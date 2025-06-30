@@ -1,1 +1,17 @@
-{}
+{
+  "name": "icod2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "fe",
+    "be"
+  ],
+  "scripts": {
+    "dev": "concurrently \"yarn workspace icod2-fe dev\" \"yarn workspace icod2-be start\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

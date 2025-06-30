@@ -1,0 +1,32 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "be/**"
+      - ".github/workflows/be-ci.yaml"
+  pull_request:
+    paths:
+      - "be/**"
+      - ".github/workflows/be-ci.yaml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24
+    - name: Setup Yarn Berry
+      run: corepack enable
+      working-directory: ./be
+    - name: Install deps
+      run: yarn install --immutable
+      working-directory: ./be
+    - name: TypeScript Compile Check
+      run: yarn type-check
+      working-directory: ./be
