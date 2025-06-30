@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-const SIGNALING_SERVER_URL = 'ws://localhost:8080';
+const SIGNALING_SERVER_URL = "ws://localhost:8080";
 
 function App() {
   const [messages, setMessages] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
   const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
   const dataChannelsRef = useRef<Map<string, RTCDataChannel>>(new Map());
-  const [dataChannelStates, setDataChannelStates] = useState<Record<string, string>>({});
+  const [dataChannelStates, setDataChannelStates] = useState<
+    Record<string, string>
+  >({});
   const [myId, setMyId] = useState<string | null>(null);
   const [peers, setPeers] = useState<Record<string, string>>({}); // peerId: userAgent
 
@@ -28,17 +30,23 @@ function App() {
 
       peer.onicecandidate = (event) => {
         if (event.candidate && wsRef.current) {
-          wsRef.current.send(JSON.stringify({ type: 'candidate', targetId: peerId, candidate: event.candidate }));
+          wsRef.current.send(
+            JSON.stringify({
+              type: "candidate",
+              targetId: peerId,
+              candidate: event.candidate,
+            })
+          );
         }
       };
 
       const handleDataChannel = (dc: RTCDataChannel) => {
         dataChannelsRef.current.set(peerId, dc);
         dc.onopen = () => {
-          setDataChannelStates((prev) => ({ ...prev, [peerId]: 'open' }));
+          setDataChannelStates((prev) => ({ ...prev, [peerId]: "open" }));
         };
         dc.onclose = () => {
-          setDataChannelStates((prev) => ({ ...prev, [peerId]: 'closed' }));
+          setDataChannelStates((prev) => ({ ...prev, [peerId]: "closed" }));
         };
         dc.onmessage = (ev) => {
           const msg = JSON.parse(ev.data);
@@ -48,36 +56,38 @@ function App() {
       };
 
       if (isInitiator) {
-        const dataChannel = peer.createDataChannel('chat');
+        const dataChannel = peer.createDataChannel("chat");
         handleDataChannel(dataChannel);
       } else {
         peer.ondatachannel = (event) => {
           handleDataChannel(event.channel);
         };
       }
-      
+
       return peer;
     };
 
     ws.onopen = () => {
-      ws.send(JSON.stringify({ type: 'greeting', id: navigator.userAgent }));
+      ws.send(JSON.stringify({ type: "greeting", id: navigator.userAgent }));
     };
 
     ws.onmessage = async (event) => {
       const data = JSON.parse(event.data);
 
-      if (data.type === 'id') {
+      if (data.type === "id") {
         setMyId(data.id);
         myIdRef.current = data.id;
-      } else if (data.type === 'peerConnected') {
+      } else if (data.type === "peerConnected") {
         setPeers((prev) => ({ ...prev, [data.peerId]: data.peerId }));
         if (myIdRef.current && myIdRef.current < data.peerId) {
           const peer = setupPeerConnection(data.peerId, true);
           const offer = await peer.createOffer();
           await peer.setLocalDescription(offer);
-          wsRef.current?.send(JSON.stringify({ type: 'offer', targetId: data.peerId, offer }));
+          wsRef.current?.send(
+            JSON.stringify({ type: "offer", targetId: data.peerId, offer })
+          );
         }
-      } else if (data.type === 'peerDisconnected') {
+      } else if (data.type === "peerDisconnected") {
         setPeers((prev) => {
           const newPeers = { ...prev };
           delete newPeers[data.peerId];
@@ -91,7 +101,7 @@ function App() {
           delete newState[data.peerId];
           return newState;
         });
-      } else if (data.type === 'offer') {
+      } else if (data.type === "offer") {
         let peer = peerConnectionsRef.current.get(data.senderId);
         if (!peer) {
           peer = setupPeerConnection(data.senderId, false);
@@ -99,22 +109,24 @@ function App() {
         await peer.setRemoteDescription(data.offer);
         const answer = await peer.createAnswer();
         await peer.setLocalDescription(answer);
-        wsRef.current?.send(JSON.stringify({ type: 'answer', targetId: data.senderId, answer }));
-      } else if (data.type === 'answer') {
+        wsRef.current?.send(
+          JSON.stringify({ type: "answer", targetId: data.senderId, answer })
+        );
+      } else if (data.type === "answer") {
         const peer = peerConnectionsRef.current.get(data.senderId);
         if (peer) {
           await peer.setRemoteDescription(data.answer);
         }
-      } else if (data.type === 'candidate') {
+      } else if (data.type === "candidate") {
         const peer = peerConnectionsRef.current.get(data.senderId);
         if (peer && peer.remoteDescription) {
           try {
             await peer.addIceCandidate(data.candidate);
           } catch (e) {
-            console.error('Error adding received ice candidate', e);
+            console.error("Error adding received ice candidate", e);
           }
         }
-      } else if (data.type === 'greeting') {
+      } else if (data.type === "greeting") {
         setMessages((msgs) => [...msgs, data.message]);
       }
     };
@@ -125,7 +137,7 @@ function App() {
     };
   }, []);
 
-  const [messageInput, setMessageInput] = useState('');
+  const [messageInput, setMessageInput] = useState("");
 
   const sendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -135,7 +147,7 @@ function App() {
 
     let sentToAtLeastOne = false;
     dataChannelsRef.current.forEach((dataChannel) => {
-      if (dataChannel.readyState === 'open') {
+      if (dataChannel.readyState === "open") {
         dataChannel.send(messageToSend);
         sentToAtLeastOne = true;
       }
@@ -143,9 +155,9 @@ function App() {
 
     if (sentToAtLeastOne) {
       setMessages((msgs) => [...msgs, `You: ${messageInput}`]);
-      setMessageInput(''); // Clear input after sending
+      setMessageInput(""); // Clear input after sending
     } else {
-      alert('No active data channels to send message.');
+      alert("No active data channels to send message.");
     }
   };
 
@@ -157,16 +169,19 @@ function App() {
           type="text"
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
-          style={{ marginRight: 8, padding: '8px 12px', fontSize: '16px' }}
+          style={{ marginRight: 8, padding: "8px 12px", fontSize: "16px" }}
         />
-        <button type="submit" style={{ padding: '8px 12px', fontSize: '16px' }}>Send</button>
+        <button type="submit" style={{ padding: "8px 12px", fontSize: "16px" }}>
+          Send
+        </button>
       </form>
       <p>My ID: {myId}</p>
       <h3>Connected Peers:</h3>
       <ul>
         {Object.entries(peers).map(([peerId, userAgent]) => (
           <li key={peerId}>
-            (ID: {peerId}) - Data Channel: {dataChannelStates[peerId] || 'connecting'}
+            (ID: {peerId}) - Data Channel:{" "}
+            {dataChannelStates[peerId] || "connecting"}
           </li>
         ))}
       </ul>
