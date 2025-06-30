@@ -3,7 +3,13 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - "fe/**"
+      - ".github/workflows/fe-ci.yaml"
   pull_request:
+    paths:
+      - "fe/**"
+      - ".github/workflows/fe-ci.yaml"
 
 jobs:
   check:
@@ -15,9 +21,13 @@ jobs:
           node-version: 24
       - name: Setup Yarn Berry
         run: corepack enable
+        working-directory: ./fe
       - name: Install deps
         run: yarn install --immutable
+        working-directory: ./fe
       - name: Biome Check
         run: yarn biome check .
+        working-directory: ./fe
       - name: TypeScript Compile Check
         run: yarn tsc --noEmit
+        working-directory: ./fe
