@@ -26,7 +26,7 @@ jobs:
         run: yarn install --immutable
         working-directory: ./fe
       - name: Biome Check
-        run: yarn biome check .
+        run: yarn lint
         working-directory: ./fe
       - name: TypeScript Compile Check
         run: yarn tsc --noEmit
