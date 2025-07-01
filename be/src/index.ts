@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 interface ClientInfo {
   ws: WebSocket;
   id: string;
+  userAgent?: string;
 }
 
 const server = createServer();
@@ -49,18 +50,19 @@ wss.on('connection', (ws) => {
 
     if (data.type === 'greeting') {
       senderInfo.id = data.id;
+      senderInfo.userAgent = data.id;
 
       // Notify all other clients about the new client
       for (const [clientId, clientInfo] of clients.entries()) {
         if (clientId !== senderId && clientInfo.ws.readyState === WebSocket.OPEN) {
-          clientInfo.ws.send(JSON.stringify({ type: 'peerConnected', peerId: senderId, id: data.id }));
+          clientInfo.ws.send(JSON.stringify({ type: 'peerConnected', peerId: senderId, userAgent: senderInfo.userAgent }));
         }
       }
 
       // Notify the new client about all existing clients
       for (const [clientId, clientInfo] of clients.entries()) {
         if (clientId !== senderId && clientInfo.ws.readyState === WebSocket.OPEN && clientInfo.id) {
-          ws.send(JSON.stringify({ type: 'peerConnected', peerId: clientId, id: clientInfo.id }));
+          ws.send(JSON.stringify({ type: 'peerConnected', peerId: clientId, userAgent: clientInfo.userAgent }));
         }
       }
     } else if (data.type === 'offer' || data.type === 'answer' || data.type === 'candidate' || data.type === 'chatMessage') {

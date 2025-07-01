@@ -1,1 +1,2 @@
+yarn workspace icod2-fe lint:fix
 yarn workspace icod2-fe lint
