@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import ComponentsDemo from "./components/ComponentsDemo";
 import HelloWorld from "./components/HelloWorld";
 import WebRTCPlayground from "./components/WebRTCPlayground";
 
@@ -10,13 +11,20 @@ function App() {
 					<Link to="/" style={{ marginRight: 16, textDecoration: "none" }}>
 						Home
 					</Link>
-					<Link to="/webrtc-poc" style={{ textDecoration: "none" }}>
+					<Link
+						to="/webrtc-poc"
+						style={{ marginRight: 16, textDecoration: "none" }}
+					>
 						WebRTC Playground
+					</Link>
+					<Link to="/components-demo" style={{ textDecoration: "none" }}>
+						Components Demo
 					</Link>
 				</nav>
 				<Routes>
 					<Route path="/" element={<HelloWorld />} />
 					<Route path="/webrtc-poc" element={<WebRTCPlayground />} />
+					<Route path="/components-demo" element={<ComponentsDemo />} />
 				</Routes>
 			</div>
 		</BrowserRouter>

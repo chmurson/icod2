@@ -1,68 +1,67 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@theme {
+  --font-family-sans: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-synthesis: none;
+  --text-rendering: optimizeLegibility;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  /* Colors */
+  --color-primary: #646cff;
+  --color-primary-hover: #535bf2;
+  --color-primary-light: #747bff;
+
+  /* Dark mode colors */
+  --color-background-dark: #242424;
+  --color-text-dark: rgba(255, 255, 255, 0.87);
+
+  /* Light mode colors */
+  --color-background-light: #ffffff;
+  --color-text-light: #213547;
+  --color-button-light: #f9f9f9;
+}
+
+/* Base styles that complement Tailwind */
+html {
+  @apply antialiased;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  @apply items-start;
+  @apply m-0 flex min-h-screen min-w-[320px] place-items-center;
+  @apply text-[--color-text-dark] bg-[--color-background-dark];
+  @apply dark:text-[--color-text-light] dark:bg-[--color-background-light];
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  @apply text-[3.2em] leading-[1.1];
+}
+
+a {
+  @apply font-medium text-[--color-primary] no-underline;
+}
+
+a:hover {
+  @apply text-[--color-primary-hover];
+  @apply dark:text-[--color-primary-light];
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  @apply rounded-lg border border-transparent px-[0.6em] py-[1.2em] text-base font-medium;
+  @apply bg-[#1a1a1a] cursor-pointer transition-colors;
+  @apply hover:border-[--color-primary] focus:outline focus:outline-4 focus:outline-offset-[-4px];
+  @apply dark:bg-[--color-button-light];
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+  body {
+    @apply text-[--color-text-light] bg-[--color-background-light];
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    @apply text-[--color-text-dark] bg-[--color-background-dark];
   }
 }

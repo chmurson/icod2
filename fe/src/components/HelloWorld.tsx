@@ -6,7 +6,8 @@ function HelloWorld() {
 			<h1>Hello World!</h1>
 			<p>Welcome to the ICOD2 frontend application.</p>
 			<p>
-				Navigate to <Link to="/webrtc-poc">/webrtc-poc</Link> to see the WebRTC playground.
+				Navigate to <Link to="/webrtc-poc">/webrtc-poc</Link> to see the WebRTC
+				playground.
 			</p>
 		</div>
 	);
