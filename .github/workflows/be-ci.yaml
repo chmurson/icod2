@@ -6,10 +6,12 @@ on:
     paths:
       - "be/**"
       - ".github/workflows/be-ci.yaml"
+      - "yarn.lock"
   pull_request:
     paths:
       - "be/**"
       - ".github/workflows/be-ci.yaml"
+      - "yarn.lock"
 
 jobs:
   check:
