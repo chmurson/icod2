@@ -1,9 +1,12 @@
 import type React from "react";
-import { useBoxStore } from "@/stores/boxStore";
+import { useJoinBoxCreationState } from "@/stores";
+import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { Button } from "@/ui/Button";
 
 const Welcome: React.FC = () => {
-	const { handleCreateClick, handleJoinClick } = useBoxStore();
+	const startCreateBox = useCreateBoxStore((state) => state.actions.start);
+	const startJoinBox = useJoinBoxCreationState((state) => state.actions.start);
+
 	return (
 		<div className="flex flex-col items-center justify-center text-center">
 			<h1 className="text-4xl font-bold mb-4">Welcome to iCod2 Box</h1>
@@ -11,10 +14,10 @@ const Welcome: React.FC = () => {
 				Securely share files with end-to-end encryption.
 			</p>
 			<div className="space-x-4 flex gap-12">
-				<Button onClick={handleCreateClick} variant="prominent">
+				<Button onClick={startCreateBox} variant="prominent">
 					Create Box
 				</Button>
-				<Button variant="prominent" onClick={handleJoinClick}>
+				<Button variant="prominent" onClick={startJoinBox}>
 					Join Box
 				</Button>
 			</div>

@@ -1,5 +1,6 @@
 import type React from "react";
-import { useBoxStore } from "@/stores/boxStore";
+import { useJoinBoxCreationState } from "@/stores";
+import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import CreateBox from "./sub-pages/CreateBox";
 import CreateBoxDownload from "./sub-pages/CreateBoxDownload";
 import JoinBox from "./sub-pages/JoinBox";
@@ -13,12 +14,8 @@ interface BoxProps {
 	className?: string;
 }
 
-/**
- * A box component for secure file sharing with multiple sub-pages.
- * Manages internal state to control which sub-page is visible.
- */
 const Box: React.FC<BoxProps> = ({ className }) => {
-	const { currentPage } = useBoxStore();
+	const currentPage = useCurrentPage();
 
 	const baseClasses = "p-6 border rounded-lg shadow-sm bg-white";
 	const combinedClasses = [baseClasses, className].filter(Boolean).join(" ");
@@ -41,6 +38,37 @@ const Box: React.FC<BoxProps> = ({ className }) => {
 	};
 
 	return <div className={combinedClasses}>{renderCurrentPage()}</div>;
+};
+
+const useCurrentPage = () => {
+	const {
+		connected: createConnected,
+		connecting: createConnecting,
+		created: createCreated,
+	} = useCreateBoxStore();
+	const {
+		connected: joinConnected,
+		connecting: joinConnecting,
+		created: joinCreated,
+	} = useJoinBoxCreationState();
+
+	if ((createConnected || createConnecting) && !createCreated) {
+		return "create";
+	}
+
+	if (createCreated) {
+		return "createDownload";
+	}
+
+	if ((joinConnected || joinConnecting) && !joinCreated) {
+		return "join";
+	}
+
+	if (joinCreated) {
+		return "joinDownload";
+	}
+
+	return "welcome";
 };
 
 export default Box;
