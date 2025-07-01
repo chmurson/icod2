@@ -28,10 +28,9 @@ html {
 }
 
 body {
-  @apply items-start;
-  @apply m-0 flex min-h-screen min-w-[320px] place-items-center;
-  @apply text-[--color-text-dark] bg-[--color-background-dark];
-  @apply dark:text-[--color-text-light] dark:bg-[--color-background-light];
+  @apply m-0 flex min-h-screen min-w-[320px] place-items-start;
+  @apply text-[var(--color-text-dark)] bg-[var(--color-background-dark)];
+  @apply dark:text-[var(--color-text-light)] dark:bg-[var(b--color-background-light)];
 }
 
 h1 {
@@ -56,12 +55,12 @@ button {
 
 @media (prefers-color-scheme: light) {
   body {
-    @apply text-[--color-text-light] bg-[--color-background-light];
+    @apply text-[var(--color-text-light)] bg-[var(--color-background-light)];
   }
 }
 
 @media (prefers-color-scheme: dark) {
   body {
-    @apply text-[--color-text-dark] bg-[--color-background-dark];
+    @apply text-[var(--color-text-dark)] bg-[var(--color-background-dark)];
   }
 }
