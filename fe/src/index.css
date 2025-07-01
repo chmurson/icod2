@@ -47,9 +47,8 @@ a:hover {
 }
 
 button {
-  @apply rounded-lg border border-transparent px-[0.6em] py-[1.2em] text-base font-medium;
-  @apply bg-[#1a1a1a] cursor-pointer transition-colors;
-  @apply hover:border-[--color-primary] focus:outline focus:outline-4 focus:outline-offset-[-4px];
+  @apply rounded-full px-[2em] py-[1em] text-sm font-bold;
+  @apply cursor-pointer transition-colors;
   @apply dark:bg-[--color-button-light];
 }
 
