@@ -21,13 +21,12 @@ jobs:
           node-version: 24
       - name: Setup Yarn Berry
         run: corepack enable
-        working-directory: ./fe
       - name: Install deps
         run: yarn install --immutable
-        working-directory: ./fe
+        working-directory: .
       - name: Biome Check
-        run: yarn biome check .
-        working-directory: ./fe
+        run: yarn workspace icod2-fe biome check .
+        working-directory: .
       - name: TypeScript Compile Check
-        run: yarn tsc --noEmit
-        working-directory: ./fe
+        run: yarn workspace icod2-fe tsc --noEmit
+        working-directory: .
