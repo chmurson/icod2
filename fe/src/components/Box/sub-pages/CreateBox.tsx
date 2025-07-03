@@ -9,7 +9,7 @@ const CreateBox: React.FC = () => {
 	const actions = useCreateBoxStore((state) => state.actions);
 
 	useEffect(() => {
-		webRTCService.connect("leader");
+		webRTCService.connectLeader();
 
 		return () => {
 			webRTCService.disconnect();

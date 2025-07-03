@@ -5,7 +5,7 @@ import { Button } from "@/ui/Button";
 
 const JoinBox: React.FC = () => {
 	useEffect(() => {
-		webRTCService.connect("participant");
+		webRTCService.connectParticipant();
 
 		return () => {
 			webRTCService.disconnect();
