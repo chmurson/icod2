@@ -17,7 +17,7 @@ interface BoxProps {
 const Box: React.FC<BoxProps> = ({ className }) => {
 	const currentPage = useCurrentPage();
 
-	const baseClasses = "p-6 border rounded-lg shadow-sm bg-white";
+	const baseClasses = "p-6 border rounded-lg shadow-sm";
 	const combinedClasses = [baseClasses, className].filter(Boolean).join(" ");
 
 	const renderCurrentPage = () => {
