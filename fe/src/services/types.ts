@@ -12,7 +12,7 @@ export type AcknowledgeLeaderMessage = {
 	type: "acknowledgeLeader";
 	leaderId: string;
 	leaderName: string;
-	leaderDevice: 'desktop' | 'mobile';
+	leaderDevice: "desktop" | "mobile";
 	leaderUserAgent: string;
 };
 
