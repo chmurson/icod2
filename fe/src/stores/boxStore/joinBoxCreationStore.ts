@@ -24,7 +24,7 @@ const joinBoxCreationState = {
 	treshold: 1,
 };
 
-type CreateBoxState = {
+type JoinBoxState = {
 	actions: {
 		reset: () => void;
 		start: () => void;
@@ -32,18 +32,23 @@ type CreateBoxState = {
 			you: ParticipantType;
 			leader: ParticipantType;
 		}) => void;
-		connectParticiapnt: (participant: ParticipantType) => void;
+		connectParticipant: (participant: ParticipantType) => void;
+		disconnectParticipant: (participantId: string) => void;
 		create: () => void;
 	};
 } & typeof joinBoxCreationState;
 
-export const useJoinBoxCreationState = create<CreateBoxState>((set) => ({
+export const useJoinBoxCreationState = create<JoinBoxState>((set) => ({
 	...joinBoxCreationState,
 	actions: {
 		start: () =>
-			set({
-				...joinBoxCreationState,
-				connecting: true,
+			set(() => {
+				const newState = {
+					...joinBoxCreationState,
+					connecting: true,
+				};
+				console.log("joinBoxCreationStore state updated", newState);
+				return newState;
 			}),
 		connectYou: ({
 			you,
@@ -51,17 +56,47 @@ export const useJoinBoxCreationState = create<CreateBoxState>((set) => ({
 		}: {
 			you: ParticipantType;
 			leader: ParticipantType;
-		}) => ({
-			leader,
-			you,
-			connecting: false,
-			connected: true,
-			error: null,
-		}),
-		connectParticiapnt: (participant: ParticipantType) =>
-			set((state) => ({
-				otherParticipants: [...state.otherParticipants, participant],
-			})),
+		}) =>
+			set((state) => {
+				const newState = {
+					leader,
+					you,
+					connecting: false,
+					connected: true,
+					error: null,
+				};
+				console.log("joinBoxCreationStore state updated", {
+					...state,
+					...newState,
+				});
+				return newState;
+			}),
+		connectParticipant: (participant: ParticipantType) => {
+			set((state) => {
+				const newState = {
+					otherParticipants: [...state.otherParticipants, participant],
+				};
+				console.log("joinBoxCreationStore state updated", {
+					...state,
+					...newState,
+				});
+				return newState;
+			});
+		},
+		disconnectParticipant: (participantId: string) => {
+			set((state) => {
+				const newState = {
+					otherParticipants: state.otherParticipants.filter(
+						(participant) => participant.id !== participantId,
+					),
+				};
+				console.log("joinBoxCreationStore state updated", {
+					...state,
+					...newState,
+				});
+				return newState;
+			});
+		},
 		create: () =>
 			set({
 				created: true,

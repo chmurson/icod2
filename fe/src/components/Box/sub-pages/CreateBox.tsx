@@ -1,5 +1,6 @@
 import type React from "react";
 import { useEffect } from "react";
+import { webRTCService } from "@/services/WebRTCService";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { Button } from "@/ui/Button.tsx";
 
@@ -8,44 +9,12 @@ const CreateBox: React.FC = () => {
 	const actions = useCreateBoxStore((state) => state.actions);
 
 	useEffect(() => {
-		const timeouts = [
-			!state.connected &&
-				setTimeout(() => {
-					actions.connectLeader({
-						device: "desktop",
-						id: "12345",
-						name: "Wojciech",
-						userAgent: navigator.userAgent,
-					});
-				}, 1000),
-
-			state.connected &&
-				setTimeout(() => {
-					actions.connectParticiapnt({
-						device: "mobile",
-						id: "12346",
-						name: "Buzz",
-						userAgent: "Chrome",
-					});
-				}, 2500),
-
-			state.connected &&
-				setTimeout(() => {
-					actions.connectParticiapnt({
-						device: "tablet",
-						id: "12349",
-						name: "Christ",
-						userAgent: "Safari",
-					});
-				}, 3500),
-		];
+		webRTCService.connect("leader");
 
 		return () => {
-			timeouts
-				.filter((x) => typeof x !== "boolean")
-				.forEach((timeout) => clearTimeout(timeout));
+			webRTCService.disconnect();
 		};
-	}, [actions, state.connected]);
+	}, []);
 
 	return (
 		<div>
