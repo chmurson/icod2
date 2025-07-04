@@ -6,7 +6,7 @@ import Box from "./components/Box/sub-pages";
 import ComponentsDemo from "./components/ComponentsDemo";
 import CryptoPlayground from "./components/CryptoPlayground";
 import DecodePlayground from "./components/DecodePlayground";
-import HelloWorld from "./components/HelloWorld";
+import { MainLayout } from "./components/MainLayout";
 import WebRTCPlayground from "./components/WebRTCPlayground";
 
 function useSystemTheme() {
@@ -44,45 +44,42 @@ function App() {
 			radius="full"
 		>
 			<BrowserRouter>
-				<div>
-					<nav style={{ padding: 16, borderBottom: "1px solid #ccc" }}>
-						<Link to="/" style={{ marginRight: 16, textDecoration: "none" }}>
-							Home
-						</Link>
-						<Link to="/box" style={{ marginRight: 16, textDecoration: "none" }}>
-							Box
-						</Link>
-						<Link
-							to="/webrtc-poc"
-							style={{ marginRight: 16, textDecoration: "none" }}
-						>
-							WebRTC Playground
-						</Link>
-						<Link
-							to="/crypto-poc"
-							style={{ marginRight: 16, textDecoration: "none" }}
-						>
-							Crypto Playground
-						</Link>
-						<Link
-							to="/decode-poc"
-							style={{ marginRight: 16, textDecoration: "none" }}
-						>
-							Decode Playground
-						</Link>
-						<Link to="/components-demo" style={{ textDecoration: "none" }}>
-							Components Demo
-						</Link>
-					</nav>
+				<nav style={{ padding: 16, borderBottom: "1px solid #ccc" }}>
+					<Link to="/" style={{ marginRight: 16, textDecoration: "none" }}>
+						Box
+					</Link>
+					<Link
+						to="/webrtc-poc"
+						style={{ marginRight: 16, textDecoration: "none" }}
+					>
+						WebRTC Playground
+					</Link>
+					<Link
+						to="/crypto-poc"
+						style={{ marginRight: 16, textDecoration: "none" }}
+					>
+						Crypto Playground
+					</Link>
+					<Link
+						to="/decode-poc"
+						style={{ marginRight: 16, textDecoration: "none" }}
+					>
+						Decode Playground
+					</Link>
+					<Link to="/components-demo" style={{ textDecoration: "none" }}>
+						Components Demo
+					</Link>
+				</nav>
+				<MainLayout>
 					<Routes>
-						<Route path="/" element={<HelloWorld />} />
-						<Route path="/box" element={<Box />} />
 						<Route path="/webrtc-poc" element={<WebRTCPlayground />} />
 						<Route path="crypto-poc" element={<CryptoPlayground />} />
 						<Route path="decode-poc" element={<DecodePlayground />} />
 						<Route path="/components-demo" element={<ComponentsDemo />} />
+						<Route path="/" element={<Box />} />
+						<Route path="*" element={<Box />} />
 					</Routes>
-				</div>
+				</MainLayout>
 			</BrowserRouter>
 		</Theme>
 	);

@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node src/index.ts",
+    "type-check": "tsc --noEmit",
     "lint": "biome check",
-    "type-check": "tsc --noEmit"
+    "lint:fix": "biome check --write"
   },
   "keywords": [],
   "author": "",
@@ -20,8 +21,8 @@
     "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@types/ws": "^8.18.1",
-    "@biomejs/biome": "^2.0.6"
+    "@biomejs/biome": "^2.0.6",
+    "@types/ws": "^8.18.1"
   },
   "packageManager": "yarn@4.9.2"
 }

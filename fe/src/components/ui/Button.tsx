@@ -16,9 +16,14 @@ interface ButtonProps extends Omit<RadixButtonProps, "variant"> {
 
 const buttonVariantToProps: Record<
 	ButtonVariant,
-	Pick<RadixButtonProps, "color" | "size" | "variant">
+	Pick<RadixButtonProps, "color" | "size" | "variant" | "style">
 > = {
-	prominent: { color: "plum", size: "3", variant: "solid" },
+	prominent: {
+		color: "plum",
+		size: "3",
+		variant: "solid",
+		style: { paddingLeft: 32, paddingRight: 32 },
+	},
 	primary: { color: "plum", size: "2", variant: "solid" },
 	secondary: { color: "plum", size: "2", variant: "outline" },
 };

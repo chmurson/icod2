@@ -59,7 +59,7 @@ const DecodePlayground = () => {
 						htmlFor="encryptedMessage"
 						className="block text-sm font-medium text-gray-300"
 					>
-						Encrypted Message (JSON Array)
+						Encrypted Message
 					</label>
 					<textarea
 						id="encryptedMessage"

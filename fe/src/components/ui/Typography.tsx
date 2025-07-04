@@ -2,17 +2,27 @@ import { Slot } from "@radix-ui/react-slot";
 import type { ElementType } from "react";
 import { twMerge } from "tailwind-merge";
 
+type TypographyVariant =
+	| "pageTitle"
+	| "sectionTitle"
+	| "primaryText"
+	| "label"
+	| "secondaryText";
+
 type TypographyProps<C extends ElementType = "div"> =
 	React.HTMLAttributes<HTMLElement> & {
 		asChild?: boolean;
 		as?: C;
-		variant:
-			| "pageTitle"
-			| "sectionTitle"
-			| "primaryText"
-			| "label"
-			| "secondaryText";
+		variant: TypographyVariant;
 	};
+
+const localPropsByVariant: Record<TypographyVariant, { as?: ElementType }> = {
+	pageTitle: { as: "h1" },
+	sectionTitle: { as: "h2" },
+	primaryText: { as: "p" },
+	label: { as: "p" },
+	secondaryText: { as: "p" },
+};
 
 export function Typography<C extends ElementType = "div">({
 	as = "div" as C,
@@ -22,6 +32,8 @@ export function Typography<C extends ElementType = "div">({
 	...props
 }: TypographyProps<C>) {
 	const Comp = asChild ? Slot : (as as ElementType);
+	const localProps = localPropsByVariant[variant] || {};
+
 	return (
 		<Comp
 			className={twMerge(
@@ -32,7 +44,10 @@ export function Typography<C extends ElementType = "div">({
 				variant === "secondaryText" && "text-base text-gray-400",
 				className,
 			)}
+			{...localProps}
 			{...props}
 		/>
 	);
 }
+
+export const Text = Typography;

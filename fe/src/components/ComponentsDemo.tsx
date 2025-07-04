@@ -1,6 +1,6 @@
 import { DownloadIcon, PlusIcon, StarIcon } from "@radix-ui/react-icons";
 import { Button } from "./ui/Button";
-import { Typography } from "./ui/Typography";
+import { Text } from "./ui/Typography";
 
 function ComponentsDemo() {
 	return (
@@ -12,15 +12,11 @@ function ComponentsDemo() {
 			<Buttons addIcon={true} />
 
 			<div className="mt-12 space-y-2">
-				<Typography variant="pageTitle" as="h1">
-					Page title
-				</Typography>
-				<Typography variant="sectionTitle" as="h2">
-					Section title
-				</Typography>
-				<Typography variant="primaryText">Primary text</Typography>
-				<Typography variant="label">Label</Typography>
-				<Typography variant="secondaryText">Secondary text</Typography>
+				<Text variant="pageTitle">Page title</Text>
+				<Text variant="sectionTitle">Section title</Text>
+				<Text variant="primaryText">Primary text</Text>
+				<Text variant="label">Label</Text>
+				<Text variant="secondaryText">Secondary text</Text>
 			</div>
 		</div>
 	);

@@ -10,6 +10,8 @@
     "libs/*"
   ],
   "scripts": {
+    ":biome": "biome check --fix",
+    ":biome:unsafe": "biome check --write --unsafe",
     "dev": "concurrently \"yarn workspace icod2-fe dev\" \"yarn workspace icod2-be start\"",
     "prepare": "husky",
     "commitlint": "commitlint --edit --last"
@@ -19,7 +21,13 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "concurrently": "^8.2.2",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2"
+  },
+  "lint-staged": {
+    "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
+      "biome check --fix --files-ignore-unknown=true"
+    ]
   },
   "packageManager": "yarn@4.9.2"
 }
