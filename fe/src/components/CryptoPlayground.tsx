@@ -80,7 +80,7 @@ const CryptoPlayground = () => {
 						type="number"
 						id="numKeys"
 						value={numKeys}
-						onChange={(e) => setNumKeys(parseInt(e.target.value, 10))}
+						onChange={(e) => setNumKeys(Number.parseInt(e.target.value, 10))}
 						className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 					/>
 				</div>
@@ -95,7 +95,7 @@ const CryptoPlayground = () => {
 						type="number"
 						id="threshold"
 						value={threshold}
-						onChange={(e) => setThreshold(parseInt(e.target.value, 10))}
+						onChange={(e) => setThreshold(Number.parseInt(e.target.value, 10))}
 						className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 					/>
 				</div>

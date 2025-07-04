@@ -3952,6 +3952,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "icod2@workspace:."
   dependencies:
+    "@biomejs/biome": "npm:^2.0.6"
     "@commitlint/cli": "npm:^19.8.1"
     "@commitlint/config-conventional": "npm:^19.8.1"
     concurrently: "npm:^8.2.2"
