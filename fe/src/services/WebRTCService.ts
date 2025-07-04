@@ -10,7 +10,7 @@ import type {
 } from "./types";
 
 // in order to allow access to app in local network, yor IP instead of localhost
-const SIGNALING_SERVER_URL = `ws://localhost:8080`;
+const SIGNALING_SERVER_URL = "ws://localhost:8080";
 
 type WebSocketHandlerOptions = {
 	onId: (data: IdMessage) => void;
