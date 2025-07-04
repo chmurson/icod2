@@ -202,7 +202,7 @@ class WebRTCService {
 				const message: SignalingMessage = JSON.parse(ev.data);
 				if (message.type === "boxStateUpdate") {
 					const { setMessage } = useJoinBoxCreationState.getState().actions;
-					const { type, ...messageWithoutType } = message;
+					const { type, content, ...messageWithoutType } = message;
 					setMessage(messageWithoutType);
 				}
 			};

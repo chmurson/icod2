@@ -1,3 +1,9 @@
+import init, {
+	ChunksConfiguration,
+	ChunksConfiguration as RustChunksConfiguration,
+	secure_message,
+} from "icod-crypto-js";
+import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { webRTCService } from "@/services/WebRTCService";
@@ -11,17 +17,34 @@ const CreateBox: React.FC = () => {
 	const [localTitle, setLocalTitle] = useState(state.title);
 	const [localContent, setLocalContent] = useState(state.content);
 
-	const handleShareContent = () => {
-		actions.setMessage({ title: localTitle, content: localContent });
-	};
-
 	useEffect(() => {
+		init(wasm);
 		webRTCService.connectLeader();
 
 		return () => {
 			webRTCService.disconnect();
 		};
 	}, []);
+
+	const handleShareContent = () => {
+		const numKeys = state.participants.length + 1; // Leader + participants
+		const config = new RustChunksConfiguration(
+			state.threshold,
+			numKeys - state.threshold,
+		);
+		const secured = secure_message(localContent, undefined, config);
+
+		actions.setMessage({
+			title: localTitle,
+			content: localContent, // Keep original content for local display
+			encryptedMessageParts: secured.encrypted_message as string[],
+			generatedKeys: secured.chunks as string[],
+			chunksConfiguration: new ChunksConfiguration(
+				state.threshold,
+				numKeys - state.threshold,
+			),
+		});
+	};
 
 	return (
 		<div>
