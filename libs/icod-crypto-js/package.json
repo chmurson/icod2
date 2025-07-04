@@ -1,0 +1,14 @@
+{
+  "name": "icod-crypto-js",
+  "version": "0.1.0",
+  "files": [
+    "icod_crypto_js_bg.wasm",
+    "icod_crypto_js.js",
+    "icod_crypto_js.d.ts"
+  ],
+  "module": "icod_crypto_js.js",
+  "types": "icod_crypto_js.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
