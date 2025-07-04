@@ -27,11 +27,15 @@ class WebRTCService {
 	private myId: string | null = null;
 
 	connectLeader() {
-		const { start, connectLeader, connectParticipant, disconnectParticipant } =
-			useCreateBoxStore.getState().actions;
+		const {
+			connect,
+			connectLeader,
+			connectParticipant,
+			disconnectParticipant,
+		} = useCreateBoxStore.getState().actions;
 
 		this.setupWebSocketHandlers({
-			onStart: start,
+			onStart: connect,
 			onId: (data) => {
 				connectLeader({
 					id: data.id,
@@ -61,11 +65,11 @@ class WebRTCService {
 	}
 
 	connectParticipant() {
-		const { start, connectYou, connectParticipant, disconnectParticipant } =
+		const { connect, connectYou, connectParticipant, disconnectParticipant } =
 			useJoinBoxCreationState.getState().actions;
 
 		this.setupWebSocketHandlers({
-			onStart: start,
+			onStart: connect,
 			onId: () => {},
 			onAcknowledgeLeader: (data) => {
 				connectYou({

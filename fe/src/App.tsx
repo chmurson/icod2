@@ -41,7 +41,7 @@ function App() {
 			grayColor="gray"
 			panelBackground="translucent"
 			scaling="100%"
-			radius="full"
+			radius="medium"
 			style={{ backgroundColor: "inherit" }}
 		>
 			<BrowserRouter>

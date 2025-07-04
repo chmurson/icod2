@@ -3,9 +3,15 @@ import {
 	getReadableUserAgent,
 	getUserAgentDeviceIcon,
 } from "@/services/user-agent/get-user-agent";
-import type { DeviceType, ParticipantType } from "./common-types";
+import type { ParticipantType } from "./common-types";
 
 const joinBoxCreationState = {
+	state: "initial" as
+		| "initial"
+		| "set-name"
+		| "connecting"
+		| "connected"
+		| "created",
 	title: "",
 	connecting: false,
 	connected: false,
@@ -15,13 +21,11 @@ const joinBoxCreationState = {
 		id: "",
 		name: "",
 		userAgent: "",
-		device: "❓" as DeviceType,
 	} satisfies ParticipantType,
 	leader: {
 		id: "",
 		name: "",
 		userAgent: "",
-		device: "❓" as DeviceType,
 	} satisfies ParticipantType,
 	otherParticipants: [] as ParticipantType[],
 	content: "",
@@ -34,6 +38,7 @@ type JoinBoxState = {
 	actions: {
 		reset: () => void;
 		start: () => void;
+		connect: (args: { name: string; userAgent: string }) => void;
 		connectYou: (args: {
 			you: ParticipantType;
 			leader: ParticipantType;
@@ -54,7 +59,18 @@ type JoinBoxState = {
 export const useJoinBoxCreationState = create<JoinBoxState>((set) => ({
 	...joinBoxCreationState,
 	actions: {
-		start: () => set({ ...joinBoxCreationState, connecting: true }),
+		start: () => set({ ...joinBoxCreationState, state: "set-name" }),
+		connect: ({ name, userAgent }) =>
+			set((state) => ({
+				...joinBoxCreationState,
+				connecting: true,
+				state: "connecting",
+				you: {
+					...state.you,
+					name,
+					userAgent,
+				},
+			})),
 		connectYou: ({
 			you,
 			leader,
@@ -62,21 +78,18 @@ export const useJoinBoxCreationState = create<JoinBoxState>((set) => ({
 			you: ParticipantType;
 			leader: ParticipantType;
 		}) =>
-			set({
-				leader: {
-					...leader,
-					userAgent: getReadableUserAgent(leader.userAgent),
-					device: getUserAgentDeviceIcon(leader.userAgent),
-				},
+			set((state) => ({
+				leader,
 				you: {
-					...you,
-					userAgent: getReadableUserAgent(you.userAgent),
-					device: getUserAgentDeviceIcon(you.userAgent),
+					...state.you,
+					id: you.id,
 				},
 				connecting: false,
 				connected: true,
 				error: null,
-			}),
+
+				state: "connected",
+			})),
 		connectParticipant: (participant: ParticipantType) => {
 			set((state) => ({
 				otherParticipants: [
@@ -96,8 +109,15 @@ export const useJoinBoxCreationState = create<JoinBoxState>((set) => ({
 				),
 			}));
 		},
-		create: () => set({ created: true }),
-		reset: () => set({ ...joinBoxCreationState }),
+		create: () =>
+			set({
+				created: true,
+				state: "created",
+			}),
+		reset: () =>
+			set({
+				...joinBoxCreationState,
+			}),
 		setMessage: (message) => set(message),
 	},
 }));

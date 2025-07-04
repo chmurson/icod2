@@ -4,5 +4,4 @@ export type ParticipantType = {
 	id: string;
 	name: string;
 	userAgent: string;
-	device: DeviceType;
 };

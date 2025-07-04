@@ -4,9 +4,15 @@ import {
 	getUserAgentDeviceIcon,
 } from "@/services/user-agent/get-user-agent";
 import { webRTCService } from "@/services/web-rtc/WebRTCService";
-import type { DeviceType, ParticipantType } from "./common-types";
+import type { ParticipantType } from "./common-types";
 
 const createBoxDefaultState = {
+	state: "initial" as
+		| "initial"
+		| "set-name"
+		| "connecting"
+		| "connected"
+		| "created",
 	title: "",
 	connecting: false,
 	connected: false,
@@ -16,7 +22,6 @@ const createBoxDefaultState = {
 		id: "",
 		name: "",
 		userAgent: "",
-		device: "❓" as DeviceType,
 	} satisfies ParticipantType,
 	participants: [] as ParticipantType[],
 	content: "",
@@ -33,6 +38,7 @@ type CreateBoxState = {
 		connectParticipant: (participant: ParticipantType) => void;
 		disconnectParticipant: (participantId: string) => void;
 		start: () => void;
+		connect: (args: { name: string; userAgent: string }) => void;
 		create: () => void;
 		setMessage: (message: {
 			title?: string;
@@ -48,18 +54,25 @@ type CreateBoxState = {
 export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 	...createBoxDefaultState,
 	actions: {
-		start: () => set({ ...createBoxDefaultState, connecting: true }),
-		connectLeader: (leader) =>
+		connect: ({ name, userAgent }) =>
 			set({
+				...createBoxDefaultState,
+				connecting: true,
+				state: "connecting",
+				leader: { id: "", name, userAgent },
+			}),
+		start: () => set({ ...createBoxDefaultState, state: "set-name" }),
+		connectLeader: (leader) =>
+			set((state) => ({
 				leader: {
-					...leader,
-					userAgent: getReadableUserAgent(leader.userAgent),
-					device: getUserAgentDeviceIcon(leader.userAgent),
+					...state.leader,
+					id: leader.id,
 				},
 				connecting: false,
 				connected: true,
 				error: null,
-			}),
+				state: "connected",
+			})),
 		connectParticipant: (participant) =>
 			set((state) => ({
 				participants: [
@@ -78,8 +91,15 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 				),
 			}));
 		},
-		create: () => set({ created: true, connected: true, connecting: false }),
-		reset: () => set({ ...createBoxDefaultState }),
+		create: () =>
+			set({
+				created: true,
+				state: "created",
+			}),
+		reset: () =>
+			set({
+				...createBoxDefaultState,
+			}),
 		setMessage: (message) => {
 			set(message);
 			const { content, generatedKeys, ...messageToSend } = message;
