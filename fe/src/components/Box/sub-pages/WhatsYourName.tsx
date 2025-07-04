@@ -57,6 +57,12 @@ export function WhatsYourName(
 					className="min-w-72"
 					ref={refInput}
 					defaultValue={refDefaultName.current}
+					onKeyDown={() => {
+						if (refInput.current && refInput.current.value.trim() !== "") {
+							handleOkClick();
+						}
+					}}
+					autoFocus
 				>
 					<TextField.Slot>
 						<PersonIcon height="16" width="16" />
