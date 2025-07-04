@@ -1,1 +1,1 @@
-yarn workspace icod2-fe lint
+lint-staged
