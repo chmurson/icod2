@@ -57,8 +57,8 @@ export function WhatsYourName(
 					className="min-w-72"
 					ref={refInput}
 					defaultValue={refDefaultName.current}
-					onKeyDown={() => {
-						if (refInput.current && refInput.current.value.trim() !== "") {
+					onKeyDown={(e) => {
+						if (e.key === "Enter") {
 							handleOkClick();
 						}
 					}}
