@@ -6,19 +6,32 @@ interface ClientInfo {
   ws: WebSocket;
   id: string;
   userAgent?: string;
+  device?: string;
+  name?: string;
 }
 
 const server = createServer();
 const wss = new WebSocketServer({ server });
 
 const clients = new Map<string, ClientInfo>();
+let leaderId: string
+let leaderUserAgent: string
 
 wss.on('connection', (ws) => {
   const clientId = uuidv4();
+
+  if (clients.size === 0) {
+    leaderId = clientId
+  }
+
   clients.set(clientId, { ws, id: '' }); // Initialize with empty id
 
   console.log('[WS] New client connected. Total clients:', clients.size);
   ws.send(JSON.stringify({ type: 'id', id: clientId }));
+
+  if (leaderId) {
+      ws.send(JSON.stringify({ type: 'acknowledgeLeader', leaderId, leaderName: 'John Doe', leaderDevice: 'desktop',  leaderUserAgent }));
+  }
 
   ws.on('message', (message) => {
     let messageText: string;
@@ -52,9 +65,14 @@ wss.on('connection', (ws) => {
       senderInfo.id = data.id;
       senderInfo.userAgent = data.id;
 
+      if (senderInfo.id === leaderId && !leaderUserAgent) {
+        leaderUserAgent = senderInfo.userAgent ?? ''
+      }
+
       // Notify all other clients about the new client
       for (const [clientId, clientInfo] of clients.entries()) {
         if (clientId !== senderId && clientInfo.ws.readyState === WebSocket.OPEN) {
+          console.log('notifying clients about new client, peerId is', senderId)
           clientInfo.ws.send(JSON.stringify({ type: 'peerConnected', peerId: senderId, userAgent: senderInfo.userAgent }));
         }
       }
@@ -62,6 +80,7 @@ wss.on('connection', (ws) => {
       // Notify the new client about all existing clients
       for (const [clientId, clientInfo] of clients.entries()) {
         if (clientId !== senderId && clientInfo.ws.readyState === WebSocket.OPEN && clientInfo.id) {
+          console.log('notifying new client about clients', clientId)
           ws.send(JSON.stringify({ type: 'peerConnected', peerId: clientId, userAgent: clientInfo.userAgent }));
         }
       }
@@ -107,6 +126,7 @@ wss.on('connection', (ws) => {
 });
 
 const PORT = process.env.PORT || 8080;
+// in order to allow access to app in local network, put (port: PORT, hostname: {yourIP} instead of (PORT
 server.listen(PORT, () => {
   console.log(`[WS] WebSocket signaling server running on port ${PORT}`);
 });

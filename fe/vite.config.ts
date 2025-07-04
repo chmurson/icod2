@@ -8,7 +8,7 @@ export default defineConfig({
 	plugins: [react(), tailwindcss()],
 	resolve: {
 		alias: {
-		  "@/ui": fileURLToPath(new URL("./src/components/ui", import.meta.url)),
+			"@/ui": fileURLToPath(new URL("./src/components/ui", import.meta.url)),
 			"@": fileURLToPath(new URL("./src", import.meta.url)),
 		},
 	},

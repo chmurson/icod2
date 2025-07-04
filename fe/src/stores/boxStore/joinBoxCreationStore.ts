@@ -21,10 +21,10 @@ const joinBoxCreationState = {
 	} satisfies ParticipantType,
 	otherParticipants: [] as ParticipantType[],
 	content: "",
-	treshold: 1,
+	threshold: 1,
 };
 
-type CreateBoxState = {
+type JoinBoxState = {
 	actions: {
 		reset: () => void;
 		start: () => void;
@@ -32,43 +32,42 @@ type CreateBoxState = {
 			you: ParticipantType;
 			leader: ParticipantType;
 		}) => void;
-		connectParticiapnt: (participant: ParticipantType) => void;
+		connectParticipant: (participant: ParticipantType) => void;
+		disconnectParticipant: (participantId: string) => void;
 		create: () => void;
+		setMessage: (message: {
+			title?: string;
+			content?: string;
+			threshold?: number;
+		}) => void;
 	};
 } & typeof joinBoxCreationState;
 
-export const useJoinBoxCreationState = create<CreateBoxState>((set) => ({
+export const useJoinBoxCreationState = create<JoinBoxState>((set) => ({
 	...joinBoxCreationState,
 	actions: {
-		start: () =>
-			set({
-				...joinBoxCreationState,
-				connecting: true,
-			}),
+		start: () => set({ ...joinBoxCreationState, connecting: true }),
 		connectYou: ({
 			you,
 			leader,
 		}: {
 			you: ParticipantType;
 			leader: ParticipantType;
-		}) => ({
-			leader,
-			you,
-			connecting: false,
-			connected: true,
-			error: null,
-		}),
-		connectParticiapnt: (participant: ParticipantType) =>
+		}) => set({ leader, you, connecting: false, connected: true, error: null }),
+		connectParticipant: (participant: ParticipantType) => {
 			set((state) => ({
 				otherParticipants: [...state.otherParticipants, participant],
-			})),
-		create: () =>
-			set({
-				created: true,
-			}),
-		reset: () =>
-			set({
-				...joinBoxCreationState,
-			}),
+			}));
+		},
+		disconnectParticipant: (participantId: string) => {
+			set((state) => ({
+				otherParticipants: state.otherParticipants.filter(
+					(participant) => participant.id !== participantId,
+				),
+			}));
+		},
+		create: () => set({ created: true }),
+		reset: () => set({ ...joinBoxCreationState }),
+		setMessage: (message) => set(message),
 	},
 }));

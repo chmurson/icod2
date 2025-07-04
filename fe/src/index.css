@@ -1,65 +1,65 @@
 @import "tailwindcss";
 
 @theme {
-  --font-family-sans: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  --font-synthesis: none;
-  --text-rendering: optimizeLegibility;
+	--font-family-sans: system-ui, Avenir, Helvetica, Arial, sans-serif;
+	--font-synthesis: none;
+	--text-rendering: optimizeLegibility;
 
-  /* Colors */
-  --color-primary: #646cff;
-  --color-primary-hover: #535bf2;
-  --color-primary-light: #747bff;
+	/* Colors */
+	--color-primary: #646cff;
+	--color-primary-hover: #535bf2;
+	--color-primary-light: #747bff;
 
-  /* Dark mode colors */
-  --color-background-dark: #242424;
-  --color-text-dark: rgba(255, 255, 255, 0.87);
+	/* Dark mode colors */
+	--color-background-dark: #242424;
+	--color-text-dark: rgba(255, 255, 255, 0.87);
 
-  /* Light mode colors */
-  --color-background-light: #ffffff;
-  --color-text-light: #213547;
-  --color-button-light: #f9f9f9;
+	/* Light mode colors */
+	--color-background-light: #ffffff;
+	--color-text-light: #213547;
+	--color-button-light: #f9f9f9;
 }
 
 /* Base styles that complement Tailwind */
 html {
-  @apply antialiased;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	@apply antialiased;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  @apply m-0 flex min-h-screen min-w-[320px] place-items-start;
-  @apply text-[var(--color-text-dark)] bg-[var(--color-background-dark)];
-  @apply dark:text-[var(--color-text-light)] dark:bg-[var(b--color-background-light)];
+	@apply m-0 flex min-h-screen min-w-[320px] place-items-start;
+	@apply text-[var(--color-text-dark)] bg-[var(--color-background-dark)];
+	@apply dark:text-[var(--color-text-light)] dark:bg-[var(b--color-background-light)];
 }
 
 h1 {
-  @apply text-[3.2em] leading-[1.1];
+	@apply text-[3.2em] leading-[1.1];
 }
 
 a {
-  @apply font-medium text-[--color-primary] no-underline;
+	@apply font-medium text-[--color-primary] no-underline;
 }
 
 a:hover {
-  @apply text-[--color-primary-hover];
-  @apply dark:text-[--color-primary-light];
+	@apply text-[--color-primary-hover];
+	@apply dark:text-[--color-primary-light];
 }
 
 button {
-  @apply rounded-full px-[2em] py-[1em] text-sm font-bold;
-  @apply cursor-pointer transition-colors;
-  @apply dark:bg-[--color-button-light];
+	@apply rounded-full px-[2em] py-[1em] text-sm font-bold;
+	@apply cursor-pointer transition-colors;
+	@apply dark:bg-[--color-button-light];
 }
 
 @media (prefers-color-scheme: light) {
-  body {
-    @apply text-[var(--color-text-light)] bg-[var(--color-background-light)];
-  }
+	body {
+		@apply text-[var(--color-text-light)] bg-[var(--color-background-light)];
+	}
 }
 
 @media (prefers-color-scheme: dark) {
-  body {
-    @apply text-[var(--color-text-dark)] bg-[var(--color-background-dark)];
-  }
+	body {
+		@apply text-[var(--color-text-dark)] bg-[var(--color-background-dark)];
+	}
 }
