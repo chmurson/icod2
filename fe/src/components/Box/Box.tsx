@@ -6,6 +6,7 @@ import CreateBoxDownload from "./sub-pages/CreateBoxDownload";
 import JoinBox from "./sub-pages/JoinBox";
 import JoinBoxDownload from "./sub-pages/JoinBoxDownload";
 import Welcome from "./sub-pages/Welcome";
+import { WhatsYourName } from "./sub-pages/WhatsYourName";
 
 interface BoxProps {
 	/**
@@ -19,6 +20,10 @@ const Box: React.FC<BoxProps> = () => {
 
 	const renderCurrentPage = () => {
 		switch (currentPage) {
+			case "createBoxSetName":
+				return <WhatsYourName create />;
+			case "joinBoxSetName":
+				return <WhatsYourName join />;
 			case "welcome":
 				return <Welcome />;
 			case "create":
@@ -38,30 +43,32 @@ const Box: React.FC<BoxProps> = () => {
 };
 
 const useCurrentPage = () => {
-	const {
-		connected: createConnected,
-		connecting: createConnecting,
-		created: createCreated,
-	} = useCreateBoxStore();
-	const {
-		connected: joinConnected,
-		connecting: joinConnecting,
-		created: joinCreated,
-	} = useJoinBoxCreationState();
+	const { state: createBoxState } = useCreateBoxStore();
+	const { state: joinBoxState } = useJoinBoxCreationState();
 
-	if ((createConnected || createConnecting) && !createCreated) {
+	console.log(createBoxState);
+
+	if (createBoxState === "set-name") {
+		return "createBoxSetName";
+	}
+
+	if (createBoxState === "connected" || createBoxState === "connecting") {
 		return "create";
 	}
 
-	if (createCreated) {
+	if (createBoxState === "created") {
 		return "createDownload";
 	}
 
-	if ((joinConnected || joinConnecting) && !joinCreated) {
+	if (joinBoxState === "set-name") {
+		return "joinBoxSetName";
+	}
+
+	if (joinBoxState === "connecting" || joinBoxState === "connected") {
 		return "join";
 	}
 
-	if (joinCreated) {
+	if (joinBoxState === "created") {
 		return "joinDownload";
 	}
 
