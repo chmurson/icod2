@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node src/index.ts",
+    "lint": "biome check",
     "type-check": "tsc --noEmit"
   },
   "keywords": [],
