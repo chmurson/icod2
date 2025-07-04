@@ -1,8 +1,4 @@
-import init, {
-	ChunksConfiguration,
-	ChunksConfiguration as RustChunksConfiguration,
-	secure_message,
-} from "icod-crypto-js";
+import init, { ChunksConfiguration, secure_message } from "icod-crypto-js";
 import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
 import type React from "react";
 import { useEffect, useState } from "react";
@@ -28,21 +24,18 @@ const CreateBox: React.FC = () => {
 
 	const handleShareContent = () => {
 		const numKeys = state.participants.length + 1; // Leader + participants
-		const config = new RustChunksConfiguration(
-			state.threshold,
-			numKeys - state.threshold,
+		const secured = secure_message(
+			localContent,
+			undefined,
+			new ChunksConfiguration(state.threshold, numKeys - state.threshold),
 		);
-		const secured = secure_message(localContent, undefined, config);
 
 		actions.setMessage({
 			title: localTitle,
 			content: localContent, // Keep original content for local display
-			encryptedMessageParts: secured.encrypted_message as string[],
+			encryptedMessage: secured.encrypted_message[0] as string,
+			generatedKey: secured.chunks[0],
 			generatedKeys: secured.chunks as string[],
-			chunksConfiguration: new ChunksConfiguration(
-				state.threshold,
-				numKeys - state.threshold,
-			),
 		});
 	};
 

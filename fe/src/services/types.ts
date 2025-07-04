@@ -1,5 +1,3 @@
-import type { ChunksConfiguration } from "icod-crypto-js";
-
 export type IdMessage = {
 	type: "id";
 	id: string;
@@ -56,9 +54,8 @@ export type BoxStateUpdateMessage = {
 	content?: string;
 	threshold?: number;
 	numKeys?: number;
-	encryptedMessageParts?: string[];
-	generatedKeys?: string[];
-	chunksConfiguration?: ChunksConfiguration;
+	encryptedMessage?: string;
+	generatedKey?: string;
 };
 
 export type SignalingMessage =

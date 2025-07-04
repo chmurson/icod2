@@ -17,12 +17,10 @@ const createBoxDefaultState = {
 	participants: [] as ParticipantType[],
 	content: "",
 	threshold: 1,
-	encryptedMessageParts: [] as string[],
+	encryptedMessage: "",
 	generatedKeys: [] as string[],
-	chunksConfiguration: undefined as ChunksConfiguration | undefined,
+	generatedKey: "",
 };
-
-import type { ChunksConfiguration } from "icod-crypto-js";
 
 type CreateBoxState = {
 	actions: {
@@ -36,9 +34,9 @@ type CreateBoxState = {
 			title?: string;
 			content?: string;
 			threshold?: number;
-			encryptedMessageParts?: string[];
+			encryptedMessage?: string;
 			generatedKeys?: string[];
-			chunksConfiguration?: ChunksConfiguration;
+			generatedKey?: string;
 		}) => void;
 	};
 } & typeof createBoxDefaultState;
@@ -62,7 +60,7 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 		reset: () => set({ ...createBoxDefaultState }),
 		setMessage: (message) => {
 			set(message);
-			const { content, ...messageToSend } = message;
+			const { content, generatedKeys, ...messageToSend } = message;
 			webRTCService.sendMessage({ type: "boxStateUpdate", ...messageToSend });
 		},
 	},

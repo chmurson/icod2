@@ -22,12 +22,9 @@ const joinBoxCreationState = {
 	otherParticipants: [] as ParticipantType[],
 	content: "",
 	threshold: 1,
-	encryptedMessageParts: [] as string[],
-	generatedKeys: [] as string[],
-	chunksConfiguration: undefined as ChunksConfiguration | undefined,
+	encryptedMessage: "",
+	generatedKey: "",
 };
-
-import type { ChunksConfiguration } from "icod-crypto-js";
 
 type JoinBoxState = {
 	actions: {
@@ -44,9 +41,8 @@ type JoinBoxState = {
 			title?: string;
 			content?: string;
 			threshold?: number;
-			encryptedMessageParts?: string[];
-			generatedKeys?: string[];
-			chunksConfiguration?: ChunksConfiguration;
+			encryptedMessage?: string;
+			generatedKey?: string;
 		}) => void;
 	};
 } & typeof joinBoxCreationState;
