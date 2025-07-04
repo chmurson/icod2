@@ -17,6 +17,9 @@ const createBoxDefaultState = {
 	participants: [] as ParticipantType[],
 	content: "",
 	threshold: 1,
+	encryptedMessage: "",
+	generatedKeys: [] as string[],
+	generatedKey: "",
 };
 
 type CreateBoxState = {
@@ -31,6 +34,9 @@ type CreateBoxState = {
 			title?: string;
 			content?: string;
 			threshold?: number;
+			encryptedMessage?: string;
+			generatedKeys?: string[];
+			generatedKey?: string;
 		}) => void;
 	};
 } & typeof createBoxDefaultState;
@@ -54,7 +60,8 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 		reset: () => set({ ...createBoxDefaultState }),
 		setMessage: (message) => {
 			set(message);
-			webRTCService.sendMessage({ type: "boxStateUpdate", ...message });
+			const { content, generatedKeys, ...messageToSend } = message;
+			webRTCService.sendMessage({ type: "boxStateUpdate", ...messageToSend });
 		},
 	},
 }));

@@ -22,6 +22,8 @@ const joinBoxCreationState = {
 	otherParticipants: [] as ParticipantType[],
 	content: "",
 	threshold: 1,
+	encryptedMessage: "",
+	generatedKey: "",
 };
 
 type JoinBoxState = {
@@ -39,6 +41,8 @@ type JoinBoxState = {
 			title?: string;
 			content?: string;
 			threshold?: number;
+			encryptedMessage?: string;
+			generatedKey?: string;
 		}) => void;
 	};
 } & typeof joinBoxCreationState;

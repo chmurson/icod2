@@ -202,7 +202,7 @@ class WebRTCService {
 				const message: SignalingMessage = JSON.parse(ev.data);
 				if (message.type === "boxStateUpdate") {
 					const { setMessage } = useJoinBoxCreationState.getState().actions;
-					const { type, ...messageWithoutType } = message;
+					const { type, content, ...messageWithoutType } = message;
 					setMessage(messageWithoutType);
 				}
 			};
@@ -230,12 +230,16 @@ class WebRTCService {
 	}
 
 	sendMessage(message: BoxStateUpdateMessage) {
-		const messageString = JSON.stringify(message);
-		console.log(this.dataChannels);
+		const { generatedKeys } = useCreateBoxStore.getState();
+		let keyIndex = 1;
 		this.dataChannels.forEach((channel) => {
-			console.log(`${channel.id} is ${channel.readyState}`);
 			if (channel.readyState === "open") {
-				channel.send(messageString);
+				const messageToSend = {
+					...message,
+					generatedKey: generatedKeys[keyIndex],
+				};
+				channel.send(JSON.stringify(messageToSend));
+				keyIndex++;
 			}
 		});
 	}

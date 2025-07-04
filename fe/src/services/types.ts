@@ -50,9 +50,12 @@ export type CandidateMessage = {
 
 export type BoxStateUpdateMessage = {
 	type: "boxStateUpdate";
-	threshold?: number;
 	title?: string;
 	content?: string;
+	threshold?: number;
+	numKeys?: number;
+	encryptedMessage?: string;
+	generatedKey?: string;
 };
 
 export type SignalingMessage =

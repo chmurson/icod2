@@ -5,6 +5,7 @@ import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import Box from "./components/Box/sub-pages";
 import ComponentsDemo from "./components/ComponentsDemo";
 import CryptoPlayground from "./components/CryptoPlayground";
+import DecodePlayground from "./components/DecodePlayground";
 import { MainLayout } from "./components/MainLayout";
 import WebRTCPlayground from "./components/WebRTCPlayground";
 
@@ -59,6 +60,12 @@ function App() {
 					>
 						Crypto Playground
 					</Link>
+					<Link
+						to="/decode-poc"
+						style={{ marginRight: 16, textDecoration: "none" }}
+					>
+						Decode Playground
+					</Link>
 					<Link to="/components-demo" style={{ textDecoration: "none" }}>
 						Components Demo
 					</Link>
@@ -67,6 +74,7 @@ function App() {
 					<Routes>
 						<Route path="/webrtc-poc" element={<WebRTCPlayground />} />
 						<Route path="crypto-poc" element={<CryptoPlayground />} />
+						<Route path="decode-poc" element={<DecodePlayground />} />
 						<Route path="/components-demo" element={<ComponentsDemo />} />
 						<Route path="/" element={<Box />} />
 						<Route path="*" element={<Box />} />
