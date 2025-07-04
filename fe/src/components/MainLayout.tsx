@@ -1,4 +1,5 @@
 import type { FC, PropsWithChildren } from "react";
+import headerCropppedUrl from "../../public/header-cropped.jpg";
 
 export const MainLayout: FC<PropsWithChildren> = ({ children }) => {
 	return (
@@ -23,7 +24,7 @@ const HeaderImage: FC = () => {
 	return (
 		<div
 			style={{
-				backgroundImage: "url('/public/header-cropped.jpg')",
+				backgroundImage: `url(${headerCropppedUrl})`,
 			}}
 			className="
 				  b-image
