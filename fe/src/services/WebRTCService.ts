@@ -2,13 +2,15 @@ import { useCreateBoxStore } from "../stores/boxStore/createBoxStore";
 import { useJoinBoxCreationState } from "../stores/boxStore/joinBoxCreationStore";
 import type {
 	AcknowledgeLeaderMessage,
+	BoxStateUpdateMessage,
 	IdMessage,
 	PeerConnectedMessage,
 	PeerDisconnectedMessage,
 	SignalingMessage,
 } from "./types";
 
-const SIGNALING_SERVER_URL = "ws://localhost:8080";
+// in order to allow access to app in local network, yor IP instead of localhost
+const SIGNALING_SERVER_URL = `ws://localhost:8080`;
 
 type WebSocketHandlerOptions = {
 	onId: (data: IdMessage) => void;
@@ -196,7 +198,14 @@ class WebRTCService {
 			this.dataChannels.set(peerId, dc);
 			dc.onopen = () => {};
 			dc.onclose = () => {};
-			dc.onmessage = () => {};
+			dc.onmessage = (ev) => {
+				const message: SignalingMessage = JSON.parse(ev.data);
+				if (message.type === "boxStateUpdate") {
+					const { setMessage } = useJoinBoxCreationState.getState().actions;
+					const { type, ...messageWithoutType } = message;
+					setMessage(messageWithoutType);
+				}
+			};
 		};
 
 		if (isInitiator) {
@@ -218,6 +227,17 @@ class WebRTCService {
 		this.peerConnections.forEach((peer) => peer.close());
 		this.peerConnections.clear();
 		this.dataChannels.clear();
+	}
+
+	sendMessage(message: BoxStateUpdateMessage) {
+		const messageString = JSON.stringify(message);
+		console.log(this.dataChannels);
+		this.dataChannels.forEach((channel) => {
+			console.log(`${channel.id} is ${channel.readyState}`);
+			if (channel.readyState === "open") {
+				channel.send(messageString);
+			}
+		});
 	}
 }
 

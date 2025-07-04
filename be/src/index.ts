@@ -126,6 +126,7 @@ wss.on('connection', (ws) => {
 });
 
 const PORT = process.env.PORT || 8080;
+// in order to allow access to app in local network, put (port: PORT, hostname: {yourIP} instead of (PORT
 server.listen(PORT, () => {
   console.log(`[WS] WebSocket signaling server running on port ${PORT}`);
 });

@@ -48,6 +48,13 @@ export type CandidateMessage = {
 	senderId: string;
 };
 
+export type BoxStateUpdateMessage = {
+	type: "boxStateUpdate";
+	threshold?: number;
+	title?: string;
+	content?: string;
+};
+
 export type SignalingMessage =
 	| IdMessage
 	| GreetingMessage
@@ -56,4 +63,5 @@ export type SignalingMessage =
 	| PeerDisconnectedMessage
 	| OfferMessage
 	| AnswerMessage
-	| CandidateMessage;
+	| CandidateMessage
+	| BoxStateUpdateMessage;

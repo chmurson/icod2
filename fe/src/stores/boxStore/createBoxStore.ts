@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { webRTCService } from "@/services/WebRTCService";
 import type { DeviceType, ParticipantType } from "./common-types";
 
 const createBoxDefaultState = {
@@ -15,7 +16,7 @@ const createBoxDefaultState = {
 	} satisfies ParticipantType,
 	participants: [] as ParticipantType[],
 	content: "",
-	treshold: 1,
+	threshold: 1,
 };
 
 type CreateBoxState = {
@@ -26,67 +27,34 @@ type CreateBoxState = {
 		disconnectParticipant: (participantId: string) => void;
 		start: () => void;
 		create: () => void;
+		setMessage: (message: {
+			title?: string;
+			content?: string;
+			threshold?: number;
+		}) => void;
 	};
 } & typeof createBoxDefaultState;
 
 export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 	...createBoxDefaultState,
 	actions: {
-		start: () =>
-			set(() => {
-				const newState = {
-					...createBoxDefaultState,
-					connecting: true,
-				};
-				console.log("createBoxStore state updated", newState);
-				return newState;
-			}),
+		start: () => set({ ...createBoxDefaultState, connecting: true }),
 		connectLeader: (leader) =>
-			set((state) => {
-				const newState = {
-					leader,
-					connecting: false,
-					connected: true,
-					error: null,
-				};
-				console.log("createBoxStore state updated", { ...state, ...newState });
-				return newState;
-			}),
+			set({ leader, connecting: false, connected: true, error: null }),
 		connectParticipant: (participant) =>
-			set((state) => {
-				const newState = {
-					participants: [...state.participants, participant],
-				};
-				console.log("createBoxStore state updated", { ...state, ...newState });
-				return newState;
-			}),
+			set((state) => ({ participants: [...state.participants, participant] })),
 		disconnectParticipant: (participantId: string) => {
-			set((state) => {
-				const newState = {
-					participants: state.participants.filter(
-						(participant) => participant.id !== participantId,
-					),
-				};
-				console.log("createBoxStore state updated", { ...state, ...newState });
-				return newState;
-			});
+			set((state) => ({
+				participants: state.participants.filter(
+					(participant) => participant.id !== participantId,
+				),
+			}));
 		},
-		create: () =>
-			set((state) => {
-				const newState = {
-					created: true,
-					connected: true,
-					connecting: false,
-				};
-				console.log("createBoxStore state updated", { ...state, ...newState });
-				return newState;
-			}),
-		reset: () =>
-			set(() => {
-				console.log("createBoxStore state updated", createBoxDefaultState);
-				return {
-					...createBoxDefaultState,
-				};
-			}),
+		create: () => set({ created: true, connected: true, connecting: false }),
+		reset: () => set({ ...createBoxDefaultState }),
+		setMessage: (message) => {
+			set(message);
+			webRTCService.sendMessage({ type: "boxStateUpdate", ...message });
+		},
 	},
 }));
