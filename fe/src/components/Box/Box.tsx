@@ -14,11 +14,8 @@ interface BoxProps {
 	className?: string;
 }
 
-const Box: React.FC<BoxProps> = ({ className }) => {
+const Box: React.FC<BoxProps> = () => {
 	const currentPage = useCurrentPage();
-
-	const baseClasses = "p-6 border rounded-lg shadow-sm";
-	const combinedClasses = [baseClasses, className].filter(Boolean).join(" ");
 
 	const renderCurrentPage = () => {
 		switch (currentPage) {
@@ -37,7 +34,7 @@ const Box: React.FC<BoxProps> = ({ className }) => {
 		}
 	};
 
-	return <div className={combinedClasses}>{renderCurrentPage()}</div>;
+	return renderCurrentPage();
 };
 
 const useCurrentPage = () => {

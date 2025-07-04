@@ -10,6 +10,8 @@
     "libs/*"
   ],
   "scripts": {
+    ":biome": "biome check --fix",
+    ":biome:unsafe": "biome check --write --unsafe",
     "dev": "concurrently \"yarn workspace icod2-fe dev\" \"yarn workspace icod2-be start\"",
     "prepare": "husky",
     "commitlint": "commitlint --edit --last"
