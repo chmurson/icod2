@@ -1,3 +1,4 @@
+import { Card } from "@radix-ui/themes";
 import type { FC, PropsWithChildren } from "react";
 import headerCropppedUrl from "../../public/header-cropped.jpg";
 
@@ -12,11 +13,9 @@ export const MainLayout: FC<PropsWithChildren> = ({ children }) => {
 
 const ContentCard: FC<PropsWithChildren> = ({ children }) => {
 	return (
-		<div className="max-w-5xl mx-auto px-4 -mt-20 w-full">
-			<div className="bg-white shadow-md rounded-lg p-6 px-24 max-md:px-8">
-				{children}
-			</div>
-		</div>
+		<Card className="max-w-5xl mx-auto px-4 -mt-20 w-full mb-18">
+			<div className="p-6 px-24 max-md:px-8">{children}</div>
+		</Card>
 	);
 };
 

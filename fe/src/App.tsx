@@ -42,9 +42,10 @@ function App() {
 			panelBackground="translucent"
 			scaling="100%"
 			radius="full"
+			style={{ backgroundColor: "inherit" }}
 		>
 			<BrowserRouter>
-				<nav style={{ padding: 16, borderBottom: "1px solid #ccc" }}>
+				<nav className="bg-[#ffffffAA] absolute w-full p-2 dark:text-gray-700">
 					<Link to="/" style={{ marginRight: 16, textDecoration: "none" }}>
 						Box
 					</Link>

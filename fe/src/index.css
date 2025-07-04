@@ -30,7 +30,7 @@ html {
 body {
 	@apply m-0 flex min-h-screen min-w-[320px] place-items-start;
 	@apply text-[var(--color-text-dark)] bg-[var(--color-background-dark)];
-	@apply dark:text-[var(--color-text-light)] dark:bg-[var(b--color-background-light)];
+	@apply dark:text-[var(--color-text-light)] dark:bg-[var(--color-background-light)];
 }
 
 #root {
