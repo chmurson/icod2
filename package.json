@@ -6,7 +6,8 @@
   "private": true,
   "workspaces": [
     "fe",
-    "be"
+    "be",
+    "libs/*"
   ],
   "scripts": {
     "dev": "concurrently \"yarn workspace icod2-fe dev\" \"yarn workspace icod2-be start\"",
