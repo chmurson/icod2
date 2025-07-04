@@ -1,4 +1,4 @@
-export type DeviceType = "mobile" | "tablet" | "desktop";
+export type DeviceType = "💻" | "📱" | "❓";
 
 export type ParticipantType = {
 	id: string;

@@ -2,7 +2,7 @@ import init, { ChunksConfiguration, secure_message } from "icod-crypto-js";
 import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { webRTCService } from "@/services/WebRTCService";
+import { webRTCService } from "@/services/web-rtc/WebRTCService";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { Button } from "@/ui/Button.tsx";
 

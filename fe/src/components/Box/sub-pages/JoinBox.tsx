@@ -1,6 +1,6 @@
 import type React from "react";
 import { useEffect } from "react";
-import { webRTCService } from "@/services/WebRTCService";
+import { webRTCService } from "@/services/web-rtc/WebRTCService";
 import { useJoinBoxCreationState } from "@/stores";
 import { Button } from "@/ui/Button";
 

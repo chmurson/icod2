@@ -1,4 +1,8 @@
 import { create } from "zustand";
+import {
+	getReadableUserAgent,
+	getUserAgentDeviceIcon,
+} from "@/services/user-agent/get-user-agent";
 import type { DeviceType, ParticipantType } from "./common-types";
 
 const joinBoxCreationState = {
@@ -11,13 +15,13 @@ const joinBoxCreationState = {
 		id: "",
 		name: "",
 		userAgent: "",
-		device: "mobile" as DeviceType,
+		device: "❓" as DeviceType,
 	} satisfies ParticipantType,
 	leader: {
 		id: "",
 		name: "",
 		userAgent: "",
-		device: "mobile" as DeviceType,
+		device: "❓" as DeviceType,
 	} satisfies ParticipantType,
 	otherParticipants: [] as ParticipantType[],
 	content: "",
@@ -57,10 +61,32 @@ export const useJoinBoxCreationState = create<JoinBoxState>((set) => ({
 		}: {
 			you: ParticipantType;
 			leader: ParticipantType;
-		}) => set({ leader, you, connecting: false, connected: true, error: null }),
+		}) =>
+			set({
+				leader: {
+					...leader,
+					userAgent: getReadableUserAgent(leader.userAgent),
+					device: getUserAgentDeviceIcon(leader.userAgent),
+				},
+				you: {
+					...you,
+					userAgent: getReadableUserAgent(you.userAgent),
+					device: getUserAgentDeviceIcon(you.userAgent),
+				},
+				connecting: false,
+				connected: true,
+				error: null,
+			}),
 		connectParticipant: (participant: ParticipantType) => {
 			set((state) => ({
-				otherParticipants: [...state.otherParticipants, participant],
+				otherParticipants: [
+					...state.otherParticipants,
+					{
+						...participant,
+						userAgent: getReadableUserAgent(participant.userAgent),
+						device: getUserAgentDeviceIcon(participant.userAgent),
+					},
+				],
 			}));
 		},
 		disconnectParticipant: (participantId: string) => {

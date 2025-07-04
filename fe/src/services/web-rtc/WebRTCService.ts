@@ -1,5 +1,5 @@
-import { useCreateBoxStore } from "../stores/boxStore/createBoxStore";
-import { useJoinBoxCreationState } from "../stores/boxStore/joinBoxCreationStore";
+import { useCreateBoxStore } from "../../stores/boxStore/createBoxStore";
+import { useJoinBoxCreationState } from "../../stores/boxStore/joinBoxCreationStore";
 import type {
 	AcknowledgeLeaderMessage,
 	BoxStateUpdateMessage,

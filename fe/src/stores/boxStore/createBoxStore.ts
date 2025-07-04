@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import { webRTCService } from "@/services/WebRTCService";
+import {
+	getReadableUserAgent,
+	getUserAgentDeviceIcon,
+} from "@/services/user-agent/get-user-agent";
+import { webRTCService } from "@/services/web-rtc/WebRTCService";
 import type { DeviceType, ParticipantType } from "./common-types";
 
 const createBoxDefaultState = {
@@ -12,7 +16,7 @@ const createBoxDefaultState = {
 		id: "",
 		name: "",
 		userAgent: "",
-		device: "mobile" as DeviceType,
+		device: "❓" as DeviceType,
 	} satisfies ParticipantType,
 	participants: [] as ParticipantType[],
 	content: "",
@@ -46,9 +50,27 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 	actions: {
 		start: () => set({ ...createBoxDefaultState, connecting: true }),
 		connectLeader: (leader) =>
-			set({ leader, connecting: false, connected: true, error: null }),
+			set({
+				leader: {
+					...leader,
+					userAgent: getReadableUserAgent(leader.userAgent),
+					device: getUserAgentDeviceIcon(leader.userAgent),
+				},
+				connecting: false,
+				connected: true,
+				error: null,
+			}),
 		connectParticipant: (participant) =>
-			set((state) => ({ participants: [...state.participants, participant] })),
+			set((state) => ({
+				participants: [
+					...state.participants,
+					{
+						...participant,
+						userAgent: getReadableUserAgent(participant.userAgent),
+						device: getUserAgentDeviceIcon(participant.userAgent),
+					},
+				],
+			})),
 		disconnectParticipant: (participantId: string) => {
 			set((state) => ({
 				participants: state.participants.filter(
