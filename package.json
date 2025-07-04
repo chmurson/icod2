@@ -6,7 +6,8 @@
   "private": true,
   "workspaces": [
     "fe",
-    "be"
+    "be",
+    "libs/*"
   ],
   "scripts": {
     "dev": "concurrently \"yarn workspace icod2-fe dev\" \"yarn workspace icod2-be start\"",
@@ -18,5 +19,6 @@
     "@commitlint/config-conventional": "^19.8.1",
     "concurrently": "^8.2.2",
     "husky": "^9.1.7"
-  }
+  },
+  "packageManager": "yarn@4.9.2"
 }

@@ -21,7 +21,7 @@
     "@tailwindcss/vite": "^4.1.11",
     "@types/node": "^24.0.8",
     "detect-browser": "^5.3.0",
-    "icod-crypto-js": "file:../crypto/pkg",
+    "icod-crypto-js": "workspace:*",
     "postcss": "^8.5.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
