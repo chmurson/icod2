@@ -72,6 +72,7 @@ const CreateBox: React.FC = () => {
 				<button
 					type="button"
 					onClick={() => actions.setMessage({ threshold: state.threshold - 1 })}
+					disabled={state.threshold === 1}
 				>
 					-
 				</button>
@@ -80,7 +81,13 @@ const CreateBox: React.FC = () => {
 				</span>
 				<button
 					type="button"
-					onClick={() => actions.setMessage({ threshold: state.threshold + 1 })}
+					onClick={() => {
+						const numKeys = state.participants.length + 1;
+						if (state.threshold < numKeys) {
+							actions.setMessage({ threshold: state.threshold + 1 });
+						}
+					}}
+					disabled={state.threshold >= state.participants.length + 1}
 				>
 					+
 				</button>

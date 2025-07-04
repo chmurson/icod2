@@ -82,6 +82,7 @@ const DecodePlayground = () => {
 						value={threshold}
 						onChange={(e) => setThreshold(Number.parseInt(e.target.value, 10))}
 						className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+						min={1}
 					/>
 				</div>
 				<div className="mt-6 border-t border-gray-600 pt-6">
