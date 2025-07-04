@@ -10,6 +10,7 @@
 		"includes": [
 			"**/*.ts",
 			"**/*.tsx",
+			"**/*.json",
 			"!node_modules",
 			"!dist",
 			"!libs/icod-crypto-js"
