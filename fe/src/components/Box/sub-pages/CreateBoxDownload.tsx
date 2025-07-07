@@ -1,23 +1,58 @@
 import { DownloadIcon } from "@radix-ui/react-icons";
-import { AlertDialog, TextArea } from "@radix-ui/themes";
-import { useCallback, useState } from "react";
+import { TextArea } from "@radix-ui/themes";
+import { useCallback, useEffect, useState } from "react"; // Added useEffect
+import { useBlocker, useNavigate } from "react-router-dom"; // Added useBlocker, useNavigate
 import { useCreateBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
+import { GoBackAlert } from "../components/GoBackAlert";
 import { HiddenTextArea } from "../components/HiddenTextArea";
 import { ParticipantItem } from "../components/ParticipantItem";
 
 const CreateBoxDownload: React.FC = () => {
 	const { leader, participants, title, treshold } = useCreateBoxState();
+
 	const { hideMessage, showMessage, visibleMessage } =
 		useNaiveShowHiddenMessage();
-	const resetStateAction = useCreateBoxStore((state) => state.actions.reset);
+
+	const resetStoreStateAction = useCreateBoxStore(
+		(state) => state.actions.reset,
+	);
+
+	const navigate = useNavigate();
 
 	const [isDownloadButtonClicked, setIsDownloadButtonClicked] = useState(false);
 
 	const handleClickDownloadButton = () => {
 		setIsDownloadButtonClicked(true);
 	};
+
+	const resetAndNavigateAway = useCallback(() => {
+		resetStoreStateAction();
+		navigate("/");
+	}, [resetStoreStateAction, navigate]);
+
+	const shouldNavigationBeBlocked = useCallback(
+		() => !isDownloadButtonClicked,
+		[isDownloadButtonClicked],
+	);
+
+	const blocker = useBlocker(shouldNavigationBeBlocked);
+
+	useEffect(() => {
+		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+			if (!isDownloadButtonClicked) {
+				event.preventDefault();
+				event.returnValue = ""; // Required for browser to show prompt
+			}
+		};
+
+		window.addEventListener("beforeunload", handleBeforeUnload);
+
+		return () => {
+			window.removeEventListener("beforeunload", handleBeforeUnload);
+		};
+	}, [isDownloadButtonClicked]);
 
 	return (
 		<div className="flex flex-col gap-8">
@@ -68,9 +103,19 @@ const CreateBoxDownload: React.FC = () => {
 				{JSON.stringify(isDownloadButtonClicked)}
 				<ClosePageButton
 					showAlert={!isDownloadButtonClicked}
-					onClose={resetStateAction}
+					onClose={resetAndNavigateAway}
 				/>
 			</div>
+			<GoBackAlert
+				open={blocker.state === "blocked"}
+				onClose={() => {
+					blocker.reset?.();
+				}}
+				onGoBack={() => {
+					blocker.proceed?.();
+					resetAndNavigateAway();
+				}}
+			/>
 		</div>
 	);
 };
@@ -91,29 +136,10 @@ const ClosePageButton = ({
 	}
 
 	return (
-		<AlertDialog.Root>
-			<AlertDialog.Trigger>
-				<Button variant="secondary">Close page</Button>
-			</AlertDialog.Trigger>
-			<AlertDialog.Content maxWidth="450px">
-				<AlertDialog.Title>Box shard is not downloaded</AlertDialog.Title>
-				<AlertDialog.Description size="2">
-					Are you sure? This application will no longer be accessible, and you
-					will lose your chance to download the box shard.
-				</AlertDialog.Description>
-
-				<div className="flex justify-between mt-4">
-					<AlertDialog.Cancel>
-						<Button variant="primary">Upps, cancel</Button>
-					</AlertDialog.Cancel>
-					<AlertDialog.Action>
-						<Button variant="secondary" onClick={onClose}>
-							Ignore the alert and close the page
-						</Button>
-					</AlertDialog.Action>
-				</div>
-			</AlertDialog.Content>
-		</AlertDialog.Root>
+		<GoBackAlert
+			triggerSlot={<Button variant="secondary">Close page</Button>}
+			onGoBack={onClose}
+		/>
 	);
 };
 
