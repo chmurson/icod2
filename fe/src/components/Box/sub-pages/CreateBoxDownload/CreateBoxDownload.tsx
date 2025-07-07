@@ -5,12 +5,14 @@ import { useBlocker, useNavigate } from "react-router-dom"; // Added useBlocker,
 import { useCreateBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { GoBackAlert } from "../components/GoBackAlert";
-import { HiddenTextArea } from "../components/HiddenTextArea";
-import { ParticipantItem } from "../components/ParticipantItem";
+import { HiddenTextArea } from "../../components/HiddenTextArea";
+import { ParticipantItem } from "../../components/ParticipantItem";
+import { ClosePageButton, GoBackAlert } from "./components";
+import { useCreateBoxDownloadState } from "./hooks";
+import { useNaiveShowHiddenMessage } from "./hooks/useNaiveShowHiddenMessage";
 
-const CreateBoxDownload: React.FC = () => {
-	const { leader, participants, title, treshold } = useCreateBoxState();
+export const CreateBoxDownload: React.FC = () => {
+	const { leader, participants, title, treshold } = useCreateBoxDownloadState();
 
 	const { hideMessage, showMessage, visibleMessage } =
 		useNaiveShowHiddenMessage();
@@ -119,61 +121,3 @@ const CreateBoxDownload: React.FC = () => {
 		</div>
 	);
 };
-
-const ClosePageButton = ({
-	showAlert,
-	onClose,
-}: {
-	showAlert: boolean;
-	onClose: () => void;
-}) => {
-	if (!showAlert) {
-		return (
-			<Button variant="secondary" onClick={onClose}>
-				Close page
-			</Button>
-		);
-	}
-
-	return (
-		<GoBackAlert
-			triggerSlot={<Button variant="secondary">Close page</Button>}
-			onGoBack={onClose}
-		/>
-	);
-};
-
-const useNaiveShowHiddenMessage = () => {
-	const message = useCreateBoxStore((state) => state.content);
-	const [visibleMessage, setVisisableMessage] = useState("");
-
-	const hideMessage = useCallback(() => {
-		setVisisableMessage("");
-	}, []);
-
-	const showMessage = useCallback(() => {
-		setVisisableMessage(message);
-	}, [message]);
-
-	return {
-		visibleMessage,
-		hideMessage,
-		showMessage,
-	};
-};
-
-const useCreateBoxState = () => {
-	const title = useCreateBoxStore((state) => state.title);
-	const treshold = useCreateBoxStore((state) => state.threshold);
-	const leader = useCreateBoxStore((state) => state.leader);
-	const participants = useCreateBoxStore((state) => state.participants);
-
-	return {
-		title,
-		treshold,
-		leader,
-		participants,
-	};
-};
-
-export default CreateBoxDownload;
