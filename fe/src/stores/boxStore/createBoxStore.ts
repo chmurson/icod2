@@ -93,7 +93,6 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 				state: "created",
 			});
 			const { generatedKeys, ...messageToSend } = message;
-			console.log("boxStateUpdate mess", message);
 			webRTCService.sendMessage({ type: "boxStateUpdate", ...messageToSend });
 		},
 		reset: () =>

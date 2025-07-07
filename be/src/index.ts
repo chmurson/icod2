@@ -24,12 +24,6 @@ wss.on("connection", (ws) => {
 	ws.send(JSON.stringify({ type: "id", id: clientId }));
 
 	if (leaderId) {
-		console.log("ackLeade", {
-			type: "acknowledgeLeader",
-			leaderId,
-			leaderName,
-			leaderUserAgent,
-		});
 		ws.send(
 			JSON.stringify({
 				type: "acknowledgeLeader",
@@ -92,7 +86,6 @@ wss.on("connection", (ws) => {
 		const [senderId, senderInfo] = currentClientInfo;
 
 		if (data.type === "greeting") {
-			console.log("data", data);
 			senderInfo.userAgent = data.userAgent;
 			senderInfo.id = data.id;
 			senderInfo.name = data.name;
@@ -108,11 +101,6 @@ wss.on("connection", (ws) => {
 					clientId !== senderId &&
 					clientInfo.ws.readyState === WebSocket.OPEN
 				) {
-					console.log(
-						"notifying clients about new client, peerId is",
-						senderId,
-					);
-					console.log("peer connected");
 					clientInfo.ws.send(
 						JSON.stringify({
 							type: "peerConnected",
@@ -126,12 +114,10 @@ wss.on("connection", (ws) => {
 
 			// Notify the new client about all existing clients
 			for (const [clientId, clientInfo] of clients.entries()) {
-				console.log("clientInfo.id", clientInfo.id);
 				if (
 					clientId !== senderId &&
 					clientInfo.ws.readyState === WebSocket.OPEN
 				) {
-					console.log("notifying new client about clients", clientId);
 					ws.send(
 						JSON.stringify({
 							type: "peerConnected",

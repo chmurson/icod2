@@ -44,8 +44,6 @@ const useCurrentPage = () => {
 	const { state: createBoxState } = useCreateBoxStore();
 	const { state: joinBoxState } = useJoinBoxCreationState();
 
-	console.log(createBoxState);
-
 	if (createBoxState === "set-name") {
 		return "createBoxSetName";
 	}

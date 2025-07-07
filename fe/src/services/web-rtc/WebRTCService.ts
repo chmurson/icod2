@@ -48,11 +48,13 @@ class WebRTCService {
 				this.ws?.send(
 					JSON.stringify({ type: "offer", targetId: data.peerId, offer }),
 				);
-				connectParticipant({
-					id: data.peerId,
-					name: data.name,
-					userAgent: data.userAgent,
-				});
+				if (data.peerId !== useJoinBoxCreationState.getState().leader.id) {
+					connectParticipant({
+						id: data.peerId,
+						name: data.name,
+						userAgent: data.userAgent,
+					});
+				}
 			},
 			onPeerDisconnected: (data) => {
 				disconnectParticipant(data.peerId);
@@ -88,7 +90,6 @@ class WebRTCService {
 			},
 			onPeerConnected: async (data) => {
 				// Participant does not initiate connection, only adds other peers to the list.
-				console.log("data", data);
 				if (data.peerId !== useJoinBoxCreationState.getState().leader.id) {
 					connectParticipant({
 						id: data.peerId,
@@ -140,7 +141,6 @@ class WebRTCService {
 					onAcknowledgeLeader?.(data);
 					break;
 				case "peerConnected":
-					console.log("peerCon", data);
 					await onPeerConnected(data);
 					break;
 				case "peerDisconnected":
@@ -213,7 +213,6 @@ class WebRTCService {
 					const { create } = useJoinBoxCreationState.getState().actions;
 					const { fromJoinBox } = useDownloadBoxStore.getState();
 					const { type, ...messageWithoutType } = message;
-					console.log("useBoxMess", messageWithoutType);
 					create(messageWithoutType);
 					fromJoinBox();
 				}
