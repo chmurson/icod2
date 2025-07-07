@@ -8,7 +8,7 @@
 		"build": "tsc --noEmit --project tsconfig.app.json && vite build",
 		"lint": "yarn run -T biome check",
 		"lint:fix": "yarn run -T biome check --write",
-		"typecheck": "tsc --noEmit --project tsconfig.app.json",
+		"type-check": "tsc --noEmit --project tsconfig.app.json",
 		"preview": "vite preview"
 	},
 	"dependencies": {
