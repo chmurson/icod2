@@ -12,8 +12,7 @@ import { useCreateBoxDownloadState, useDownloadShard } from "./hooks";
 import { useNaiveShowHiddenMessage } from "./hooks/useNaiveShowHiddenMessage";
 
 export const CreateBoxDownload: React.FC = () => {
-	const { leader, participants, title, threshold } =
-		useCreateBoxDownloadState();
+	const state = useCreateBoxDownloadState();
 
 	const { hideMessage, showMessage, visibleMessage } =
 		useNaiveShowHiddenMessage();
@@ -71,28 +70,57 @@ export const CreateBoxDownload: React.FC = () => {
 			<div className="flex flex-col gap-4">
 				<div className="flex gap-2 items-end">
 					<Text variant="label">Name:</Text>
-					<Text variant="primaryText">{title}</Text>
+					<Text variant="primaryText">{state.title}</Text>
 				</div>
 				<div className="flex gap-2 items-end">
 					<Text variant="label">Treshold:</Text>
-					<Text variant="primaryText">{threshold}</Text>
+					<Text variant="primaryText">{state.threshold}</Text>
 				</div>
 				<div className="flex flex-col gap-1">
-					<Text variant="label">You - leader:</Text>
-					<ParticipantItem name={leader.name} userAgent={leader.userAgent} />
+					{!state.you && <Text variant="label">You - leader:</Text>}
+					{state.you && <Text variant="label">Leader:</Text>}
+					<ParticipantItem
+						name={state.leader.name}
+						userAgent={state.leader.userAgent}
+					/>
 				</div>
-				<div className="flex flex-col gap-1">
-					<Text variant="label">Participants:</Text>
-					<div>
-						{participants.map((p) => (
-							<ParticipantItem
-								key={p.id}
-								name={p.name}
-								userAgent={p.userAgent}
-							/>
-						))}
+				{state.you && (
+					<div className="flex flex-col gap-1">
+						<Text variant="label">You:</Text>
+						<ParticipantItem
+							name={state.you.name}
+							userAgent={state.you.userAgent}
+						/>
 					</div>
-				</div>
+				)}
+				{!state.you && (
+					<div className="flex flex-col gap-1">
+						<Text variant="label">Participants:</Text>
+						<div>
+							{state.participants.map((p) => (
+								<ParticipantItem
+									key={p.id}
+									name={p.name}
+									userAgent={p.userAgent}
+								/>
+							))}
+						</div>
+					</div>
+				)}
+				{state.you && (
+					<div className="flex flex-col gap-1">
+						<Text variant="label">Other participants:</Text>
+						<div>
+							{state.otherParticipants.map((p) => (
+								<ParticipantItem
+									key={p.id}
+									name={p.name}
+									userAgent={p.userAgent}
+								/>
+							))}
+						</div>
+					</div>
+				)}
 				<div className="flex flex-col gap-1">
 					<Text variant="label">Preview messae:</Text>
 					<HiddenTextArea

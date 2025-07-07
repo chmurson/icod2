@@ -31,6 +31,7 @@ type DownloadBoxStoreStateType =
 				| "content"
 				| "encryptedMessage"
 				| "generatedKey"
+				| "threshold"
 			>;
 	  }
 	| {
@@ -39,6 +40,7 @@ type DownloadBoxStoreStateType =
 
 type Actions = {
 	fromCreateBox: () => void;
+	fromJoinBox: () => void;
 };
 
 const createStoreFn: StateCreator<DownloadBoxStoreStateType & Actions> = (
@@ -60,7 +62,22 @@ const createStoreFn: StateCreator<DownloadBoxStoreStateType & Actions> = (
 			},
 		});
 	},
-	fromJoinBox: () => {},
+	fromJoinBox: () => {
+		const joinBoxState = useJoinBoxCreationState.getState();
+		set({
+			type: "fromJoinBox",
+			state: {
+				content: joinBoxState.content,
+				encryptedMessage: joinBoxState.encryptedMessage,
+				generatedKey: joinBoxState.generatedKey,
+				leader: joinBoxState.leader,
+				otherParticipants: joinBoxState.otherParticipants,
+				title: joinBoxState.title,
+				you: joinBoxState.you,
+				threshold: joinBoxState.threshold,
+			},
+		});
+	},
 });
 
 export const useDownloadBoxStore = create<

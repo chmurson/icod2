@@ -18,17 +18,27 @@ export const useCreateBoxDownloadState = () => {
 	}
 
 	if (state.type === "fromJoinBox") {
+		const {
+			content,
+			leader,
+			threshold,
+			title,
+			encryptedMessage,
+			generatedKey,
+			otherParticipants,
+			you,
+		} = state.state;
+
 		return {
 			type: "fromJoinBox",
-			title: "",
-			treshold: "",
-			leader: {
-				id: "",
-				name: "",
-				userAgent: "",
-			} satisfies ParticipantType,
-			participants: [],
-			contnet: "",
+			content,
+			leader,
+			threshold,
+			title,
+			encryptedMessage,
+			generatedKey,
+			otherParticipants,
+			you,
 		};
 	}
 
