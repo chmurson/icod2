@@ -7,6 +7,7 @@ import type {
 	SignalingMessage,
 	ThresholdStateUpdateMessage,
 } from "@icod2/contracts";
+
 import { useDownloadBoxStore } from "@/stores";
 import { useCreateBoxStore } from "../../stores/boxStore/createBoxStore";
 import { useJoinBoxCreationState } from "../../stores/boxStore/joinBoxCreationStore";

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { webRTCService } from "@/services/web-rtc/WebRTCService";
+import { leaderService } from "@/services/web-rtc/leaderSingleton";
 import type { ParticipantType } from "./common-types";
 
 const createBoxDefaultState = {
@@ -93,7 +93,7 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 				state: "created",
 			});
 			const { generatedKeys, ...messageToSend } = message;
-			webRTCService.sendMessage({ type: "boxStateUpdate", ...messageToSend });
+			leaderService.sendMessage({ type: "boxStateUpdate", ...messageToSend });
 		},
 		reset: () =>
 			set({
@@ -103,7 +103,7 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 			set({
 				threshold: threshold,
 			});
-			webRTCService.sendThreshold({ type: "thresholdStatUpdate", threshold });
+			leaderService.sendThreshold({ type: "thresholdStatUpdate", threshold });
 		},
 	},
 }));
