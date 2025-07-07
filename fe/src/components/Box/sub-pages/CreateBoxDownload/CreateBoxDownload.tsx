@@ -12,7 +12,8 @@ import { useCreateBoxDownloadState, useDownloadShard } from "./hooks";
 import { useNaiveShowHiddenMessage } from "./hooks/useNaiveShowHiddenMessage";
 
 export const CreateBoxDownload: React.FC = () => {
-	const { leader, participants, title, treshold } = useCreateBoxDownloadState();
+	const { leader, participants, title, threshold } =
+		useCreateBoxDownloadState();
 
 	const { hideMessage, showMessage, visibleMessage } =
 		useNaiveShowHiddenMessage();
@@ -74,7 +75,7 @@ export const CreateBoxDownload: React.FC = () => {
 				</div>
 				<div className="flex gap-2 items-end">
 					<Text variant="label">Treshold:</Text>
-					<Text variant="primaryText">{treshold}</Text>
+					<Text variant="primaryText">{threshold}</Text>
 				</div>
 				<div className="flex flex-col gap-1">
 					<Text variant="label">You - leader:</Text>

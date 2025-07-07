@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
-import { useCreateBoxStore } from "@/stores";
+import { useCreateBoxDownloadState } from "./useCreateBoxDownloadState";
 
 export const useNaiveShowHiddenMessage = () => {
-	const message = useCreateBoxStore((state) => state.content);
+	const { content } = useCreateBoxDownloadState();
 	const [visibleMessage, setVisisableMessage] = useState("");
 
 	const hideMessage = useCallback(() => {
@@ -10,8 +10,8 @@ export const useNaiveShowHiddenMessage = () => {
 	}, []);
 
 	const showMessage = useCallback(() => {
-		setVisisableMessage(message);
-	}, [message]);
+		setVisisableMessage(content ?? "");
+	}, [content]);
 
 	return {
 		visibleMessage,

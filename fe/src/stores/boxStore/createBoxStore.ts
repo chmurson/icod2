@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 import {
 	getReadableUserAgent,
 	getUserAgentDeviceIcon,
@@ -31,6 +32,8 @@ const createBoxDefaultState = {
 	generatedKey: "",
 };
 
+export type CreateBoxStateData = typeof createBoxDefaultState;
+
 type CreateBoxState = {
 	actions: {
 		reset: () => void;
@@ -49,7 +52,7 @@ type CreateBoxState = {
 			generatedKey?: string;
 		}) => void;
 	};
-} & typeof createBoxDefaultState;
+} & CreateBoxStateData;
 
 export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 	...createBoxDefaultState,

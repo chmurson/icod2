@@ -6,6 +6,7 @@ import { Button } from "@/ui/Button";
 
 const JoinBox: React.FC = () => {
 	const state = useJoinBoxCreationState((state) => state);
+	const actions = useJoinBoxCreationState((state) => state.actions);
 
 	useEffect(() => {
 		webRTCService.connectParticipant();
@@ -18,8 +19,8 @@ const JoinBox: React.FC = () => {
 	return (
 		<div>
 			<h1>Hi I'm Join Box page</h1>
-			<Button variant="primary" onClick={() => {}}>
-				Join Box
+			<Button variant="primary" onClick={() => actions.create()}>
+				Simulate box created
 			</Button>
 			<PrettyJson>{state}</PrettyJson>
 		</div>

@@ -34,6 +34,8 @@ const joinBoxCreationState = {
 	generatedKey: "",
 };
 
+export type JoinBoxStateData = typeof joinBoxCreationState;
+
 type JoinBoxState = {
 	actions: {
 		reset: () => void;
@@ -54,7 +56,7 @@ type JoinBoxState = {
 			generatedKey?: string;
 		}) => void;
 	};
-} & typeof joinBoxCreationState;
+} & JoinBoxStateData;
 
 export const useJoinBoxCreationState = create<JoinBoxState>((set) => ({
 	...joinBoxCreationState,

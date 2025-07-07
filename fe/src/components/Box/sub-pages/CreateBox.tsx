@@ -5,6 +5,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { webRTCService } from "@/services/web-rtc/WebRTCService";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
+import { useDownloadBoxStore } from "@/stores/boxStore/downloadBoxStore";
 import { Button } from "@/ui/Button.tsx";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../components/FieldArea";
@@ -16,6 +17,9 @@ const CreateBox: React.FC = () => {
 	const leader = useCreateBoxStore((state) => state.leader);
 	const particiapants = useCreateBoxStore((state) => state.participants);
 	const actions = useCreateBoxStore((state) => state.actions);
+	const createDownloadStoreFromCreateBox = useDownloadBoxStore(
+		(state) => state.fromCreateBox,
+	);
 
 	const [localTitle, setLocalTitle] = useState(state.title);
 	const [localContent, setLocalContent] = useState(state.content);
@@ -44,6 +48,11 @@ const CreateBox: React.FC = () => {
 			generatedKey: secured.chunks[0],
 			generatedKeys: secured.chunks as string[],
 		});
+	};
+
+	const handleBoxCreation = () => {
+		actions.create();
+		createDownloadStoreFromCreateBox();
 	};
 
 	const noParticipantConnected = particiapants.length === 0;
@@ -108,7 +117,7 @@ const CreateBox: React.FC = () => {
 			<div>
 				<Button
 					variant="prominent"
-					onClick={actions.create}
+					onClick={handleBoxCreation}
 					disabled={noParticipantConnected}
 				>
 					Create Box
