@@ -23,6 +23,9 @@ const localPropsByVariant: Record<TypographyVariant, { as?: ElementType }> = {
 	primaryText: { as: "p" },
 	label: { as: "p" },
 	secondaryText: { as: "p" },
+	primaryError: {
+		as: "p",
+	},
 };
 
 export function Typography<C extends ElementType = "div">({
