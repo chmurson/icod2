@@ -25,11 +25,11 @@ export const JoinBox: React.FC = () => {
 				Join a Box Creation
 			</Text>
 			<div className="flex flex-col gap-4">
-				<div className="flex gap-2 items-end">
+				<div className="flex gap-2 items-center">
 					<Text variant="label">Name:</Text>
 					<Text variant="primaryText">{title}</Text>
 				</div>
-				<div className="flex gap-2 items-end">
+				<div className="flex gap-2 items-center">
 					<Text variant="label">Treshold:</Text>
 					<Text variant="primaryText">{threshold}</Text>
 				</div>
@@ -85,14 +85,6 @@ const useStoreSlice = () => {
 		otherParticipants,
 		content,
 	};
-};
-
-const _PrettyJson: React.FC<{ children: object }> = ({ children }) => {
-	return (
-		<pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-			{JSON.stringify(children, null, 2)}
-		</pre>
-	);
 };
 
 export default JoinBox;

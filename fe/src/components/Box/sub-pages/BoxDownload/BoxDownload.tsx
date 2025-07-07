@@ -11,7 +11,7 @@ import { ClosePageButton, GoBackAlert } from "./components";
 import { useCreateBoxDownloadState, useDownloadShard } from "./hooks";
 import { useNaiveShowHiddenMessage } from "./hooks/useNaiveShowHiddenMessage";
 
-export const CreateBoxDownload: React.FC = () => {
+export const BoxDownload: React.FC = () => {
 	const state = useCreateBoxDownloadState();
 
 	const { hideMessage, showMessage, visibleMessage } =
