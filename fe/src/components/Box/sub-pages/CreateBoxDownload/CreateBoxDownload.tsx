@@ -8,7 +8,7 @@ import { Text } from "@/ui/Typography";
 import { HiddenTextArea } from "../../components/HiddenTextArea";
 import { ParticipantItem } from "../../components/ParticipantItem";
 import { ClosePageButton, GoBackAlert } from "./components";
-import { useCreateBoxDownloadState } from "./hooks";
+import { useCreateBoxDownloadState, useDownloadShard } from "./hooks";
 import { useNaiveShowHiddenMessage } from "./hooks/useNaiveShowHiddenMessage";
 
 export const CreateBoxDownload: React.FC = () => {
@@ -23,10 +23,16 @@ export const CreateBoxDownload: React.FC = () => {
 
 	const navigate = useNavigate();
 
-	const [isDownloadButtonClicked, setIsDownloadButtonClicked] = useState(false);
+	const [isShardDownloaded, setIsShardDownloaded] = useState(false);
+
+	const { downloadKeyShardAndMessage, error: downloadError } = useDownloadShard(
+		{
+			onSuccess: () => setIsShardDownloaded(true),
+		},
+	);
 
 	const handleClickDownloadButton = () => {
-		setIsDownloadButtonClicked(true);
+		downloadKeyShardAndMessage();
 	};
 
 	const resetAndNavigateAway = useCallback(() => {
@@ -35,15 +41,15 @@ export const CreateBoxDownload: React.FC = () => {
 	}, [resetStoreStateAction, navigate]);
 
 	const shouldNavigationBeBlocked = useCallback(
-		() => !isDownloadButtonClicked,
-		[isDownloadButtonClicked],
+		() => !isShardDownloaded,
+		[isShardDownloaded],
 	);
 
 	const blocker = useBlocker(shouldNavigationBeBlocked);
 
 	useEffect(() => {
 		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-			if (!isDownloadButtonClicked) {
+			if (!isShardDownloaded) {
 				event.preventDefault();
 				event.returnValue = ""; // Required for browser to show prompt
 			}
@@ -54,7 +60,7 @@ export const CreateBoxDownload: React.FC = () => {
 		return () => {
 			window.removeEventListener("beforeunload", handleBeforeUnload);
 		};
-	}, [isDownloadButtonClicked]);
+	}, [isShardDownloaded]);
 
 	return (
 		<div className="flex flex-col gap-8">
@@ -98,15 +104,23 @@ export const CreateBoxDownload: React.FC = () => {
 					</HiddenTextArea>
 				</div>
 			</div>
-			<div className="flex justify-between items-end">
-				<Button variant="prominent" onClick={handleClickDownloadButton}>
-					<DownloadIcon /> Download box shard
-				</Button>
-				{JSON.stringify(isDownloadButtonClicked)}
-				<ClosePageButton
-					showAlert={!isDownloadButtonClicked}
-					onClose={resetAndNavigateAway}
-				/>
+			<div className="flex flex-col gap-1">
+				<div className="flex justify-between items-end">
+					<Button variant="prominent" onClick={handleClickDownloadButton}>
+						<DownloadIcon /> Download box shard
+					</Button>
+					<ClosePageButton
+						showAlert={!isShardDownloaded}
+						onClose={resetAndNavigateAway}
+					/>
+				</div>
+				<div>
+					{downloadError && (
+						<Text variant="primaryError" color="crimson">
+							Failed to download: {downloadError}
+						</Text>
+					)}
+				</div>
 			</div>
 			<GoBackAlert
 				open={blocker.state === "blocked"}
