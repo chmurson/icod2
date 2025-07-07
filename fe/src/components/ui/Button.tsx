@@ -3,6 +3,7 @@ import {
 	type ButtonProps as RadixButtonProps,
 	Spinner,
 } from "@radix-ui/themes";
+import { forwardRef } from "react";
 import { twMerge } from "tailwind-merge";
 
 type ButtonVariant = "prominent" | "primary" | "secondary";
@@ -12,7 +13,6 @@ interface ButtonProps extends Omit<RadixButtonProps, "variant"> {
 	loading?: boolean;
 	loadingText?: string;
 	iconSlot?: React.ReactNode;
-	ref?: React.Ref<HTMLButtonElement>;
 }
 
 const buttonVariantToProps: Record<
@@ -29,34 +29,38 @@ const buttonVariantToProps: Record<
 	secondary: { color: "plum", size: "2", variant: "outline" },
 };
 
-export function Button({
-	className,
-	loading = false,
-	loadingText,
-	children,
-	disabled,
-	ref,
-	variant,
-	iconSlot = null,
-	...props
-}: ButtonProps) {
-	const { className: variantClassName, ...variantProps } =
-		buttonVariantToProps[variant || "primary"];
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+	(
+		{
+			className,
+			loading = false,
+			loadingText,
+			children,
+			disabled,
+			variant,
+			iconSlot = null,
+			...props
+		},
+		ref,
+	) => {
+		const { className: variantClassName, ...variantProps } =
+			buttonVariantToProps[variant || "primary"];
 
-	return (
-		<RadixButton
-			ref={ref}
-			disabled={loading || disabled}
-			size="2"
-			{...variantProps}
-			{...props}
-			className={twMerge(variantClassName, className)}
-		>
-			{!!iconSlot && <Spinner loading={loading}>{iconSlot}</Spinner>}
-			{!iconSlot && <Spinner loading={loading} />}
-			{children}
-		</RadixButton>
-	);
-}
+		return (
+			<RadixButton
+				ref={ref}
+				disabled={loading || disabled}
+				size="2"
+				{...variantProps}
+				{...props}
+				className={twMerge(variantClassName, className)}
+			>
+				{!!iconSlot && <Spinner loading={loading}>{iconSlot}</Spinner>}
+				{!iconSlot && <Spinner loading={loading} />}
+				{children}
+			</RadixButton>
+		);
+	},
+);
 
 Button.displayName = "Button";
