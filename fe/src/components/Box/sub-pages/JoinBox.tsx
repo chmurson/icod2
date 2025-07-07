@@ -1,15 +1,10 @@
 import type React from "react";
 import { useEffect } from "react";
 import { webRTCService } from "@/services/web-rtc/WebRTCService";
-import { useDownloadBoxStore, useJoinBoxCreationState } from "@/stores";
-import { Button } from "@/ui/Button";
+import { useJoinBoxCreationState } from "@/stores";
 
 const JoinBox: React.FC = () => {
 	const state = useJoinBoxCreationState((state) => state);
-	const actions = useJoinBoxCreationState((state) => state.actions);
-	const createDownloadStoreFromJoinBox = useDownloadBoxStore(
-		(state) => state.fromJoinBox,
-	);
 
 	useEffect(() => {
 		webRTCService.connectParticipant();
@@ -19,17 +14,9 @@ const JoinBox: React.FC = () => {
 		};
 	}, []);
 
-	const handleSimulateJoinCreatedBox = () => {
-		actions.create();
-		createDownloadStoreFromJoinBox();
-	};
-
 	return (
 		<div>
 			<h1>Hi I'm Join Box page</h1>
-			<Button variant="primary" onClick={handleSimulateJoinCreatedBox}>
-				Simulate box created
-			</Button>
 			<PrettyJson>{state}</PrettyJson>
 		</div>
 	);

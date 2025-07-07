@@ -161,6 +161,15 @@ export const CreateBoxDownload: React.FC = () => {
 					resetAndNavigateAway();
 				}}
 			/>
+			<PrettyJson>{state}</PrettyJson>
 		</div>
+	);
+};
+
+const PrettyJson: React.FC<{ children: object }> = ({ children }) => {
+	return (
+		<pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+			{JSON.stringify(children, null, 2)}
+		</pre>
 	);
 };

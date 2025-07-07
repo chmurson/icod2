@@ -1,8 +1,4 @@
 import { create } from "zustand";
-import {
-	getReadableUserAgent,
-	getUserAgentDeviceIcon,
-} from "@/services/user-agent/get-user-agent";
 import { webRTCService } from "@/services/web-rtc/WebRTCService";
 import type { ParticipantType } from "./common-types";
 
@@ -41,15 +37,14 @@ type CreateBoxState = {
 		disconnectParticipant: (participantId: string) => void;
 		start: () => void;
 		connect: (args: { name: string; userAgent: string }) => void;
-		create: () => void;
-		setMessage: (message: {
+		create: (message: {
 			title?: string;
 			content?: string;
-			threshold?: number;
 			encryptedMessage?: string;
 			generatedKeys?: string[];
 			generatedKey?: string;
 		}) => void;
+		setThreshold: (threshold: number) => void;
 	};
 } & CreateBoxStateData;
 
@@ -81,8 +76,6 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 					...state.participants,
 					{
 						...participant,
-						userAgent: getReadableUserAgent(participant.userAgent),
-						device: getUserAgentDeviceIcon(participant.userAgent),
 					},
 				],
 			})),
@@ -93,19 +86,25 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 				),
 			}));
 		},
-		create: () =>
+		create: (message) => {
 			set({
+				...message,
 				created: true,
 				state: "created",
-			}),
+			});
+			const { generatedKeys, ...messageToSend } = message;
+			console.log("boxStateUpdate mess", message);
+			webRTCService.sendMessage({ type: "boxStateUpdate", ...messageToSend });
+		},
 		reset: () =>
 			set({
 				...createBoxDefaultState,
 			}),
-		setMessage: (message) => {
-			set(message);
-			const { content, generatedKeys, ...messageToSend } = message;
-			webRTCService.sendMessage({ type: "boxStateUpdate", ...messageToSend });
+		setThreshold: (threshold) => {
+			set({
+				threshold: threshold,
+			});
+			webRTCService.sendThreshold({ type: "thresholdStatUpdate", threshold });
 		},
 	},
 }));

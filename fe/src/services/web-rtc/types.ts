@@ -6,19 +6,21 @@ export type IdMessage = {
 export type GreetingMessage = {
 	type: "greeting";
 	id: string;
+	name: string;
+	userAgent: string;
 };
 
 export type AcknowledgeLeaderMessage = {
 	type: "acknowledgeLeader";
 	leaderId: string;
 	leaderName: string;
-	leaderDevice: "desktop" | "mobile";
 	leaderUserAgent: string;
 };
 
 export type PeerConnectedMessage = {
 	type: "peerConnected";
 	peerId: string;
+	name: string;
 	userAgent: string;
 };
 
@@ -52,10 +54,13 @@ export type BoxStateUpdateMessage = {
 	type: "boxStateUpdate";
 	title?: string;
 	content?: string;
-	threshold?: number;
-	numKeys?: number;
 	encryptedMessage?: string;
 	generatedKey?: string;
+};
+
+export type ThresholdStateUpdateMessage = {
+	type: "thresholdStatUpdate";
+	threshold: number;
 };
 
 export type SignalingMessage =
@@ -67,4 +72,5 @@ export type SignalingMessage =
 	| OfferMessage
 	| AnswerMessage
 	| CandidateMessage
-	| BoxStateUpdateMessage;
+	| BoxStateUpdateMessage
+	| ThresholdStateUpdateMessage;

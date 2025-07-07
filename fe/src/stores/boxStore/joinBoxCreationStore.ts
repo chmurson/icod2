@@ -1,8 +1,4 @@
 import { create } from "zustand";
-import {
-	getReadableUserAgent,
-	getUserAgentDeviceIcon,
-} from "@/services/user-agent/get-user-agent";
 import type { ParticipantType } from "./common-types";
 
 const joinBoxCreationState = {
@@ -47,14 +43,13 @@ type JoinBoxState = {
 		}) => void;
 		connectParticipant: (participant: ParticipantType) => void;
 		disconnectParticipant: (participantId: string) => void;
-		create: () => void;
-		setMessage: (message: {
+		create: (message: {
 			title?: string;
 			content?: string;
-			threshold?: number;
 			encryptedMessage?: string;
 			generatedKey?: string;
 		}) => void;
+		setThreshold: (threshold: number) => void;
 	};
 } & JoinBoxStateData;
 
@@ -98,8 +93,6 @@ export const useJoinBoxCreationState = create<JoinBoxState>((set) => ({
 					...state.otherParticipants,
 					{
 						...participant,
-						userAgent: getReadableUserAgent(participant.userAgent),
-						device: getUserAgentDeviceIcon(participant.userAgent),
 					},
 				],
 			}));
@@ -111,8 +104,9 @@ export const useJoinBoxCreationState = create<JoinBoxState>((set) => ({
 				),
 			}));
 		},
-		create: () =>
+		create: (message) =>
 			set({
+				...message,
 				created: true,
 				state: "created",
 			}),
@@ -120,6 +114,9 @@ export const useJoinBoxCreationState = create<JoinBoxState>((set) => ({
 			set({
 				...joinBoxCreationState,
 			}),
-		setMessage: (message) => set(message),
+		setThreshold: (threshold) =>
+			set({
+				threshold: threshold,
+			}),
 	},
 }));

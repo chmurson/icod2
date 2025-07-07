@@ -1,3 +1,4 @@
+import { useDownloadBoxStore } from "@/stores";
 import { useCreateBoxStore } from "../../stores/boxStore/createBoxStore";
 import { useJoinBoxCreationState } from "../../stores/boxStore/joinBoxCreationStore";
 import type {
@@ -7,12 +8,14 @@ import type {
 	PeerConnectedMessage,
 	PeerDisconnectedMessage,
 	SignalingMessage,
+	ThresholdStateUpdateMessage,
 } from "./types";
 
 // in order to allow access to app in local network, yor IP instead of localhost
-const SIGNALING_SERVER_URL = "ws://localhost:8080";
+const SIGNALING_SERVER_URL = "ws://192.168.0.74:8080";
 
 type WebSocketHandlerOptions = {
+	userName: string;
 	onId: (data: IdMessage) => void;
 	onAcknowledgeLeader?: (data: AcknowledgeLeaderMessage) => void;
 	onPeerConnected: (data: PeerConnectedMessage) => Promise<void>;
@@ -30,7 +33,10 @@ class WebRTCService {
 		const { connectLeader, connectParticipant, disconnectParticipant } =
 			useCreateBoxStore.getState().actions;
 
+		const { leader } = useCreateBoxStore.getState();
+
 		this.setupWebSocketHandlers({
+			userName: leader.name,
 			onId: (data) => {
 				connectLeader({
 					id: data.id,
@@ -45,9 +51,8 @@ class WebRTCService {
 				);
 				connectParticipant({
 					id: data.peerId,
-					name: "John Doe",
+					name: data.name,
 					userAgent: data.userAgent,
-					device: "desktop",
 				});
 			},
 			onPeerDisconnected: (data) => {
@@ -60,33 +65,36 @@ class WebRTCService {
 		const { connect, connectYou, connectParticipant, disconnectParticipant } =
 			useJoinBoxCreationState.getState().actions;
 
+		const { you } = useJoinBoxCreationState.getState();
+
 		this.setupWebSocketHandlers({
-			onStart: connect,
+			userName: you.name,
+			onStart: () => {
+				connect({ name: you.name, userAgent: you.userAgent });
+			},
 			onId: () => {},
 			onAcknowledgeLeader: (data) => {
 				connectYou({
 					you: {
 						id: this.myId ?? "id-not-assigned-probably-error",
-						name: "Ben Smith",
-						device: "desktop",
-						userAgent: navigator.userAgent,
+						name: you.name,
+						userAgent: you.userAgent,
 					},
 					leader: {
 						id: data.leaderId,
 						name: data.leaderName,
-						device: data.leaderDevice,
 						userAgent: data.leaderUserAgent,
 					},
 				});
 			},
 			onPeerConnected: async (data) => {
 				// Participant does not initiate connection, only adds other peers to the list.
+				console.log("data", data);
 				if (data.peerId !== useJoinBoxCreationState.getState().leader.id) {
 					connectParticipant({
 						id: data.peerId,
-						name: "John Doe",
+						name: data.name,
 						userAgent: data.userAgent,
-						device: "desktop",
 					});
 				}
 			},
@@ -97,6 +105,7 @@ class WebRTCService {
 	}
 
 	private setupWebSocketHandlers({
+		userName,
 		onId,
 		onAcknowledgeLeader,
 		onPeerConnected,
@@ -111,7 +120,11 @@ class WebRTCService {
 
 		this.ws.onopen = () => {
 			this.ws?.send(
-				JSON.stringify({ type: "greeting", id: navigator.userAgent }),
+				JSON.stringify({
+					type: "greeting",
+					name: userName,
+					userAgent: navigator.userAgent,
+				}),
 			);
 			onStart?.();
 		};
@@ -128,6 +141,7 @@ class WebRTCService {
 					onAcknowledgeLeader?.(data);
 					break;
 				case "peerConnected":
+					console.log("peerCon", data);
 					await onPeerConnected(data);
 					break;
 				case "peerDisconnected":
@@ -197,9 +211,16 @@ class WebRTCService {
 			dc.onmessage = (ev) => {
 				const message: SignalingMessage = JSON.parse(ev.data);
 				if (message.type === "boxStateUpdate") {
-					const { setMessage } = useJoinBoxCreationState.getState().actions;
-					const { type, content, ...messageWithoutType } = message;
-					setMessage(messageWithoutType);
+					const { create } = useJoinBoxCreationState.getState().actions;
+					const { fromJoinBox } = useDownloadBoxStore.getState();
+					const { type, ...messageWithoutType } = message;
+					console.log("useBoxMess", messageWithoutType);
+					create(messageWithoutType);
+					fromJoinBox();
+				}
+				if (message.type === "thresholdStatUpdate") {
+					const { setThreshold } = useJoinBoxCreationState.getState().actions;
+					setThreshold(message.threshold);
 				}
 			};
 		};
@@ -236,6 +257,17 @@ class WebRTCService {
 				};
 				channel.send(JSON.stringify(messageToSend));
 				keyIndex++;
+			}
+		});
+	}
+
+	sendThreshold(message: ThresholdStateUpdateMessage) {
+		this.dataChannels.forEach((channel) => {
+			if (channel.readyState === "open") {
+				const messageToSend = {
+					...message,
+				};
+				channel.send(JSON.stringify(messageToSend));
 			}
 		});
 	}

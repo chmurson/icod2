@@ -15,7 +15,7 @@ import { ParticipantItem } from "../components/ParticipantItem";
 const CreateBox: React.FC = () => {
 	const state = useCreateBoxStore((state) => state);
 	const leader = useCreateBoxStore((state) => state.leader);
-	const particiapants = useCreateBoxStore((state) => state.participants);
+	const participants = useCreateBoxStore((state) => state.participants);
 	const actions = useCreateBoxStore((state) => state.actions);
 	const createDownloadStoreFromCreateBox = useDownloadBoxStore(
 		(state) => state.fromCreateBox,
@@ -33,7 +33,9 @@ const CreateBox: React.FC = () => {
 		};
 	}, []);
 
-	const handleShareContent = () => {
+	const noParticipantConnected = participants.length === 0;
+
+	const handleBoxCreation = () => {
 		const numKeys = state.participants.length + 1; // Leader + participants
 		const secured = secure_message(
 			localContent,
@@ -41,21 +43,15 @@ const CreateBox: React.FC = () => {
 			new ChunksConfiguration(state.threshold, numKeys - state.threshold),
 		);
 
-		actions.setMessage({
+		actions.create({
 			title: localTitle,
-			content: localContent, // Keep original content for local display
+			content: localContent,
 			encryptedMessage: secured.encrypted_message[0] as string,
 			generatedKey: secured.chunks[0],
 			generatedKeys: secured.chunks as string[],
 		});
-	};
-
-	const handleBoxCreation = () => {
-		actions.create();
 		createDownloadStoreFromCreateBox();
 	};
-
-	const noParticipantConnected = particiapants.length === 0;
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -87,9 +83,7 @@ const CreateBox: React.FC = () => {
 						defaultValue={1}
 						max={10}
 						onChange={(e) =>
-							actions.setMessage({
-								threshold: Number.parseInt(e.currentTarget.value),
-							})
+							actions.setThreshold(Number.parseInt(e.currentTarget.value))
 						}
 						className="min-w-10"
 					/>
@@ -99,12 +93,12 @@ const CreateBox: React.FC = () => {
 				</FieldArea>
 				<FieldArea label="Participants: ">
 					<div className="flex flex-col gap-1.5">
-						{particiapants.length === 0 && (
+						{participants.length === 0 && (
 							<Text variant="secondaryText">
 								No participants yet. Waiting for others to join...
 							</Text>
 						)}
-						{particiapants.map((p) => (
+						{participants.map((p) => (
 							<ParticipantItem
 								key={p.id}
 								name={p.name}
@@ -122,14 +116,9 @@ const CreateBox: React.FC = () => {
 				>
 					Create Box
 				</Button>
+
+				<PrettyJson>{state}</PrettyJson>
 			</div>
-			<div className="mt-2">
-				<Button variant="secondary" onClick={handleShareContent}>
-					Share Content
-				</Button>
-			</div>
-			<fieldset className="mt-4" />
-			<PrettyJson>{state}</PrettyJson>
 		</div>
 	);
 };

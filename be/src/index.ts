@@ -15,31 +15,37 @@ const wss = new WebSocketServer({ server });
 
 const clients = new Map<string, ClientInfo>();
 let leaderId: string;
+let leaderName: string;
 let leaderUserAgent: string;
 
 wss.on("connection", (ws) => {
 	const clientId = uuidv4();
+
+	ws.send(JSON.stringify({ type: "id", id: clientId }));
+
+	if (leaderId) {
+		console.log("ackLeade", {
+			type: "acknowledgeLeader",
+			leaderId,
+			leaderName,
+			leaderUserAgent,
+		});
+		ws.send(
+			JSON.stringify({
+				type: "acknowledgeLeader",
+				leaderId,
+				leaderName,
+				leaderUserAgent,
+			}),
+		);
+	}
 
 	if (clients.size === 0) {
 		leaderId = clientId;
 	}
 
 	clients.set(clientId, { ws, id: "" }); // Initialize with empty id
-
 	console.log("[WS] New client connected. Total clients:", clients.size);
-	ws.send(JSON.stringify({ type: "id", id: clientId }));
-
-	if (leaderId) {
-		ws.send(
-			JSON.stringify({
-				type: "acknowledgeLeader",
-				leaderId,
-				leaderName: "John Doe",
-				leaderDevice: "desktop",
-				leaderUserAgent,
-			}),
-		);
-	}
 
 	ws.on("message", (message) => {
 		let messageText: string;
@@ -57,6 +63,8 @@ wss.on("connection", (ws) => {
 					type: string;
 					id: string;
 					targetId: string;
+					name: string;
+					userAgent: string;
 			  }
 			| undefined;
 
@@ -84,10 +92,13 @@ wss.on("connection", (ws) => {
 		const [senderId, senderInfo] = currentClientInfo;
 
 		if (data.type === "greeting") {
+			console.log("data", data);
+			senderInfo.userAgent = data.userAgent;
 			senderInfo.id = data.id;
-			senderInfo.userAgent = data.id;
+			senderInfo.name = data.name;
 
-			if (senderInfo.id === leaderId && !leaderUserAgent) {
+			if (!leaderName && !leaderUserAgent) {
+				leaderName = senderInfo.name ?? "";
 				leaderUserAgent = senderInfo.userAgent ?? "";
 			}
 
@@ -101,10 +112,12 @@ wss.on("connection", (ws) => {
 						"notifying clients about new client, peerId is",
 						senderId,
 					);
+					console.log("peer connected");
 					clientInfo.ws.send(
 						JSON.stringify({
 							type: "peerConnected",
 							peerId: senderId,
+							name: senderInfo.name,
 							userAgent: senderInfo.userAgent,
 						}),
 					);
@@ -113,16 +126,17 @@ wss.on("connection", (ws) => {
 
 			// Notify the new client about all existing clients
 			for (const [clientId, clientInfo] of clients.entries()) {
+				console.log("clientInfo.id", clientInfo.id);
 				if (
 					clientId !== senderId &&
-					clientInfo.ws.readyState === WebSocket.OPEN &&
-					clientInfo.id
+					clientInfo.ws.readyState === WebSocket.OPEN
 				) {
 					console.log("notifying new client about clients", clientId);
 					ws.send(
 						JSON.stringify({
 							type: "peerConnected",
 							peerId: clientId,
+							name: clientInfo.name,
 							userAgent: clientInfo.userAgent,
 						}),
 					);
@@ -192,6 +206,6 @@ wss.on("connection", (ws) => {
 
 const PORT = process.env.PORT || 8080;
 // in order to allow access to app in local network, put ({ port: PORT, hostname: {yourIP} } instead of (PORT
-server.listen(PORT, () => {
+server.listen({ port: PORT, hostname: "192.168.0.74" }, () => {
 	console.log(`[WS] WebSocket signaling server running on port ${PORT}`);
 });
