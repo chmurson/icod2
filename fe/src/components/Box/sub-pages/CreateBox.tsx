@@ -7,9 +7,13 @@ import { webRTCService } from "@/services/web-rtc/WebRTCService";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { Button } from "@/ui/Button.tsx";
 import { Text } from "@/ui/Typography";
+import { FieldArea } from "../components/FieldArea";
+import { ParticipantItem } from "../components/ParticipantItem";
 
 const CreateBox: React.FC = () => {
 	const state = useCreateBoxStore((state) => state);
+	const leader = useCreateBoxStore((state) => state.leader);
+	const particiapants = useCreateBoxStore((state) => state.participants);
 	const actions = useCreateBoxStore((state) => state.actions);
 
 	const [localTitle, setLocalTitle] = useState(state.title);
@@ -65,6 +69,33 @@ const CreateBox: React.FC = () => {
 						className="w-full"
 					/>
 				</div>
+				<div className="flex gap-1 flex-col items-start">
+					<Text variant="label">You - leader: </Text>
+					<ParticipantItem name={leader.name} userAgent={leader.userAgent} />
+				</div>
+				<FieldArea label="Participants: ">
+					<div className="flex flex-col gap-1.5">
+						{particiapants.length === 0 && (
+							<Text variant="secondaryText">
+								No participants yet. Waiting for others to join...
+							</Text>
+						)}
+						{particiapants.map((p) => (
+							<ParticipantItem
+								key={p.id}
+								name={p.name}
+								userAgent={p.userAgent}
+							/>
+						))}
+					</div>
+				</FieldArea>
+				<Button
+					variant="prominent"
+					onClick={actions.create}
+					className="self-start"
+				>
+					Create Box
+				</Button>
 				<div className="mt-2">
 					<Button variant="secondary" onClick={handleShareContent}>
 						Share Content
@@ -97,9 +128,6 @@ const CreateBox: React.FC = () => {
 						+
 					</button>
 				</fieldset>
-				<Button variant="primary" onClick={actions.create}>
-					Create Box
-				</Button>
 				<PrettyJson>{state}</PrettyJson>
 			</div>
 		</div>
