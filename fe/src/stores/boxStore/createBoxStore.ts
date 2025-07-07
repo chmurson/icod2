@@ -34,7 +34,7 @@ const createBoxDefaultState = {
 type CreateBoxState = {
 	actions: {
 		reset: () => void;
-		connectLeader: (leader: ParticipantType) => void;
+		connectLeader: (leader: { id: string }) => void;
 		connectParticipant: (participant: ParticipantType) => void;
 		disconnectParticipant: (participantId: string) => void;
 		start: () => void;

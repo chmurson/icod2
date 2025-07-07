@@ -17,7 +17,7 @@ type WebSocketHandlerOptions = {
 	onAcknowledgeLeader?: (data: AcknowledgeLeaderMessage) => void;
 	onPeerConnected: (data: PeerConnectedMessage) => Promise<void>;
 	onPeerDisconnected: (data: PeerDisconnectedMessage) => void;
-	onStart: () => void;
+	onStart?: () => void;
 };
 
 class WebRTCService {
@@ -27,21 +27,13 @@ class WebRTCService {
 	private myId: string | null = null;
 
 	connectLeader() {
-		const {
-			connect,
-			connectLeader,
-			connectParticipant,
-			disconnectParticipant,
-		} = useCreateBoxStore.getState().actions;
+		const { connectLeader, connectParticipant, disconnectParticipant } =
+			useCreateBoxStore.getState().actions;
 
 		this.setupWebSocketHandlers({
-			onStart: connect,
 			onId: (data) => {
 				connectLeader({
 					id: data.id,
-					name: "Leader",
-					userAgent: navigator.userAgent,
-					device: "desktop",
 				});
 			},
 			onPeerConnected: async (data) => {
@@ -121,7 +113,7 @@ class WebRTCService {
 			this.ws?.send(
 				JSON.stringify({ type: "greeting", id: navigator.userAgent }),
 			);
-			onStart();
+			onStart?.();
 		};
 
 		this.ws.onmessage = async (event) => {
