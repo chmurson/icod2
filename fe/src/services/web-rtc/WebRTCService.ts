@@ -12,7 +12,6 @@ import type {
 } from "./types";
 
 // in order to allow access to app in local network, yor IP instead of localhost
-const SIGNALING_SERVER_URL = "ws://192.168.0.74:8080";
 
 type WebSocketHandlerOptions = {
 	userName: string;
@@ -116,7 +115,7 @@ class WebRTCService {
 			return; // Already connected or connecting
 		}
 
-		this.ws = new WebSocket(SIGNALING_SERVER_URL);
+		this.ws = new WebSocket(import.meta.env.VITE_SIGNALING_SERVER_URL);
 
 		this.ws.onopen = () => {
 			this.ws?.send(
