@@ -5,9 +5,10 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite --host",
-		"build": "tsc --noEmit && vite build",
+		"build": "tsc --noEmit --project tsconfig.app.json && vite build",
 		"lint": "yarn run -T biome check",
 		"lint:fix": "yarn run -T biome check --write",
+		"typecheck": "tsc --noEmit --project tsconfig.app.json",
 		"preview": "vite preview"
 	},
 	"dependencies": {
@@ -18,6 +19,7 @@
 		"@radix-ui/react-icons": "^1.3.2",
 		"@radix-ui/react-slot": "^1.2.3",
 		"@radix-ui/themes": "^3.2.1",
+		"@redux-devtools/extension": "^3.3.0",
 		"@tailwindcss/vite": "^4.1.11",
 		"@types/node": "^24.0.8",
 		"detect-browser": "^5.3.0",

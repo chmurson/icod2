@@ -2,9 +2,8 @@ import type React from "react";
 import { useJoinBoxCreationState } from "@/stores";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import CreateBox from "./sub-pages/CreateBox";
-import CreateBoxDownload from "./sub-pages/CreateBoxDownload";
+import { CreateBoxDownload } from "./sub-pages/CreateBoxDownload";
 import JoinBox from "./sub-pages/JoinBox";
-import JoinBoxDownload from "./sub-pages/JoinBoxDownload";
 import Welcome from "./sub-pages/Welcome";
 import { WhatsYourName } from "./sub-pages/WhatsYourName";
 
@@ -33,7 +32,7 @@ const Box: React.FC<BoxProps> = () => {
 			case "createDownload":
 				return <CreateBoxDownload />;
 			case "joinDownload":
-				return <JoinBoxDownload />;
+				return <CreateBoxDownload />;
 			default:
 				return <Welcome />;
 		}

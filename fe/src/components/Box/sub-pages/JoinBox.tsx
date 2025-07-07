@@ -4,7 +4,7 @@ import { webRTCService } from "@/services/web-rtc/WebRTCService";
 import { useJoinBoxCreationState } from "@/stores";
 
 const JoinBox: React.FC = () => {
-	const { ...state } = useJoinBoxCreationState();
+	const state = useJoinBoxCreationState((state) => state);
 
 	useEffect(() => {
 		webRTCService.connectParticipant();

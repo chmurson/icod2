@@ -1,3 +1,4 @@
+import { useDownloadBoxStore } from "@/stores";
 import { useCreateBoxStore } from "../../stores/boxStore/createBoxStore";
 import { useJoinBoxCreationState } from "../../stores/boxStore/joinBoxCreationStore";
 import type {
@@ -211,9 +212,11 @@ class WebRTCService {
 				const message: SignalingMessage = JSON.parse(ev.data);
 				if (message.type === "boxStateUpdate") {
 					const { create } = useJoinBoxCreationState.getState().actions;
+					const { fromJoinBox } = useDownloadBoxStore.getState();
 					const { type, ...messageWithoutType } = message;
 					console.log("useBoxMess", messageWithoutType);
 					create(messageWithoutType);
+					fromJoinBox();
 				}
 				if (message.type === "thresholdStatUpdate") {
 					const { setThreshold } = useJoinBoxCreationState.getState().actions;

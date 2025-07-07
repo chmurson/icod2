@@ -1,1 +1,5 @@
-export { useCreateBoxStore, useJoinBoxCreationState } from "./boxStore";
+export {
+	useCreateBoxStore,
+	useDownloadBoxStore,
+	useJoinBoxCreationState,
+} from "./boxStore";

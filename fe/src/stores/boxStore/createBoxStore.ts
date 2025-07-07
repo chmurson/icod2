@@ -27,6 +27,8 @@ const createBoxDefaultState = {
 	generatedKey: "",
 };
 
+export type CreateBoxStateData = typeof createBoxDefaultState;
+
 type CreateBoxState = {
 	actions: {
 		reset: () => void;
@@ -44,7 +46,7 @@ type CreateBoxState = {
 		}) => void;
 		setThreshold: (threshold: number) => void;
 	};
-} & typeof createBoxDefaultState;
+} & CreateBoxStateData;
 
 export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 	...createBoxDefaultState,
