@@ -13,16 +13,18 @@ import { InputNumber } from "../components/InputNumber";
 import { ParticipantItem } from "../components/ParticipantItem";
 
 const CreateBox: React.FC = () => {
-	const state = useCreateBoxStore((state) => state);
+	const title = useCreateBoxStore((state) => state.title);
+	const content = useCreateBoxStore((state) => state.content);
 	const leader = useCreateBoxStore((state) => state.leader);
+	const threshold = useCreateBoxStore((state) => state.threshold);
 	const participants = useCreateBoxStore((state) => state.participants);
 	const actions = useCreateBoxStore((state) => state.actions);
 	const createDownloadStoreFromCreateBox = useDownloadBoxStore(
 		(state) => state.fromCreateBox,
 	);
 
-	const [localTitle, setLocalTitle] = useState(state.title);
-	const [localContent, setLocalContent] = useState(state.content);
+	const [localTitle, setLocalTitle] = useState(title);
+	const [localContent, setLocalContent] = useState(content);
 
 	useEffect(() => {
 		init(wasm);
@@ -36,11 +38,11 @@ const CreateBox: React.FC = () => {
 	const noParticipantConnected = participants.length === 0;
 
 	const handleBoxCreation = () => {
-		const numKeys = state.participants.length + 1; // Leader + participants
+		const numKeys = participants.length + 1; // Leader + participants
 		const secured = secure_message(
 			localContent,
 			undefined,
-			new ChunksConfiguration(state.threshold, numKeys - state.threshold),
+			new ChunksConfiguration(threshold, numKeys - threshold),
 		);
 
 		actions.create({
@@ -116,18 +118,8 @@ const CreateBox: React.FC = () => {
 				>
 					Create Box
 				</Button>
-
-				<PrettyJson>{state}</PrettyJson>
 			</div>
 		</div>
-	);
-};
-
-const PrettyJson: React.FC<{ children: object }> = ({ children }) => {
-	return (
-		<pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-			{JSON.stringify(children, null, 2)}
-		</pre>
 	);
 };
 
