@@ -15,7 +15,7 @@ import type {
 
 type WebSocketHandlerOptions = {
 	userName: string;
-	onId: (data: IdMessage) => void;
+	onId?: (data: IdMessage) => void;
 	onAcknowledgeLeader?: (data: AcknowledgeLeaderMessage) => void;
 	onPeerConnected: (data: PeerConnectedMessage) => Promise<void>;
 	onPeerDisconnected: (data: PeerDisconnectedMessage) => void;
@@ -63,17 +63,13 @@ class WebRTCService {
 	}
 
 	connectParticipant() {
-		const { connect, connectYou, connectParticipant, disconnectParticipant } =
+		const { connectYou, connectParticipant, disconnectParticipant } =
 			useJoinBoxCreationState.getState().actions;
 
 		const { you } = useJoinBoxCreationState.getState();
 
 		this.setupWebSocketHandlers({
 			userName: you.name,
-			onStart: () => {
-				connect({ name: you.name, userAgent: you.userAgent });
-			},
-			onId: () => {},
 			onAcknowledgeLeader: (data) => {
 				connectYou({
 					you: {

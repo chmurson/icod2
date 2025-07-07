@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 import type { ParticipantType } from "./common-types";
 
 const joinBoxCreationState = {
@@ -53,70 +54,72 @@ type JoinBoxState = {
 	};
 } & JoinBoxStateData;
 
-export const useJoinBoxCreationState = create<JoinBoxState>((set) => ({
-	...joinBoxCreationState,
-	actions: {
-		start: () => set({ ...joinBoxCreationState, state: "set-name" }),
-		connect: ({ name, userAgent }) =>
-			set((state) => ({
-				...joinBoxCreationState,
-				connecting: true,
-				state: "connecting",
-				you: {
-					...state.you,
-					name,
-					userAgent,
-				},
-			})),
-		connectYou: ({
-			you,
-			leader,
-		}: {
-			you: ParticipantType;
-			leader: ParticipantType;
-		}) =>
-			set((state) => ({
-				leader,
-				you: {
-					...state.you,
-					id: you.id,
-				},
-				connecting: false,
-				connected: true,
-				error: null,
-
-				state: "connected",
-			})),
-		connectParticipant: (participant: ParticipantType) => {
-			set((state) => ({
-				otherParticipants: [
-					...state.otherParticipants,
-					{
-						...participant,
+export const useJoinBoxCreationState = create<JoinBoxState>()(
+	devtools((set) => ({
+		...joinBoxCreationState,
+		actions: {
+			start: () => set({ ...joinBoxCreationState, state: "set-name" }),
+			connect: ({ name, userAgent }) =>
+				set((state) => ({
+					...joinBoxCreationState,
+					connecting: true,
+					state: "connecting",
+					you: {
+						...state.you,
+						name,
+						userAgent,
 					},
-				],
-			}));
+				})),
+			connectYou: ({
+				you,
+				leader,
+			}: {
+				you: ParticipantType;
+				leader: ParticipantType;
+			}) =>
+				set((state) => ({
+					leader,
+					you: {
+						...state.you,
+						id: you.id,
+					},
+					connecting: false,
+					connected: true,
+					error: null,
+
+					state: "connected",
+				})),
+			connectParticipant: (participant: ParticipantType) => {
+				set((state) => ({
+					otherParticipants: [
+						...state.otherParticipants,
+						{
+							...participant,
+						},
+					],
+				}));
+			},
+			disconnectParticipant: (participantId: string) => {
+				set((state) => ({
+					otherParticipants: state.otherParticipants.filter(
+						(participant) => participant.id !== participantId,
+					),
+				}));
+			},
+			create: (message) =>
+				set({
+					...message,
+					created: true,
+					state: "created",
+				}),
+			reset: () =>
+				set({
+					...joinBoxCreationState,
+				}),
+			setThreshold: (threshold) =>
+				set({
+					threshold: threshold,
+				}),
 		},
-		disconnectParticipant: (participantId: string) => {
-			set((state) => ({
-				otherParticipants: state.otherParticipants.filter(
-					(participant) => participant.id !== participantId,
-				),
-			}));
-		},
-		create: (message) =>
-			set({
-				...message,
-				created: true,
-				state: "created",
-			}),
-		reset: () =>
-			set({
-				...joinBoxCreationState,
-			}),
-		setThreshold: (threshold) =>
-			set({
-				threshold: threshold,
-			}),
-	},
-}));
+	})),
+);
