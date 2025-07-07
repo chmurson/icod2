@@ -3,6 +3,7 @@ import {
 	type ButtonProps as RadixButtonProps,
 	Spinner,
 } from "@radix-ui/themes";
+import { twMerge } from "tailwind-merge";
 
 type ButtonVariant = "prominent" | "primary" | "secondary";
 
@@ -16,13 +17,13 @@ interface ButtonProps extends Omit<RadixButtonProps, "variant"> {
 
 const buttonVariantToProps: Record<
 	ButtonVariant,
-	Pick<RadixButtonProps, "color" | "size" | "variant" | "style">
+	Pick<RadixButtonProps, "color" | "size" | "variant" | "className">
 > = {
 	prominent: {
 		color: "plum",
 		size: "3",
 		variant: "solid",
-		style: { paddingLeft: 32, paddingRight: 32 },
+		className: "py-4",
 	},
 	primary: { color: "plum", size: "2", variant: "solid" },
 	secondary: { color: "plum", size: "2", variant: "outline" },
@@ -39,15 +40,17 @@ export function Button({
 	iconSlot = null,
 	...props
 }: ButtonProps) {
-	const localVariantProps = buttonVariantToProps[variant || "primary"];
+	const { className: variantClassName, ...variantProps } =
+		buttonVariantToProps[variant || "primary"];
 
 	return (
 		<RadixButton
 			ref={ref}
 			disabled={loading || disabled}
 			size="2"
-			{...localVariantProps}
+			{...variantProps}
 			{...props}
+			className={twMerge(variantClassName, className)}
 		>
 			{!!iconSlot && <Spinner loading={loading}>{iconSlot}</Spinner>}
 			{!iconSlot && <Spinner loading={loading} />}

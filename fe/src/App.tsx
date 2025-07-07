@@ -1,5 +1,4 @@
 import { Theme } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import { useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import Box from "./components/Box/sub-pages";

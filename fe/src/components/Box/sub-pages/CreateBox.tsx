@@ -8,6 +8,7 @@ import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { Button } from "@/ui/Button.tsx";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../components/FieldArea";
+import { InputNumber } from "../components/InputNumber";
 import { ParticipantItem } from "../components/ParticipantItem";
 
 const CreateBox: React.FC = () => {
@@ -45,12 +46,15 @@ const CreateBox: React.FC = () => {
 		});
 	};
 
+	const noParticipantConnected = particiapants.length === 0;
+
 	return (
-		<div className="flex flex-col gap-6 items-start">
-			<Text variant="pageTitle">Create a box</Text>
+		<div className="flex flex-col gap-6">
+			<Text variant="pageTitle" className="mt-4">
+				Create a box
+			</Text>
 			<div className="flex flex-col gap-4">
-				<div className="flex gap-1 flex-col items-start">
-					<Text variant="label">Name of the box</Text>
+				<FieldArea label="Name of the box">
 					<TextField.Root
 						id="title"
 						type="text"
@@ -58,9 +62,8 @@ const CreateBox: React.FC = () => {
 						onChange={(e) => setLocalTitle(e.target.value)}
 						className="max-w-md w-full"
 					/>
-				</div>
-				<div className="flex gap-1 flex-col items-start">
-					<Text variant="label">Content: </Text>
+				</FieldArea>
+				<FieldArea label="Content: ">
 					<TextArea
 						id="content"
 						value={localContent}
@@ -68,11 +71,23 @@ const CreateBox: React.FC = () => {
 						rows={10}
 						className="w-full"
 					/>
-				</div>
-				<div className="flex gap-1 flex-col items-start">
-					<Text variant="label">You - leader: </Text>
+				</FieldArea>
+				<FieldArea label="Treshold:">
+					<InputNumber
+						min={1}
+						defaultValue={1}
+						max={10}
+						onChange={(e) =>
+							actions.setMessage({
+								threshold: Number.parseInt(e.currentTarget.value),
+							})
+						}
+						className="min-w-10"
+					/>
+				</FieldArea>
+				<FieldArea label="You - leader">
 					<ParticipantItem name={leader.name} userAgent={leader.userAgent} />
-				</div>
+				</FieldArea>
 				<FieldArea label="Participants: ">
 					<div className="flex flex-col gap-1.5">
 						{particiapants.length === 0 && (
@@ -89,47 +104,23 @@ const CreateBox: React.FC = () => {
 						))}
 					</div>
 				</FieldArea>
+			</div>
+			<div>
 				<Button
 					variant="prominent"
 					onClick={actions.create}
-					className="self-start"
+					disabled={noParticipantConnected}
 				>
 					Create Box
 				</Button>
-				<div className="mt-2">
-					<Button variant="secondary" onClick={handleShareContent}>
-						Share Content
-					</Button>
-				</div>
-				<fieldset className="mt-4">
-					<legend>Threshold: </legend>
-					<button
-						type="button"
-						onClick={() =>
-							actions.setMessage({ threshold: state.threshold - 1 })
-						}
-						disabled={state.threshold === 1}
-					>
-						-
-					</button>
-					<span className="w-16 text-center py-1 bg-gray-200 dark:bg-gray-700 rounded-md mx-2">
-						{state.threshold}
-					</span>
-					<button
-						type="button"
-						onClick={() => {
-							const numKeys = state.participants.length + 1;
-							if (state.threshold < numKeys) {
-								actions.setMessage({ threshold: state.threshold + 1 });
-							}
-						}}
-						disabled={state.threshold >= state.participants.length + 1}
-					>
-						+
-					</button>
-				</fieldset>
-				<PrettyJson>{state}</PrettyJson>
 			</div>
+			<div className="mt-2">
+				<Button variant="secondary" onClick={handleShareContent}>
+					Share Content
+				</Button>
+			</div>
+			<fieldset className="mt-4" />
+			<PrettyJson>{state}</PrettyJson>
 		</div>
 	);
 };
