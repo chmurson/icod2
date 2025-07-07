@@ -1,6 +1,3 @@
-import { useDownloadBoxStore } from "@/stores";
-import { useCreateBoxStore } from "../../stores/boxStore/createBoxStore";
-import { useJoinBoxCreationState } from "../../stores/boxStore/joinBoxCreationStore";
 import type {
 	AcknowledgeLeaderMessage,
 	BoxStateUpdateMessage,
@@ -9,7 +6,10 @@ import type {
 	PeerDisconnectedMessage,
 	SignalingMessage,
 	ThresholdStateUpdateMessage,
-} from "./types";
+} from "@icod2/contracts";
+import { useDownloadBoxStore } from "@/stores";
+import { useCreateBoxStore } from "../../stores/boxStore/createBoxStore";
+import { useJoinBoxCreationState } from "../../stores/boxStore/joinBoxCreationStore";
 
 // in order to allow access to app in local network, yor IP instead of localhost
 

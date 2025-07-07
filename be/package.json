@@ -13,6 +13,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@icod2/contracts": "workspace:*",
 		"@types/node": "^24.0.7",
 		"@types/uuid": "^10.0.0",
 		"ts-node": "^10.9.2",
