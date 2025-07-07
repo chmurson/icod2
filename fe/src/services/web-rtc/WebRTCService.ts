@@ -131,7 +131,7 @@ class WebRTCService {
 			switch (data.type) {
 				case "id":
 					this.myId = data.id;
-					onId(data);
+					onId?.(data);
 					break;
 				case "acknowledgeLeader":
 					onAcknowledgeLeader?.(data);
