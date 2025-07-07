@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useCreateBoxStore } from "@/stores";
+import { useBoxDownloadState } from "./useBoxDownloadState";
 
 const defaultArgs = {};
 
@@ -8,14 +8,13 @@ export const useDownloadShard = ({
 }: {
 	onSuccess?: () => void;
 } = defaultArgs) => {
-	const encryptedMessage = useCreateBoxStore((state) => state.encryptedMessage);
-	const generatedKey = useCreateBoxStore((state) => state.generatedKey);
+	const { encryptedMessage, generatedKey } = useBoxDownloadState();
 
 	const [error, setError] = useState<string | undefined>(undefined);
 
 	const downloadKeyShardAndMessage = useCallback(() => {
 		setError(undefined);
-		if (!encryptedMessage.trim() || !generatedKey.trim()) {
+		if (!encryptedMessage?.trim() || !generatedKey?.trim()) {
 			setError("Encrypted message and generate key are not set!");
 			return;
 		}

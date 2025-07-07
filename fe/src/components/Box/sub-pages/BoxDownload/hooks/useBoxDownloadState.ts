@@ -1,11 +1,19 @@
 import { useDownloadBoxStore } from "@/stores";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 
-export const useCreateBoxDownloadState = () => {
+export const useBoxDownloadState = () => {
 	const state = useDownloadBoxStore((state) => state);
 
 	if (state.type === "fromCreateBox") {
-		const { content, leader, participants, threshold, title } = state.state;
+		const {
+			content,
+			leader,
+			participants,
+			threshold,
+			title,
+			encryptedMessage,
+			generatedKey,
+		} = state.state;
 
 		return {
 			type: "fromCreateBox",
@@ -14,6 +22,8 @@ export const useCreateBoxDownloadState = () => {
 			leader,
 			participants,
 			content,
+			encryptedMessage,
+			generatedKey,
 		};
 	}
 

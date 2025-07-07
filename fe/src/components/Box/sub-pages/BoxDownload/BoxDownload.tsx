@@ -8,11 +8,11 @@ import { Text } from "@/ui/Typography";
 import { HiddenTextArea } from "../../components/HiddenTextArea";
 import { ParticipantItem } from "../../components/ParticipantItem";
 import { ClosePageButton, GoBackAlert } from "./components";
-import { useCreateBoxDownloadState, useDownloadShard } from "./hooks";
+import { useBoxDownloadState, useDownloadShard } from "./hooks";
 import { useNaiveShowHiddenMessage } from "./hooks/useNaiveShowHiddenMessage";
 
 export const BoxDownload: React.FC = () => {
-	const state = useCreateBoxDownloadState();
+	const state = useBoxDownloadState();
 
 	const { hideMessage, showMessage, visibleMessage } =
 		useNaiveShowHiddenMessage();
@@ -107,7 +107,7 @@ export const BoxDownload: React.FC = () => {
 						</div>
 					</div>
 				)}
-				{state.you && (
+				{state.you && state.otherParticipants.length > 0 && (
 					<div className="flex flex-col gap-1">
 						<Text variant="label">Other participants:</Text>
 						<div>
