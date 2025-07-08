@@ -26,6 +26,14 @@ const CreateBox: React.FC = () => {
 	const [localContent, setLocalContent] = useState(content);
 
 	useEffect(() => {
+		const timeoutHandler = setTimeout(() => {
+			actions.setBoxInfo({ title: localTitle, content: localContent });
+		}, 250);
+
+		return () => clearTimeout(timeoutHandler);
+	}, [localTitle, localContent, actions.setBoxInfo]);
+
+	useEffect(() => {
 		init(wasm);
 		webRTCService.connectLeader();
 
@@ -37,7 +45,7 @@ const CreateBox: React.FC = () => {
 	const noParticipantConnected = participants.length === 0;
 
 	const handleBoxCreation = () => {
-		const isStateValid = validate();
+		const isStateValid = validate({ title: localTitle, content: localContent });
 		if (!isStateValid) {
 			return;
 		}
@@ -144,8 +152,9 @@ const createBoxSchema = z
 	.object({
 		title: z
 			.string()
+			.trim()
 			.min(3, { message: "Title must be at least 3 characters long." }),
-		content: z.string().min(1, { message: "Content cannot be empty." }),
+		content: z.string().trim().min(1, { message: "Content cannot be empty." }),
 		threshold: z.number().min(1, { message: "Threshold must be at least 1." }),
 		participants: z
 			.array(z.any())
@@ -169,23 +178,27 @@ const useStoreState = () => {
 
 	const [errors, setErrors] = useState<z.ZodError | null>(null);
 
-	const validate = useCallback(() => {
-		setErrors(null);
-		const dataToValidate = {
-			title,
-			content,
-			participants,
-			threshold,
-		} satisfies CreateBoxSchema;
+	const validate = useCallback(
+		(partialStateUpdate?: Partial<CreateBoxSchema>) => {
+			setErrors(null);
+			const dataToValidate = {
+				title,
+				content,
+				participants,
+				threshold,
+				...partialStateUpdate,
+			} satisfies CreateBoxSchema;
 
-		const validationResult = createBoxSchema.safeParse(dataToValidate);
+			const validationResult = createBoxSchema.safeParse(dataToValidate);
 
-		if (!validationResult.success) {
-			setErrors(validationResult.error);
-			return false;
-		}
-		return true;
-	}, [title, content, participants, threshold]);
+			if (!validationResult.success) {
+				setErrors(validationResult.error);
+				return false;
+			}
+			return true;
+		},
+		[title, content, participants, threshold],
+	);
 
 	const getError = (fieldName: keyof CreateBoxSchema) => {
 		return errors?.errors.find((e) => e.path[0] === fieldName)?.message;
