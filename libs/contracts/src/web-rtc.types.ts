@@ -63,6 +63,18 @@ export type ThresholdStateUpdateMessage = {
 	threshold: number;
 };
 
+export type MinimalChatMessage = {
+	type: "chatMessage";
+	targetId: string;
+	[key: string]: unknown;
+};
+
+export type TargetedSignalingMessage =
+	| OfferMessage
+	| AnswerMessage
+	| CandidateMessage
+	| MinimalChatMessage;
+
 export type SignalingMessage =
 	| IdMessage
 	| GreetingMessage

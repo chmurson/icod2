@@ -7,6 +7,7 @@ import {
 	handleOffer,
 } from "./handlers/webrtcHandler";
 import type {
+	ClientInfo,
 	HandlerContext,
 	MessageHandler,
 	MessageHandlerRegistry,
@@ -27,13 +28,13 @@ export class MessageRouter {
 
 	routeMessage(
 		data: SignalingMessage,
-		sender: any,
+		sender: ClientInfo,
 		senderId: string,
 		context: HandlerContext,
 	): void {
 		const handler = this.handlers[data.type];
 		if (handler) {
-			handler(data, sender, senderId, context);
+			handler(data, senderId, context, sender);
 		} else {
 			console.warn("[WS] Unknown message type:", data.type);
 		}

@@ -3,6 +3,7 @@ import type {
 	AcknowledgeLeaderMessage,
 	IdMessage,
 	PeerDisconnectedMessage,
+	SignalingMessage,
 } from "@icod2/contracts";
 import { v4 as uuidv4 } from "uuid";
 import { type WebSocket, WebSocketServer } from "ws";
@@ -73,7 +74,7 @@ export class SignalingServer {
 		});
 	}
 
-	private handleMessage(message: any, ws: WebSocket): void {
+	private handleMessage(message: unknown, ws: WebSocket): void {
 		let messageText: string;
 		if (typeof message === "string") {
 			messageText = message;
@@ -84,7 +85,7 @@ export class SignalingServer {
 			return;
 		}
 
-		let data: any;
+		let data: SignalingMessage;
 		try {
 			data = JSON.parse(messageText);
 		} catch {

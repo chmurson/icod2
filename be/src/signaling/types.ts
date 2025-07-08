@@ -1,4 +1,3 @@
-import { SignalingMessage } from "@icod2/contracts";
 import type { WebSocket, WebSocketServer } from "ws";
 import type { ClientManager } from "./ClientManager";
 
@@ -21,9 +20,9 @@ export interface HandlerContext {
 
 export type MessageHandler = (
 	data: any,
-	sender: ClientInfo,
 	senderId: string,
 	context: HandlerContext,
+	sender?: ClientInfo,
 ) => void;
 
 export type MessageHandlerRegistry = Record<string, MessageHandler>;
