@@ -1,11 +1,12 @@
 {
-	"name": "icod2-fe",
+	"name": "@icod2/fe",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite --host",
 		"build": "tsc --build tsconfig.app.json && vite build",
+		"build-force": "tsc --build --force tsconfig.app.json && vite build",
 		"lint": "yarn run -T biome check",
 		"lint:fix": "yarn run -T biome check --write",
 		"type-check": "tsc --noEmit --project tsconfig.app.json",
