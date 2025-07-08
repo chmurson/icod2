@@ -1,12 +1,15 @@
-import type { GreetingMessage } from "@icod2/contracts";
 import type { MessageHandler } from "../types";
 
 export const handleGreeting: MessageHandler = (
-	data: GreetingMessage,
+	data,
 	senderId,
 	context,
 	sender?,
 ) => {
+	if (data.type !== "greeting") {
+		throw new Error("handleGreeting called with non-greeting message");
+	}
+
 	context.clients.updateClient(senderId, {
 		userAgent: data.userAgent,
 		id: data.id,
