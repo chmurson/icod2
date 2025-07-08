@@ -39,7 +39,7 @@ export const JoinBox: React.FC = () => {
 				<FieldArea label="You">
 					<ParticipantItem name={you.name} userAgent={you.userAgent} />
 				</FieldArea>
-				<FieldArea label="Participants: ">
+				<FieldArea label="Other participants: ">
 					<div className="flex flex-col gap-1.5">
 						{otherParticipants.length === 0 && (
 							<Text variant="secondaryText">
