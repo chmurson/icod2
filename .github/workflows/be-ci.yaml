@@ -31,4 +31,4 @@ jobs:
         run: yarn workspace icod2-be lint .
         working-directory: .
       - name: TypeScript Compile Check
-        run: yarn workspace icod2-be type-check
+        run: yarn workspace icod2-be build
