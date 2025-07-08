@@ -16,11 +16,9 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 24
       - name: Setup Yarn Berry
@@ -28,7 +26,6 @@ jobs:
       - name: Install deps
         run: yarn install --immutable
       - name: Biome Check
-        run: yarn workspace icod2-be lint .
-        working-directory: .
+        run: yarn workspace icod2-be lint
       - name: TypeScript Compile Check
         run: yarn workspace icod2-be build
