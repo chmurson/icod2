@@ -17,11 +17,9 @@ export interface WebRTCHandlerContext {
 	ws: WebSocket;
 	peerConnections: Map<string, RTCPeerConnection>;
 	dataChannels: Map<string, RTCDataChannel>;
-	signalingService?: SignalingService; // Reference to SignalingService for setupPeerConnection
-	// Business logic hooks
+	signalingService?: SignalingService;
 	onId?: (data: IdMessage) => void;
 	onAcknowledgeLeader?: (data: AcknowledgeLeaderMessage) => void;
 	onPeerConnected?: (data: PeerConnectedMessage) => Promise<void>;
 	onPeerDisconnected?: (data: PeerDisconnectedMessage) => void;
-	// Add more as needed
 }

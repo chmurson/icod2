@@ -9,7 +9,6 @@ export const handleOffer: WebRTCMessageHandler = async (data, ctx) => {
 	const { senderId, offer } = data as OfferMessage;
 	let peer = ctx.peerConnections.get(senderId);
 	if (!peer) {
-		// Use the SignalingService's setupPeerConnection method
 		peer =
 			ctx.signalingService?.setupPeerConnection(senderId, false) ||
 			new RTCPeerConnection();
