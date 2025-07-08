@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite --host",
-		"build": "tsc --noEmit --project tsconfig.app.json && vite build",
+		"build": "tsc --build tsconfig.app.json && vite build",
 		"lint": "yarn run -T biome check",
 		"lint:fix": "yarn run -T biome check --write",
 		"type-check": "tsc --noEmit --project tsconfig.app.json",

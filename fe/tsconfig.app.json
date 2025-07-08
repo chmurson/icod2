@@ -29,5 +29,5 @@
 		"noFallthroughCasesInSwitch": true,
 		"noUncheckedSideEffectImports": true
 	},
-	"include": ["src", "../contracts/web-rtc.types.ts"]
+	"references": [{ "path": "../libs/contracts" }]
 }

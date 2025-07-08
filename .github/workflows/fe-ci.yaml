@@ -26,9 +26,6 @@ jobs:
       - name: Install deps
         run: yarn install --immutable
         working-directory: .
-      - name: Build contracts package
-        run: yarn workspace @icod2/contracts build
-        working-directory: .
       - name: Biome Check
         run: yarn workspace icod2-fe lint .
         working-directory: .

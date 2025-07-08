@@ -6,6 +6,7 @@
 	"scripts": {
 		"start": "ts-node src/index.ts",
 		"type-check": "tsc --noEmit",
+		"build": "tsc --build tsconfig.json",
 		"lint": "yarn run -T biome check",
 		"lint:fix": "yarn run -T biome check --write"
 	},

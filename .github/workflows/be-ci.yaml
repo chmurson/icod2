@@ -27,8 +27,6 @@ jobs:
         run: corepack enable
       - name: Install deps
         run: yarn install --immutable
-      - name: Build contracts package
-        run: yarn workspace @icod2/contracts build
       - name: Biome Check
         run: yarn workspace icod2-be lint .
         working-directory: .
