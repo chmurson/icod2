@@ -143,6 +143,12 @@ export class SignalingServer {
 				disconnectedClientId,
 				JSON.stringify(disconnectMessage),
 			);
+
+			if (this.leaderId === disconnectedClientId) {
+				this.leaderId = undefined;
+				this.leaderName = undefined;
+				this.leaderUserAgent = undefined;
+			}
 		} else {
 			console.log(
 				"[WS] Unknown client disconnected. Total clients:",

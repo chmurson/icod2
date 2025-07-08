@@ -3,6 +3,7 @@ import type React from "react";
 import { useEffect } from "react";
 import { ParticipantService, SignalingService } from "@/services/web-rtc";
 import { useJoinBoxCreationState } from "@/stores";
+import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../components/FieldArea";
 import { ParticipantItem } from "../components/ParticipantItem";
@@ -13,6 +14,7 @@ const participantService = new ParticipantService(new SignalingService());
 export const JoinBox: React.FC = () => {
 	const { leader, otherParticipants, threshold, title, you, content } =
 		useStoreSlice();
+	const actions = useJoinBoxCreationState((state) => state.actions);
 
 	useEffect(() => {
 		participantService.connect({
@@ -35,7 +37,6 @@ export const JoinBox: React.FC = () => {
 				});
 			},
 			onPeerConnected: async (data) => {
-				// Participant does not initiate connection, only adds other peers to the list
 				const { connectParticipant } =
 					useJoinBoxCreationState.getState().actions;
 				if (data.peerId !== useJoinBoxCreationState.getState().leader.id) {
@@ -63,6 +64,45 @@ export const JoinBox: React.FC = () => {
 			<Text variant="pageTitle" className="mt-4">
 				Join a Box Creation
 			</Text>
+			{!leader?.id && (
+				<div className="flex flex-col items-start gap-4">
+					<Text variant="primaryError">No leader connected</Text>
+					<Button variant="primary" onClick={actions.reset}>
+						Go back
+					</Button>
+				</div>
+			)}
+			{!!leader?.id && (
+				<BoxJoinContentForOK
+					leader={leader}
+					otherParticipants={otherParticipants}
+					threshold={threshold}
+					title={title}
+					you={you}
+					content={content}
+				/>
+			)}
+		</div>
+	);
+};
+
+const BoxJoinContentForOK = ({
+	leader,
+	threshold,
+	title,
+	you,
+	otherParticipants,
+	content,
+}: {
+	title: string;
+	threshold: number;
+	otherParticipants: { id: string; name: string; userAgent: string }[];
+	leader: { name: string; userAgent: string };
+	you: { name: string; userAgent: string };
+	content: string;
+}) => {
+	return (
+		<>
 			<div className="flex flex-col gap-4">
 				<div className="flex gap-2 items-center">
 					<Text variant="label">Name:</Text>
@@ -102,7 +142,7 @@ export const JoinBox: React.FC = () => {
 				Waiting for more participants, or leader to create finalize box
 				creation.
 			</Text>
-		</div>
+		</>
 	);
 };
 
