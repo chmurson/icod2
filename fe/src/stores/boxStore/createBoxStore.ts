@@ -45,6 +45,7 @@ type CreateBoxState = {
 			generatedKey?: string;
 		}) => void;
 		setThreshold: (threshold: number) => void;
+		setBoxInfo: (args: Pick<CreateBoxStateData, "title" | "content">) => void;
 	};
 } & CreateBoxStateData;
 
@@ -105,5 +106,13 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 			});
 			leaderService.sendThreshold({ type: "thresholdStatUpdate", threshold });
 		},
+		setBoxInfo: ({
+			content,
+			title,
+		}: Pick<CreateBoxStateData, "title" | "content">) =>
+			set({
+				content,
+				title,
+			}),
 	},
 }));

@@ -2,7 +2,8 @@ import { TextArea, TextField } from "@radix-ui/themes";
 import init, { ChunksConfiguration, secure_message } from "icod-crypto-js";
 import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { z } from "zod";
 import { leaderService } from "@/services/web-rtc/leaderSingleton";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { useDownloadBoxStore } from "@/stores/boxStore/downloadBoxStore";
@@ -14,18 +15,24 @@ import { InputNumber } from "../components/InputNumber";
 import { ParticipantItem } from "../components/ParticipantItem";
 
 const CreateBox: React.FC = () => {
-	const title = useCreateBoxStore((state) => state.title);
-	const content = useCreateBoxStore((state) => state.content);
-	const leader = useCreateBoxStore((state) => state.leader);
-	const threshold = useCreateBoxStore((state) => state.threshold);
-	const participants = useCreateBoxStore((state) => state.participants);
-	const actions = useCreateBoxStore((state) => state.actions);
+	const { state, actions, validate, getError } = useStoreState();
+
+	const { content, leader, participants, threshold, title } = state;
+
 	const createDownloadStoreFromCreateBox = useDownloadBoxStore(
 		(state) => state.fromCreateBox,
 	);
 
 	const [localTitle, setLocalTitle] = useState(title);
 	const [localContent, setLocalContent] = useState(content);
+
+	useEffect(() => {
+		const timeoutHandler = setTimeout(() => {
+			actions.setBoxInfo({ title: localTitle, content: localContent });
+		}, 250);
+
+		return () => clearTimeout(timeoutHandler);
+	}, [localTitle, localContent, actions.setBoxInfo]);
 
 	useEffect(() => {
 		init(wasm);
@@ -76,6 +83,10 @@ const CreateBox: React.FC = () => {
 	const noParticipantConnected = participants.length === 0;
 
 	const handleBoxCreation = () => {
+		const isStateValid = validate({ title: localTitle, content: localContent });
+		if (!isStateValid) {
+			return;
+		}
 		const numKeys = participants.length + 1; // Leader + participants
 		const secured = secure_message(
 			localContent,
@@ -115,6 +126,9 @@ const CreateBox: React.FC = () => {
 						onChange={(e) => setLocalTitle(e.target.value)}
 						className="max-w-md w-full"
 					/>
+					{getError("title") && (
+						<Text variant="primaryError">{getError("title")}</Text>
+					)}
 				</FieldArea>
 				<FieldArea label="Content: ">
 					<TextArea
@@ -124,6 +138,9 @@ const CreateBox: React.FC = () => {
 						rows={10}
 						className="w-full"
 					/>
+					{getError("content") && (
+						<Text variant="primaryError">{getError("content")}</Text>
+					)}
 				</FieldArea>
 				<FieldArea label="Treshold:">
 					<InputNumber
@@ -135,6 +152,9 @@ const CreateBox: React.FC = () => {
 						}
 						className="min-w-10"
 					/>
+					{getError("threshold") && (
+						<Text variant="primaryError">{getError("threshold")}</Text>
+					)}
 				</FieldArea>
 				<FieldArea label="You - leader">
 					<ParticipantItem name={leader.name} userAgent={leader.userAgent} />
@@ -154,6 +174,9 @@ const CreateBox: React.FC = () => {
 							/>
 						))}
 					</div>
+					{getError("participants") && (
+						<Text variant="primaryError">{getError("participants")}</Text>
+					)}
 				</FieldArea>
 			</div>
 			<div>
@@ -170,3 +193,73 @@ const CreateBox: React.FC = () => {
 };
 
 export default CreateBox;
+
+const createBoxSchema = z
+	.object({
+		title: z
+			.string()
+			.trim()
+			.min(3, { message: "Title must be at least 3 characters long." }),
+		content: z.string().trim().min(1, { message: "Content cannot be empty." }),
+		threshold: z.number().min(1, { message: "Threshold must be at least 1." }),
+		participants: z
+			.array(z.any())
+			.min(1, { message: "At least one participant is required." }),
+	})
+	.refine((data) => data.threshold <= data.participants.length + 1, {
+		message:
+			"Threshold cannot be greater than the total number of participants.",
+		path: ["threshold"], // This will attach the error message to the `threshold` field
+	});
+
+type CreateBoxSchema = z.infer<typeof createBoxSchema>;
+
+const useStoreState = () => {
+	const title = useCreateBoxStore((state) => state.title);
+	const content = useCreateBoxStore((state) => state.content);
+	const leader = useCreateBoxStore((state) => state.leader);
+	const threshold = useCreateBoxStore((state) => state.threshold);
+	const participants = useCreateBoxStore((state) => state.participants);
+	const actions = useCreateBoxStore((state) => state.actions);
+
+	const [errors, setErrors] = useState<z.ZodError | null>(null);
+
+	const validate = useCallback(
+		(partialStateUpdate?: Partial<CreateBoxSchema>) => {
+			setErrors(null);
+			const dataToValidate = {
+				title,
+				content,
+				participants,
+				threshold,
+				...partialStateUpdate,
+			} satisfies CreateBoxSchema;
+
+			const validationResult = createBoxSchema.safeParse(dataToValidate);
+
+			if (!validationResult.success) {
+				setErrors(validationResult.error);
+				return false;
+			}
+			return true;
+		},
+		[title, content, participants, threshold],
+	);
+
+	const getError = (fieldName: keyof CreateBoxSchema) => {
+		return errors?.errors.find((e) => e.path[0] === fieldName)?.message;
+	};
+
+	return {
+		state: {
+			title,
+			content,
+			leader,
+			threshold,
+			participants,
+		},
+		actions,
+		getError,
+		validate: validate,
+	};
+};
