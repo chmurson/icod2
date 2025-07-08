@@ -4,9 +4,10 @@ import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
-import { webRTCService } from "@/services/web-rtc/WebRTCService";
+import { leaderService } from "@/services/web-rtc/leaderSingleton";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { useDownloadBoxStore } from "@/stores/boxStore/downloadBoxStore";
+import { useJoinBoxCreationState } from "@/stores/boxStore/joinBoxCreationStore";
 import { Button } from "@/ui/Button.tsx";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../components/FieldArea";
@@ -35,12 +36,49 @@ const CreateBox: React.FC = () => {
 
 	useEffect(() => {
 		init(wasm);
-		webRTCService.connectLeader();
+		leaderService.connect({
+			userName: leader.name,
+			onId: (data) => {
+				actions.connectLeader({ id: data.id });
+			},
+			onPeerConnected: async (data) => {
+				// Leader initiates connection with new peer
+				let peer = leaderService.signaling
+					.getPeerConnections()
+					.get(data.peerId);
+				if (!peer) {
+					peer = leaderService.signaling.setupPeerConnection(data.peerId, true);
+				}
+				const offer = await peer.createOffer();
+				await peer.setLocalDescription(offer);
+				leaderService.signaling
+					.getWebSocket()
+					?.send(
+						JSON.stringify({ type: "offer", targetId: data.peerId, offer }),
+					);
+				// Add participant to store (excluding leader)
+				if (data.peerId !== useJoinBoxCreationState.getState().leader.id) {
+					actions.connectParticipant({
+						id: data.peerId,
+						name: data.name,
+						userAgent: data.userAgent,
+					});
+				}
+			},
+			onPeerDisconnected: (data) => {
+				actions.disconnectParticipant(data.peerId);
+			},
+		});
 
 		return () => {
-			webRTCService.disconnect();
+			leaderService.disconnect();
 		};
-	}, []);
+	}, [
+		actions.connectLeader,
+		actions.connectParticipant,
+		actions.disconnectParticipant,
+		leader.name,
+	]);
 
 	const noParticipantConnected = participants.length === 0;
 
@@ -64,6 +102,14 @@ const CreateBox: React.FC = () => {
 			generatedKeys: secured.chunks as string[],
 		});
 		createDownloadStoreFromCreateBox();
+		// Send encrypted message to participants
+		leaderService.createBox({
+			type: "createBox",
+			title: localTitle,
+			content: localContent,
+			encryptedMessage: secured.encrypted_message[0] as string,
+			generatedKey: secured.chunks[0],
+		});
 	};
 
 	return (

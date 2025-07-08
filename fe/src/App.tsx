@@ -12,7 +12,6 @@ import ComponentsDemo from "./components/ComponentsDemo";
 import CryptoPlayground from "./components/CryptoPlayground";
 import DecodePlayground from "./components/DecodePlayground";
 import { MainLayout } from "./components/MainLayout";
-import WebRTCPlayground from "./components/WebRTCPlayground";
 
 function useSystemTheme() {
 	const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -44,12 +43,6 @@ const Root: FC = () => {
 					Box
 				</Link>
 				<Link
-					to="/webrtc-poc"
-					style={{ marginRight: 16, textDecoration: "none" }}
-				>
-					WebRTC Playground
-				</Link>
-				<Link
 					to="/crypto-poc"
 					style={{ marginRight: 16, textDecoration: "none" }}
 				>
@@ -67,7 +60,6 @@ const Root: FC = () => {
 			</nav>
 			<MainLayout>
 				<Routes>
-					<Route path="/webrtc-poc" element={<WebRTCPlayground />} />
 					<Route path="crypto-poc" element={<CryptoPlayground />} />
 					<Route path="decode-poc" element={<DecodePlayground />} />
 					<Route path="/components-demo" element={<ComponentsDemo />} />
@@ -84,10 +76,6 @@ const router = createBrowserRouter([
 		path: "/",
 		Component: Root,
 		children: [
-			{
-				path: "/webrtc-poc",
-				Component: WebRTCPlayground,
-			},
 			{
 				path: "/crypto-poc",
 				Component: CryptoPlayground,

@@ -16,11 +16,9 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 24
       - name: Setup Yarn Berry
@@ -31,4 +29,4 @@ jobs:
         run: yarn workspace @icod2/be lint .
         working-directory: .
       - name: TypeScript Compile Check
-        run: yarn workspace @icod2/be type-check
+        run: yarn workspace @icod2/be build

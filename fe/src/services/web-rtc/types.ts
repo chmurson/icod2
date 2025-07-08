@@ -1,76 +1,25 @@
-export type IdMessage = {
-	type: "id";
-	id: string;
-};
+import type {
+	AcknowledgeLeaderMessage,
+	IdMessage,
+	PeerConnectedMessage,
+	PeerDisconnectedMessage,
+	SignalingMessage,
+} from "@icod2/contracts";
+import type { SignalingService } from "./SignalingService";
 
-export type GreetingMessage = {
-	type: "greeting";
-	id: string;
-	name: string;
-	userAgent: string;
-};
+export type WebRTCMessageHandler = (
+	data: SignalingMessage,
+	context: WebRTCHandlerContext,
+) => Promise<void> | void;
 
-export type AcknowledgeLeaderMessage = {
-	type: "acknowledgeLeader";
-	leaderId: string;
-	leaderName: string;
-	leaderUserAgent: string;
-};
-
-export type PeerConnectedMessage = {
-	type: "peerConnected";
-	peerId: string;
-	name: string;
-	userAgent: string;
-};
-
-export type PeerDisconnectedMessage = {
-	type: "peerDisconnected";
-	peerId: string;
-};
-
-export type OfferMessage = {
-	type: "offer";
-	targetId: string;
-	offer: RTCSessionDescriptionInit;
-	senderId: string;
-};
-
-export type AnswerMessage = {
-	type: "answer";
-	targetId: string;
-	answer: RTCSessionDescriptionInit;
-	senderId: string;
-};
-
-export type CandidateMessage = {
-	type: "candidate";
-	targetId: string;
-	candidate: RTCIceCandidateInit;
-	senderId: string;
-};
-
-export type BoxStateUpdateMessage = {
-	type: "boxStateUpdate";
-	title?: string;
-	content?: string;
-	encryptedMessage?: string;
-	generatedKey?: string;
-};
-
-export type ThresholdStateUpdateMessage = {
-	type: "thresholdStatUpdate";
-	threshold: number;
-};
-
-export type SignalingMessage =
-	| IdMessage
-	| GreetingMessage
-	| AcknowledgeLeaderMessage
-	| PeerConnectedMessage
-	| PeerDisconnectedMessage
-	| OfferMessage
-	| AnswerMessage
-	| CandidateMessage
-	| BoxStateUpdateMessage
-	| ThresholdStateUpdateMessage;
+export interface WebRTCHandlerContext {
+	myId: string | null;
+	ws: WebSocket;
+	peerConnections: Map<string, RTCPeerConnection>;
+	dataChannels: Map<string, RTCDataChannel>;
+	signalingService?: SignalingService;
+	onId?: (data: IdMessage) => void;
+	onAcknowledgeLeader?: (data: AcknowledgeLeaderMessage) => void;
+	onPeerConnected?: (data: PeerConnectedMessage) => Promise<void>;
+	onPeerDisconnected?: (data: PeerDisconnectedMessage) => void;
+}

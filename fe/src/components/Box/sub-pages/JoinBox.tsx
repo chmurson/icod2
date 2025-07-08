@@ -1,23 +1,62 @@
 import { TextArea } from "@radix-ui/themes";
 import type React from "react";
 import { useEffect } from "react";
-import { webRTCService } from "@/services/web-rtc/WebRTCService";
+import { ParticipantService, SignalingService } from "@/services/web-rtc";
 import { useJoinBoxCreationState } from "@/stores";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../components/FieldArea";
 import { ParticipantItem } from "../components/ParticipantItem";
+
+// Singleton for the session
+const participantService = new ParticipantService(new SignalingService());
 
 export const JoinBox: React.FC = () => {
 	const { leader, otherParticipants, threshold, title, you, content } =
 		useStoreSlice();
 
 	useEffect(() => {
-		webRTCService.connectParticipant();
+		participantService.connect({
+			userName: you.name,
+			onAcknowledgeLeader: (data) => {
+				const { connectYou } = useJoinBoxCreationState.getState().actions;
+				connectYou({
+					you: {
+						id:
+							participantService.signaling.getMyId() ??
+							"id-not-assigned-probably-error",
+						name: you.name,
+						userAgent: you.userAgent,
+					},
+					leader: {
+						id: data.leaderId,
+						name: data.leaderName,
+						userAgent: data.leaderUserAgent,
+					},
+				});
+			},
+			onPeerConnected: async (data) => {
+				// Participant does not initiate connection, only adds other peers to the list
+				const { connectParticipant } =
+					useJoinBoxCreationState.getState().actions;
+				if (data.peerId !== useJoinBoxCreationState.getState().leader.id) {
+					connectParticipant({
+						id: data.peerId,
+						name: data.name,
+						userAgent: data.userAgent,
+					});
+				}
+			},
+			onPeerDisconnected: (data) => {
+				const { disconnectParticipant } =
+					useJoinBoxCreationState.getState().actions;
+				disconnectParticipant(data.peerId);
+			},
+		});
 
 		return () => {
-			webRTCService.disconnect();
+			participantService.disconnect();
 		};
-	}, []);
+	}, [you.name, you.userAgent]);
 
 	return (
 		<div className="flex flex-col gap-8">

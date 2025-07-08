@@ -1,11 +1,12 @@
 {
-	"name": "icod2-fe",
+	"name": "@icod2/fe",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite --host",
-		"build": "tsc --noEmit --project tsconfig.app.json && vite build",
+		"build": "tsc --build tsconfig.app.json && vite build",
+		"build-force": "tsc --build --force tsconfig.app.json && vite build",
 		"lint": "yarn run -T biome check",
 		"lint:fix": "yarn run -T biome check --write",
 		"type-check": "tsc --noEmit --project tsconfig.app.json",
@@ -14,6 +15,7 @@
 	"dependencies": {
 		"@emotion/react": "^11.14.0",
 		"@emotion/styled": "^11.14.1",
+		"@icod2/contracts": "workspace:*",
 		"@mui/icons-material": "^7.2.0",
 		"@mui/material": "^7.2.0",
 		"@radix-ui/react-icons": "^1.3.2",

@@ -1,11 +1,13 @@
 {
-	"name": "icod2-be",
+	"name": "@icod2/be",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
 		"start": "ts-node src/index.ts",
 		"type-check": "tsc --noEmit",
+		"build": "tsc --build tsconfig.json",
+		"build-force": "tsc --build --force",
 		"lint": "yarn run -T biome check",
 		"lint:fix": "yarn run -T biome check --write"
 	},
@@ -13,6 +15,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@icod2/contracts": "workspace:*",
 		"@types/node": "^24.0.7",
 		"@types/uuid": "^10.0.0",
 		"ts-node": "^10.9.2",
