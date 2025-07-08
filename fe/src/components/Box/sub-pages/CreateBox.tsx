@@ -92,8 +92,8 @@ const CreateBox: React.FC = () => {
 		});
 		createDownloadStoreFromCreateBox();
 		// Send encrypted message to participants
-		leaderService.sendMessage({
-			type: "boxStateUpdate",
+		leaderService.createBox({
+			type: "createBox",
 			title: localTitle,
 			content: localContent,
 			encryptedMessage: secured.encrypted_message[0] as string,

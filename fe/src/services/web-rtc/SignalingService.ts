@@ -6,7 +6,7 @@ import type {
 	SignalingMessage,
 } from "@icod2/contracts";
 import {
-	handleBoxStateUpdate,
+	handleCreateBox,
 	handleThresholdStateUpdate,
 } from "./handlers/businessHandlers";
 import {
@@ -38,7 +38,7 @@ export class SignalingService {
 			offer: handleOffer,
 			answer: handleAnswer,
 			candidate: handleCandidate,
-			boxStateUpdate: handleBoxStateUpdate,
+			createBox: handleCreateBox,
 			thresholdStatUpdate: handleThresholdStateUpdate,
 		};
 	}

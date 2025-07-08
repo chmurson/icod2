@@ -93,7 +93,7 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
 				state: "created",
 			});
 			const { generatedKeys, ...messageToSend } = message;
-			leaderService.sendMessage({ type: "boxStateUpdate", ...messageToSend });
+			leaderService.createBox({ type: "createBox", ...messageToSend });
 		},
 		reset: () =>
 			set({

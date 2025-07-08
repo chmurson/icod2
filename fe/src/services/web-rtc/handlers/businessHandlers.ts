@@ -1,15 +1,15 @@
 import type {
-	BoxStateUpdateMessage,
+	CreateBoxMessage,
 	ThresholdStateUpdateMessage,
 } from "@icod2/contracts";
 import { useDownloadBoxStore } from "@/stores";
 import { useJoinBoxCreationState } from "@/stores/boxStore/joinBoxCreationStore";
 import type { WebRTCMessageHandler } from "../types";
 
-export const handleBoxStateUpdate: WebRTCMessageHandler = (data, _ctx) => {
+export const handleCreateBox: WebRTCMessageHandler = (data, _ctx) => {
 	const { create } = useJoinBoxCreationState.getState().actions;
 	const { fromJoinBox } = useDownloadBoxStore.getState();
-	const { type, ...messageWithoutType } = data as BoxStateUpdateMessage;
+	const { type, ...messageWithoutType } = data as CreateBoxMessage;
 	create(messageWithoutType);
 	fromJoinBox();
 };

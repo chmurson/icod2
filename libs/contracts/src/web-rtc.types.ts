@@ -50,8 +50,8 @@ export type CandidateMessage = {
 	senderId: string;
 };
 
-export type BoxStateUpdateMessage = {
-	type: "boxStateUpdate";
+export type CreateBoxMessage = {
+	type: "createBox";
 	title?: string;
 	content?: string;
 	encryptedMessage?: string;
@@ -84,5 +84,5 @@ export type SignalingMessage =
 	| OfferMessage
 	| AnswerMessage
 	| CandidateMessage
-	| BoxStateUpdateMessage
+	| CreateBoxMessage
 	| ThresholdStateUpdateMessage;

@@ -1,5 +1,5 @@
 import type {
-	BoxStateUpdateMessage,
+	CreateBoxMessage,
 	ThresholdStateUpdateMessage,
 } from "@icod2/contracts";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
@@ -16,7 +16,7 @@ export class LeaderService {
 		this.signaling.connect(options);
 	}
 
-	sendMessage(message: BoxStateUpdateMessage) {
+	createBox(message: CreateBoxMessage) {
 		const { generatedKeys } = useCreateBoxStore.getState();
 		let keyIndex = 1;
 		this.signaling.getDataChannels().forEach((channel) => {
