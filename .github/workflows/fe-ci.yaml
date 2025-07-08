@@ -26,6 +26,8 @@ jobs:
       - name: Install deps
         run: yarn install --immutable
       - name: Biome Check
-        run: yarn workspace icod2-fe lint
+        run: yarn workspace @icod2/fe lint .
+        working-directory: .
       - name: TypeScript Compile Check
-        run: yarn workspace icod2-fe build
+        run: yarn workspace @icod2/fe type-check
+        working-directory: .
