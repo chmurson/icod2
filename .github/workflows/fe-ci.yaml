@@ -25,10 +25,7 @@ jobs:
         run: corepack enable
       - name: Install deps
         run: yarn install --immutable
-        working-directory: .
       - name: Biome Check
-        run: yarn workspace icod2-fe lint .
-        working-directory: .
+        run: yarn workspace icod2-fe lint
       - name: TypeScript Compile Check
         run: yarn workspace icod2-fe build
-        working-directory: .
