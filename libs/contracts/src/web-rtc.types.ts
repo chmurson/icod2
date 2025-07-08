@@ -58,9 +58,11 @@ export type CreateBoxMessage = {
 	generatedKey?: string;
 };
 
-export type ThresholdStateUpdateMessage = {
-	type: "thresholdStatUpdate";
+export type BoxInfoMessage = {
+	type: "boxInfo";
 	threshold: number;
+	content: string;
+	title: string;
 };
 
 export type MinimalChatMessage = {
@@ -85,4 +87,4 @@ export type SignalingMessage =
 	| AnswerMessage
 	| CandidateMessage
 	| CreateBoxMessage
-	| ThresholdStateUpdateMessage;
+	| BoxInfoMessage;

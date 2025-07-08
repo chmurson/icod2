@@ -25,14 +25,26 @@ const CreateBox: React.FC = () => {
 
 	const [localTitle, setLocalTitle] = useState(title);
 	const [localContent, setLocalContent] = useState(content);
+	const [localThreshold, setLocalThreshold] = useState(threshold);
 
 	useEffect(() => {
 		const timeoutHandler = setTimeout(() => {
-			actions.setBoxInfo({ title: localTitle, content: localContent });
+			actions.setBoxInfo({
+				title: localTitle,
+				content: localContent,
+				threshold: localThreshold,
+			});
 		}, 250);
 
+		leaderService.sendBoxInfo({
+			type: "boxInfo",
+			threshold: localThreshold,
+			content: localContent,
+			title: localTitle,
+		});
+
 		return () => clearTimeout(timeoutHandler);
-	}, [localTitle, localContent, actions.setBoxInfo]);
+	}, [localTitle, localContent, localThreshold, actions.setBoxInfo]);
 
 	useEffect(() => {
 		init(wasm);
@@ -148,7 +160,7 @@ const CreateBox: React.FC = () => {
 						defaultValue={1}
 						max={10}
 						onChange={(e) =>
-							actions.setThreshold(Number.parseInt(e.currentTarget.value))
+							setLocalThreshold(Number.parseInt(e.currentTarget.value))
 						}
 						className="min-w-10"
 					/>

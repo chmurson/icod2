@@ -5,10 +5,7 @@ import type {
 	PeerDisconnectedMessage,
 	SignalingMessage,
 } from "@icod2/contracts";
-import {
-	handleCreateBox,
-	handleThresholdStateUpdate,
-} from "./handlers/businessHandlers";
+import { handleBoxInfo, handleCreateBox } from "./handlers/businessHandlers";
 import {
 	handleAcknowledgeLeader,
 	handleId,
@@ -39,7 +36,7 @@ export class SignalingService {
 			answer: handleAnswer,
 			candidate: handleCandidate,
 			createBox: handleCreateBox,
-			thresholdStatUpdate: handleThresholdStateUpdate,
+			boxInfo: handleBoxInfo,
 		};
 	}
 

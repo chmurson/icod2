@@ -1,7 +1,4 @@
-import type {
-	CreateBoxMessage,
-	ThresholdStateUpdateMessage,
-} from "@icod2/contracts";
+import type { BoxInfoMessage, CreateBoxMessage } from "@icod2/contracts";
 import { useDownloadBoxStore } from "@/stores";
 import { useJoinBoxCreationState } from "@/stores/boxStore/joinBoxCreationStore";
 import type { WebRTCMessageHandler } from "../types";
@@ -14,10 +11,8 @@ export const handleCreateBox: WebRTCMessageHandler = (data, _ctx) => {
 	fromJoinBox();
 };
 
-export const handleThresholdStateUpdate: WebRTCMessageHandler = (
-	data,
-	_ctx,
-) => {
-	const { setThreshold } = useJoinBoxCreationState.getState().actions;
-	setThreshold((data as ThresholdStateUpdateMessage).threshold);
+export const handleBoxInfo: WebRTCMessageHandler = (data, _ctx) => {
+	const { setInfoBox } = useJoinBoxCreationState.getState().actions;
+	const { threshold, content, title } = data as BoxInfoMessage;
+	setInfoBox(threshold, content, title);
 };

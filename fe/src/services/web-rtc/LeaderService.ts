@@ -1,7 +1,4 @@
-import type {
-	CreateBoxMessage,
-	ThresholdStateUpdateMessage,
-} from "@icod2/contracts";
+import type { BoxInfoMessage, CreateBoxMessage } from "@icod2/contracts";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import type { SignalingService } from "./SignalingService";
 
@@ -31,7 +28,7 @@ export class LeaderService {
 		});
 	}
 
-	sendThreshold(message: ThresholdStateUpdateMessage) {
+	sendBoxInfo(message: BoxInfoMessage) {
 		this.signaling.getDataChannels().forEach((channel) => {
 			if (channel.readyState === "open") {
 				channel.send(JSON.stringify(message));

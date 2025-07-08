@@ -50,7 +50,7 @@ type JoinBoxState = {
 			encryptedMessage?: string;
 			generatedKey?: string;
 		}) => void;
-		setThreshold: (threshold: number) => void;
+		setInfoBox: (threshold: number, content: string, title: string) => void;
 	};
 } & JoinBoxStateData;
 
@@ -116,9 +116,11 @@ export const useJoinBoxCreationState = create<JoinBoxState>()(
 				set({
 					...joinBoxCreationState,
 				}),
-			setThreshold: (threshold) =>
+			setInfoBox: (threshold, content, title) =>
 				set({
-					threshold: threshold,
+					threshold,
+					content,
+					title,
 				}),
 		},
 	})),
