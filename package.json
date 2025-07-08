@@ -12,7 +12,7 @@
 	"scripts": {
 		":lint-fix": "biome check --fix",
 		":lint-fix-force": "biome check --write --unsafe",
-		"dev": "concurrently \"yarn workspace icod2-fe dev\" \"yarn workspace icod2-be start\"",
+		"dev": "concurrently \"yarn workspace @icod2/fe dev\" \"yarn workspace @icod2/be start\"",
 		"prepare": "husky",
 		"commitlint": "commitlint --edit --last"
 	},
