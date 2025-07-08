@@ -10,10 +10,11 @@
 		"libs/*"
 	],
 	"scripts": {
-		"lint-fix:": "biome check --fix",
-		"lint-fix-force:": "biome check --write --unsafe",
+		":lint-fix": "biome check --fix",
+		":lint-fix-force:": "biome check --write --unsafe",
 		"dev-prepare": "yarn workspace @icod2/contracts build",
-		"dev": "concurrently \"yarn workspace @icod2/fe dev\" \"yarn workspace @icod2/be start\"",
+		"dev-copy-env-file": "echo \"#GENERATED FROM .env files in root project\" > fe/.env.local && cat .env >> fe/.env.local && cat .env.local >> fe/.env.local",
+		"dev": "yarn dev-copy-env-file && concurrently \"yarn workspace @icod2/fe dev\" \"dotenvx run -f .env.local -f .env  -- yarn workspace @icod2/be start\"",
 		"prepare": "husky",
 		"commitlint": "commitlint --edit --last"
 	},
@@ -30,5 +31,8 @@
 			"biome check --fix"
 		]
 	},
-	"packageManager": "yarn@4.9.2"
+	"packageManager": "yarn@4.9.2",
+	"dependencies": {
+		"@dotenvx/dotenvx": "^1.46.0"
+	}
 }

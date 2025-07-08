@@ -4,7 +4,7 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "vite --host",
+		"dev": "VITE_TEST=elomordo vite --host",
 		"build": "tsc --build tsconfig.app.json && vite build",
 		"build-force": "tsc --build --force tsconfig.app.json && vite build",
 		"lint": "yarn run -T biome check",

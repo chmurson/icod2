@@ -159,7 +159,7 @@ export class SignalingServer {
 
 	private start(port: number, hostname: string): void {
 		this.server.listen({ port, hostname }, () => {
-			console.log(`[WS] WebSocket signaling server running on port ${port}`);
+			console.log(`Signaling Server listens on: ws://${hostname}:${port}`);
 		});
 	}
 }

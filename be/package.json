@@ -5,6 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "ts-node src/index.ts",
+		"dev": "node --env-file=.env  -r ts-node/register src/index.ts",
 		"type-check": "tsc --noEmit",
 		"build": "tsc --build tsconfig.json",
 		"build-force": "tsc --build --force",
@@ -18,6 +19,7 @@
 		"@icod2/contracts": "workspace:*",
 		"@types/node": "^24.0.7",
 		"@types/uuid": "^10.0.0",
+		"dotenv": "^17.1.0",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.8.3",
 		"uuid": "^11.1.0",

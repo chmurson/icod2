@@ -1,6 +1,9 @@
+import { config } from "dotenv";
 import { SignalingServer } from "./signaling";
 
-const PORT = Number.parseInt(process.env.PORT || "8080", 10);
-const HOSTNAME = "localhost"; // in order to allow access to app in local network, put IP
+config({ path: [".env.local", ".env"] });
 
-new SignalingServer(PORT, HOSTNAME);
+const port = Number.parseInt(process.env.PORT ?? "8080", 10);
+const hostname = process.env.VITE_SIGNALING_HOSTNAME ?? "0.0.0.0";
+
+new SignalingServer(port, hostname);
