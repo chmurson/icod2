@@ -20,4 +20,4 @@ yarn dev
 
 ## Production
 
-[icod2.netlify.app](icod2.netlify.app)
+[icod2.netlify.app](https://icod2.netlify.app)
