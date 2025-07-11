@@ -8,7 +8,7 @@ Box is a simple and lightweight app to share content with your firends and famil
 yarn install --immutable
 ```
 
-Prapre dependencies
+Prepare dependencies
 ```
 yarn dev-prepare
 ```
@@ -20,4 +20,4 @@ yarn dev
 
 ## Production
 
-[icod2.netlify.app](icod2.netlify.app)
+[icod2.netlify.app](https://icod2.netlify.app)
