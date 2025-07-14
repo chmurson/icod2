@@ -109,7 +109,7 @@ const BoxJoinContentForOK = ({
 					<Text variant="primaryText">{title}</Text>
 				</div>
 				<div className="flex gap-2 items-center">
-					<Text variant="label">Treshold:</Text>
+					<Text variant="label">Key Treshold:</Text>
 					<Text variant="primaryText">{threshold}</Text>
 				</div>
 				<FieldArea label="Leader:">

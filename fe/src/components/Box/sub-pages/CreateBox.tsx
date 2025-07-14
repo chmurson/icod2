@@ -153,7 +153,7 @@ const CreateBox: React.FC = () => {
 						<Text variant="primaryError">{getError("content")}</Text>
 					)}
 				</FieldArea>
-				<FieldArea label="Treshold:">
+				<FieldArea label="Key Treshold:">
 					<InputNumber
 						min={1}
 						defaultValue={1}

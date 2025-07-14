@@ -73,7 +73,7 @@ export const BoxDownload: React.FC = () => {
 					<Text variant="primaryText">{state.title}</Text>
 				</div>
 				<div className="flex gap-2 items-center">
-					<Text variant="label">Treshold:</Text>
+					<Text variant="label">Key Treshold:</Text>
 					<Text variant="primaryText">{state.threshold}</Text>
 				</div>
 				<div className="flex flex-col gap-1">
