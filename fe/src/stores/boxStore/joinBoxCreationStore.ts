@@ -24,7 +24,7 @@ const joinBoxCreationState = {
 		name: "",
 		userAgent: "",
 	} satisfies ParticipantType,
-	otherParticipants: [] as ParticipantType[],
+	otherKeyholders: [] as ParticipantType[],
 	content: "",
 	threshold: 1,
 	encryptedMessage: "",
@@ -91,8 +91,8 @@ export const useJoinBoxCreationState = create<JoinBoxState>()(
 				})),
 			connectParticipant: (participant: ParticipantType) => {
 				set((state) => ({
-					otherParticipants: [
-						...state.otherParticipants,
+					otherKeyholders: [
+						...state.otherKeyholders,
 						{
 							...participant,
 						},
@@ -101,7 +101,7 @@ export const useJoinBoxCreationState = create<JoinBoxState>()(
 			},
 			disconnectParticipant: (participantId: string) => {
 				set((state) => ({
-					otherParticipants: state.otherParticipants.filter(
+					otherKeyholders: state.otherKeyholders.filter(
 						(participant) => participant.id !== participantId,
 					),
 				}));

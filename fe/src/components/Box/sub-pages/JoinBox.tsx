@@ -12,7 +12,7 @@ import { ParticipantItem } from "../components/ParticipantItem";
 const participantService = new ParticipantService(new SignalingService());
 
 export const JoinBox: React.FC = () => {
-	const { leader, otherParticipants, threshold, title, you, content } =
+	const { leader, otherKeyholders, threshold, title, you, content } =
 		useStoreSlice();
 	const actions = useJoinBoxCreationState((state) => state.actions);
 
@@ -75,7 +75,7 @@ export const JoinBox: React.FC = () => {
 			{!!leader?.id && (
 				<BoxJoinContentForOK
 					leader={leader}
-					otherParticipants={otherParticipants}
+					otherKeyholders={otherKeyholders}
 					threshold={threshold}
 					title={title}
 					you={you}
@@ -91,12 +91,12 @@ const BoxJoinContentForOK = ({
 	threshold,
 	title,
 	you,
-	otherParticipants,
+	otherKeyholders,
 	content,
 }: {
 	title: string;
 	threshold: number;
-	otherParticipants: { id: string; name: string; userAgent: string }[];
+	otherKeyholders: { id: string; name: string; userAgent: string }[];
 	leader: { name: string; userAgent: string };
 	you: { name: string; userAgent: string };
 	content: string;
@@ -120,12 +120,12 @@ const BoxJoinContentForOK = ({
 				</FieldArea>
 				<FieldArea label="Other keyholders: ">
 					<div className="flex flex-col gap-1.5">
-						{otherParticipants.length === 0 && (
+						{otherKeyholders.length === 0 && (
 							<Text variant="secondaryText">
 								No keyholders yet. Waiting for others to join...
 							</Text>
 						)}
-						{otherParticipants.map((p) => (
+						{otherKeyholders.map((p) => (
 							<ParticipantItem
 								key={p.id}
 								name={p.name}
@@ -150,8 +150,8 @@ const useStoreSlice = () => {
 	const leader = useJoinBoxCreationState((state) => state.leader);
 	const you = useJoinBoxCreationState((state) => state.you);
 	const threshold = useJoinBoxCreationState((state) => state.threshold);
-	const otherParticipants = useJoinBoxCreationState(
-		(state) => state.otherParticipants,
+	const otherKeyholders = useJoinBoxCreationState(
+		(state) => state.otherKeyholders,
 	);
 	const content = useJoinBoxCreationState((state) => state.content);
 
@@ -160,7 +160,7 @@ const useStoreSlice = () => {
 		leader,
 		you,
 		threshold,
-		otherParticipants,
+		otherKeyholders,
 		content,
 	};
 };

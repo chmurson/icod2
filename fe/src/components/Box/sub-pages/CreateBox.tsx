@@ -17,7 +17,7 @@ import { ParticipantItem } from "../components/ParticipantItem";
 const CreateBox: React.FC = () => {
 	const { state, actions, validate, getError } = useStoreState();
 
-	const { content, leader, participants, threshold, title } = state;
+	const { content, leader, keyholders, threshold, title } = state;
 
 	const createDownloadStoreFromCreateBox = useDownloadBoxStore(
 		(state) => state.fromCreateBox,
@@ -92,14 +92,14 @@ const CreateBox: React.FC = () => {
 		leader.name,
 	]);
 
-	const noParticipantConnected = participants.length === 0;
+	const noParticipantConnected = keyholders.length === 0;
 
 	const handleBoxCreation = () => {
 		const isStateValid = validate({ title: localTitle, content: localContent });
 		if (!isStateValid) {
 			return;
 		}
-		const numKeys = participants.length + 1; // Leader + participants
+		const numKeys = keyholders.length + 1; // Leader + keyholders
 		const secured = secure_message(
 			localContent,
 			undefined,
@@ -172,12 +172,12 @@ const CreateBox: React.FC = () => {
 				</FieldArea>
 				<FieldArea label="Keyholders: ">
 					<div className="flex flex-col gap-1.5">
-						{participants.length === 0 && (
+						{keyholders.length === 0 && (
 							<Text variant="secondaryText">
 								No keyholders yet. Waiting for others to join...
 							</Text>
 						)}
-						{participants.map((p) => (
+						{keyholders.map((p) => (
 							<ParticipantItem
 								key={p.id}
 								name={p.name}
@@ -185,8 +185,8 @@ const CreateBox: React.FC = () => {
 							/>
 						))}
 					</div>
-					{getError("participants") && (
-						<Text variant="primaryError">{getError("participants")}</Text>
+					{getError("keyholders") && (
+						<Text variant="primaryError">{getError("keyholders")}</Text>
 					)}
 				</FieldArea>
 			</div>
@@ -213,13 +213,12 @@ const createBoxSchema = z
 			.min(3, { message: "Title must be at least 3 characters long." }),
 		content: z.string().trim().min(1, { message: "Content cannot be empty." }),
 		threshold: z.number().min(1, { message: "Threshold must be at least 1." }),
-		participants: z
+		keyholders: z
 			.array(z.any())
-			.min(1, { message: "At least one participant is required." }),
+			.min(1, { message: "At least one keyholders is required." }),
 	})
-	.refine((data) => data.threshold <= data.participants.length + 1, {
-		message:
-			"Threshold cannot be greater than the total number of participants.",
+	.refine((data) => data.threshold <= data.keyholders.length + 1, {
+		message: "Threshold cannot be greater than the total number of keyholders.",
 		path: ["threshold"], // This will attach the error message to the `threshold` field
 	});
 
@@ -230,7 +229,7 @@ const useStoreState = () => {
 	const content = useCreateBoxStore((state) => state.content);
 	const leader = useCreateBoxStore((state) => state.leader);
 	const threshold = useCreateBoxStore((state) => state.threshold);
-	const participants = useCreateBoxStore((state) => state.participants);
+	const keyholders = useCreateBoxStore((state) => state.keyholders);
 	const actions = useCreateBoxStore((state) => state.actions);
 
 	const [errors, setErrors] = useState<z.ZodError | null>(null);
@@ -241,7 +240,7 @@ const useStoreState = () => {
 			const dataToValidate = {
 				title,
 				content,
-				participants,
+				keyholders,
 				threshold,
 				...partialStateUpdate,
 			} satisfies CreateBoxSchema;
@@ -254,7 +253,7 @@ const useStoreState = () => {
 			}
 			return true;
 		},
-		[title, content, participants, threshold],
+		[title, content, keyholders, threshold],
 	);
 
 	const getError = (fieldName: keyof CreateBoxSchema) => {
@@ -267,7 +266,7 @@ const useStoreState = () => {
 			content,
 			leader,
 			threshold,
-			participants,
+			keyholders,
 		},
 		actions,
 		getError,

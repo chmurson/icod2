@@ -12,7 +12,7 @@ type DownloadBoxStoreStateType =
 			state: Pick<
 				CreateBoxStateData,
 				| "leader"
-				| "participants"
+				| "keyholders"
 				| "threshold"
 				| "title"
 				| "content"
@@ -25,7 +25,7 @@ type DownloadBoxStoreStateType =
 			state: Pick<
 				JoinBoxStateData,
 				| "leader"
-				| "otherParticipants"
+				| "otherKeyholders"
 				| "you"
 				| "title"
 				| "content"
@@ -56,7 +56,7 @@ const createStoreFn: StateCreator<DownloadBoxStoreStateType & Actions> = (
 				encryptedMessage: createBoxState.encryptedMessage,
 				generatedKey: createBoxState.generatedKey,
 				leader: createBoxState.leader,
-				participants: createBoxState.participants,
+				keyholders: createBoxState.keyholders,
 				threshold: createBoxState.threshold,
 				title: createBoxState.title,
 			},
@@ -71,7 +71,7 @@ const createStoreFn: StateCreator<DownloadBoxStoreStateType & Actions> = (
 				encryptedMessage: joinBoxState.encryptedMessage,
 				generatedKey: joinBoxState.generatedKey,
 				leader: joinBoxState.leader,
-				otherParticipants: joinBoxState.otherParticipants,
+				otherKeyholders: joinBoxState.otherKeyholders,
 				title: joinBoxState.title,
 				you: joinBoxState.you,
 				threshold: joinBoxState.threshold,
