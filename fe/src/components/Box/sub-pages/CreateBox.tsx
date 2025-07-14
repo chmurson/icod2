@@ -114,7 +114,6 @@ const CreateBox: React.FC = () => {
 			generatedKeys: secured.chunks as string[],
 		});
 		createDownloadStoreFromCreateBox();
-		// Send encrypted message to participants
 		leaderService.createBox({
 			type: "createBox",
 			title: localTitle,
@@ -171,11 +170,11 @@ const CreateBox: React.FC = () => {
 				<FieldArea label="You - leader">
 					<ParticipantItem name={leader.name} userAgent={leader.userAgent} />
 				</FieldArea>
-				<FieldArea label="Participants: ">
+				<FieldArea label="Keyholders: ">
 					<div className="flex flex-col gap-1.5">
 						{participants.length === 0 && (
 							<Text variant="secondaryText">
-								No participants yet. Waiting for others to join...
+								No keyholders yet. Waiting for others to join...
 							</Text>
 						)}
 						{participants.map((p) => (

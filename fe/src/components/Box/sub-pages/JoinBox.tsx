@@ -112,17 +112,17 @@ const BoxJoinContentForOK = ({
 					<Text variant="label">Treshold:</Text>
 					<Text variant="primaryText">{threshold}</Text>
 				</div>
-				<FieldArea label="Leader">
+				<FieldArea label="Leader:">
 					<ParticipantItem name={leader.name} userAgent={leader.userAgent} />
 				</FieldArea>
-				<FieldArea label="You">
+				<FieldArea label="You:">
 					<ParticipantItem name={you.name} userAgent={you.userAgent} />
 				</FieldArea>
-				<FieldArea label="Other participants: ">
+				<FieldArea label="Other keyholders: ">
 					<div className="flex flex-col gap-1.5">
 						{otherParticipants.length === 0 && (
 							<Text variant="secondaryText">
-								No participants yet. Waiting for others to join...
+								No keyholders yet. Waiting for others to join...
 							</Text>
 						)}
 						{otherParticipants.map((p) => (
@@ -134,13 +134,12 @@ const BoxJoinContentForOK = ({
 						))}
 					</div>
 				</FieldArea>
-				<FieldArea label="Content">
+				<FieldArea label="Content:">
 					<TextArea disabled rows={6} value={content} className="w-full" />
 				</FieldArea>
 			</div>
 			<Text variant="primaryText">
-				Waiting for more participants, or leader to create finalize box
-				creation.
+				Waiting for more keyholders, or leader to create finalize box creation.
 			</Text>
 		</>
 	);

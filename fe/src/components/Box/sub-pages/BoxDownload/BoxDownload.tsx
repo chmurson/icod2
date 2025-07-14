@@ -95,7 +95,7 @@ export const BoxDownload: React.FC = () => {
 				)}
 				{!state.you && (
 					<div className="flex flex-col gap-1">
-						<Text variant="label">Participants:</Text>
+						<Text variant="label">Keyholders:</Text>
 						<div>
 							{state.participants.map((p) => (
 								<ParticipantItem
@@ -109,7 +109,7 @@ export const BoxDownload: React.FC = () => {
 				)}
 				{state.you && state.otherParticipants.length > 0 && (
 					<div className="flex flex-col gap-1">
-						<Text variant="label">Other participants:</Text>
+						<Text variant="label">Other keyholders:</Text>
 						<div>
 							{state.otherParticipants.map((p) => (
 								<ParticipantItem
