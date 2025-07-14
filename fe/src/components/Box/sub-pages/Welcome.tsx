@@ -12,7 +12,7 @@ const Welcome: React.FC = () => {
 	return (
 		<div className="flex flex-col gap-4 pb-12">
 			<Typography variant="pageTitle" as="h1" className="mt-2">
-				Decantralized Box
+				Decentralised Box
 			</Typography>
 			<InfoBox
 				title="Create a Box"
@@ -21,10 +21,20 @@ const Welcome: React.FC = () => {
 						<p className="my-1">Start by creating a box. You’ll:</p>
 						<ul className="my-1">
 							<li>- Define the message or content you want to protect.</li>
-							<li>- Invite others (your friends or devices) to join.</li>
 							<li>
-								- Set a threshold (e.g. 3 out of 5) — the number of people
-								required to unlock the vault later.
+								- Invite other keyholders (your friends or devices) to join.
+							</li>
+							<li>
+								- Set a key threshold (e.g. 3 out of 5) — the number of
+								keyholders required to unlock the box later
+							</li>
+							<li>
+								- Lock the Box, downloads yours and share the remainig Locked
+								Boxes with every keyholder
+							</li>
+							<li>
+								- Every Locked Box contains the same ecrypted message, but a
+								different key.
 							</li>
 						</ul>
 					</>
@@ -39,7 +49,7 @@ const Welcome: React.FC = () => {
 				title="Join the Box Creation"
 				text={
 					<>
-						<p className="my-1">Start by creating a box. You’ll:</p>
+						<p className="my-1">Start by joining a box creation. You’ll:</p>
 						<ul className="my-1">
 							<li>
 								- Join by clicking a link or entering a token they shared with
@@ -47,8 +57,9 @@ const Welcome: React.FC = () => {
 							</li>
 							<li>- Take part in the box setup process.</li>
 							<li>
-								- Wait for the creator to define the final message or content.
+								- Wait for the leader to define the final message or content.
 							</li>
+							<li>- In the end you w</li>
 						</ul>
 					</>
 				}
@@ -60,26 +71,28 @@ const Welcome: React.FC = () => {
 			/>
 
 			<InfoBox
-				title="Open an Existing Box"
+				title="Open a Locked Box"
 				text={
 					<>
 						<p className="my-1">
-							Once a vault is created, it can only be opened when:
+							Once you downloaded a Locked Box, you can unlock it again, but
+							only when:
 						</p>
 						<ul className="my-1">
 							<li>
-								- At least the required number of people (as set during
-								creation) agree to open it.
+								- At least the required number of keyholds (as set during
+								creation by Key Trehsold) agree to open it.
 							</li>
 							<li>
-								- You’ll confirm your intent to unlock the content with others.
+								- You’ll confirm your intent to unlock the content with
+								keyholders
 							</li>
 						</ul>
 					</>
 				}
 				buttonSlot={
 					<Button onClick={startJoinBox} variant="prominent" disabled>
-						Open an Existing Box
+						Open a Locked Box
 					</Button>
 				}
 			/>

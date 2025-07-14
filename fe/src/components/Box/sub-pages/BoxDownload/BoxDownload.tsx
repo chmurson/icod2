@@ -65,7 +65,7 @@ export const BoxDownload: React.FC = () => {
 	return (
 		<div className="flex flex-col gap-8">
 			<Text variant="pageTitle" className="mt-4">
-				Box
+				Locked Box
 			</Text>
 			<div className="flex flex-col gap-4">
 				<div className="flex gap-2 items-center">
@@ -136,7 +136,7 @@ export const BoxDownload: React.FC = () => {
 			<div className="flex flex-col gap-1">
 				<div className="flex justify-between items-end">
 					<Button variant="prominent" onClick={handleClickDownloadButton}>
-						<DownloadIcon /> Download box shard
+						<DownloadIcon /> Download the Locked Box
 					</Button>
 					<ClosePageButton
 						showAlert={!isShardDownloaded}
