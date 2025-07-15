@@ -26,6 +26,9 @@ const CreateBox: React.FC = () => {
 	const [localTitle, setLocalTitle] = useState(title);
 	const [localContent, setLocalContent] = useState(content);
 	const [localThreshold, setLocalThreshold] = useState(threshold);
+	const [isContentSharedToPeer, setIsContentSharedToPeer] = useState<
+		Record<string, boolean>
+	>({});
 
 	useEffect(() => {
 		const timeoutHandler = setTimeout(() => {
@@ -36,15 +39,24 @@ const CreateBox: React.FC = () => {
 			});
 		}, 250);
 
-		leaderService.sendBoxInfo({
-			type: "boxInfo",
-			threshold: localThreshold,
-			content: localContent,
-			title: localTitle,
-		});
+		leaderService.sendBoxInfo(
+			{
+				type: "boxInfo",
+				threshold: localThreshold,
+				content: localContent,
+				title: localTitle,
+			},
+			isContentSharedToPeer,
+		);
 
 		return () => clearTimeout(timeoutHandler);
-	}, [localTitle, localContent, localThreshold, actions.setBoxInfo]);
+	}, [
+		localTitle,
+		localContent,
+		localThreshold,
+		actions.setBoxInfo,
+		isContentSharedToPeer,
+	]);
 
 	useEffect(() => {
 		init(wasm);
@@ -182,6 +194,13 @@ const CreateBox: React.FC = () => {
 								key={p.id}
 								name={p.name}
 								userAgent={p.userAgent}
+								isContentShared={!!isContentSharedToPeer[p.id]}
+								onContentShareChange={(checked) => {
+									setIsContentSharedToPeer((prev) => ({
+										...prev,
+										[p.id]: checked,
+									}));
+								}}
 							/>
 						))}
 					</div>

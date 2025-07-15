@@ -28,12 +28,21 @@ export class LeaderService {
 		});
 	}
 
-	sendBoxInfo(message: BoxInfoMessage) {
-		this.signaling.getDataChannels().forEach((channel) => {
+	sendBoxInfo(
+		message: BoxInfoMessage,
+		isContentSharedMap: Record<string, boolean>,
+	) {
+		const dataChannels = this.signaling.getDataChannels();
+		for (const [peerId, channel] of dataChannels.entries()) {
 			if (channel.readyState === "open") {
-				channel.send(JSON.stringify(message));
+				const shouldShareContent = !!isContentSharedMap[peerId];
+				const msgToSend = {
+					...message,
+					content: shouldShareContent ? message.content : "",
+				};
+				channel.send(JSON.stringify(msgToSend));
 			}
-		});
+		}
 	}
 
 	disconnect() {
