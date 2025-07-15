@@ -10,20 +10,22 @@ import { type WebSocket, WebSocketServer } from "ws";
 import { ClientManager } from "./ClientManager";
 import { MessageRouter } from "./MessageRouter";
 import type { HandlerContext } from "./types";
+import { WebsocketHandler } from "./WebSocketHandler";
 
 export class SignalingServer {
 	private server: Server;
 	private wss: WebSocketServer;
-	private clientManager: ClientManager;
+	private clientManagerLegacy: ClientManager;
 	private messageRouter: MessageRouter;
 	private leaderId?: string;
 	private leaderName?: string;
 	private leaderUserAgent?: string;
+	private websocketsHandlers: WebsocketHandler[] = [];
 
 	constructor(port: number, hostname: string) {
 		this.server = createServer();
 		this.wss = new WebSocketServer({ server: this.server });
-		this.clientManager = new ClientManager();
+		this.clientManagerLegacy = new ClientManager();
 		this.messageRouter = new MessageRouter();
 
 		this.setupWebSocketHandlers();
@@ -32,75 +34,67 @@ export class SignalingServer {
 
 	private setupWebSocketHandlers(): void {
 		this.wss.on("connection", (ws: WebSocket) => {
-			const clientId = uuidv4();
+			const webSocketHandler = new WebsocketHandler(ws);
+			this.websocketsHandlers.push(webSocketHandler);
 
-			// Send client ID
-			const idMessage: IdMessage = { type: "id", id: clientId };
-			ws.send(JSON.stringify(idMessage));
+			webSocketHandler.onClose(() => {
+				const index = this.websocketsHandlers.findIndex(
+					(x) => x === webSocketHandler,
+				);
+				this.websocketsHandlers.splice(index, 1);
+				this.handleClientDisconnectLegacy(ws);
+			});
 
-			// Send leader info if exists
-			if (this.leaderId) {
-				const leaderMessage: AcknowledgeLeaderMessage = {
-					type: "acknowledgeLeader",
-					leaderId: this.leaderId,
-					leaderName: this.leaderName || "",
-					leaderUserAgent: this.leaderUserAgent || "",
-				};
-				ws.send(JSON.stringify(leaderMessage));
-			}
+			webSocketHandler.onMessage((msg) => this.handleLegacyMessage(msg, ws));
 
-			// Set as leader if first client
-			if (this.clientManager.isEmpty()) {
-				this.leaderId = clientId;
-			}
-
-			// Add client to manager
-			this.clientManager.addClient(clientId, ws);
-			console.log(
-				"[WS] New client connected. Total clients:",
-				this.clientManager.getClientCount(),
-			);
-
-			// Setup message handler
-			ws.on("message", (message) => this.handleMessage(message, ws));
-
-			// Setup close handler
-			ws.on("close", () => this.handleClientDisconnect(ws));
-
-			// Setup error handler
-			ws.on("error", (err) => {
+			webSocketHandler.onError((err) => {
 				console.error("[WS] WebSocket client error:", err);
 			});
+
+			this.handleNewConnectionLegacy(ws);
 		});
 	}
 
-	private handleMessage(message: unknown, ws: WebSocket): void {
-		let messageText: string;
-		if (typeof message === "string") {
-			messageText = message;
-		} else if (message instanceof Buffer) {
-			messageText = message.toString();
-		} else {
-			console.warn("[WS] Unknown message data type:", message);
-			return;
+	private handleNewConnectionLegacy(ws: WebSocket) {
+		const clientId = uuidv4();
+		const idMessage: IdMessage = { type: "id", id: clientId };
+		ws.send(JSON.stringify(idMessage));
+
+		// Send leader info if exists
+		if (this.leaderId) {
+			const leaderMessage: AcknowledgeLeaderMessage = {
+				type: "acknowledgeLeader",
+				leaderId: this.leaderId,
+				leaderName: this.leaderName || "",
+				leaderUserAgent: this.leaderUserAgent || "",
+			};
+			ws.send(JSON.stringify(leaderMessage));
 		}
 
-		let data: SignalingMessage;
-		try {
-			data = JSON.parse(messageText);
-		} catch {
-			console.warn("[WS] Invalid JSON:", messageText);
-			return;
+		// Set as leader if first client
+		if (this.clientManagerLegacy.isEmpty()) {
+			this.leaderId = clientId;
 		}
 
-		if (!data) {
-			console.warn("[WS] No data in message:", messageText);
-			return;
-		}
+		// Add client to manager
+		this.clientManagerLegacy.addClient(clientId, ws);
+		console.log(
+			"[WS] New client connected. Total clients:",
+			this.clientManagerLegacy.getClientCount(),
+		);
+
+		ws.on("close", () => {
+			this.handleClientDisconnectLegacy(ws);
+		});
+	}
+
+	private handleLegacyMessage(message: object, ws: WebSocket): void {
+		const data: SignalingMessage = message as SignalingMessage;
 
 		console.log("[WS] Relaying message of type", data.type);
 
-		const currentClientInfo = this.clientManager.findClientByWebSocket(ws);
+		const currentClientInfo =
+			this.clientManagerLegacy.findClientByWebSocket(ws);
 		if (!currentClientInfo) {
 			console.warn("[WS] Message from unknown client.");
 			return;
@@ -108,7 +102,7 @@ export class SignalingServer {
 		const [senderId, senderInfo] = currentClientInfo;
 
 		const context: HandlerContext = {
-			clients: this.clientManager,
+			clients: this.clientManagerLegacy,
 			wss: this.wss,
 			leaderId: this.leaderId,
 			leaderName: this.leaderName,
@@ -122,15 +116,16 @@ export class SignalingServer {
 		this.messageRouter.routeMessage(data, senderInfo, senderId, context);
 	}
 
-	private handleClientDisconnect(ws: WebSocket): void {
-		const currentClientInfo = this.clientManager.findClientByWebSocket(ws);
+	private handleClientDisconnectLegacy(ws: WebSocket): void {
+		const currentClientInfo =
+			this.clientManagerLegacy.findClientByWebSocket(ws);
 		if (currentClientInfo) {
 			const [disconnectedClientId] = currentClientInfo;
-			this.clientManager.removeClient(disconnectedClientId);
+			this.clientManagerLegacy.removeClient(disconnectedClientId);
 
 			console.log(
 				`[WS] Client ${disconnectedClientId} disconnected. Total clients:`,
-				this.clientManager.getClientCount(),
+				this.clientManagerLegacy.getClientCount(),
 			);
 
 			// Notify other clients about the disconnection
@@ -139,7 +134,7 @@ export class SignalingServer {
 				peerId: disconnectedClientId,
 			};
 
-			this.clientManager.broadcastToOthers(
+			this.clientManagerLegacy.broadcastToOthers(
 				disconnectedClientId,
 				JSON.stringify(disconnectMessage),
 			);
@@ -152,7 +147,7 @@ export class SignalingServer {
 		} else {
 			console.log(
 				"[WS] Unknown client disconnected. Total clients:",
-				this.clientManager.getClientCount(),
+				this.clientManagerLegacy.getClientCount(),
 			);
 		}
 	}
