@@ -4,7 +4,7 @@ import { Button } from "@/ui/Button";
 export const OpenBox: React.FC = () => {
   const openBoxState = useOpenBoxCreationState();
 
-  if (openBoxState.state === "connecting") {
+  if (openBoxState.state !== "connecting") {
     return <div>Loading...</div>;
   }
 

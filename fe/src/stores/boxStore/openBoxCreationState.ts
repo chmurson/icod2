@@ -5,7 +5,7 @@ import type { KeyHolderType, ParticipantType } from "./common-types";
 const openBoxCreationState = {
   state: "initial" as
     | "initial"
-    | "drop-file-part"
+    | "drop-box"
     | "connecting"
     | "connected"
     | "opened",
@@ -57,7 +57,7 @@ export const useOpenBoxCreationState = create<OpenBoxState>()(
   devtools((set) => ({
     ...openBoxCreationState,
     actions: {
-      start: () => set({ ...openBoxCreationState, state: "drop-file-part" }),
+      start: () => set({ ...openBoxCreationState, state: "drop-box" }),
       connect: ({
         boxTitle,
         encryptedMessage,
