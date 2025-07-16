@@ -5,7 +5,7 @@ export type AcceptsOffersRequest = {
 export function isAcceptsOffersRequest(
   payload: object,
 ): payload is AcceptsOffersRequest {
-  return "type" in payload && payload.type === "accepts-offer-request";
+  return "type" in payload && payload.type === "accepts-offers-request";
 }
 
 export type AcceptsOffersResponse = {
