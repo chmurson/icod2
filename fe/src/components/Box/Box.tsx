@@ -2,7 +2,7 @@ import type React from "react";
 import { useJoinBoxCreationState } from "@/stores";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { BoxDownload } from "./sub-pages/BoxDownload";
-import CreateBox from "./sub-pages/CreateBox";
+import { CreateBox } from "./sub-pages/CreateBox";
 import JoinBox from "./sub-pages/JoinBox";
 import Welcome from "./sub-pages/Welcome";
 import { WhatsYourName } from "./sub-pages/WhatsYourName";

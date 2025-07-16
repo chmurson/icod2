@@ -97,7 +97,7 @@ export const BoxDownload: React.FC = () => {
           <div className="flex flex-col gap-1">
             <Text variant="label">Keyholders:</Text>
             <div>
-              {state.keyholders.map((p) => (
+              {state.keyHolders.map((p) => (
                 <ParticipantItem
                   key={p.id}
                   name={p.name}
@@ -107,11 +107,11 @@ export const BoxDownload: React.FC = () => {
             </div>
           </div>
         )}
-        {state.you && state.otherKeyholders.length > 0 && (
+        {state.you && state.otherKeyHolders.length > 0 && (
           <div className="flex flex-col gap-1">
             <Text variant="label">Other keyholders:</Text>
             <div>
-              {state.otherKeyholders.map((p) => (
+              {state.otherKeyHolders.map((p) => (
                 <ParticipantItem
                   key={p.id}
                   name={p.name}
@@ -121,17 +121,19 @@ export const BoxDownload: React.FC = () => {
             </div>
           </div>
         )}
-        <div className="flex flex-col gap-1">
-          <Text variant="label">Preview messae:</Text>
-          <HiddenTextArea
-            onShow={showMessage}
-            onHide={hideMessage}
-            value={visibleMessage}
-            onChange={(e) => console.log(e.target.value)} // Example onChange
-          >
-            <TextArea rows={8} disabled />
-          </HiddenTextArea>
-        </div>
+        {state.type === "fromCreateBox" && (
+          <div className="flex flex-col gap-1">
+            <Text variant="label">Preview messae:</Text>
+            <HiddenTextArea
+              onShow={showMessage}
+              onHide={hideMessage}
+              value={visibleMessage}
+              onChange={(e) => console.log(e.target.value)} // Example onChange
+            >
+              <TextArea rows={8} disabled />
+            </HiddenTextArea>
+          </div>
+        )}
       </div>
       <div className="flex flex-col gap-1">
         <div className="flex justify-between items-end">

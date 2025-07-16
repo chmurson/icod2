@@ -8,21 +8,29 @@ export const useDownloadShard = ({
 }: {
   onSuccess?: () => void;
 } = defaultArgs) => {
-  const { encryptedMessage, generatedKey } = useBoxDownloadState();
+  const state = useBoxDownloadState();
 
   const [error, setError] = useState<string | undefined>(undefined);
 
   const downloadKeyShardAndMessage = useCallback(() => {
     setError(undefined);
-    if (!encryptedMessage?.trim() || !generatedKey?.trim()) {
-      setError("Encrypted message and generate key are not set!");
-      return;
-    }
-    downloadFile(encryptedMessage, "encrypted-message.txt");
-    downloadFile(generatedKey, "key-shard.txt");
 
+    const data = {
+      encryptedMessage: state.encryptedMessage,
+      key: state.generatedKey,
+      boxTitle: state.title,
+      keyHolderId:
+        state.type === "fromCreateBox" ? state.leader.id : state.you?.id,
+      keyThreshold: state.threshold,
+      keyHolders:
+        state.type === "fromCreateBox"
+          ? [state.leader, ...(state.keyHolders ?? [])]
+          : [state.leader, ...(state.otherKeyHolders ?? []), state.you],
+    };
+
+    downloadFile(JSON.stringify(data, null, 2), "locked-box.json");
     onSuccess?.();
-  }, [encryptedMessage, generatedKey, onSuccess]);
+  }, [onSuccess, state]);
 
   return {
     downloadKeyShardAndMessage,
@@ -31,7 +39,7 @@ export const useDownloadShard = ({
 };
 
 function downloadFile(content: string, fileName: string) {
-  const blob = new Blob([content], { type: "text/plain" });
+  const blob = new Blob([content], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

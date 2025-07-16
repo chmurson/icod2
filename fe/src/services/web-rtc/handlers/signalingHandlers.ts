@@ -8,6 +8,7 @@ import type { WebRTCMessageHandler } from "../types";
 
 export const handleId: WebRTCMessageHandler = (data, ctx) => {
   ctx.myId = (data as IdMessage).id;
+  ctx.signalingService?.setMyId((data as IdMessage).id);
   ctx.onId?.(data as IdMessage);
 };
 
