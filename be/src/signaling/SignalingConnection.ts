@@ -11,7 +11,7 @@ import {
 } from "@icod2/contracts/src/client-server";
 import { v4 as uuidv4 } from "uuid";
 import type { WebSocket } from "ws";
-import { WebsocketJSONHandler } from "./WebSocketHandler";
+import { WebsocketJSONHandler } from "./WebSocketJSONHandler";
 
 export class SignalingConnection {
   private websocketJSONHandler;
@@ -20,7 +20,7 @@ export class SignalingConnection {
     | undefined
     | { mode: "acceptsOffers"; offerSender?: SignalingConnection }
     | { mode: "sendsOffer"; matchedAcceptor: SignalingConnection };
-  private token: string | undefined;
+  private sessionToken: string | undefined;
 
   constructor(
     websocket: WebSocket,
@@ -97,8 +97,8 @@ export class SignalingConnection {
       return;
     }
 
-    this.token = payload.token;
-    console.warn(payload.token, "token is ignored for now");
+    this.sessionToken = payload.sessionToken;
+    console.warn(payload.sessionToken, "sessionToken is ignored for now");
 
     const firstAwaitingOffers = this.otherSignalingConnections.find(
       (x) => x.getState()?.mode === "acceptsOffers",
@@ -124,10 +124,10 @@ export class SignalingConnection {
 
     this.state = { mode: "acceptsOffers" };
 
-    const token = uuidv4();
+    const sessionToken = uuidv4();
     this.websocketJSONHandler.send({
       type: "accepts-offers-response",
-      token,
+      sessionToken: sessionToken,
     } satisfies AcceptsOffersResponse);
   }
 }
