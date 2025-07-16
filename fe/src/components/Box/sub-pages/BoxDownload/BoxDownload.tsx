@@ -121,17 +121,19 @@ export const BoxDownload: React.FC = () => {
             </div>
           </div>
         )}
-        <div className="flex flex-col gap-1">
-          <Text variant="label">Preview messae:</Text>
-          <HiddenTextArea
-            onShow={showMessage}
-            onHide={hideMessage}
-            value={visibleMessage}
-            onChange={(e) => console.log(e.target.value)} // Example onChange
-          >
-            <TextArea rows={8} disabled />
-          </HiddenTextArea>
-        </div>
+        {state.type === "fromCreateBox" && (
+          <div className="flex flex-col gap-1">
+            <Text variant="label">Preview messae:</Text>
+            <HiddenTextArea
+              onShow={showMessage}
+              onHide={hideMessage}
+              value={visibleMessage}
+              onChange={(e) => console.log(e.target.value)} // Example onChange
+            >
+              <TextArea rows={8} disabled />
+            </HiddenTextArea>
+          </div>
+        )}
       </div>
       <div className="flex flex-col gap-1">
         <div className="flex justify-between items-end">
