@@ -1,4 +1,8 @@
 import {
+  calleeIntroduction,
+  callerIntroduction,
+} from "@icod2/contracts/src/client-client";
+import {
   type AnswerRequest,
   isAnswerRequest,
   isSendsOfferResponse,
@@ -12,11 +16,16 @@ import {
   createOfferAndAllIceCandidate,
 } from "./callerPeerConnectionUtils";
 
+type ConnectionFailureReason = "no-callee-available" | "unknown-error";
+
 export class CallerSignalingService {
   private websocketJSONHandler: WebsocketJSONHandler;
   private peerConnection?: RTCPeerConnection;
+  private peerConnected = false;
   private dataChannel?: RTCDataChannel;
   private _onPeerConnected?: (peerConnection: RTCPeerConnection) => void;
+  private _onPeerDisconnected?: (peerConnection: RTCPeerConnection) => void;
+  private _failedToConnect?: (reason: ConnectionFailureReason) => void;
 
   constructor(websocketJSONHandler: WebsocketJSONHandler) {
     this.websocketJSONHandler = websocketJSONHandler;
@@ -38,8 +47,29 @@ export class CallerSignalingService {
     this._onPeerConnected = callback;
   }
 
+  get onPeerDisconnected():
+    | ((peerConnection: RTCPeerConnection) => void)
+    | undefined {
+    return this._onPeerDisconnected;
+  }
+
+  set onPeerDisconnected(callback: (
+    peerConnection: RTCPeerConnection,
+  ) => void) {
+    this._onPeerDisconnected = callback;
+  }
+
+  get onFailedToConnect():
+    | ((reason: ConnectionFailureReason) => void)
+    | undefined {
+    return this._failedToConnect;
+  }
+
+  set onFailedToConnect(callback: (reason: ConnectionFailureReason) => void) {
+    this._failedToConnect = callback;
+  }
+
   close(): void {
-    console.log("[DEBUG][CallerSignalingService]close()");
     this.peerConnection?.close();
     this.dataChannel?.close();
     this.websocketJSONHandler.close();
@@ -55,15 +85,26 @@ export class CallerSignalingService {
     this.dataChannel = this.peerConnection.createDataChannel("chat");
 
     this.dataChannel.onopen = () => {
-      console.log("Data channel open!");
-      this.dataChannel?.send("Hello from Caller");
+      this.dataChannel?.send(callerIntroduction);
     };
     this.dataChannel.onmessage = (event) =>
       console.log("Received from Callee:", event.data);
     this.dataChannel.onmessage = (event) => {
-      event.data === "Hello from Callee";
-      if (this.peerConnection) {
+      event.data === calleeIntroduction;
+      if (this.peerConnection && !this.peerConnected) {
+        this.peerConnected = true;
         this.onPeerConnected?.(this.peerConnection);
+      }
+    };
+
+    this.peerConnection.onconnectionstatechange = () => {
+      if (this.peerConnection?.connectionState === "disconnected") {
+        if (this.peerConnected && this.peerConnection) {
+          this.onPeerDisconnected?.(this.peerConnection);
+        }
+        this.peerConnected = false;
+        this.peerConnection?.close();
+        this.dataChannel?.close();
       }
     };
   }
@@ -99,7 +140,13 @@ export class CallerSignalingService {
 
   private async handleSendsOfferResponse(data: SendsOfferResponse) {
     if (!data.success) {
-      console.error("Failed to send offer request");
+      const reason =
+        {
+          "no-callee-available": "no-callee-available" as const,
+          other: "unknown-error" as const,
+        }[data.reason ?? "other"] ?? ("unknown-error" as const);
+
+      this.onFailedToConnect?.(reason);
       return;
     }
 
@@ -113,7 +160,6 @@ export class CallerSignalingService {
     const { offer, iceCandidates } = await createOfferAndAllIceCandidate(
       this.peerConnection,
     );
-    console.log("offer", offer);
 
     this.sendOfferRequest({ offer, iceCandidates });
   }

@@ -7,12 +7,21 @@ export function useJoinBoxConnection() {
     let peer: RTCPeerConnection | undefined;
 
     const callerConnection = new CallerSignalingService(
-      createWebsocketConnection({ enableLogging: true }),
+      createWebsocketConnection(),
     );
 
     callerConnection.onPeerConnected = (peerConnection) => {
       peer = peerConnection;
       console.log("peer connected");
+    };
+
+    callerConnection.onPeerDisconnected = () => {
+      peer = undefined;
+      console.log("peer disconnected");
+    };
+
+    callerConnection.onFailedToConnect = (reason) => {
+      console.error("Failed to connect:", reason);
     };
 
     callerConnection.start();
@@ -24,14 +33,3 @@ export function useJoinBoxConnection() {
     };
   }, []);
 }
-
-// take ws api -> request that accepts offers
-// accept response -> that requests are being accepted
-// accept offer; consume it; create answer and send it back
-// test connection
-
-// on the side of keyholder - not leader
-// take ws api -> request that sends offer
-// accept response; create offer send it to server
-// accept response with answer; consume it;
-// test connection

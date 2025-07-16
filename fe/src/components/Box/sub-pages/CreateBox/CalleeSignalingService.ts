@@ -1,4 +1,8 @@
 import {
+  calleeIntroduction,
+  callerIntroduction,
+} from "@icod2/contracts/src/client-client";
+import {
   type AcceptsOffersRequest,
   type AcceptsOffersResponse,
   type AnswerRequest,
@@ -16,7 +20,10 @@ export class CalleeSignalingService {
     string,
     { peer: RTCPeerConnection; dataChannel?: RTCDataChannel }
   > = new Map();
-  private _onPeerConnected?: (peerConnection: RTCPeerConnection) => void;
+  private _onPeerConnected?: (
+    peerConnection: RTCPeerConnection,
+    dataChannel: RTCDataChannel,
+  ) => void;
   private _onPeerDisconnected?: (peerConnection: RTCPeerConnection) => void;
   private _onConnected?: () => void;
 
@@ -45,12 +52,15 @@ export class CalleeSignalingService {
   }
 
   get onPeerConnected():
-    | ((peerConnection: RTCPeerConnection) => void)
+    | ((peerConnection: RTCPeerConnection, dataChannel: RTCDataChannel) => void)
     | undefined {
     return this._onPeerConnected;
   }
 
-  set onPeerConnected(callback: (peerConnection: RTCPeerConnection) => void) {
+  set onPeerConnected(callback: (
+    peerConnection: RTCPeerConnection,
+    dataChannel: RTCDataChannel,
+  ) => void) {
     this._onPeerConnected = callback;
   }
 
@@ -84,20 +94,30 @@ export class CalleeSignalingService {
 
     peerConnection.ondatachannel = (event) => {
       const dataChannel = event.channel;
+
       dataChannel.onopen = () => {
-        console.log("Data channel open!");
         this.peerConnections.set(peerConnectionId, {
           peer: peerConnection,
           dataChannel,
         });
+
+        peerConnection.onconnectionstatechange = () => {
+          if (peerConnection.connectionState === "disconnected") {
+            this.onPeerDisconneced?.(peerConnection);
+          }
+          this.peerConnections.delete(peerConnectionId);
+          peerConnection.close();
+          dataChannel.close();
+        };
       };
+
       dataChannel.onmessage = (event) =>
         console.log("Received from Caller:", event.data);
       dataChannel.onmessage = (event) => {
-        event.data === "Hello from Celler";
-        this.onPeerConnected?.(peerConnection);
+        event.data === callerIntroduction;
+        this.onPeerConnected?.(peerConnection, dataChannel);
       };
-      dataChannel.send("Hello from Cellee");
+      dataChannel.send(calleeIntroduction);
     };
 
     return peerConnection;
@@ -137,7 +157,7 @@ export class CalleeSignalingService {
   }
 
   private handleAcceptsOffersResponse(data: AcceptsOffersResponse) {
-    console.log(data.sessionToken);
+    console.log("priting sessionToken for now", data.sessionToken);
     this.onConnected?.();
   }
 

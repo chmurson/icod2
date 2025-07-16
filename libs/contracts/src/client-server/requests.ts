@@ -49,7 +49,7 @@ export function isSendOfferRequest(
 export type SendsOfferResponse = {
   type: "sends-offers-response";
   success: boolean;
-  reason?: string;
+  reason?: "no-callee-available" | "other";
 };
 
 export function isSendsOfferResponse(

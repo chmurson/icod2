@@ -111,10 +111,17 @@ export class SignalingConnection {
       };
     }
 
-    this.websocketJSONHandler.send({
+    if (!firstAwaitingOffers) {
+      return this.websocketJSONHandler.send({
+        type: "sends-offers-response",
+        success: !!firstAwaitingOffers,
+        reason: "no-callee-available",
+      } satisfies SendsOfferResponse);
+    }
+
+    return this.websocketJSONHandler.send({
       type: "sends-offers-response",
-      success: !!firstAwaitingOffers,
-      reason: "No one is currently waiting to receive offers",
+      success: true,
     } satisfies SendsOfferResponse);
   }
 

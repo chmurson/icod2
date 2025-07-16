@@ -36,19 +36,19 @@ export class WebsocketJSONHandler {
     this.loggingEnabled = enabled;
   }
 
-  private log(message: string, ...args: any[]) {
+  private log(message: string, ...args: unknown[]) {
     if (this.loggingEnabled) {
       console.log(message, ...args);
     }
   }
 
-  private warn(message: string, ...args: any[]) {
+  private warn(message: string, ...args: unknown[]) {
     if (this.loggingEnabled) {
       console.warn(message, ...args);
     }
   }
 
-  private error(message: string, ...args: any[]) {
+  private error(message: string, ...args: unknown[]) {
     if (this.loggingEnabled) {
       console.error(message, ...args);
     }
@@ -78,12 +78,10 @@ export class WebsocketJSONHandler {
 
   public send(payload: object) {
     this.webSocket.send(JSON.stringify(payload));
-    this.log("[DEBUG][WebsocketJSONHandler]send", payload);
   }
 
   private handleClose(code: number, reason: Buffer) {
     this.listeners.onClose.forEach((fn) => fn(code, reason));
-    this.log("[DEBUG][WebsocketJSONHandler]handleClose");
   }
 
   private handleError(error: Error) {
@@ -101,10 +99,7 @@ export class WebsocketJSONHandler {
       listenersToExecute.length === 0 &&
       this.listeners.onMessage.length === 0
     ) {
-      this.warn(
-        "[Debug][WebsocketJSONHandler] No listener to execute for: ",
-        payload,
-      );
+      this.warn("[WebsocketJSONHandler] No listener to execute for: ", payload);
     }
   }
 
@@ -116,7 +111,6 @@ export class WebsocketJSONHandler {
     if (typeof data === "string") {
       try {
         const json = JSON.parse(data);
-        this.log("[DEBUG][WebsocketJSONHandler]handleMessage", json);
         this.listeners.onMessage.forEach((fn) => fn(json));
         this.tryCallSpecificMessageListeners(json);
       } catch (e) {
@@ -129,7 +123,6 @@ export class WebsocketJSONHandler {
       try {
         const string = data.toString();
         const json = JSON.parse(string);
-        this.log("[DEBUG][WebsocketJSONHandler]handleMessage", json);
         this.listeners.onMessage.forEach((fn) => fn(json));
         this.tryCallSpecificMessageListeners(json);
       } catch (e) {

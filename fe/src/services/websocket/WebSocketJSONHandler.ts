@@ -23,7 +23,6 @@ export class WebsocketJSONHandler {
     this.loggingEnabled = enableLogging;
 
     this.webSocket.addEventListener("open", () => {
-      this.log("[DEBUG][WebsocketJSONHandler] Connection opened");
       this.handleOpen();
     });
 
@@ -44,19 +43,13 @@ export class WebsocketJSONHandler {
     this.loggingEnabled = enabled;
   }
 
-  private log(message: string, ...args: any[]) {
-    if (this.loggingEnabled) {
-      console.log(message, ...args);
-    }
-  }
-
-  private warn(message: string, ...args: any[]) {
+  private warn(message: string, ...args: unknown[]) {
     if (this.loggingEnabled) {
       console.warn(message, ...args);
     }
   }
 
-  private error(message: string, ...args: any[]) {
+  private error(message: string, ...args: unknown[]) {
     console.error(message, ...args);
   }
 
@@ -96,10 +89,6 @@ export class WebsocketJSONHandler {
   }
 
   public close() {
-    this.log(
-      "[DEBUG][WebsocketJSONHandler] Closing WebSocket connection. Connection state: ",
-      this.webSocket.readyState,
-    );
     if (
       this.webSocket.readyState === WebSocket.CLOSING ||
       this.webSocket.readyState === WebSocket.CLOSED
@@ -113,7 +102,7 @@ export class WebsocketJSONHandler {
   private handleOpen() {
     // Send all queued messages
     while (this.sendingQueue.length > 0) {
-      const payload = this.sendingQueue.shift()!;
+      const payload = this.sendingQueue.shift();
       this.webSocket.send(JSON.stringify(payload));
     }
   }
@@ -137,17 +126,12 @@ export class WebsocketJSONHandler {
       listenersToExecute.length === 0 &&
       this.listeners.onMessage.length === 0
     ) {
-      this.warn(
-        "[WebSocketJSONHandler][Debug] No listener to execute for: ",
-        payload,
-      );
     }
   }
 
   private handleMessage(event: MessageEvent) {
     try {
       const json = JSON.parse(event.data);
-      this.log("[DEBUG][WebsocketJSONHandler]handleMessage", json);
       this.listeners.onMessage.forEach((fn) => fn(json));
       this.tryCallSpecificMessageListeners(json);
     } catch (e) {

@@ -4,14 +4,26 @@ import { CalleeSignalingService } from "./CalleeSignalingService";
 
 export function useCreateBoxConnection() {
   useEffect(() => {
-    const peers: RTCPeerConnection[] = [];
+    const peers: {
+      connection: RTCPeerConnection;
+      dataChannel: RTCDataChannel;
+    }[] = [];
+
     const calleeConnection = new CalleeSignalingService(
-      createWebsocketConnection({ enableLogging: true }),
+      createWebsocketConnection(),
     );
 
-    calleeConnection.onPeerConnected = (peerConnection) => {
-      peers.push(peerConnection);
+    calleeConnection.onPeerConnected = (peerConnection, dataChannel) => {
+      peers.push({ connection: peerConnection, dataChannel });
       console.log("peer connected");
+    };
+
+    calleeConnection.onPeerDisconneced = (peerConnection) => {
+      const index = peers.findIndex((p) => p.connection === peerConnection);
+      if (index !== -1) {
+        peers.splice(index, 1);
+      }
+      console.log("peer disconnected");
     };
 
     calleeConnection.onConnected = () => {
@@ -29,14 +41,3 @@ export function useCreateBoxConnection() {
     };
   }, []);
 }
-
-// take ws api -> request that accepts offers
-// accept response -> that requests are being accepted
-// accept offer; consume it; create answer and send it back
-// test connection
-
-// on the side of keyholder - not leader
-// take ws api -> request that sends offer
-// accept response; create offer send it to server
-// accept response with answer; consume it;
-// test connection

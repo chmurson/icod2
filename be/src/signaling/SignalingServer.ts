@@ -67,13 +67,13 @@ export class SignalingServer {
         );
       });
 
-      // webSocketHandler.onMessage((msg) => this.handleLegacyMessage(msg, ws));
+      webSocketHandler.onMessage((msg) => this.handleLegacyMessage(msg, ws));
 
       webSocketHandler.onError((err) => {
         console.error("[WS] WebSocket client error:", err);
       });
 
-      // this.handleNewConnectionLegacy(ws);
+      this.handleNewConnectionLegacy(ws);
     });
   }
 
