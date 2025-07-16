@@ -8,7 +8,7 @@ export const useBoxDownloadState = () => {
     const {
       content,
       leader,
-      keyholders,
+      keyHolders,
       threshold,
       title,
       encryptedMessage,
@@ -20,7 +20,7 @@ export const useBoxDownloadState = () => {
       title,
       threshold,
       leader,
-      keyholders,
+      keyHolders: keyHolders,
       content,
       encryptedMessage,
       generatedKey,
@@ -35,7 +35,7 @@ export const useBoxDownloadState = () => {
       title,
       encryptedMessage,
       generatedKey,
-      otherKeyholders,
+      otherKeyHolders,
       you,
     } = state.state;
 
@@ -47,7 +47,7 @@ export const useBoxDownloadState = () => {
       title,
       encryptedMessage,
       generatedKey,
-      otherKeyholders,
+      otherKeyHolders,
       you,
     };
   }
@@ -55,14 +55,14 @@ export const useBoxDownloadState = () => {
   return {
     type: "",
     title: "",
-    treshold: "",
+    threshold: "",
     leader: {
       id: "",
       name: "",
       userAgent: "",
     } satisfies ParticipantType,
-    keyholders: [],
-    contnet: "",
+    keyHolders: [],
+    content: "",
   };
   // const title = useCreateBoxStore((state) => state.title);
 };

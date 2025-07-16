@@ -19,7 +19,7 @@ const createBoxDefaultState = {
     name: "",
     userAgent: "",
   } satisfies ParticipantType,
-  keyholders: [] as ParticipantType[],
+  keyHolders: [] as ParticipantType[],
   content: "",
   threshold: 1,
   encryptedMessage: "",
@@ -74,8 +74,8 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
       })),
     connectParticipant: (participant) =>
       set((state) => ({
-        keyholders: [
-          ...state.keyholders,
+        keyHolders: [
+          ...state.keyHolders,
           {
             ...participant,
           },
@@ -83,7 +83,7 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
       })),
     disconnectParticipant: (participantId: string) => {
       set((state) => ({
-        keyholders: state.keyholders.filter(
+        keyHolders: state.keyHolders.filter(
           (participant) => participant.id !== participantId,
         ),
       }));

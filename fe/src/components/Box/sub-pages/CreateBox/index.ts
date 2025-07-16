@@ -1,1 +1,1 @@
-export { useCreateBoxConnection } from "./useCreateBoxConnection";
+export { CreateBox } from "./CreateBox";

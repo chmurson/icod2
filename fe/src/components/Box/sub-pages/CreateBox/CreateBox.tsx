@@ -2,27 +2,26 @@ import { TextArea, TextField } from "@radix-ui/themes";
 import init, { ChunksConfiguration, secure_message } from "icod-crypto-js";
 import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
 import type React from "react";
-import { useCallback, useEffect, useState } from "react";
-import { z } from "zod";
+import { useEffect, useState } from "react";
 import { leaderService } from "@/services/web-rtc/leaderSingleton";
-import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
-import { useDownloadBoxStore } from "@/stores/boxStore/downloadBoxStore";
+import { useDownloadBoxStore } from "@/stores";
 import { useJoinBoxCreationState } from "@/stores/boxStore/joinBoxCreationStore";
 import { Button } from "@/ui/Button.tsx";
 import { Text } from "@/ui/Typography";
-import { FieldArea } from "../components/FieldArea";
-import { InputNumber } from "../components/InputNumber";
-import { ParticipantItem } from "../components/ParticipantItem";
-import { useCreateBoxConnection } from "./CreateBox/useCreateBoxConnection";
+import { FieldArea } from "../../components/FieldArea";
+import { InputNumber } from "../../components/InputNumber";
+import { ParticipantItem } from "../../components/ParticipantItem";
+import { useCreateBoxState } from "./hooks";
+import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
-const CreateBox: React.FC = () => {
-  const { state, actions, validate, getError } = useStoreState();
-
-  const { content, leader, keyholders, threshold, title } = state;
+export const CreateBox: React.FC = () => {
+  const { state, actions, getError, validate } = useCreateBoxState();
 
   const createDownloadStoreFromCreateBox = useDownloadBoxStore(
     (state) => state.fromCreateBox,
   );
+
+  const { content, leader, keyHolders, threshold, title } = state;
 
   const [localTitle, setLocalTitle] = useState(title);
   const [localContent, setLocalContent] = useState(content);
@@ -107,23 +106,23 @@ const CreateBox: React.FC = () => {
     leader.name,
   ]);
 
-  const noParticipantConnected = keyholders.length === 0;
+  const noParticipantConnected = keyHolders.length === 0;
 
   const handleBoxCreation = () => {
-    const isStateValid = validate({ title: localTitle, content: localContent });
+    const isStateValid = validate({ title, content });
     if (!isStateValid) {
       return;
     }
-    const numKeys = keyholders.length + 1; // Leader + keyholders
+    const numKeys = keyHolders.length + 1; // Leader + key holders
     const secured = secure_message(
-      localContent,
+      content,
       undefined,
       new ChunksConfiguration(threshold, numKeys - threshold),
     );
 
     actions.create({
-      title: localTitle,
-      content: localContent,
+      title,
+      content,
       encryptedMessage: secured.encrypted_message[0] as string,
       generatedKey: secured.chunks[0],
       generatedKeys: secured.chunks as string[],
@@ -131,8 +130,8 @@ const CreateBox: React.FC = () => {
     createDownloadStoreFromCreateBox();
     leaderService.createBox({
       type: "createBox",
-      title: localTitle,
-      content: localContent,
+      title,
+      content,
       encryptedMessage: secured.encrypted_message[0] as string,
       generatedKey: secured.chunks[0],
     });
@@ -168,7 +167,7 @@ const CreateBox: React.FC = () => {
             <Text variant="primaryError">{getError("content")}</Text>
           )}
         </FieldArea>
-        <FieldArea label="Key Treshold:">
+        <FieldArea label="Key Threshold:">
           <InputNumber
             min={1}
             defaultValue={1}
@@ -185,14 +184,14 @@ const CreateBox: React.FC = () => {
         <FieldArea label="You - leader">
           <ParticipantItem name={leader.name} userAgent={leader.userAgent} />
         </FieldArea>
-        <FieldArea label="Keyholders: ">
+        <FieldArea label="KeyHolders: ">
           <div className="flex flex-col gap-1.5">
-            {keyholders.length === 0 && (
+            {keyHolders.length === 0 && (
               <Text variant="secondaryText">
-                No keyholders yet. Waiting for others to join...
+                No key holders yet. Waiting for others to join...
               </Text>
             )}
-            {keyholders.map((p) => (
+            {keyHolders.map((p) => (
               <ParticipantItem
                 key={p.id}
                 name={p.name}
@@ -207,8 +206,8 @@ const CreateBox: React.FC = () => {
               />
             ))}
           </div>
-          {getError("keyholders") && (
-            <Text variant="primaryError">{getError("keyholders")}</Text>
+          {getError("keyHolders") && (
+            <Text variant="primaryError">{getError("keyHolders")}</Text>
           )}
         </FieldArea>
       </div>
@@ -226,72 +225,3 @@ const CreateBox: React.FC = () => {
 };
 
 export default CreateBox;
-
-const createBoxSchema = z
-  .object({
-    title: z
-      .string()
-      .trim()
-      .min(3, { message: "Title must be at least 3 characters long." }),
-    content: z.string().trim().min(1, { message: "Content cannot be empty." }),
-    threshold: z.number().min(1, { message: "Threshold must be at least 1." }),
-    keyholders: z
-      .array(z.any())
-      .min(1, { message: "At least one keyholders is required." }),
-  })
-  .refine((data) => data.threshold <= data.keyholders.length + 1, {
-    message: "Threshold cannot be greater than the total number of keyholders.",
-    path: ["threshold"], // This will attach the error message to the `threshold` field
-  });
-
-type CreateBoxSchema = z.infer<typeof createBoxSchema>;
-
-const useStoreState = () => {
-  const title = useCreateBoxStore((state) => state.title);
-  const content = useCreateBoxStore((state) => state.content);
-  const leader = useCreateBoxStore((state) => state.leader);
-  const threshold = useCreateBoxStore((state) => state.threshold);
-  const keyholders = useCreateBoxStore((state) => state.keyholders);
-  const actions = useCreateBoxStore((state) => state.actions);
-
-  const [errors, setErrors] = useState<z.ZodError | null>(null);
-
-  const validate = useCallback(
-    (partialStateUpdate?: Partial<CreateBoxSchema>) => {
-      setErrors(null);
-      const dataToValidate = {
-        title,
-        content,
-        keyholders,
-        threshold,
-        ...partialStateUpdate,
-      } satisfies CreateBoxSchema;
-
-      const validationResult = createBoxSchema.safeParse(dataToValidate);
-
-      if (!validationResult.success) {
-        setErrors(validationResult.error);
-        return false;
-      }
-      return true;
-    },
-    [title, content, keyholders, threshold],
-  );
-
-  const getError = (fieldName: keyof CreateBoxSchema) => {
-    return errors?.errors.find((e) => e.path[0] === fieldName)?.message;
-  };
-
-  return {
-    state: {
-      title,
-      content,
-      leader,
-      threshold,
-      keyholders,
-    },
-    actions,
-    getError,
-    validate: validate,
-  };
-};

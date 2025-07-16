@@ -26,9 +26,7 @@ export const JoinBox: React.FC = () => {
         const { connectYou } = useJoinBoxCreationState.getState().actions;
         connectYou({
           you: {
-            id:
-              participantService.signaling.getMyId() ??
-              "id-not-assigned-probably-error",
+            id: participantService.signaling.getMyId() ?? "",
             name: you.name,
             userAgent: you.userAgent,
           },
@@ -156,7 +154,7 @@ const useStoreSlice = () => {
   const you = useJoinBoxCreationState((state) => state.you);
   const threshold = useJoinBoxCreationState((state) => state.threshold);
   const otherKeyholders = useJoinBoxCreationState(
-    (state) => state.otherKeyholders,
+    (state) => state.otherKeyHolders,
   );
   const content = useJoinBoxCreationState((state) => state.content);
 

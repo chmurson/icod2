@@ -112,6 +112,10 @@ export class SignalingService {
     return this.myId;
   }
 
+  setMyId(id: string) {
+    this.myId = id;
+  }
+
   getWebSocket() {
     return this.ws;
   }
