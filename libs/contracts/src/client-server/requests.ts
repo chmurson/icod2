@@ -19,6 +19,17 @@ export type AcceptsOffersResponse = {
   sessionToken: string;
 };
 
+export function isAcceptsOffersResponse(
+  payload: object,
+): payload is AcceptsOffersResponse {
+  return (
+    "type" in payload &&
+    payload.type === "accepts-offers-response" &&
+    "sessionToken" in payload &&
+    typeof payload.sessionToken === "string"
+  );
+}
+
 export type SendsOfferRequest = {
   type: "sends-offer-request";
   sessionToken: string;
@@ -38,6 +49,7 @@ export function isSendOfferRequest(
 export type SendsOfferResponse = {
   type: "sends-offers-response";
   success: boolean;
+  reason?: string;
 };
 
 export function isSendsOfferResponse(

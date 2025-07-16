@@ -15,6 +15,7 @@ import {
 export class CallerSignalingService {
   private websocketJSONHandler: WebsocketJSONHandler;
   private peerConnection?: RTCPeerConnection;
+  private dataChannel?: RTCDataChannel;
   private _onPeerConnected?: (peerConnection: RTCPeerConnection) => void;
 
   constructor(websocketJSONHandler: WebsocketJSONHandler) {
@@ -25,7 +26,6 @@ export class CallerSignalingService {
 
   start(): void {
     this.sendSendsOfferRequest();
-    this.initRTCConnection();
   }
 
   get onPeerConnected():
@@ -39,25 +39,32 @@ export class CallerSignalingService {
   }
 
   close(): void {
+    console.log("[DEBUG][CallerSignalingService]close()");
     this.peerConnection?.close();
+    this.dataChannel?.close();
     this.websocketJSONHandler.close();
   }
 
   private initRTCConnection() {
+    if (this.peerConnection) {
+      return;
+    }
+
     this.peerConnection = new RTCPeerConnection();
 
-    this.peerConnection.ondatachannel = (event) => {
-      const dataChannel = event.channel;
-      dataChannel.onopen = () => console.log("Data channel open!");
-      dataChannel.onmessage = (event) =>
-        console.log("Received from Keyholder:", event.data);
-      dataChannel.onmessage = (event) => {
-        event.data === "Hello from Callee";
-        if (this.peerConnection) {
-          this.onPeerConnected?.(this.peerConnection);
-        }
-      };
-      dataChannel.send("Hello from Caller");
+    this.dataChannel = this.peerConnection.createDataChannel("chat");
+
+    this.dataChannel.onopen = () => {
+      console.log("Data channel open!");
+      this.dataChannel?.send("Hello from Caller");
+    };
+    this.dataChannel.onmessage = (event) =>
+      console.log("Received from Callee:", event.data);
+    this.dataChannel.onmessage = (event) => {
+      event.data === "Hello from Callee";
+      if (this.peerConnection) {
+        this.onPeerConnected?.(this.peerConnection);
+      }
     };
   }
 
@@ -106,6 +113,7 @@ export class CallerSignalingService {
     const { offer, iceCandidates } = await createOfferAndAllIceCandidate(
       this.peerConnection,
     );
+    console.log("offer", offer);
 
     this.sendOfferRequest({ offer, iceCandidates });
   }

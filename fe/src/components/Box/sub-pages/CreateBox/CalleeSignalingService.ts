@@ -1,6 +1,8 @@
 import {
   type AcceptsOffersRequest,
+  type AcceptsOffersResponse,
   type AnswerRequest,
+  isAcceptsOffersResponse,
   isOfferRequest,
   type OfferRequest,
 } from "@icod2/contracts/src/client-server";
@@ -10,8 +12,13 @@ import { consumeOfferAndIceCandidates } from "./consumeOfferAndIceCandidates";
 export class CalleeSignalingService {
   private websocketJSONHandler: WebsocketJSONHandler;
   private token: string;
-  private peerConnections: Map<string, RTCPeerConnection> = new Map();
+  private peerConnections: Map<
+    string,
+    { peer: RTCPeerConnection; dataChannel?: RTCDataChannel }
+  > = new Map();
   private _onPeerConnected?: (peerConnection: RTCPeerConnection) => void;
+  private _onPeerDisconnected?: (peerConnection: RTCPeerConnection) => void;
+  private _onConnected?: () => void;
 
   constructor(websocketJSONHandler: WebsocketJSONHandler) {
     this.websocketJSONHandler = websocketJSONHandler;
@@ -23,6 +30,14 @@ export class CalleeSignalingService {
   start(): void {
     this.sendAcceptOffersRequest();
     this.initRTCConnection();
+  }
+
+  get onConnected(): (() => void) | undefined {
+    return this._onConnected;
+  }
+
+  set onConnected(callback: () => void) {
+    this._onConnected = callback;
   }
 
   getToken(): string {
@@ -39,9 +54,20 @@ export class CalleeSignalingService {
     this._onPeerConnected = callback;
   }
 
+  get onPeerDisconneced():
+    | ((peerConnection: RTCPeerConnection) => void)
+    | undefined {
+    return this._onPeerDisconnected;
+  }
+
+  set onPeerDisconneced(callback: (peerConnection: RTCPeerConnection) => void) {
+    this._onPeerDisconnected = callback;
+  }
+
   close(): void {
     this.peerConnections.forEach((peerConnection) => {
-      peerConnection.close();
+      peerConnection.peer.close();
+      peerConnection.dataChannel?.close();
     });
     this.peerConnections.clear();
     this.websocketJSONHandler.close();
@@ -51,13 +77,22 @@ export class CalleeSignalingService {
     const peerConnection = new RTCPeerConnection();
     const peerConnectionId = this.generateUniqueToken();
 
-    this.peerConnections.set(peerConnectionId, peerConnection);
+    this.peerConnections.set(peerConnectionId, {
+      peer: peerConnection,
+      dataChannel: undefined,
+    });
 
     peerConnection.ondatachannel = (event) => {
       const dataChannel = event.channel;
-      dataChannel.onopen = () => console.log("Data channel open!");
+      dataChannel.onopen = () => {
+        console.log("Data channel open!");
+        this.peerConnections.set(peerConnectionId, {
+          peer: peerConnection,
+          dataChannel,
+        });
+      };
       dataChannel.onmessage = (event) =>
-        console.log("Received from Keyholder:", event.data);
+        console.log("Received from Caller:", event.data);
       dataChannel.onmessage = (event) => {
         event.data === "Hello from Celler";
         this.onPeerConnected?.(peerConnection);
@@ -77,6 +112,10 @@ export class CalleeSignalingService {
       isOfferRequest,
       this.handleOfferRequest.bind(this),
     );
+    this.websocketJSONHandler.onSpecificMessage(
+      isAcceptsOffersResponse,
+      this.handleAcceptsOffersResponse.bind(this),
+    );
   }
 
   private sendAcceptOffersRequest(): void {
@@ -95,6 +134,11 @@ export class CalleeSignalingService {
       offer: payload.answer,
       iceCandidates: payload.iceCandidates,
     } satisfies AnswerRequest);
+  }
+
+  private handleAcceptsOffersResponse(data: AcceptsOffersResponse) {
+    console.log(data.sessionToken);
+    this.onConnected?.();
   }
 
   private async handleOfferRequest(data: OfferRequest) {

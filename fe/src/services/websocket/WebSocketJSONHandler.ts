@@ -1,5 +1,6 @@
 export class WebsocketJSONHandler {
   private webSocket: WebSocket;
+  private sendingQueue: object[] = [];
   private listeners: {
     onClose: ((code: number, reason: string) => void)[];
     onError: ((error: Event) => void)[];
@@ -15,26 +16,51 @@ export class WebsocketJSONHandler {
     onSpecificMessage: [],
   };
 
-  private isOpen = false;
+  private loggingEnabled = false;
 
-  constructor(webSocket: WebSocket) {
+  constructor(webSocket: WebSocket, enableLogging = false) {
     this.webSocket = webSocket;
+    this.loggingEnabled = enableLogging;
 
-    this.webSocket.addEventListener("open", () => this.handleOpen());
+    this.webSocket.addEventListener("open", () => {
+      this.log("[DEBUG][WebsocketJSONHandler] Connection opened");
+      this.handleOpen();
+    });
 
     this.webSocket.addEventListener("message", (event) =>
       this.handleMessage(event),
     );
+
     this.webSocket.addEventListener("error", (error) =>
       this.handleError(error),
     );
+
     this.webSocket.addEventListener("close", (event) =>
       this.handleClose(event.code, event.reason),
     );
   }
 
+  public setLogging(enabled: boolean) {
+    this.loggingEnabled = enabled;
+  }
+
+  private log(message: string, ...args: any[]) {
+    if (this.loggingEnabled) {
+      console.log(message, ...args);
+    }
+  }
+
+  private warn(message: string, ...args: any[]) {
+    if (this.loggingEnabled) {
+      console.warn(message, ...args);
+    }
+  }
+
+  private error(message: string, ...args: any[]) {
+    console.error(message, ...args);
+  }
+
   public onClose(fn: (code?: number, reason?: string) => void) {
-    this.isOpen = false;
     this.listeners.onClose.push(fn);
   }
 
@@ -43,9 +69,6 @@ export class WebsocketJSONHandler {
   }
 
   public onMessage(fn: (payload: object) => void) {
-    if (!this.isOpen) {
-      throw new Error("WebSocket connection is not open");
-    }
     this.listeners.onMessage.push(fn);
   }
 
@@ -53,9 +76,6 @@ export class WebsocketJSONHandler {
     condition: (payload: object) => payload is T,
     fn: (payload: T) => void,
   ) {
-    if (!this.isOpen) {
-      throw new Error("WebSocket connection is not open");
-    }
     this.listeners.onSpecificMessage.push({
       condition,
       fn: fn as (payload: object) => void, // I'm using "as" to override TS error :(
@@ -63,27 +83,42 @@ export class WebsocketJSONHandler {
   }
 
   public send(payload: object) {
-    if (!this.isOpen) {
-      throw new Error("WebSocket connection is not open");
+    if (this.webSocket.readyState === WebSocket.CONNECTING) {
+      this.sendingQueue.push(payload);
+    } else if (this.webSocket.readyState === WebSocket.OPEN) {
+      this.webSocket.send(JSON.stringify(payload));
+    } else {
+      this.warn(
+        "[WebSocketJSONHandler] WebSocket is closed or cosling. Cannot send message.",
+        payload,
+      );
     }
-    this.webSocket.send(JSON.stringify(payload));
   }
 
   public close() {
-    if (this.isOpen) {
-      this.webSocket.close();
-      this.isOpen = false;
+    this.log(
+      "[DEBUG][WebsocketJSONHandler] Closing WebSocket connection. Connection state: ",
+      this.webSocket.readyState,
+    );
+    if (
+      this.webSocket.readyState === WebSocket.CLOSING ||
+      this.webSocket.readyState === WebSocket.CLOSED
+    ) {
+      this.warn("WebSocket is already closed or not open.");
     } else {
-      console.warn("WebSocket is already closed or not open.");
+      this.webSocket.close();
     }
   }
 
   private handleOpen() {
-    this.isOpen = true;
+    // Send all queued messages
+    while (this.sendingQueue.length > 0) {
+      const payload = this.sendingQueue.shift()!;
+      this.webSocket.send(JSON.stringify(payload));
+    }
   }
 
   private handleClose(code: number, reason: string) {
-    this.isOpen = false;
     this.listeners.onClose.forEach((fn) => fn(code, reason));
   }
 
@@ -98,18 +133,25 @@ export class WebsocketJSONHandler {
 
     listenersToExecute.forEach((listener) => listener.fn(payload));
 
-    if (listenersToExecute.length === 0) {
-      console.warn("[Debug] No listener to execute for: ", payload);
+    if (
+      listenersToExecute.length === 0 &&
+      this.listeners.onMessage.length === 0
+    ) {
+      this.warn(
+        "[WebSocketJSONHandler][Debug] No listener to execute for: ",
+        payload,
+      );
     }
   }
 
   private handleMessage(event: MessageEvent) {
     try {
       const json = JSON.parse(event.data);
+      this.log("[DEBUG][WebsocketJSONHandler]handleMessage", json);
       this.listeners.onMessage.forEach((fn) => fn(json));
       this.tryCallSpecificMessageListeners(json);
     } catch (e) {
-      console.error("Failed to parse JSON message:", e);
+      this.error("Failed to parse JSON message:", e);
     }
   }
 }

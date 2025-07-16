@@ -21,6 +21,7 @@ export async function createOfferAndAllIceCandidate(
         allIceCandidatesSet = true;
       }
     };
+
     peerConnection
       .createOffer()
       .then((value) => {

@@ -58,15 +58,22 @@ export class SignalingServer {
 
         this.signalingConnections.splice(indexOfSignalingConnection, 1);
         this.handleClientDisconnectLegacy(ws);
+
+        console.log(
+          "Websocket closed. Current number: ",
+          this.websocketsHandlers.length,
+          "SignalingConnections: ",
+          this.signalingConnections.length,
+        );
       });
 
-      webSocketHandler.onMessage((msg) => this.handleLegacyMessage(msg, ws));
+      // webSocketHandler.onMessage((msg) => this.handleLegacyMessage(msg, ws));
 
       webSocketHandler.onError((err) => {
         console.error("[WS] WebSocket client error:", err);
       });
 
-      this.handleNewConnectionLegacy(ws);
+      // this.handleNewConnectionLegacy(ws);
     });
   }
 

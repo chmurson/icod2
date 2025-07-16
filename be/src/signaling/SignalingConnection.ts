@@ -26,22 +26,22 @@ export class SignalingConnection {
     websocket: WebSocket,
     private otherSignalingConnections: SignalingConnection[],
   ) {
-    this.websocketJSONHandler = new WebsocketJSONHandler(websocket);
+    this.websocketJSONHandler = new WebsocketJSONHandler(websocket, true);
     this.websocketJSONHandler.onSpecificMessage(
       isAcceptsOffersRequest,
-      this.handleAcceptsOffersRequest,
+      this.handleAcceptsOffersRequest.bind(this),
     );
     this.websocketJSONHandler.onSpecificMessage(
       isSendOfferRequest,
-      this.handleSendsOfferRequest,
+      this.handleSendsOfferRequest.bind(this),
     );
     this.websocketJSONHandler.onSpecificMessage(
       isOfferRequest,
-      this.handleOfferRequest,
+      this.handleOfferRequest.bind(this),
     );
     this.websocketJSONHandler.onSpecificMessage(
       isAnswerRequest,
-      this.handleAnswerRequest,
+      this.handleAnswerRequest.bind(this),
     );
   }
 
@@ -114,6 +114,7 @@ export class SignalingConnection {
     this.websocketJSONHandler.send({
       type: "sends-offers-response",
       success: !!firstAwaitingOffers,
+      reason: "No one is currently waiting to receive offers",
     } satisfies SendsOfferResponse);
   }
 

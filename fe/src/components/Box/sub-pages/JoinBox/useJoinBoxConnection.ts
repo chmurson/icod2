@@ -7,7 +7,7 @@ export function useJoinBoxConnection() {
     let peer: RTCPeerConnection | undefined;
 
     const callerConnection = new CallerSignalingService(
-      createWebsocketConnection(),
+      createWebsocketConnection({ enableLogging: true }),
     );
 
     callerConnection.onPeerConnected = (peerConnection) => {
@@ -15,9 +15,12 @@ export function useJoinBoxConnection() {
       console.log("peer connected");
     };
 
+    callerConnection.start();
+
     return () => {
       peer?.close();
       callerConnection.close();
+      peer = undefined;
     };
   }, []);
 }

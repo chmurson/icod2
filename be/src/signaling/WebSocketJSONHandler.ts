@@ -16,7 +16,13 @@ export class WebsocketJSONHandler {
     onSpecificMessage: [],
   };
 
-  constructor(private readonly webSocket: WebSocket) {
+  private loggingEnabled = false;
+
+  constructor(
+    private readonly webSocket: WebSocket,
+    enableLogging = false,
+  ) {
+    this.loggingEnabled = enableLogging;
     this.webSocket.on("message", (data, isBinary) =>
       this.handleMessage(data, isBinary),
     );
@@ -24,6 +30,28 @@ export class WebsocketJSONHandler {
     this.webSocket.on("close", (code, reason) =>
       this.handleClose(code, reason),
     );
+  }
+
+  public setLogging(enabled: boolean) {
+    this.loggingEnabled = enabled;
+  }
+
+  private log(message: string, ...args: any[]) {
+    if (this.loggingEnabled) {
+      console.log(message, ...args);
+    }
+  }
+
+  private warn(message: string, ...args: any[]) {
+    if (this.loggingEnabled) {
+      console.warn(message, ...args);
+    }
+  }
+
+  private error(message: string, ...args: any[]) {
+    if (this.loggingEnabled) {
+      console.error(message, ...args);
+    }
   }
 
   public onClose(fn: (code?: number, buffer?: Buffer) => void) {
@@ -50,10 +78,12 @@ export class WebsocketJSONHandler {
 
   public send(payload: object) {
     this.webSocket.send(JSON.stringify(payload));
+    this.log("[DEBUG][WebsocketJSONHandler]send", payload);
   }
 
   private handleClose(code: number, reason: Buffer) {
     this.listeners.onClose.forEach((fn) => fn(code, reason));
+    this.log("[DEBUG][WebsocketJSONHandler]handleClose");
   }
 
   private handleError(error: Error) {
@@ -67,23 +97,30 @@ export class WebsocketJSONHandler {
 
     listenersToExecute.forEach((listener) => listener.fn(payload));
 
-    if (listenersToExecute.length === 0) {
-      console.warn("[Debug] No listener to execute for: ", payload);
+    if (
+      listenersToExecute.length === 0 &&
+      this.listeners.onMessage.length === 0
+    ) {
+      this.warn(
+        "[Debug][WebsocketJSONHandler] No listener to execute for: ",
+        payload,
+      );
     }
   }
 
   private handleMessage(data: RawData, isBinary: boolean) {
     if (isBinary) {
-      return console.error("Binary message are not supported");
+      return this.error("Binary message are not supported");
     }
 
     if (typeof data === "string") {
       try {
         const json = JSON.parse(data);
+        this.log("[DEBUG][WebsocketJSONHandler]handleMessage", json);
         this.listeners.onMessage.forEach((fn) => fn(json));
         this.tryCallSpecificMessageListeners(json);
       } catch (e) {
-        console.error(e);
+        this.error("Failed to parse JSON message:", e);
       }
       return;
     }
@@ -92,14 +129,15 @@ export class WebsocketJSONHandler {
       try {
         const string = data.toString();
         const json = JSON.parse(string);
+        this.log("[DEBUG][WebsocketJSONHandler]handleMessage", json);
         this.listeners.onMessage.forEach((fn) => fn(json));
         this.tryCallSpecificMessageListeners(json);
       } catch (e) {
-        console.error(e);
+        this.error("Failed to parse JSON message:", e);
       }
       return;
     }
 
-    console.error("Message not handled; type:", typeof data, "; data:", data);
+    this.error("Message not handled; type:", typeof data, "; data:", data);
   }
 }

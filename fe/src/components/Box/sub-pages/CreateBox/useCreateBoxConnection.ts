@@ -5,18 +5,27 @@ import { CalleeSignalingService } from "./CalleeSignalingService";
 export function useCreateBoxConnection() {
   useEffect(() => {
     const peers: RTCPeerConnection[] = [];
-    const leaderConnection = new CalleeSignalingService(
-      createWebsocketConnection(),
+    const calleeConnection = new CalleeSignalingService(
+      createWebsocketConnection({ enableLogging: true }),
     );
 
-    leaderConnection.onPeerConnected = (peerConnection) => {
+    calleeConnection.onPeerConnected = (peerConnection) => {
       peers.push(peerConnection);
       console.log("peer connected");
     };
 
+    calleeConnection.onConnected = () => {
+      console.log("connected - waiting peers to get connected");
+    };
+
+    calleeConnection.start();
+
     return () => {
-      peers.forEach((peer) => peer.close());
-      leaderConnection.close();
+      calleeConnection.close();
+
+      while (peers.length > 0) {
+        peers.pop();
+      }
     };
   }, []);
 }
