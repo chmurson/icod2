@@ -134,9 +134,11 @@ const BoxJoinContentForOK = ({
 						))}
 					</div>
 				</FieldArea>
-				<FieldArea label="Content:">
-					<TextArea disabled rows={6} value={content} className="w-full" />
-				</FieldArea>
+				{content !== "" && (
+					<FieldArea label="Content:">
+						<TextArea disabled rows={6} value={content} className="w-full" />
+					</FieldArea>
+				)}
 			</div>
 			<Text variant="primaryText">
 				Waiting for more keyholders, or leader to create finalize box creation.
