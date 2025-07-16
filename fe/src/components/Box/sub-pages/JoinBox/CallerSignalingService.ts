@@ -75,7 +75,7 @@ export class CallerSignalingService {
   private sendSendsOfferRequest(): void {
     this.websocketJSONHandler.send({
       type: "sends-offer-request",
-      token: "",
+      sessionToken: "",
     } satisfies SendsOfferRequest);
   }
 
