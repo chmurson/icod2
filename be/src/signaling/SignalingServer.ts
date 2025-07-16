@@ -11,7 +11,7 @@ import { ClientManager } from "./ClientManager";
 import { MessageRouter } from "./MessageRouter";
 import { SignalingConnection } from "./SignalingConnection";
 import type { HandlerContext } from "./types";
-import { WebsocketJSONHandler } from "./WebSocketHandler";
+import { WebsocketJSONHandler } from "./WebSocketJSONHandler";
 
 export class SignalingServer {
   private server: Server;

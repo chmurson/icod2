@@ -10,12 +10,12 @@ export function isAcceptsOffersRequest(
 
 export type AcceptsOffersResponse = {
   type: "accepts-offers-response";
-  token: string;
+  sessionToken: string;
 };
 
 export type SendsOfferRequest = {
   type: "sends-offer-request";
-  token: string;
+  sessionToken: string;
 };
 
 export function isSendOfferRequest(
@@ -24,8 +24,8 @@ export function isSendOfferRequest(
   return (
     "type" in payload &&
     payload.type === "sends-offer-request" &&
-    "token" in payload &&
-    typeof payload.token === "string"
+    "sessionToken" in payload &&
+    typeof payload.sessionToken === "string"
   );
 }
 
