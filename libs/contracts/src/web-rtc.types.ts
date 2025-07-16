@@ -1,90 +1,90 @@
 export type IdMessage = {
-	type: "id";
-	id: string;
+  type: "id";
+  id: string;
 };
 
 export type GreetingMessage = {
-	type: "greeting";
-	id: string;
-	name: string;
-	userAgent: string;
+  type: "greeting";
+  id: string;
+  name: string;
+  userAgent: string;
 };
 
 export type AcknowledgeLeaderMessage = {
-	type: "acknowledgeLeader";
-	leaderId: string;
-	leaderName: string;
-	leaderUserAgent: string;
+  type: "acknowledgeLeader";
+  leaderId: string;
+  leaderName: string;
+  leaderUserAgent: string;
 };
 
 export type PeerConnectedMessage = {
-	type: "peerConnected";
-	peerId: string;
-	name: string;
-	userAgent: string;
+  type: "peerConnected";
+  peerId: string;
+  name: string;
+  userAgent: string;
 };
 
 export type PeerDisconnectedMessage = {
-	type: "peerDisconnected";
-	peerId: string;
+  type: "peerDisconnected";
+  peerId: string;
 };
 
 export type OfferMessage = {
-	type: "offer";
-	targetId: string;
-	offer: RTCSessionDescriptionInit;
-	senderId: string;
+  type: "offer";
+  targetId: string;
+  offer: RTCSessionDescriptionInit;
+  senderId: string;
 };
 
 export type AnswerMessage = {
-	type: "answer";
-	targetId: string;
-	answer: RTCSessionDescriptionInit;
-	senderId: string;
+  type: "answer";
+  targetId: string;
+  answer: RTCSessionDescriptionInit;
+  senderId: string;
 };
 
 export type CandidateMessage = {
-	type: "candidate";
-	targetId: string;
-	candidate: RTCIceCandidateInit;
-	senderId: string;
+  type: "candidate";
+  targetId: string;
+  candidate: RTCIceCandidateInit;
+  senderId: string;
 };
 
 export type CreateBoxMessage = {
-	type: "createBox";
-	title?: string;
-	content?: string;
-	encryptedMessage?: string;
-	generatedKey?: string;
+  type: "createBox";
+  title?: string;
+  content?: string;
+  encryptedMessage?: string;
+  generatedKey?: string;
 };
 
 export type BoxInfoMessage = {
-	type: "boxInfo";
-	threshold: number;
-	content: string;
-	title: string;
+  type: "boxInfo";
+  threshold: number;
+  content: string;
+  title: string;
 };
 
 export type MinimalChatMessage = {
-	type: "chatMessage";
-	targetId: string;
-	[key: string]: unknown;
+  type: "chatMessage";
+  targetId: string;
+  [key: string]: unknown;
 };
 
 export type TargetedSignalingMessage =
-	| OfferMessage
-	| AnswerMessage
-	| CandidateMessage
-	| MinimalChatMessage;
+  | OfferMessage
+  | AnswerMessage
+  | CandidateMessage
+  | MinimalChatMessage;
 
 export type SignalingMessage =
-	| IdMessage
-	| GreetingMessage
-	| AcknowledgeLeaderMessage
-	| PeerConnectedMessage
-	| PeerDisconnectedMessage
-	| OfferMessage
-	| AnswerMessage
-	| CandidateMessage
-	| CreateBoxMessage
-	| BoxInfoMessage;
+  | IdMessage
+  | GreetingMessage
+  | AcknowledgeLeaderMessage
+  | PeerConnectedMessage
+  | PeerDisconnectedMessage
+  | OfferMessage
+  | AnswerMessage
+  | CandidateMessage
+  | CreateBoxMessage
+  | BoxInfoMessage;
