@@ -1,133 +1,133 @@
 import {
-	type AcceptsOffersResponse,
-	type AnswerRequest,
-	isAcceptsOffersRequest,
-	isAnswerRequest,
-	isOfferRequest,
-	isSendOfferRequest,
-	type OfferRequest,
-	type SendsOfferRequest,
-	type SendsOfferResponse,
+  type AcceptsOffersResponse,
+  type AnswerRequest,
+  isAcceptsOffersRequest,
+  isAnswerRequest,
+  isOfferRequest,
+  isSendOfferRequest,
+  type OfferRequest,
+  type SendsOfferRequest,
+  type SendsOfferResponse,
 } from "@icod2/contracts/src/client-server";
 import { v4 as uuidv4 } from "uuid";
 import type { WebSocket } from "ws";
 import { WebsocketJSONHandler } from "./WebSocketHandler";
 
 export class SignalingConnection {
-	private websocketJSONHandler;
+  private websocketJSONHandler;
 
-	private state:
-		| undefined
-		| { mode: "acceptsOffers"; offerSender?: SignalingConnection }
-		| { mode: "sendsOffer"; matchedAcceptor: SignalingConnection };
-	private token: string | undefined;
+  private state:
+    | undefined
+    | { mode: "acceptsOffers"; offerSender?: SignalingConnection }
+    | { mode: "sendsOffer"; matchedAcceptor: SignalingConnection };
+  private token: string | undefined;
 
-	constructor(
-		websocket: WebSocket,
-		private otherSignalingConnections: SignalingConnection[],
-	) {
-		this.websocketJSONHandler = new WebsocketJSONHandler(websocket);
-		this.websocketJSONHandler.onSpecificMessage(
-			isAcceptsOffersRequest,
-			this.handleAcceptsOffersRequest,
-		);
-		this.websocketJSONHandler.onSpecificMessage(
-			isSendOfferRequest,
-			this.handleSendsOfferRequest,
-		);
-		this.websocketJSONHandler.onSpecificMessage(
-			isOfferRequest,
-			this.handleOfferRequest,
-		);
-		this.websocketJSONHandler.onSpecificMessage(
-			isAnswerRequest,
-			this.handleAnswerRequest,
-		);
-	}
+  constructor(
+    websocket: WebSocket,
+    private otherSignalingConnections: SignalingConnection[],
+  ) {
+    this.websocketJSONHandler = new WebsocketJSONHandler(websocket);
+    this.websocketJSONHandler.onSpecificMessage(
+      isAcceptsOffersRequest,
+      this.handleAcceptsOffersRequest,
+    );
+    this.websocketJSONHandler.onSpecificMessage(
+      isSendOfferRequest,
+      this.handleSendsOfferRequest,
+    );
+    this.websocketJSONHandler.onSpecificMessage(
+      isOfferRequest,
+      this.handleOfferRequest,
+    );
+    this.websocketJSONHandler.onSpecificMessage(
+      isAnswerRequest,
+      this.handleAnswerRequest,
+    );
+  }
 
-	public getState() {
-		return this.state;
-	}
+  public getState() {
+    return this.state;
+  }
 
-	public sendOffer(
-		payload: OfferRequest,
-		offerSenderConnection: SignalingConnection,
-	) {
-		if (this.state?.mode !== "acceptsOffers") {
-			throw new Error(
-				"Cannot send offer to a connection which is not in accepts mode",
-			);
-		}
+  public sendOffer(
+    payload: OfferRequest,
+    offerSenderConnection: SignalingConnection,
+  ) {
+    if (this.state?.mode !== "acceptsOffers") {
+      throw new Error(
+        "Cannot send offer to a connection which is not in accepts mode",
+      );
+    }
 
-		this.state.offerSender = offerSenderConnection;
-		this.websocketJSONHandler.send(payload);
-	}
+    this.state.offerSender = offerSenderConnection;
+    this.websocketJSONHandler.send(payload);
+  }
 
-	public sendAnswer(payload: AnswerRequest) {
-		if (this.state?.mode !== "sendsOffer") {
-			throw new Error(
-				"Cannot send answer to a connection which is not in sends mode",
-			);
-		}
+  public sendAnswer(payload: AnswerRequest) {
+    if (this.state?.mode !== "sendsOffer") {
+      throw new Error(
+        "Cannot send answer to a connection which is not in sends mode",
+      );
+    }
 
-		this.websocketJSONHandler.send(payload);
-	}
+    this.websocketJSONHandler.send(payload);
+  }
 
-	private handleAnswerRequest(payload: AnswerRequest) {
-		if (
-			this.state?.mode !== "acceptsOffers" ||
-			this.state.offerSender === undefined
-		) {
-			return;
-		}
+  private handleAnswerRequest(payload: AnswerRequest) {
+    if (
+      this.state?.mode !== "acceptsOffers" ||
+      this.state.offerSender === undefined
+    ) {
+      return;
+    }
 
-		this.state.offerSender.sendAnswer(payload);
-	}
+    this.state.offerSender.sendAnswer(payload);
+  }
 
-	private handleOfferRequest(payload: OfferRequest) {
-		if (this.state?.mode !== "sendsOffer") {
-			return;
-		}
+  private handleOfferRequest(payload: OfferRequest) {
+    if (this.state?.mode !== "sendsOffer") {
+      return;
+    }
 
-		this.state.matchedAcceptor.sendOffer(payload, this);
-	}
+    this.state.matchedAcceptor.sendOffer(payload, this);
+  }
 
-	private handleSendsOfferRequest(payload: SendsOfferRequest) {
-		if (this.state !== undefined) {
-			return;
-		}
+  private handleSendsOfferRequest(payload: SendsOfferRequest) {
+    if (this.state !== undefined) {
+      return;
+    }
 
-		this.token = payload.token;
-		console.warn(payload.token, "token is ignored for now");
+    this.token = payload.token;
+    console.warn(payload.token, "token is ignored for now");
 
-		const firstAwaitingOffers = this.otherSignalingConnections.find(
-			(x) => x.getState()?.mode === "acceptsOffers",
-		);
+    const firstAwaitingOffers = this.otherSignalingConnections.find(
+      (x) => x.getState()?.mode === "acceptsOffers",
+    );
 
-		if (firstAwaitingOffers) {
-			this.state = {
-				mode: "sendsOffer",
-				matchedAcceptor: firstAwaitingOffers,
-			};
-		}
+    if (firstAwaitingOffers) {
+      this.state = {
+        mode: "sendsOffer",
+        matchedAcceptor: firstAwaitingOffers,
+      };
+    }
 
-		this.websocketJSONHandler.send({
-			type: "sends-offers-response",
-			success: !!firstAwaitingOffers,
-		} satisfies SendsOfferResponse);
-	}
+    this.websocketJSONHandler.send({
+      type: "sends-offers-response",
+      success: !!firstAwaitingOffers,
+    } satisfies SendsOfferResponse);
+  }
 
-	private handleAcceptsOffersRequest() {
-		if (this.state !== undefined) {
-			return;
-		}
+  private handleAcceptsOffersRequest() {
+    if (this.state !== undefined) {
+      return;
+    }
 
-		this.state = { mode: "acceptsOffers" };
+    this.state = { mode: "acceptsOffers" };
 
-		const token = uuidv4();
-		this.websocketJSONHandler.send({
-			type: "accepts-offers-response",
-			token,
-		} satisfies AcceptsOffersResponse);
-	}
+    const token = uuidv4();
+    this.websocketJSONHandler.send({
+      type: "accepts-offers-response",
+      token,
+    } satisfies AcceptsOffersResponse);
+  }
 }

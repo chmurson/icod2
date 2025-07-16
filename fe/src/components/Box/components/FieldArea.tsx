@@ -2,13 +2,13 @@ import type { FC, PropsWithChildren, ReactNode } from "react";
 import { Text } from "@/ui/Typography";
 
 export const FieldArea: FC<PropsWithChildren<{ label: ReactNode }>> = ({
-	label,
-	children,
+  label,
+  children,
 }) => {
-	return (
-		<div className="flex gap-1 flex-col items-start">
-			<Text variant="label">{label}</Text>
-			{children}
-		</div>
-	);
+  return (
+    <div className="flex gap-1 flex-col items-start">
+      <Text variant="label">{label}</Text>
+      {children}
+    </div>
+  );
 };
