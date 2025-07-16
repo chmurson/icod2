@@ -76,12 +76,14 @@ export const useOpenBoxCreationState = create<OpenBoxState>()(
           encryptedMessage,
           key,
           keyHolderId,
-          offLineKeyHolders: keyHolders.map((x) => {
-            return {
-              ...x,
-              isOnline: false,
-            };
-          }),
+          offLineKeyHolders: keyHolders
+            .filter((x) => x.id !== keyHolderId)
+            .map((x) => {
+              return {
+                ...x,
+                isOnline: false,
+              };
+            }),
           keyThreshold,
           you: {
             ...you,
