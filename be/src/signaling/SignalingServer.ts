@@ -9,8 +9,9 @@ import { v4 as uuidv4 } from "uuid";
 import { type WebSocket, WebSocketServer } from "ws";
 import { ClientManager } from "./ClientManager";
 import { MessageRouter } from "./MessageRouter";
+import { SignalingConnection } from "./SignalingConnection";
 import type { HandlerContext } from "./types";
-import { WebsocketHandler } from "./WebSocketHandler";
+import { WebsocketJSONHandler } from "./WebSocketHandler";
 
 export class SignalingServer {
 	private server: Server;
@@ -20,7 +21,8 @@ export class SignalingServer {
 	private leaderId?: string;
 	private leaderName?: string;
 	private leaderUserAgent?: string;
-	private websocketsHandlers: WebsocketHandler[] = [];
+	private websocketsHandlers: WebsocketJSONHandler[] = [];
+	private signalingConnections: SignalingConnection[] = [];
 
 	constructor(port: number, hostname: string) {
 		this.server = createServer();
@@ -34,14 +36,27 @@ export class SignalingServer {
 
 	private setupWebSocketHandlers(): void {
 		this.wss.on("connection", (ws: WebSocket) => {
-			const webSocketHandler = new WebsocketHandler(ws);
+			const webSocketHandler = new WebsocketJSONHandler(ws);
+			const signalingConnection = new SignalingConnection(
+				ws,
+				this.signalingConnections,
+			);
+
 			this.websocketsHandlers.push(webSocketHandler);
+			this.signalingConnections.push(signalingConnection);
 
 			webSocketHandler.onClose(() => {
-				const index = this.websocketsHandlers.findIndex(
+				const indexOfHandlers = this.websocketsHandlers.findIndex(
 					(x) => x === webSocketHandler,
 				);
-				this.websocketsHandlers.splice(index, 1);
+
+				this.websocketsHandlers.splice(indexOfHandlers, 1);
+
+				const indexOfSignalingConnection = this.signalingConnections.findIndex(
+					(x) => x === signalingConnection,
+				);
+
+				this.signalingConnections.splice(indexOfSignalingConnection, 1);
 				this.handleClientDisconnectLegacy(ws);
 			});
 
