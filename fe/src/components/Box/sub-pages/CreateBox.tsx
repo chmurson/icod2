@@ -13,6 +13,7 @@ import { Text } from "@/ui/Typography";
 import { FieldArea } from "../components/FieldArea";
 import { InputNumber } from "../components/InputNumber";
 import { ParticipantItem } from "../components/ParticipantItem";
+import { useCreateBoxConnection } from "./CreateBox/useCreateBoxConnection";
 
 const CreateBox: React.FC = () => {
   const { state, actions, validate, getError } = useStoreState();
@@ -29,6 +30,8 @@ const CreateBox: React.FC = () => {
   const [isContentSharedToPeer, setIsContentSharedToPeer] = useState<
     Record<string, boolean>
   >({});
+
+  useCreateBoxConnection();
 
   useEffect(() => {
     const timeoutHandler = setTimeout(() => {

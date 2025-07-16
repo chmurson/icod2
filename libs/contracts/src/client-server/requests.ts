@@ -1,11 +1,17 @@
 export type AcceptsOffersRequest = {
   type: "accepts-offers-request";
+  token: string;
 };
 
 export function isAcceptsOffersRequest(
   payload: object,
 ): payload is AcceptsOffersRequest {
-  return "type" in payload && payload.type === "accepts-offer-request";
+  return (
+    "type" in payload &&
+    payload.type === "accepts-offer-request" &&
+    "token" in payload &&
+    typeof payload.token === "string"
+  );
 }
 
 export type AcceptsOffersResponse = {
@@ -34,6 +40,17 @@ export type SendsOfferResponse = {
   success: boolean;
 };
 
+export function isSendsOfferResponse(
+  payload: object,
+): payload is SendsOfferResponse {
+  return (
+    "type" in payload &&
+    payload.type === "sends-offers-response" &&
+    "success" in payload &&
+    typeof payload.success === "boolean"
+  );
+}
+
 export type OfferRequest = {
   type: "offer-request";
   offer: unknown;
@@ -45,6 +62,8 @@ export type AnswerRequest = {
   offer: unknown;
   iceCandidates: unknown[];
 };
+
+export function isAnswerReqquest() {}
 
 export function isOfferRequest(payload: object): payload is OfferRequest {
   return (
