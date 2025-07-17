@@ -1,9 +1,39 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { CalleeSignalingService } from "@/services/signaling";
 import { DataChannelManager } from "@/services/webrtc";
+import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
 import { createWebsocketConnection } from "@/services/websocket/createWebsocketConnection";
+import { useCreateBoxStore } from "@/stores";
+import { isKeyHolderWelcomesLeader } from "../commons";
+
+function useMessageRouter() {
+  const storeActions = useCreateBoxStore((state) => state.actions);
+
+  const router = useMemo(() => {
+    return new DataChannelMessageRouter();
+  }, []);
+
+  useEffect(() => {
+    router.addHandler(isKeyHolderWelcomesLeader, (localId, message) => {
+      storeActions.connectParticipant({
+        id: localId,
+        name: message.name,
+        userAgent: message.userAgent,
+      });
+    });
+
+    return () => {
+      router.clearHandlers();
+    };
+  }, [router, storeActions]);
+
+  return router.router;
+}
 
 export function useCreateBoxConnection() {
+  const storeActions = useCreateBoxStore((state) => state.actions);
+  const messageRouter = useMessageRouter();
+
   useEffect(() => {
     const dataChannelManager = new DataChannelManager({
       signalingService: new CalleeSignalingService(createWebsocketConnection()),
@@ -13,6 +43,7 @@ export function useCreateBoxConnection() {
         },
         onPeerDisconnected: (localId) => {
           console.log("Peer disconnected:", localId);
+          storeActions.disconnectParticipant(localId);
         },
         onFailedToConnect: (reason) => {
           console.error("Failed to connect:", reason);
@@ -20,6 +51,7 @@ export function useCreateBoxConnection() {
         onConnected: () => {
           console.log("Connected to signaling service");
         },
+        onDataChannelMessage: messageRouter,
       },
     });
 
@@ -28,5 +60,5 @@ export function useCreateBoxConnection() {
     return () => {
       dataChannelManager.close();
     };
-  }, []);
+  }, [messageRouter, storeActions]);
 }

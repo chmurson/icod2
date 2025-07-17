@@ -5,7 +5,6 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { leaderService } from "@/services/web-rtc/leaderSingleton";
 import { useDownloadBoxStore } from "@/stores";
-import { useJoinBoxCreationState } from "@/stores/boxStore/joinBoxCreationStore";
 import { Button } from "@/ui/Button.tsx";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
@@ -32,79 +31,37 @@ export const CreateBox: React.FC = () => {
 
   useCreateBoxConnection();
 
-  useEffect(() => {
-    const timeoutHandler = setTimeout(() => {
-      actions.setBoxInfo({
-        title: localTitle,
-        content: localContent,
-        threshold: localThreshold,
-      });
-    }, 250);
+  // useEffect(() => {
+  //   const timeoutHandler = setTimeout(() => {
+  //     actions.setBoxInfo({
+  //       title: localTitle,
+  //       content: localContent,
+  //       threshold: localThreshold,
+  //     });
+  //   }, 250);
 
-    leaderService.sendBoxInfo(
-      {
-        type: "boxInfo",
-        threshold: localThreshold,
-        content: localContent,
-        title: localTitle,
-      },
-      isContentSharedToPeer,
-    );
+  //   leaderService.sendBoxInfo(
+  //     {
+  //       type: "boxInfo",
+  //       threshold: localThreshold,
+  //       content: localContent,
+  //       title: localTitle,
+  //     },
+  //     isContentSharedToPeer,
+  //   );
 
-    return () => clearTimeout(timeoutHandler);
-  }, [
-    localTitle,
-    localContent,
-    localThreshold,
-    actions.setBoxInfo,
-    isContentSharedToPeer,
-  ]);
+  //   return () => clearTimeout(timeoutHandler);
+  // }, [
+  //   localTitle,
+  //   localContent,
+  //   localThreshold,
+  //   actions.setBoxInfo,
+  //   isContentSharedToPeer,
+  // ]);
 
   useEffect(() => {
     init(wasm);
-    leaderService.connect({
-      userName: leader.name,
-      onId: (data) => {
-        actions.connectLeader({ id: data.id });
-      },
-      onPeerConnected: async (data) => {
-        // Leader initiates connection with new peer
-        let peer = leaderService.signaling
-          .getPeerConnections()
-          .get(data.peerId);
-        if (!peer) {
-          peer = leaderService.signaling.setupPeerConnection(data.peerId, true);
-        }
-        const offer = await peer.createOffer();
-        await peer.setLocalDescription(offer);
-        leaderService.signaling
-          .getWebSocket()
-          ?.send(
-            JSON.stringify({ type: "offer", targetId: data.peerId, offer }),
-          );
-        // Add participant to store (excluding leader)
-        if (data.peerId !== useJoinBoxCreationState.getState().leader.id) {
-          actions.connectParticipant({
-            id: data.peerId,
-            name: data.name,
-            userAgent: data.userAgent,
-          });
-        }
-      },
-      onPeerDisconnected: (data) => {
-        actions.disconnectParticipant(data.peerId);
-      },
-    });
-
-    return () => {
-      leaderService.disconnect();
-    };
-  }, [
-    actions.connectLeader,
-    actions.connectParticipant,
-    actions.disconnectParticipant,
-    leader.name,
-  ]);
+  }, []);
 
   const noParticipantConnected = keyHolders.length === 0;
 
