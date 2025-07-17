@@ -62,7 +62,9 @@ const BoxJoinContentForOK = ({
       <div className="flex flex-col gap-4">
         <div className="flex gap-2 items-center">
           <Text variant="label">Name:</Text>
-          <Text variant="primaryText">{title}</Text>
+          <Text variant={title.trim() ? "primaryText" : "secondaryText"}>
+            {title.trim() || "No name set"}
+          </Text>
         </div>
         <div className="flex gap-2 items-center">
           <Text variant="label">Key Treshold:</Text>

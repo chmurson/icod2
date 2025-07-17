@@ -1,6 +1,4 @@
 import { TextArea, TextField } from "@radix-ui/themes";
-import init, { ChunksConfiguration, secure_message } from "icod-crypto-js";
-import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { leaderService } from "@/services/web-rtc/leaderSingleton";
@@ -10,89 +8,47 @@ import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { InputNumber } from "../../../components/InputNumber";
 import { ParticipantItem } from "../../../components/ParticipantItem";
-import { useCreateBoxState } from "./hooks";
+import { usePartOfCreateBoxStore } from "./hooks";
+import { useLockBox } from "./hooks/useHandleBoxCreation";
 import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
 export const CreateBox: React.FC = () => {
-  const { state, actions, getError, validate } = useCreateBoxState();
+  const { state, actions, getError, validate } = usePartOfCreateBoxStore();
 
-  const createDownloadStoreFromCreateBox = useDownloadBoxStore(
-    (state) => state.fromCreateBox,
-  );
-
-  const { content, leader, keyHolders, threshold, title } = state;
-
-  const [localTitle, setLocalTitle] = useState(title);
-  const [localContent, setLocalContent] = useState(content);
-  const [_localThreshold, setLocalThreshold] = useState(threshold);
+  const [localTitle, setLocalTitle] = useState(state.title);
+  const [localContent, setLocalContent] = useState(state.content);
+  const [localThreshold, setLocalThreshold] = useState(state.threshold);
   const [isContentSharedToPeer, setIsContentSharedToPeer] = useState<
     Record<string, boolean>
   >({});
 
-  useCreateBoxConnection();
-
-  // useEffect(() => {
-  //   const timeoutHandler = setTimeout(() => {
-  //     actions.setBoxInfo({
-  //       title: localTitle,
-  //       content: localContent,
-  //       threshold: localThreshold,
-  //     });
-  //   }, 250);
-
-  //   leaderService.sendBoxInfo(
-  //     {
-  //       type: "boxInfo",
-  //       threshold: localThreshold,
-  //       content: localContent,
-  //       title: localTitle,
-  //     },
-  //     isContentSharedToPeer,
-  //   );
-
-  //   return () => clearTimeout(timeoutHandler);
-  // }, [
-  //   localTitle,
-  //   localContent,
-  //   localThreshold,
-  //   actions.setBoxInfo,
-  //   isContentSharedToPeer,
-  // ]);
+  const { sendBoxUpdate, sendBoxCreated } = useCreateBoxConnection();
+  const { handleBoxCreation } = useLockBox();
 
   useEffect(() => {
-    init(wasm);
-  }, []);
+    const timeoutHandler = setTimeout(() => {
+      actions.setBoxInfo({
+        title: localTitle,
+        content: localContent,
+        threshold: localThreshold,
+      });
+    }, 250);
 
-  const noParticipantConnected = keyHolders.length === 0;
-
-  const handleBoxCreation = () => {
-    const isStateValid = validate({ title, content });
-    if (!isStateValid) {
-      return;
-    }
-    const numKeys = keyHolders.length + 1; // Leader + key holders
-    const secured = secure_message(
-      content,
-      undefined,
-      new ChunksConfiguration(threshold, numKeys - threshold),
-    );
-
-    actions.create({
-      title,
-      content,
-      encryptedMessage: secured.encrypted_message[0] as string,
-      generatedKey: secured.chunks[0],
-      generatedKeys: secured.chunks as string[],
+    sendBoxUpdate({
+      keyHolderTreshold: localThreshold,
+      title: localTitle,
     });
-    createDownloadStoreFromCreateBox();
-    leaderService.createBox({
-      type: "createBox",
-      title,
-      content,
-      encryptedMessage: secured.encrypted_message[0] as string,
-      generatedKey: secured.chunks[0],
-    });
-  };
+
+    return () => clearTimeout(timeoutHandler);
+  }, [
+    localTitle,
+    localContent,
+    localThreshold,
+    actions.setBoxInfo,
+    sendBoxUpdate,
+  ]);
+
+  const noParticipantConnected = state.keyHolders.length === 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -139,16 +95,19 @@ export const CreateBox: React.FC = () => {
           )}
         </FieldArea>
         <FieldArea label="You - leader">
-          <ParticipantItem name={leader.name} userAgent={leader.userAgent} />
+          <ParticipantItem
+            name={state.leader.name}
+            userAgent={state.leader.userAgent}
+          />
         </FieldArea>
         <FieldArea label="KeyHolders: ">
           <div className="flex flex-col gap-1.5">
-            {keyHolders.length === 0 && (
+            {state.keyHolders.length === 0 && (
               <Text variant="secondaryText">
                 No key holders yet. Waiting for others to join...
               </Text>
             )}
-            {keyHolders.map((p) => (
+            {state.keyHolders.map((p) => (
               <ParticipantItem
                 key={p.id}
                 name={p.name}

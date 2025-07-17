@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { CalleeSignalingService } from "@/services/signaling";
 import { DataChannelManager } from "@/services/webrtc";
 import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
@@ -6,6 +6,8 @@ import { createWebsocketConnection } from "@/services/websocket/createWebsocketC
 import { useCreateBoxStore } from "@/stores";
 import {
   isKeyHolderWelcomesLeader,
+  type LeaderSendsBoxCreated,
+  type LeaderSendsBoxUpdate,
   type LeaderWelcomesKeyholder,
 } from "../commons";
 
@@ -41,7 +43,57 @@ router.addHandler(
 );
 
 export function useCreateBoxConnection() {
+  const dataChannelMngRef = useCreateBoxDataChannel();
+
+  const sendBoxUpdate = useCallback(
+    ({
+      title,
+      keyHolderTreshold,
+    }: {
+      title: string;
+      keyHolderTreshold: number;
+    }) => {
+      dataChannelMngRef.current?.sendMessageToAllPeers({
+        type: "leader:sends-box-update",
+        boxInfo: {
+          name: title,
+          keyHolderTreshold: keyHolderTreshold,
+        },
+      } satisfies LeaderSendsBoxUpdate);
+    },
+    [dataChannelMngRef],
+  );
+
+  const sendBoxCreated = useCallback(
+    ({
+      encryptedMessage,
+      key,
+      localPeerID,
+    }: {
+      localPeerID: string;
+      key: string;
+      encryptedMessage: string;
+    }) => {
+      dataChannelMngRef.current?.sendMessageToSinglePeer(localPeerID, {
+        type: "leader:box-created",
+        key,
+        encryptedMessage,
+      } satisfies LeaderSendsBoxCreated);
+    },
+    [dataChannelMngRef],
+  );
+
+  return {
+    sendBoxUpdate,
+    sendBoxCreated,
+  };
+}
+
+function useCreateBoxDataChannel() {
   const storeActions = useCreateBoxStore((state) => state.actions);
+  const dataChannelManagerRef = useRef<
+    DataChannelManager<CalleeSignalingService> | undefined
+  >(undefined);
 
   useEffect(() => {
     const dataChannelManager = new DataChannelManager({
@@ -65,9 +117,13 @@ export function useCreateBoxConnection() {
     });
 
     dataChannelManager.start();
+    dataChannelManagerRef.current = dataChannelManager;
 
     return () => {
+      dataChannelManagerRef.current = undefined;
       dataChannelManager.close();
     };
   }, [storeActions]);
+
+  return dataChannelManagerRef;
 }

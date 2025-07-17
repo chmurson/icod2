@@ -55,3 +55,46 @@ export function isLeaderWelcomesKeyholder(
     typeof payload.yourId === "string"
   );
 }
+
+export type LeaderSendsBoxUpdate = {
+  type: "leader:sends-box-update";
+  boxInfo: {
+    name: string;
+    keyHolderTreshold: number;
+  };
+};
+
+export function isLeaderSendsBoxUpdate(
+  payload: object,
+): payload is LeaderSendsBoxUpdate {
+  return (
+    "type" in payload &&
+    payload.type === "leader:sends-box-update" &&
+    "boxInfo" in payload &&
+    typeof payload.boxInfo === "object" &&
+    payload.boxInfo !== null &&
+    "name" in payload.boxInfo &&
+    typeof payload.boxInfo.name === "string" &&
+    "keyHolderTreshold" in payload.boxInfo &&
+    typeof payload.boxInfo.keyHolderTreshold === "number"
+  );
+}
+
+export type LeaderSendsBoxCreated = {
+  type: "leader:box-created";
+  key: string;
+  encryptedMessage: string;
+};
+
+export function isLeaderSendsBoxCreated(
+  payload: object,
+): payload is LeaderSendsBoxCreated {
+  return (
+    "type" in payload &&
+    payload.type === "leader:box-created" &&
+    "key" in payload &&
+    typeof payload.key === "string" &&
+    "encryptedMessage" in payload &&
+    typeof payload.encryptedMessage === "string"
+  );
+}

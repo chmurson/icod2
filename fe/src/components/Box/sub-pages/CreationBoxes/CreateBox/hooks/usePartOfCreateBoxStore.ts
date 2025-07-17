@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import z from "zod";
 import { useCreateBoxStore } from "@/stores";
 
-export const useCreateBoxState = () => {
+export const usePartOfCreateBoxStore = () => {
   const title = useCreateBoxStore((state) => state.title);
   const content = useCreateBoxStore((state) => state.content);
   const leader = useCreateBoxStore((state) => state.leader);

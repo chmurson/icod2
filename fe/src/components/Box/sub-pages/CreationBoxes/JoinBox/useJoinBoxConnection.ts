@@ -5,6 +5,7 @@ import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRo
 import { createWebsocketConnection } from "@/services/websocket/createWebsocketConnection";
 import { useJoinBoxStore } from "@/stores";
 import {
+  isLeaderSendsBoxUpdate,
   isLeaderWelcomesKeyholder,
   type KeyHolderWelcomesLeader,
 } from "../commons";
@@ -25,6 +26,15 @@ router.addHandler(isLeaderWelcomesKeyholder, (_, message) => {
     },
   });
 
+  storeActions.setInfoBox({
+    title: message.boxInfo.name,
+    content: "",
+    threshold: message.boxInfo.keyHolderTreshold,
+  });
+});
+
+router.addHandler(isLeaderSendsBoxUpdate, (_, message) => {
+  const storeActions = useJoinBoxStore.getState().actions;
   storeActions.setInfoBox({
     title: message.boxInfo.name,
     content: "",
