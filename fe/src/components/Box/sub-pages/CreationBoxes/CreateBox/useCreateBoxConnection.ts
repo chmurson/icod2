@@ -4,7 +4,10 @@ import { DataChannelManager } from "@/services/webrtc";
 import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
 import { createWebsocketConnection } from "@/services/websocket/createWebsocketConnection";
 import { useCreateBoxStore } from "@/stores";
-import { isKeyHolderWelcomesLeader } from "../commons";
+import {
+  isKeyHolderWelcomesLeader,
+  type LeaderWelcomesKeyholder,
+} from "../commons";
 
 function useMessageRouter() {
   const storeActions = useCreateBoxStore((state) => state.actions);
@@ -14,13 +17,31 @@ function useMessageRouter() {
   }, []);
 
   useEffect(() => {
-    router.addHandler(isKeyHolderWelcomesLeader, (localId, message) => {
-      storeActions.connectParticipant({
-        id: localId,
-        name: message.name,
-        userAgent: message.userAgent,
-      });
-    });
+    router.addHandler(
+      isKeyHolderWelcomesLeader,
+      (localId, message, dataChannelMng) => {
+        storeActions.connectParticipant({
+          id: localId,
+          name: message.name,
+          userAgent: message.userAgent,
+        });
+
+        const state = useCreateBoxStore.getState();
+        dataChannelMng?.sendMessageToSinglePeer(localId, {
+          boxInfo: {
+            keyHolderTreshold: state.threshold,
+            name: state.title,
+          },
+          leaderInfo: {
+            id: state.leader.id,
+            name: state.leader.name,
+            userAgent: state.leader.userAgent,
+          },
+          yourId: localId,
+          type: "leader:welcome-keyholder",
+        } satisfies LeaderWelcomesKeyholder);
+      },
+    );
 
     return () => {
       router.clearHandlers();
@@ -30,12 +51,8 @@ function useMessageRouter() {
   return router.router;
 }
 
-type LocalDataChannelManagerType = DataChannelManager<CalleeSignalingService>;
-
 export function useCreateBoxConnection() {
-  const dataChannelManagerRef = useRef<LocalDataChannelManagerType | undefined>(
-    undefined,
-  );
+  const messageRouter = useMessageRouter();
   const storeActions = useCreateBoxStore((state) => state.actions);
 
   useEffect(() => {

@@ -3,11 +3,13 @@ import type {
   SignalingServiceConnectionInitiator,
 } from "../signaling";
 
+export type PossibleSignalingServie<TConnectionFailReason> =
+  | SignalingService
+  | (SignalingService &
+      SignalingServiceConnectionInitiator<TConnectionFailReason>);
+
 export class DataChannelManager<
-  TSignalingService extends
-    | SignalingService
-    | (SignalingService &
-        SignalingServiceConnectionInitiator<TConnectionFailReason>),
+  TSignalingService extends PossibleSignalingServie<TConnectionFailReason>,
   TConnectionFailReason = unknown,
 > {
   private signalingService: SignalingService;
@@ -18,7 +20,14 @@ export class DataChannelManager<
     onFailedToConnect?: (reason: TConnectionFailReason) => void;
     onPeerConnected?: (localID: string) => void;
     onPeerDisconnected?: (localID: string) => void;
-    onDataChannelMessage?: (localID: string, data: object) => void;
+    onDataChannelMessage?: (
+      localID: string,
+      data: object,
+      dataChannelManager: DataChannelManager<
+        TSignalingService,
+        TConnectionFailReason
+      >,
+    ) => void;
   };
 
   private peers = new WeakMap<
@@ -33,7 +42,14 @@ export class DataChannelManager<
       onFailedToConnect?: (reason: TConnectionFailReason) => void;
       onPeerConnected?: (localID: string) => void;
       onPeerDisconnected?: (localID: string) => void;
-      onDataChannelMessage?: (localID: string, data: object) => void;
+      onDataChannelMessage?: (
+        localID: string,
+        data: object,
+        dataChannelManager: DataChannelManager<
+          TSignalingService,
+          TConnectionFailReason
+        >,
+      ) => void;
     };
   }) {
     this.callbacks = args.callbacks ?? {};
@@ -115,7 +131,7 @@ export class DataChannelManager<
       if (typeof event.data === "string") {
         try {
           const data = JSON.parse(event.data);
-          this.callbacks.onDataChannelMessage?.(localID, data);
+          this.callbacks.onDataChannelMessage?.(localID, data, this);
         } catch (error) {
           console.error("Failed to parse message:", error);
         }

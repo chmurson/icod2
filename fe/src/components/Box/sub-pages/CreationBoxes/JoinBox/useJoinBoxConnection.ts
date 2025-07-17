@@ -28,6 +28,11 @@ function useMessageRouter() {
           id: message.yourId,
         },
       });
+      storeActions.setInfoBox({
+        title: message.boxInfo.name,
+        content: "",
+        threshold: message.boxInfo.keyHolderTreshold,
+      });
     });
 
     return () => {
