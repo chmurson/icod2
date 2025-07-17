@@ -10,7 +10,7 @@ export class DataChannelMessageRouter<
   private routes: {
     condition: (arg: object) => boolean;
     handler: (
-      locaID: string,
+      localID: string,
       arg: object,
       dataChannelManager: DataChannelManager<
         TSignalingService,

@@ -34,7 +34,7 @@ export const CreateBox: React.FC = () => {
       sendBoxUpdate({
         id: keyHolder.id,
         title: state.title,
-        keyHolderTreshold: state.threshold,
+        keyHolderThreshold: state.threshold,
         content: isContentShared ? state.content : undefined,
         isContentShared,
       });

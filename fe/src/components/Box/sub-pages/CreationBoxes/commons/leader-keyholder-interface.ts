@@ -24,9 +24,9 @@ export type LeaderWelcomesKeyholder = {
   };
   boxInfo: {
     name: string;
-    keyHolderTreshold: number;
+    keyHolderThreshold: number;
   };
-  yourId: string;
+  keyHolderID: string;
 };
 
 export function isLeaderWelcomesKeyholder(
@@ -49,17 +49,17 @@ export function isLeaderWelcomesKeyholder(
     payload.boxInfo !== null &&
     "name" in payload.boxInfo &&
     typeof payload.boxInfo.name === "string" &&
-    "keyHolderTreshold" in payload.boxInfo &&
-    typeof payload.boxInfo.keyHolderTreshold === "number" &&
-    "yourId" in payload &&
-    typeof payload.yourId === "string"
+    "keyHolderThreshold" in payload.boxInfo &&
+    typeof payload.boxInfo.keyHolderThreshold === "number" &&
+    "keyHolderID" in payload &&
+    typeof payload.keyHolderID === "string"
   );
 }
 
 export type LeaderSendsBoxUpdate = {
   type: "leader:sends-box-update";
   name: string;
-  keyHolderTreshold: number;
+  keyHolderThreshold: number;
   content?: string;
 };
 
@@ -71,8 +71,8 @@ export function isLeaderSendsBoxUpdate(
     payload.type === "leader:sends-box-update" &&
     "name" in payload &&
     typeof payload.name === "string" &&
-    "keyHolderTreshold" in payload &&
-    typeof payload.keyHolderTreshold === "number" &&
+    "keyHolderThreshold" in payload &&
+    typeof payload.keyHolderThreshold === "number" &&
     (!("content" in payload) || typeof payload.content === "string")
   );
 }

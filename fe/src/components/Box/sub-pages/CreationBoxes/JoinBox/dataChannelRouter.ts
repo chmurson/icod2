@@ -18,14 +18,14 @@ router.addHandler(isLeaderWelcomesKeyholder, (_, message) => {
       userAgent: message.leaderInfo.userAgent,
     },
     you: {
-      id: message.yourId,
+      id: message.keyHolderID,
     },
   });
 
   storeActions.setInfoBox({
     title: message.boxInfo.name,
     content: undefined,
-    threshold: message.boxInfo.keyHolderTreshold,
+    threshold: message.boxInfo.keyHolderThreshold,
   });
 });
 
@@ -34,7 +34,7 @@ router.addHandler(isLeaderSendsBoxUpdate, (_, message) => {
   storeActions.setInfoBox({
     title: message.name,
     content: message.content,
-    threshold: message.keyHolderTreshold,
+    threshold: message.keyHolderThreshold,
   });
 });
 

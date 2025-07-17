@@ -15,12 +15,12 @@ export function useCreateBoxConnection() {
     ({
       id,
       title,
-      keyHolderTreshold,
+      keyHolderThreshold,
       content,
       isContentShared,
     }: {
       title: string;
-      keyHolderTreshold: number;
+      keyHolderThreshold: number;
       content?: string;
       id: string;
       isContentShared?: boolean;
@@ -28,10 +28,10 @@ export function useCreateBoxConnection() {
       const payload = isContentShared
         ? {
             name: title,
-            keyHolderTreshold,
+            keyHolderThreshold,
             content,
           }
-        : { name: title, keyHolderTreshold };
+        : { name: title, keyHolderThreshold };
 
       dataChannelMngRef.current?.sendMessageToSinglePeer(id, {
         type: "leader:sends-box-update",

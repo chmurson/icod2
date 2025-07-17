@@ -22,7 +22,7 @@ router.addHandler(
 
     dataChannelMng?.sendMessageToSinglePeer(localId, {
       boxInfo: {
-        keyHolderTreshold: state.threshold,
+        keyHolderThreshold: state.threshold,
         name: state.title,
       },
       leaderInfo: {
@@ -30,7 +30,7 @@ router.addHandler(
         name: state.leader.name,
         userAgent: state.leader.userAgent,
       },
-      yourId: localId,
+      keyHolderID: localId,
       type: "leader:welcome-keyholder",
     } satisfies LeaderWelcomesKeyholder);
   },
