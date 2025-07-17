@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { type RefObject, useEffect, useMemo, useRef } from "react";
 import { CalleeSignalingService } from "@/services/signaling";
 import { DataChannelManager } from "@/services/webrtc";
 import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
@@ -30,9 +30,13 @@ function useMessageRouter() {
   return router.router;
 }
 
+type LocalDataChannelManagerType = DataChannelManager<CalleeSignalingService>;
+
 export function useCreateBoxConnection() {
+  const dataChannelManagerRef = useRef<LocalDataChannelManagerType | undefined>(
+    undefined,
+  );
   const storeActions = useCreateBoxStore((state) => state.actions);
-  const messageRouter = useMessageRouter();
 
   useEffect(() => {
     const dataChannelManager = new DataChannelManager({

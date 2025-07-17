@@ -8,7 +8,7 @@ export class DataChannelManager<
     | SignalingService
     | (SignalingService &
         SignalingServiceConnectionInitiator<TConnectionFailReason>),
-  TConnectionFailReason,
+  TConnectionFailReason = unknown,
 > {
   private signalingService: SignalingService;
   private objectIdSet = new Set<{ localID: string }>();
