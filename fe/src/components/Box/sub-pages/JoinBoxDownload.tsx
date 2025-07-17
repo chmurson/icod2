@@ -1,10 +1,10 @@
 import { Box } from "@radix-ui/themes";
 import type React from "react";
-import { useJoinBoxCreationState } from "@/stores";
+import { useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 
 const JoinBoxDownload: React.FC = () => {
-  const state = useJoinBoxCreationState();
+  const state = useJoinBoxStore();
 
   const handleDownload = () => {
     if (state.encryptedMessage) {
