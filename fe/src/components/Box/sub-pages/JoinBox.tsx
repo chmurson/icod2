@@ -7,6 +7,7 @@ import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../components/FieldArea";
 import { ParticipantItem } from "../components/ParticipantItem";
+import { useJoinBoxConnection } from "./JoinBox/useJoinBoxConnection";
 
 // Singleton for the session
 const participantService = new ParticipantService(new SignalingService());
@@ -15,6 +16,8 @@ export const JoinBox: React.FC = () => {
   const { leader, otherKeyholders, threshold, title, you, content } =
     useStoreSlice();
   const actions = useJoinBoxCreationState((state) => state.actions);
+
+  useJoinBoxConnection();
 
   useEffect(() => {
     participantService.connect({

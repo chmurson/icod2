@@ -54,8 +54,8 @@ const Welcome: React.FC = () => {
             <p className="my-1">Start by joining a box creation. You’ll:</p>
             <ul className="my-1">
               <li>
-                - Join by clicking a link or entering a token they shared with
-                you.
+                - Join by clicking a link or entering a sessionToken they shared
+                with you.
               </li>
               <li>- Take part in the box setup process.</li>
               <li>
