@@ -8,9 +8,9 @@ import { useDownloadBoxStore } from "@/stores";
 import { useJoinBoxCreationState } from "@/stores/boxStore/joinBoxCreationStore";
 import { Button } from "@/ui/Button.tsx";
 import { Text } from "@/ui/Typography";
-import { FieldArea } from "../../components/FieldArea";
-import { InputNumber } from "../../components/InputNumber";
-import { ParticipantItem } from "../../components/ParticipantItem";
+import { FieldArea } from "../../../components/FieldArea";
+import { InputNumber } from "../../../components/InputNumber";
+import { ParticipantItem } from "../../../components/ParticipantItem";
 import { useCreateBoxState } from "./hooks";
 import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
