@@ -1,11 +1,11 @@
-import { useOpenLockedBoxCreationStore } from "@/stores/boxStore/openBoxCreationState";
+import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../components/FieldArea";
 import { ParticipantItem } from "../../components/ParticipantItem";
 
 export const OpenLockedBox: React.FC = () => {
-  const state = useOpenLockedBoxCreationStore();
+  const state = useOpenLockedBoxStore();
 
   // Only show UI when in connecting/connected/opened state
   if (!["connecting", "connected", "opened"].includes(state.state)) {

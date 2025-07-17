@@ -1,6 +1,6 @@
 import type React from "react";
 import { useJoinBoxStore } from "@/stores";
-import { useOpenLockedBoxCreationStore } from "@/stores/boxStore";
+import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { CreateBox, JoinBox } from "./sub-pages/CreationBoxes";
 import { DownloadLockedBox } from "./sub-pages/DownloadLockedBox";
@@ -48,7 +48,7 @@ const Box: React.FC<BoxProps> = () => {
 const useCurrentPage = () => {
   const { state: createBoxState } = useCreateBoxStore();
   const { state: joinBoxState } = useJoinBoxStore();
-  const { state: openBoxState } = useOpenLockedBoxCreationStore();
+  const { state: openBoxState } = useOpenLockedBoxStore();
 
   if (openBoxState === "drop-box") {
     return "dropBox";
