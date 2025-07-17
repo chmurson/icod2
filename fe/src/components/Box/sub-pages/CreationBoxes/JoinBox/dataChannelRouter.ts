@@ -24,7 +24,7 @@ router.addHandler(isLeaderWelcomesKeyholder, (_, message) => {
 
   storeActions.setInfoBox({
     title: message.boxInfo.name,
-    content: "",
+    content: undefined,
     threshold: message.boxInfo.keyHolderTreshold,
   });
 });
@@ -32,9 +32,9 @@ router.addHandler(isLeaderWelcomesKeyholder, (_, message) => {
 router.addHandler(isLeaderSendsBoxUpdate, (_, message) => {
   const storeActions = useJoinBoxStore.getState().actions;
   storeActions.setInfoBox({
-    title: message.boxInfo.name,
-    content: "",
-    threshold: message.boxInfo.keyHolderTreshold,
+    title: message.name,
+    content: message.content,
+    threshold: message.keyHolderTreshold,
   });
 });
 

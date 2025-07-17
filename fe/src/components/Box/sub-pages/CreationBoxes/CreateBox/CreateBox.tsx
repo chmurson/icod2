@@ -1,6 +1,6 @@
 import { TextArea, TextField } from "@radix-ui/themes";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/ui/Button.tsx";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
@@ -12,6 +12,11 @@ import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
 export const CreateBox: React.FC = () => {
   const { state, actions, getError, validate } = usePartOfCreateBoxStore();
+  const keyHoldersRef = useRef(state.keyHolders);
+
+  useEffect(() => {
+    keyHoldersRef.current = state.keyHolders;
+  }, [state.keyHolders]);
 
   const [localTitle, setLocalTitle] = useState(state.title);
   const [localContent, setLocalContent] = useState(state.content);
@@ -24,6 +29,25 @@ export const CreateBox: React.FC = () => {
   const { lockBox } = useLockBox();
 
   useEffect(() => {
+    keyHoldersRef.current.forEach((keyHolder) => {
+      const isContentShared = isContentSharedToPeer[keyHolder.id] === true;
+      sendBoxUpdate({
+        id: keyHolder.id,
+        title: state.title,
+        keyHolderTreshold: state.threshold,
+        content: isContentShared ? state.content : undefined,
+        isContentShared,
+      });
+    });
+  }, [
+    state.content,
+    state.threshold,
+    state.title,
+    isContentSharedToPeer,
+    sendBoxUpdate,
+  ]);
+
+  useEffect(() => {
     const timeoutHandler = setTimeout(() => {
       actions.setBoxInfo({
         title: localTitle,
@@ -32,19 +56,8 @@ export const CreateBox: React.FC = () => {
       });
     }, 250);
 
-    sendBoxUpdate({
-      keyHolderTreshold: localThreshold,
-      title: localTitle,
-    });
-
     return () => clearTimeout(timeoutHandler);
-  }, [
-    localTitle,
-    localContent,
-    localThreshold,
-    actions.setBoxInfo,
-    sendBoxUpdate,
-  ]);
+  }, [localTitle, localContent, localThreshold, actions.setBoxInfo]);
 
   const noParticipantConnected = state.keyHolders.length === 0;
 

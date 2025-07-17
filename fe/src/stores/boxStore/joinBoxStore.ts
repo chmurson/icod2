@@ -25,7 +25,7 @@ const joinBoxDefaultState = {
     userAgent: "",
   } satisfies ParticipantType,
   otherKeyHolders: [] as ParticipantType[],
-  content: "",
+  content: undefined as string | undefined,
   threshold: 1,
   encryptedMessage: "",
   generatedKey: "",
@@ -52,7 +52,7 @@ type JoinBoxState = {
     }) => void;
     setInfoBox: (arg: {
       threshold: number;
-      content: string;
+      content?: string;
       title: string;
     }) => void;
   };

@@ -55,7 +55,7 @@ const BoxJoinContentForOK = ({
   otherKeyholders: { id: string; name: string; userAgent: string }[];
   leader: { name: string; userAgent: string };
   you: { name: string; userAgent: string };
-  content: string;
+  content?: string;
 }) => {
   return (
     <>
@@ -92,7 +92,7 @@ const BoxJoinContentForOK = ({
             ))}
           </div>
         </FieldArea>
-        {content !== "" && (
+        {content !== undefined && (
           <FieldArea label="Content:">
             <TextArea disabled rows={6} value={content} className="w-full" />
           </FieldArea>

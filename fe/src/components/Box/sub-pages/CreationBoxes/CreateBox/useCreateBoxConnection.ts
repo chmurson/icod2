@@ -13,18 +13,29 @@ export function useCreateBoxConnection() {
 
   const sendBoxUpdate = useCallback(
     ({
+      id,
       title,
       keyHolderTreshold,
+      content,
+      isContentShared,
     }: {
       title: string;
       keyHolderTreshold: number;
+      content?: string;
+      id: string;
+      isContentShared?: boolean;
     }) => {
-      dataChannelMngRef.current?.sendMessageToAllPeers({
+      const payload = isContentShared
+        ? {
+            name: title,
+            keyHolderTreshold,
+            content,
+          }
+        : { name: title, keyHolderTreshold };
+
+      dataChannelMngRef.current?.sendMessageToSinglePeer(id, {
         type: "leader:sends-box-update",
-        boxInfo: {
-          name: title,
-          keyHolderTreshold: keyHolderTreshold,
-        },
+        ...payload,
       } satisfies LeaderSendsBoxUpdate);
     },
     [dataChannelMngRef],
