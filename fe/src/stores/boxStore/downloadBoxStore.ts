@@ -1,10 +1,7 @@
 import { create, type StateCreator } from "zustand";
 import { devtools } from "zustand/middleware";
 import { type CreateBoxStateData, useCreateBoxStore } from "./createBoxStore";
-import {
-  type JoinBoxStateData,
-  useJoinBoxCreationState,
-} from "./joinBoxCreationStore";
+import { type JoinBoxStateData, useJoinBoxStore } from "./joinBoxStore";
 
 type DownloadBoxStoreStateType =
   | {
@@ -63,7 +60,7 @@ const createStoreFn: StateCreator<DownloadBoxStoreStateType & Actions> = (
     });
   },
   fromJoinBox: () => {
-    const joinBoxState = useJoinBoxCreationState.getState();
+    const joinBoxState = useJoinBoxStore.getState();
     set({
       type: "fromJoinBox",
       state: {

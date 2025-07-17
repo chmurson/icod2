@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
-import type { LockedBoxFile } from "@/stores/boxStore/common-types";
+import type { LockedBox } from "@/stores/boxStore/common-types";
 import { useOpenBoxCreationState } from "@/stores/boxStore/openBoxCreationState";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 
-function isLockedBoxFile(data: object): data is LockedBoxFile {
+function isLockedBoxFile(data: object): data is LockedBox {
   return (
     "encryptedMessage" in data &&
     typeof data.encryptedMessage === "string" &&
@@ -30,9 +30,9 @@ function isLockedBoxFile(data: object): data is LockedBoxFile {
   );
 }
 
-export const DropBox: React.FC = () => {
+export const DropLockedBox: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<LockedBoxFile | null>(null);
+  const [success, setSuccess] = useState<LockedBox | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const openBoxState = useOpenBoxCreationState();
 

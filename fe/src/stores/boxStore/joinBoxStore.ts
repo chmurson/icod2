@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { ParticipantType } from "./common-types";
 
-const joinBoxCreationState = {
+const joinBoxDefaultState = {
   state: "initial" as
     | "initial"
     | "set-name"
@@ -31,7 +31,7 @@ const joinBoxCreationState = {
   generatedKey: "",
 };
 
-export type JoinBoxStateData = typeof joinBoxCreationState;
+export type JoinBoxStateData = typeof joinBoxDefaultState;
 
 type JoinBoxState = {
   actions: {
@@ -54,14 +54,14 @@ type JoinBoxState = {
   };
 } & JoinBoxStateData;
 
-export const useJoinBoxCreationState = create<JoinBoxState>()(
+export const useJoinBoxStore = create<JoinBoxState>()(
   devtools((set) => ({
-    ...joinBoxCreationState,
+    ...joinBoxDefaultState,
     actions: {
-      start: () => set({ ...joinBoxCreationState, state: "set-name" }),
+      start: () => set({ ...joinBoxDefaultState, state: "set-name" }),
       connect: ({ name, userAgent }) =>
         set((state) => ({
-          ...joinBoxCreationState,
+          ...joinBoxDefaultState,
           connecting: true,
           state: "connecting",
           you: {
@@ -114,7 +114,7 @@ export const useJoinBoxCreationState = create<JoinBoxState>()(
         }),
       reset: () =>
         set({
-          ...joinBoxCreationState,
+          ...joinBoxDefaultState,
         }),
       setInfoBox: (threshold, content, title) =>
         set({
