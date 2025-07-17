@@ -1,7 +1,5 @@
 import { TextArea } from "@radix-ui/themes";
 import type React from "react";
-import { useEffect } from "react";
-import { ParticipantService, SignalingService } from "@/services/web-rtc";
 import { useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
@@ -10,53 +8,12 @@ import { ParticipantItem } from "../../../components/ParticipantItem";
 import { useJoinBoxConnection } from "./useJoinBoxConnection";
 
 // Singleton for the session
-const participantService = new ParticipantService(new SignalingService());
-
 export const JoinBox: React.FC = () => {
   const { leader, otherKeyholders, threshold, title, you, content } =
     useStoreSlice();
   const actions = useJoinBoxStore((state) => state.actions);
 
   useJoinBoxConnection();
-
-  useEffect(() => {
-    participantService.connect({
-      userName: you.name,
-      onAcknowledgeLeader: (data) => {
-        const { connectYou } = useJoinBoxStore.getState().actions;
-        connectYou({
-          you: {
-            id: participantService.signaling.getMyId() ?? "",
-            name: you.name,
-            userAgent: you.userAgent,
-          },
-          leader: {
-            id: data.leaderId,
-            name: data.leaderName,
-            userAgent: data.leaderUserAgent,
-          },
-        });
-      },
-      onPeerConnected: async (data) => {
-        const { connectParticipant } = useJoinBoxStore.getState().actions;
-        if (data.peerId !== useJoinBoxStore.getState().leader.id) {
-          connectParticipant({
-            id: data.peerId,
-            name: data.name,
-            userAgent: data.userAgent,
-          });
-        }
-      },
-      onPeerDisconnected: (data) => {
-        const { disconnectParticipant } = useJoinBoxStore.getState().actions;
-        disconnectParticipant(data.peerId);
-      },
-    });
-
-    return () => {
-      participantService.disconnect();
-    };
-  }, [you.name, you.userAgent]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -98,14 +55,16 @@ const BoxJoinContentForOK = ({
   otherKeyholders: { id: string; name: string; userAgent: string }[];
   leader: { name: string; userAgent: string };
   you: { name: string; userAgent: string };
-  content: string;
+  content?: string;
 }) => {
   return (
     <>
       <div className="flex flex-col gap-4">
         <div className="flex gap-2 items-center">
           <Text variant="label">Name:</Text>
-          <Text variant="primaryText">{title}</Text>
+          <Text variant={title.trim() ? "primaryText" : "secondaryText"}>
+            {title.trim() || "No name set"}
+          </Text>
         </div>
         <div className="flex gap-2 items-center">
           <Text variant="label">Key Treshold:</Text>
@@ -133,7 +92,7 @@ const BoxJoinContentForOK = ({
             ))}
           </div>
         </FieldArea>
-        {content !== "" && (
+        {content !== undefined && (
           <FieldArea label="Content:">
             <TextArea disabled rows={6} value={content} className="w-full" />
           </FieldArea>

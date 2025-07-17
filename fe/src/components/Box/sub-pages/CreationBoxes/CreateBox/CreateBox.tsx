@@ -1,36 +1,51 @@
 import { TextArea, TextField } from "@radix-ui/themes";
-import init, { ChunksConfiguration, secure_message } from "icod-crypto-js";
-import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
 import type React from "react";
-import { useEffect, useState } from "react";
-import { leaderService } from "@/services/web-rtc/leaderSingleton";
-import { useDownloadBoxStore } from "@/stores";
-import { useJoinBoxStore } from "@/stores/boxStore/joinBoxStore";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/ui/Button.tsx";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { InputNumber } from "../../../components/InputNumber";
 import { ParticipantItem } from "../../../components/ParticipantItem";
-import { useCreateBoxState } from "./hooks";
+import { usePartOfCreateBoxStore } from "./hooks";
+import { useLockBox } from "./hooks/useHandleBoxCreation";
 import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
 export const CreateBox: React.FC = () => {
-  const { state, actions, getError, validate } = useCreateBoxState();
+  const { state, actions, getError, validate } = usePartOfCreateBoxStore();
+  const keyHoldersRef = useRef(state.keyHolders);
 
-  const createDownloadStoreFromCreateBox = useDownloadBoxStore(
-    (state) => state.fromCreateBox,
-  );
+  useEffect(() => {
+    keyHoldersRef.current = state.keyHolders;
+  }, [state.keyHolders]);
 
-  const { content, leader, keyHolders, threshold, title } = state;
-
-  const [localTitle, setLocalTitle] = useState(title);
-  const [localContent, setLocalContent] = useState(content);
-  const [localThreshold, setLocalThreshold] = useState(threshold);
+  const [localTitle, setLocalTitle] = useState(state.title);
+  const [localContent, setLocalContent] = useState(state.content);
+  const [localThreshold, setLocalThreshold] = useState(state.threshold);
   const [isContentSharedToPeer, setIsContentSharedToPeer] = useState<
     Record<string, boolean>
   >({});
 
-  useCreateBoxConnection();
+  const { sendBoxUpdate, sendBoxLocked } = useCreateBoxConnection();
+  const { lockBox } = useLockBox();
+
+  useEffect(() => {
+    keyHoldersRef.current.forEach((keyHolder) => {
+      const isContentShared = isContentSharedToPeer[keyHolder.id] === true;
+      sendBoxUpdate({
+        id: keyHolder.id,
+        title: state.title,
+        keyHolderThreshold: state.threshold,
+        content: isContentShared ? state.content : undefined,
+        isContentShared,
+      });
+    });
+  }, [
+    state.content,
+    state.threshold,
+    state.title,
+    isContentSharedToPeer,
+    sendBoxUpdate,
+  ]);
 
   useEffect(() => {
     const timeoutHandler = setTimeout(() => {
@@ -41,99 +56,34 @@ export const CreateBox: React.FC = () => {
       });
     }, 250);
 
-    leaderService.sendBoxInfo(
-      {
-        type: "boxInfo",
-        threshold: localThreshold,
-        content: localContent,
-        title: localTitle,
-      },
-      isContentSharedToPeer,
-    );
-
     return () => clearTimeout(timeoutHandler);
-  }, [
-    localTitle,
-    localContent,
-    localThreshold,
-    actions.setBoxInfo,
-    isContentSharedToPeer,
-  ]);
+  }, [localTitle, localContent, localThreshold, actions.setBoxInfo]);
 
-  useEffect(() => {
-    init(wasm);
-    leaderService.connect({
-      userName: leader.name,
-      onId: (data) => {
-        actions.connectLeader({ id: data.id });
-      },
-      onPeerConnected: async (data) => {
-        // Leader initiates connection with new peer
-        let peer = leaderService.signaling
-          .getPeerConnections()
-          .get(data.peerId);
-        if (!peer) {
-          peer = leaderService.signaling.setupPeerConnection(data.peerId, true);
-        }
-        const offer = await peer.createOffer();
-        await peer.setLocalDescription(offer);
-        leaderService.signaling
-          .getWebSocket()
-          ?.send(
-            JSON.stringify({ type: "offer", targetId: data.peerId, offer }),
-          );
-        // Add participant to store (excluding leader)
-        if (data.peerId !== useJoinBoxStore.getState().leader.id) {
-          actions.connectParticipant({
-            id: data.peerId,
-            name: data.name,
-            userAgent: data.userAgent,
-          });
-        }
-      },
-      onPeerDisconnected: (data) => {
-        actions.disconnectParticipant(data.peerId);
-      },
-    });
+  const noParticipantConnected = state.keyHolders.length === 0;
 
-    return () => {
-      leaderService.disconnect();
-    };
-  }, [
-    actions.connectLeader,
-    actions.connectParticipant,
-    actions.disconnectParticipant,
-    leader.name,
-  ]);
-
-  const noParticipantConnected = keyHolders.length === 0;
-
-  const handleBoxCreation = () => {
-    const isStateValid = validate({ title, content });
-    if (!isStateValid) {
+  const handleBoxCreation = async () => {
+    const isValid = validate();
+    if (!isValid) {
       return;
     }
-    const numKeys = keyHolders.length + 1; // Leader + key holders
-    const secured = secure_message(
-      content,
-      undefined,
-      new ChunksConfiguration(threshold, numKeys - threshold),
-    );
 
-    actions.create({
-      title,
-      content,
-      encryptedMessage: secured.encrypted_message[0] as string,
-      generatedKey: secured.chunks[0],
-      generatedKeys: secured.chunks as string[],
-    });
-    createDownloadStoreFromCreateBox();
-    leaderService.createBox({
-      type: "createBox",
-      title,
-      content,
-      encryptedMessage: secured.encrypted_message[0] as string,
-      generatedKey: secured.chunks[0],
+    const { encryptedMessage, key, keys } = lockBox();
+    const notLeaderKeys = keys.filter((k) => k !== key);
+    state.keyHolders.forEach((keyHolder) => {
+      const key = notLeaderKeys.shift();
+
+      if (!key) {
+        console.error("No key available for keyHolder:", keyHolder.id);
+        return;
+      }
+
+      if (key) {
+        sendBoxLocked({
+          localPeerID: keyHolder.id,
+          key,
+          encryptedMessage,
+        });
+      }
     });
   };
 
@@ -182,16 +132,19 @@ export const CreateBox: React.FC = () => {
           )}
         </FieldArea>
         <FieldArea label="You - leader">
-          <ParticipantItem name={leader.name} userAgent={leader.userAgent} />
+          <ParticipantItem
+            name={state.leader.name}
+            userAgent={state.leader.userAgent}
+          />
         </FieldArea>
         <FieldArea label="KeyHolders: ">
           <div className="flex flex-col gap-1.5">
-            {keyHolders.length === 0 && (
+            {state.keyHolders.length === 0 && (
               <Text variant="secondaryText">
                 No key holders yet. Waiting for others to join...
               </Text>
             )}
-            {keyHolders.map((p) => (
+            {state.keyHolders.map((p) => (
               <ParticipantItem
                 key={p.id}
                 name={p.name}

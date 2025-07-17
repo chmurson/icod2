@@ -46,9 +46,9 @@ const Box: React.FC<BoxProps> = () => {
 };
 
 const useCurrentPage = () => {
-  const { state: createBoxState } = useCreateBoxStore();
-  const { state: joinBoxState } = useJoinBoxStore();
-  const { state: openBoxState } = useOpenLockedBoxStore();
+  const createBoxState = useCreateBoxStore((state) => state.state);
+  const joinBoxState = useJoinBoxStore((state) => state.state);
+  const openBoxState = useOpenLockedBoxStore((state) => state.state);
 
   if (openBoxState === "drop-box") {
     return "dropBox";

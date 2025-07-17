@@ -25,7 +25,7 @@ const joinBoxDefaultState = {
     userAgent: "",
   } satisfies ParticipantType,
   otherKeyHolders: [] as ParticipantType[],
-  content: "",
+  content: undefined as string | undefined,
   threshold: 1,
   encryptedMessage: "",
   generatedKey: "",
@@ -39,7 +39,7 @@ type JoinBoxState = {
     start: () => void;
     connect: (args: { name: string; userAgent: string }) => void;
     connectYou: (args: {
-      you: ParticipantType;
+      you: { id: string };
       leader: ParticipantType;
     }) => void;
     connectParticipant: (participant: ParticipantType) => void;
@@ -50,7 +50,11 @@ type JoinBoxState = {
       encryptedMessage?: string;
       generatedKey?: string;
     }) => void;
-    setInfoBox: (threshold: number, content: string, title: string) => void;
+    setInfoBox: (arg: {
+      threshold: number;
+      content?: string;
+      title: string;
+    }) => void;
   };
 } & JoinBoxStateData;
 
@@ -74,7 +78,7 @@ export const useJoinBoxStore = create<JoinBoxState>()(
         you,
         leader,
       }: {
-        you: ParticipantType;
+        you: { id: string };
         leader: ParticipantType;
       }) =>
         set((state) => ({
@@ -116,12 +120,7 @@ export const useJoinBoxStore = create<JoinBoxState>()(
         set({
           ...joinBoxDefaultState,
         }),
-      setInfoBox: (threshold, content, title) =>
-        set({
-          threshold,
-          content,
-          title,
-        }),
+      setInfoBox: (newPartState) => set(newPartState),
     },
   })),
 );

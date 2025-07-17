@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { leaderService } from "@/services/web-rtc/leaderSingleton";
 import type { ParticipantType } from "./common-types";
 
 const createBoxDefaultState = {
@@ -37,7 +36,7 @@ type CreateBoxState = {
     disconnectParticipant: (participantId: string) => void;
     start: () => void;
     connect: (args: { name: string; userAgent: string }) => void;
-    create: (message: {
+    lock: (message: {
       title?: string;
       content?: string;
       encryptedMessage?: string;
@@ -88,14 +87,12 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
         ),
       }));
     },
-    create: (message) => {
+    lock: (message) => {
       set({
         ...message,
         created: true,
         state: "created",
       });
-      const { generatedKeys, ...messageToSend } = message;
-      leaderService.createBox({ type: "createBox", ...messageToSend });
     },
     reset: () =>
       set({
