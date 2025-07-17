@@ -11,9 +11,10 @@ import {
   type OfferRequest,
 } from "@icod2/contracts/src/client-server";
 import type { WebsocketJSONHandler } from "@/services/websocket/WebSocketJSONHandler";
-import { consumeOfferAndIceCandidates } from "./consumeOfferAndIceCandidates";
+import type { SignalingService } from "./SignalingService";
+import { consumeOfferAndIceCandidates } from "./utils/consumeOfferAndIceCandidates";
 
-export class CalleeSignalingService {
+export class CalleeSignalingService implements SignalingService {
   private websocketJSONHandler: WebsocketJSONHandler;
   private token: string;
   private peerConnections: Map<
@@ -64,13 +65,15 @@ export class CalleeSignalingService {
     this._onPeerConnected = callback;
   }
 
-  get onPeerDisconneced():
+  get onPeerDisconnected():
     | ((peerConnection: RTCPeerConnection) => void)
     | undefined {
     return this._onPeerDisconnected;
   }
 
-  set onPeerDisconneced(callback: (peerConnection: RTCPeerConnection) => void) {
+  set onPeerDisconnected(callback: (
+    peerConnection: RTCPeerConnection,
+  ) => void) {
     this._onPeerDisconnected = callback;
   }
 
@@ -103,7 +106,7 @@ export class CalleeSignalingService {
 
         peerConnection.onconnectionstatechange = () => {
           if (peerConnection.connectionState === "disconnected") {
-            this.onPeerDisconneced?.(peerConnection);
+            this.onPeerDisconnected?.(peerConnection);
           }
           this.peerConnections.delete(peerConnectionId);
           peerConnection.close();

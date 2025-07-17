@@ -1,6 +1,6 @@
 import { useEffect } from "react";
+import { CallerSignalingService } from "@/services/signaling";
 import { createWebsocketConnection } from "@/services/websocket/createWebsocketConnection";
-import { CallerSignalingService } from "./CallerSignalingService";
 
 export function useJoinBoxConnection() {
   useEffect(() => {

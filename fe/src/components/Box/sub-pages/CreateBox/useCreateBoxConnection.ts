@@ -1,6 +1,6 @@
 import { useEffect } from "react";
+import { CalleeSignalingService } from "@/services/signaling";
 import { createWebsocketConnection } from "@/services/websocket/createWebsocketConnection";
-import { CalleeSignalingService } from "./CalleeSignalingService";
 
 export function useCreateBoxConnection() {
   useEffect(() => {
@@ -18,7 +18,7 @@ export function useCreateBoxConnection() {
       console.log("peer connected");
     };
 
-    calleeConnection.onPeerDisconneced = (peerConnection) => {
+    calleeConnection.onPeerDisconnected = (peerConnection) => {
       const index = peers.findIndex((p) => p.connection === peerConnection);
       if (index !== -1) {
         peers.splice(index, 1);
@@ -41,3 +41,13 @@ export function useCreateBoxConnection() {
     };
   }, []);
 }
+
+// further plan:
+// peer is -> connection and datachannel
+// accept new peers
+// remove peer when disconnected
+// assign unique local token to each peer
+// send json data to all peers
+// send json data to single peer
+// receive json data from all peers
+//

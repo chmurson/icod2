@@ -11,14 +11,25 @@ import {
   type SendsOfferResponse,
 } from "@icod2/contracts/src/client-server";
 import type { WebsocketJSONHandler } from "@/services/websocket/WebSocketJSONHandler";
+import type {
+  SignalingService,
+  SignalingServiceConnectionInitiator,
+} from "./SignalingService";
 import {
   consumeAnswer,
   createOfferAndAllIceCandidate,
-} from "./callerPeerConnectionUtils";
+} from "./utils/callerPeerConnectionUtils";
 
-type ConnectionFailureReason = "no-callee-available" | "unknown-error";
+export type ConnectionFailureReason =
+  | "no-callee-available"
+  | "fail-to-initialize-rtc-connection"
+  | "unknown-error";
 
-export class CallerSignalingService {
+export class CallerSignalingService
+  implements
+    SignalingService,
+    SignalingServiceConnectionInitiator<ConnectionFailureReason>
+{
   private websocketJSONHandler: WebsocketJSONHandler;
   private peerConnection?: RTCPeerConnection;
   private peerConnected = false;
@@ -26,6 +37,7 @@ export class CallerSignalingService {
   private _onPeerConnected?: (peerConnection: RTCPeerConnection) => void;
   private _onPeerDisconnected?: (peerConnection: RTCPeerConnection) => void;
   private _failedToConnect?: (reason: ConnectionFailureReason) => void;
+  private _onConnected?: () => void;
 
   constructor(websocketJSONHandler: WebsocketJSONHandler) {
     this.websocketJSONHandler = websocketJSONHandler;
@@ -35,6 +47,18 @@ export class CallerSignalingService {
 
   start(): void {
     this.sendSendsOfferRequest();
+  }
+
+  getToken(): string {
+    return "";
+  }
+
+  get onConnected(): (() => void) | undefined {
+    return this._onConnected;
+  }
+
+  set onConnected(callback: () => void) {
+    this._onConnected = callback;
   }
 
   get onPeerConnected():
@@ -153,9 +177,12 @@ export class CallerSignalingService {
     this.initRTCConnection();
 
     if (!this.peerConnection) {
+      this.onFailedToConnect?.("fail-to-initialize-rtc-connection");
       console.error("Peer connection is not initialized");
       return;
     }
+
+    this.onConnected?.();
 
     const { offer, iceCandidates } = await createOfferAndAllIceCandidate(
       this.peerConnection,
