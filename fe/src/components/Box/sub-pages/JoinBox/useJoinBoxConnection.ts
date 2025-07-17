@@ -4,14 +4,22 @@ import { createWebsocketConnection } from "@/services/websocket/createWebsocketC
 
 export function useJoinBoxConnection() {
   useEffect(() => {
-    let peer: RTCPeerConnection | undefined;
+    let peer:
+      | {
+          connection: RTCPeerConnection;
+          dataChannel: RTCDataChannel;
+        }
+      | undefined;
 
     const callerConnection = new CallerSignalingService(
       createWebsocketConnection(),
     );
 
-    callerConnection.onPeerConnected = (peerConnection) => {
-      peer = peerConnection;
+    callerConnection.onPeerConnected = (peerConnection, dataChannel) => {
+      peer = {
+        connection: peerConnection,
+        dataChannel: dataChannel,
+      };
       console.log("peer connected");
     };
 
@@ -27,7 +35,8 @@ export function useJoinBoxConnection() {
     callerConnection.start();
 
     return () => {
-      peer?.close();
+      peer?.dataChannel.close();
+      peer?.connection.close();
       callerConnection.close();
       peer = undefined;
     };

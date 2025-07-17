@@ -8,6 +8,7 @@ import type {
 import { v4 as uuidv4 } from "uuid";
 import { type WebSocket, WebSocketServer } from "ws";
 import { ClientManager } from "./ClientManager";
+import { MatchedSignalingConnectionsProvider } from "./MatchedSignalingConnectionsProvider";
 import { MessageRouter } from "./MessageRouter";
 import { SignalingConnection } from "./SignalingConnection";
 import type { HandlerContext } from "./types";
@@ -23,6 +24,8 @@ export class SignalingServer {
   private leaderUserAgent?: string;
   private websocketsHandlers: WebsocketJSONHandler[] = [];
   private signalingConnections: SignalingConnection[] = [];
+  private matchedSignalingConnectinosProvider: MatchedSignalingConnectionsProvider =
+    new MatchedSignalingConnectionsProvider();
 
   constructor(port: number, hostname: string) {
     this.server = createServer();
@@ -39,11 +42,19 @@ export class SignalingServer {
       const webSocketHandler = new WebsocketJSONHandler(ws);
       const signalingConnection = new SignalingConnection(
         ws,
-        this.signalingConnections,
+        this.matchedSignalingConnectinosProvider,
+      );
+      this.matchedSignalingConnectinosProvider.add(
+        signalingConnection.localID,
+        signalingConnection,
       );
 
       this.websocketsHandlers.push(webSocketHandler);
       this.signalingConnections.push(signalingConnection);
+
+      console.log(
+        `[SignalingServer] New signaling connection: ${signalingConnection.localID}; Total connections: ${this.signalingConnections.length}`,
+      );
 
       webSocketHandler.onClose(() => {
         const indexOfHandlers = this.websocketsHandlers.findIndex(
@@ -57,6 +68,15 @@ export class SignalingServer {
         );
 
         this.signalingConnections.splice(indexOfSignalingConnection, 1);
+
+        this.matchedSignalingConnectinosProvider.remove(
+          signalingConnection.localID,
+        );
+
+        console.log(
+          `[SignalingServer] Signaling connection got disconnected: ${signalingConnection.localID}; Total connections: ${this.signalingConnections.length}`,
+        );
+
         this.handleClientDisconnectLegacy(ws);
 
         console.log(

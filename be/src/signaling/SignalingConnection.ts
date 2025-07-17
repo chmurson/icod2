@@ -11,20 +11,22 @@ import {
 } from "@icod2/contracts/src/client-server";
 import { v4 as uuidv4 } from "uuid";
 import type { WebSocket } from "ws";
+import type { MatchedSignalingConnectionsProvider } from "./MatchedSignalingConnectionsProvider";
 import { WebsocketJSONHandler } from "./WebSocketJSONHandler";
 
 export class SignalingConnection {
   private websocketJSONHandler;
 
-  private state:
+  private _state:
     | undefined
     | { mode: "acceptsOffers"; offerSender?: SignalingConnection }
     | { mode: "sendsOffer"; matchedAcceptor: SignalingConnection };
-  private sessionToken: string | undefined;
+
+  public readonly localID: string = uuidv4();
 
   constructor(
     websocket: WebSocket,
-    private otherSignalingConnections: SignalingConnection[],
+    private connectionMatchProvider: MatchedSignalingConnectionsProvider,
   ) {
     this.websocketJSONHandler = new WebsocketJSONHandler(websocket, true);
     this.websocketJSONHandler.onSpecificMessage(
@@ -44,9 +46,12 @@ export class SignalingConnection {
       this.handleAnswerRequest.bind(this),
     );
   }
+  get state() {
+    return this._state;
+  }
 
-  public getState() {
-    return this.state;
+  private set state(value: typeof this._state) {
+    this._state = value;
   }
 
   public sendOffer(
@@ -54,7 +59,7 @@ export class SignalingConnection {
     offerSenderConnection: SignalingConnection,
   ) {
     if (this.state?.mode !== "acceptsOffers") {
-      throw new Error(
+      return console.error(
         "Cannot send offer to a connection which is not in accepts mode",
       );
     }
@@ -65,12 +70,16 @@ export class SignalingConnection {
 
   public sendAnswer(payload: AnswerRequest) {
     if (this.state?.mode !== "sendsOffer") {
-      throw new Error(
+      return console.error(
         "Cannot send answer to a connection which is not in sends mode",
       );
     }
 
     this.websocketJSONHandler.send(payload);
+  }
+
+  close() {
+    this.state = undefined;
   }
 
   private handleAnswerRequest(payload: AnswerRequest) {
@@ -97,12 +106,10 @@ export class SignalingConnection {
       return;
     }
 
-    this.sessionToken = payload.sessionToken;
     console.warn(payload.sessionToken, "sessionToken is ignored for now");
 
-    const firstAwaitingOffers = this.otherSignalingConnections.find(
-      (x) => x.getState()?.mode === "acceptsOffers",
-    );
+    const firstAwaitingOffers =
+      this.connectionMatchProvider.findOneThatAcceptsOffers();
 
     if (firstAwaitingOffers) {
       this.state = {

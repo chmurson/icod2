@@ -36,7 +36,9 @@ export function useCreateBoxConnection() {
       calleeConnection.close();
 
       while (peers.length > 0) {
-        peers.pop();
+        const peer = peers.pop();
+        peer?.connection.close();
+        peer?.dataChannel.close();
       }
     };
   }, []);

@@ -34,7 +34,10 @@ export class CallerSignalingService
   private peerConnection?: RTCPeerConnection;
   private peerConnected = false;
   private dataChannel?: RTCDataChannel;
-  private _onPeerConnected?: (peerConnection: RTCPeerConnection) => void;
+  private _onPeerConnected?: (
+    peerConnection: RTCPeerConnection,
+    dataChannel: RTCDataChannel,
+  ) => void;
   private _onPeerDisconnected?: (peerConnection: RTCPeerConnection) => void;
   private _failedToConnect?: (reason: ConnectionFailureReason) => void;
   private _onConnected?: () => void;
@@ -62,12 +65,15 @@ export class CallerSignalingService
   }
 
   get onPeerConnected():
-    | ((peerConnection: RTCPeerConnection) => void)
+    | ((peerConnection: RTCPeerConnection, dataChannel: RTCDataChannel) => void)
     | undefined {
     return this._onPeerConnected;
   }
 
-  set onPeerConnected(callback: (peerConnection: RTCPeerConnection) => void) {
+  set onPeerConnected(callback: (
+    peerConnection: RTCPeerConnection,
+    dataChannel: RTCDataChannel,
+  ) => void) {
     this._onPeerConnected = callback;
   }
 
@@ -115,9 +121,9 @@ export class CallerSignalingService
       console.log("Received from Callee:", event.data);
     this.dataChannel.onmessage = (event) => {
       event.data === calleeIntroduction;
-      if (this.peerConnection && !this.peerConnected) {
+      if (this.peerConnection && !this.peerConnected && this.dataChannel) {
         this.peerConnected = true;
-        this.onPeerConnected?.(this.peerConnection);
+        this.onPeerConnected?.(this.peerConnection, this.dataChannel);
       }
     };
 
