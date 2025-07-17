@@ -5,9 +5,9 @@ import { ParticipantService, SignalingService } from "@/services/web-rtc";
 import { useJoinBoxCreationState } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { FieldArea } from "../components/FieldArea";
-import { ParticipantItem } from "../components/ParticipantItem";
-import { useJoinBoxConnection } from "./JoinBox/useJoinBoxConnection";
+import { FieldArea } from "../../../components/FieldArea";
+import { ParticipantItem } from "../../../components/ParticipantItem";
+import { useJoinBoxConnection } from "./useJoinBoxConnection";
 
 // Singleton for the session
 const participantService = new ParticipantService(new SignalingService());
