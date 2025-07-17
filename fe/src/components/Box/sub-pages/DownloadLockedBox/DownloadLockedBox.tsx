@@ -39,7 +39,7 @@ export const DownloadLockedBox: React.FC = () => {
   };
 
   const resetAndNavigateAway = useCallback(() => {
-    reset;
+    reset();
     navigate("/");
   }, [reset, navigate]);
 
