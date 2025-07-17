@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { KeyHolderType, ParticipantType } from "./common-types";
 
-const openLockedBoxCreationState = {
+const openLockedBoxState = {
   state: "initial" as
     | "initial"
     | "drop-box"
@@ -28,7 +28,7 @@ const openLockedBoxCreationState = {
   decryptedContent: "",
 };
 
-export type OpenLockedBoxStateData = typeof openLockedBoxCreationState;
+export type OpenLockedBoxStateData = typeof openLockedBoxState;
 
 type OpenLockedBoxState = {
   actions: {
@@ -55,9 +55,9 @@ type OpenLockedBoxState = {
 
 export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
   devtools((set) => ({
-    ...openLockedBoxCreationState,
+    ...openLockedBoxState,
     actions: {
-      start: () => set({ ...openLockedBoxCreationState, state: "drop-box" }),
+      start: () => set({ ...openLockedBoxState, state: "drop-box" }),
       connect: ({
         boxTitle,
         encryptedMessage,
@@ -145,7 +145,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         }),
       reset: () =>
         set({
-          ...openLockedBoxCreationState,
+          ...openLockedBoxState,
         }),
     },
   })),
