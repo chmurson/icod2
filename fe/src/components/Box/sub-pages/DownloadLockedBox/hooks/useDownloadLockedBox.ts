@@ -1,29 +1,35 @@
 import { useCallback, useState } from "react";
 import type {
-  LockedBoxFile,
+  LockedBox,
   ParticipantType,
 } from "@/stores/boxStore/common-types";
-import { useBoxDownloadState } from "./useBoxDownloadState";
+import { useDownloadLockedBoxState } from "./useDownloadLockedBoxState";
 
 const defaultArgs = {};
 
-export const useDownloadShard = ({
+export const useDownloadLockedBox = ({
   onSuccess,
 }: {
   onSuccess?: () => void;
 } = defaultArgs) => {
-  const state = useBoxDownloadState();
+  const state = useDownloadLockedBoxState();
 
   const [error, setError] = useState<string | undefined>(undefined);
 
-  const downloadKeyShardAndMessage = useCallback(() => {
-    const data = getLockedBoxFileData(state, setError);
-    downloadFile(JSON.stringify(data, null, 2), "locked-box.json");
+  const downloadLockedBox = useCallback(() => {
+    const lockedBox = getLockedBox(state);
+
+    if (!lockedBox) {
+      setError("Failed to download box due to missing data");
+      return;
+    }
+
+    downloadFile(JSON.stringify(lockedBox, null, 2), "locked-box.json");
     onSuccess?.();
   }, [onSuccess, state]);
 
   return {
-    downloadKeyShardAndMessage,
+    downloadLockedBox,
     error,
   };
 };
@@ -38,31 +44,23 @@ function downloadFile(content: string, fileName: string) {
   URL.revokeObjectURL(url);
 }
 
-const getLockedBoxFileData = (
-  state: ReturnType<typeof useBoxDownloadState>,
-  setError: (msg: React.SetStateAction<string | undefined>) => void,
-): LockedBoxFile | undefined => {
+const getLockedBox = (
+  state: ReturnType<typeof useDownloadLockedBoxState>,
+): LockedBox | undefined => {
   if (
     !state.encryptedMessage ||
     !state.generatedKey ||
     !state.threshold ||
     (!state.you?.id && !state.leader)
   ) {
-    setError("Failed to download box due to missing data");
     return;
   }
 
-  let keyHolderId: string;
-  const keyHolders: ParticipantType[] = [];
-  if (state.type !== "fromCreateBox" && state.you) {
-    keyHolderId = state.you.id;
-    keyHolders.push(
-      ...[state.leader, ...(state.otherKeyHolders ?? []), state.you],
-    );
-  } else {
-    keyHolderId = state.leader.id;
-    keyHolders.push(...[state.leader, ...(state.keyHolders ?? [])]);
-  }
+  const isFromCreateBox = state.type === "fromCreateBox" || !state.you;
+  const keyHolderId = isFromCreateBox ? state.leader.id : state.you.id;
+  const keyHolders: ParticipantType[] = isFromCreateBox
+    ? [state.leader, ...(state.keyHolders ?? [])]
+    : [state.leader, ...(state.otherKeyHolders ?? []), state.you];
   return {
     encryptedMessage: state.encryptedMessage,
     key: state.generatedKey,

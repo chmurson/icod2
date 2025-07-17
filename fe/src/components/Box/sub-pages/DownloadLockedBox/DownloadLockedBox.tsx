@@ -5,51 +5,54 @@ import { useBlocker, useNavigate } from "react-router-dom"; // Added useBlocker,
 import { useCreateBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
+import { useJoinBoxStore } from "../../../../stores/boxStore/joinBoxStore";
 import { HiddenTextArea } from "../../components/HiddenTextArea";
 import { ParticipantItem } from "../../components/ParticipantItem";
 import { ClosePageButton, GoBackAlert } from "./components";
-import { useBoxDownloadState, useDownloadShard } from "./hooks";
+import { useDownloadLockedBox, useDownloadLockedBoxState } from "./hooks";
 import { useNaiveShowHiddenMessage } from "./hooks/useNaiveShowHiddenMessage";
 
-export const BoxDownload: React.FC = () => {
-  const state = useBoxDownloadState();
+export const DownloadLockedBox: React.FC = () => {
+  const downloadLockedBoxState = useDownloadLockedBoxState();
+
+  const createBoxReset = useCreateBoxStore((state) => state.actions.reset);
+  const joinBoxReset = useJoinBoxStore((state) => state.actions.reset);
+
+  const reset =
+    downloadLockedBoxState.type === "fromCreateBox"
+      ? createBoxReset
+      : joinBoxReset;
 
   const { hideMessage, showMessage, visibleMessage } =
     useNaiveShowHiddenMessage();
 
-  const resetStoreStateAction = useCreateBoxStore(
-    (state) => state.actions.reset,
-  );
-
   const navigate = useNavigate();
 
-  const [isShardDownloaded, setIsShardDownloaded] = useState(false);
+  const [isLockedBoxDownloaded, setIsLockedBoxDownloaded] = useState(false);
 
-  const { downloadKeyShardAndMessage, error: downloadError } = useDownloadShard(
-    {
-      onSuccess: () => setIsShardDownloaded(true),
-    },
-  );
+  const { downloadLockedBox, error: downloadError } = useDownloadLockedBox({
+    onSuccess: () => setIsLockedBoxDownloaded(true),
+  });
 
   const handleClickDownloadButton = () => {
-    downloadKeyShardAndMessage();
+    downloadLockedBox();
   };
 
   const resetAndNavigateAway = useCallback(() => {
-    resetStoreStateAction();
+    reset();
     navigate("/");
-  }, [resetStoreStateAction, navigate]);
+  }, [reset, navigate]);
 
   const shouldNavigationBeBlocked = useCallback(
-    () => !isShardDownloaded,
-    [isShardDownloaded],
+    () => !isLockedBoxDownloaded,
+    [isLockedBoxDownloaded],
   );
 
   const blocker = useBlocker(shouldNavigationBeBlocked);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!isShardDownloaded) {
+      if (!isLockedBoxDownloaded) {
         event.preventDefault();
         event.returnValue = ""; // Required for browser to show prompt
       }
@@ -60,7 +63,7 @@ export const BoxDownload: React.FC = () => {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [isShardDownloaded]);
+  }, [isLockedBoxDownloaded]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -70,34 +73,36 @@ export const BoxDownload: React.FC = () => {
       <div className="flex flex-col gap-4">
         <div className="flex gap-2 items-center">
           <Text variant="label">Name:</Text>
-          <Text variant="primaryText">{state.title}</Text>
+          <Text variant="primaryText">{downloadLockedBoxState.title}</Text>
         </div>
         <div className="flex gap-2 items-center">
           <Text variant="label">Key Treshold:</Text>
-          <Text variant="primaryText">{state.threshold}</Text>
+          <Text variant="primaryText">{downloadLockedBoxState.threshold}</Text>
         </div>
         <div className="flex flex-col gap-1">
-          {!state.you && <Text variant="label">You - leader:</Text>}
-          {state.you && <Text variant="label">Leader:</Text>}
+          {!downloadLockedBoxState.you && (
+            <Text variant="label">You - leader:</Text>
+          )}
+          {downloadLockedBoxState.you && <Text variant="label">Leader:</Text>}
           <ParticipantItem
-            name={state.leader.name}
-            userAgent={state.leader.userAgent}
+            name={downloadLockedBoxState.leader.name}
+            userAgent={downloadLockedBoxState.leader.userAgent}
           />
         </div>
-        {state.you && (
+        {downloadLockedBoxState.you && (
           <div className="flex flex-col gap-1">
             <Text variant="label">You:</Text>
             <ParticipantItem
-              name={state.you.name}
-              userAgent={state.you.userAgent}
+              name={downloadLockedBoxState.you.name}
+              userAgent={downloadLockedBoxState.you.userAgent}
             />
           </div>
         )}
-        {!state.you && (
+        {!downloadLockedBoxState.you && (
           <div className="flex flex-col gap-1">
             <Text variant="label">Keyholders:</Text>
             <div>
-              {state.keyHolders.map((p) => (
+              {downloadLockedBoxState.keyHolders.map((p) => (
                 <ParticipantItem
                   key={p.id}
                   name={p.name}
@@ -107,21 +112,22 @@ export const BoxDownload: React.FC = () => {
             </div>
           </div>
         )}
-        {state.you && state.otherKeyHolders.length > 0 && (
-          <div className="flex flex-col gap-1">
-            <Text variant="label">Other keyholders:</Text>
-            <div>
-              {state.otherKeyHolders.map((p) => (
-                <ParticipantItem
-                  key={p.id}
-                  name={p.name}
-                  userAgent={p.userAgent}
-                />
-              ))}
+        {downloadLockedBoxState.you &&
+          downloadLockedBoxState.otherKeyHolders.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <Text variant="label">Other keyholders:</Text>
+              <div>
+                {downloadLockedBoxState.otherKeyHolders.map((p) => (
+                  <ParticipantItem
+                    key={p.id}
+                    name={p.name}
+                    userAgent={p.userAgent}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-        {state.type === "fromCreateBox" && (
+          )}
+        {downloadLockedBoxState.type === "fromCreateBox" && (
           <div className="flex flex-col gap-1">
             <Text variant="label">Preview messae:</Text>
             <HiddenTextArea
@@ -141,7 +147,7 @@ export const BoxDownload: React.FC = () => {
             <DownloadIcon /> Download the Locked Box
           </Button>
           <ClosePageButton
-            showAlert={!isShardDownloaded}
+            showAlert={!isLockedBoxDownloaded}
             onClose={resetAndNavigateAway}
           />
         </div>

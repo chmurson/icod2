@@ -8,7 +8,7 @@ export type ParticipantType = {
 
 export type KeyHolderType = ParticipantType & { isOnline: boolean };
 
-export type LockedBoxFile = {
+export type LockedBox = {
   encryptedMessage: string;
   key: string;
   boxTitle: string;

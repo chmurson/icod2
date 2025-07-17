@@ -1,6 +1,6 @@
 import type React from "react";
 import type { ReactNode } from "react";
-import { useJoinBoxCreationState } from "@/stores";
+import { useJoinBoxStore } from "@/stores";
 import { useOpenBoxCreationState } from "@/stores/boxStore";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { Button } from "@/ui/Button";
@@ -8,7 +8,7 @@ import { Typography } from "@/ui/Typography";
 
 const Welcome: React.FC = () => {
   const startCreateBox = useCreateBoxStore((state) => state.actions.start);
-  const startJoinBox = useJoinBoxCreationState((state) => state.actions.start);
+  const startJoinBox = useJoinBoxStore((state) => state.actions.start);
   const startOpenBox = useOpenBoxCreationState((state) => state.actions.start);
 
   return (

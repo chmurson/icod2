@@ -3,7 +3,7 @@ import { TextField } from "@radix-ui/themes";
 import { useRef } from "react";
 import { useCurrentUserAgent } from "@/hooks/useCurrentUserAgent";
 import { usePersistInLocalStorage } from "@/hooks/usePersistInLocalStorage";
-import { useCreateBoxStore, useJoinBoxCreationState } from "@/stores";
+import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { UserAgent } from "../components/UserAgent";
@@ -22,7 +22,7 @@ export function WhatsYourName(
   const refInput = useRef<HTMLInputElement>(null);
   const isCreate = "create" in props;
   const createBoxStoreActions = useCreateBoxStore((x) => x.actions);
-  const joinBoxStoreActions = useJoinBoxCreationState((x) => x.actions);
+  const joinBoxStoreActions = useJoinBoxStore((x) => x.actions);
   const currentUserAgent = useCurrentUserAgent();
 
   const handleBackClick = () => {

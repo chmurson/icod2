@@ -1,11 +1,10 @@
-import { TextArea } from "@radix-ui/themes";
 import { useOpenBoxCreationState } from "@/stores/boxStore/openBoxCreationState";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { FieldArea } from "../components/FieldArea";
-import { ParticipantItem } from "../components/ParticipantItem";
+import { FieldArea } from "../../components/FieldArea";
+import { ParticipantItem } from "../../components/ParticipantItem";
 
-export const OpenBox: React.FC = () => {
+export const OpenLockedBox: React.FC = () => {
   const state = useOpenBoxCreationState();
 
   // Only show UI when in connecting/connected/opened state
@@ -59,16 +58,6 @@ export const OpenBox: React.FC = () => {
             ))}
           </div>
         </FieldArea>
-        {state.decryptedContent && (
-          <FieldArea label="Decrypted Content:">
-            <TextArea
-              disabled
-              rows={6}
-              value={state.decryptedContent}
-              className="w-full"
-            />
-          </FieldArea>
-        )}
       </div>
       <div className="flex gap-4">
         <Button variant="secondary" onClick={handleBackClick}>

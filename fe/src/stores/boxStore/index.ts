@@ -1,4 +1,4 @@
 export { useCreateBoxStore } from "./createBoxStore";
 export { useDownloadBoxStore } from "./downloadBoxStore";
-export { useJoinBoxCreationState } from "./joinBoxCreationStore";
+export { useJoinBoxStore } from "./joinBoxStore";
 export { useOpenBoxCreationState } from "./openBoxCreationState";
