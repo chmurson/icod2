@@ -53,7 +53,7 @@ type OpenLockedBoxState = {
   };
 } & OpenLockedBoxStateData;
 
-export const useOpenBoxCreationState = create<OpenLockedBoxState>()(
+export const useOpenLockedBoxCreationStore = create<OpenLockedBoxState>()(
   devtools((set) => ({
     ...openLockedBoxCreationState,
     actions: {

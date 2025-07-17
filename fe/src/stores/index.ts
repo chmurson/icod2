@@ -1,5 +1,5 @@
 export {
   useCreateBoxStore,
   useDownloadBoxStore,
-  useJoinBoxCreationState,
+  useJoinBoxStore,
 } from "./boxStore";

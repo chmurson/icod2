@@ -2,7 +2,7 @@ import { TextArea } from "@radix-ui/themes";
 import type React from "react";
 import { useEffect } from "react";
 import { ParticipantService, SignalingService } from "@/services/web-rtc";
-import { useJoinBoxCreationState } from "@/stores";
+import { useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
@@ -15,7 +15,7 @@ const participantService = new ParticipantService(new SignalingService());
 export const JoinBox: React.FC = () => {
   const { leader, otherKeyholders, threshold, title, you, content } =
     useStoreSlice();
-  const actions = useJoinBoxCreationState((state) => state.actions);
+  const actions = useJoinBoxStore((state) => state.actions);
 
   useJoinBoxConnection();
 
@@ -23,7 +23,7 @@ export const JoinBox: React.FC = () => {
     participantService.connect({
       userName: you.name,
       onAcknowledgeLeader: (data) => {
-        const { connectYou } = useJoinBoxCreationState.getState().actions;
+        const { connectYou } = useJoinBoxStore.getState().actions;
         connectYou({
           you: {
             id: participantService.signaling.getMyId() ?? "",
@@ -38,9 +38,8 @@ export const JoinBox: React.FC = () => {
         });
       },
       onPeerConnected: async (data) => {
-        const { connectParticipant } =
-          useJoinBoxCreationState.getState().actions;
-        if (data.peerId !== useJoinBoxCreationState.getState().leader.id) {
+        const { connectParticipant } = useJoinBoxStore.getState().actions;
+        if (data.peerId !== useJoinBoxStore.getState().leader.id) {
           connectParticipant({
             id: data.peerId,
             name: data.name,
@@ -49,8 +48,7 @@ export const JoinBox: React.FC = () => {
         }
       },
       onPeerDisconnected: (data) => {
-        const { disconnectParticipant } =
-          useJoinBoxCreationState.getState().actions;
+        const { disconnectParticipant } = useJoinBoxStore.getState().actions;
         disconnectParticipant(data.peerId);
       },
     });
@@ -149,14 +147,12 @@ const BoxJoinContentForOK = ({
 };
 
 const useStoreSlice = () => {
-  const title = useJoinBoxCreationState((state) => state.title);
-  const leader = useJoinBoxCreationState((state) => state.leader);
-  const you = useJoinBoxCreationState((state) => state.you);
-  const threshold = useJoinBoxCreationState((state) => state.threshold);
-  const otherKeyholders = useJoinBoxCreationState(
-    (state) => state.otherKeyHolders,
-  );
-  const content = useJoinBoxCreationState((state) => state.content);
+  const title = useJoinBoxStore((state) => state.title);
+  const leader = useJoinBoxStore((state) => state.leader);
+  const you = useJoinBoxStore((state) => state.you);
+  const threshold = useJoinBoxStore((state) => state.threshold);
+  const otherKeyholders = useJoinBoxStore((state) => state.otherKeyHolders);
+  const content = useJoinBoxStore((state) => state.content);
 
   return {
     title,
