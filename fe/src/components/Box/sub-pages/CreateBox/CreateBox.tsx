@@ -12,6 +12,7 @@ import { FieldArea } from "../../components/FieldArea";
 import { InputNumber } from "../../components/InputNumber";
 import { ParticipantItem } from "../../components/ParticipantItem";
 import { useCreateBoxState } from "./hooks";
+import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
 export const CreateBox: React.FC = () => {
   const { state, actions, getError, validate } = useCreateBoxState();
@@ -28,6 +29,8 @@ export const CreateBox: React.FC = () => {
   const [isContentSharedToPeer, setIsContentSharedToPeer] = useState<
     Record<string, boolean>
   >({});
+
+  useCreateBoxConnection();
 
   useEffect(() => {
     const timeoutHandler = setTimeout(() => {

@@ -61,8 +61,6 @@ export class SignalingService {
 
     const port = import.meta.env.VITE_SIGNALING_PORT;
     const hosname = import.meta.env.VITE_SIGNALING_HOSTNAME;
-    const env = import.meta.env;
-    console.log(env);
     const url = `ws://${hosname}:${port}`;
 
     this.ws = new WebSocket(url);

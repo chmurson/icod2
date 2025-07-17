@@ -8,9 +8,11 @@ import type {
 import { v4 as uuidv4 } from "uuid";
 import { type WebSocket, WebSocketServer } from "ws";
 import { ClientManager } from "./ClientManager";
+import { MatchedSignalingConnectionsProvider } from "./MatchedSignalingConnectionsProvider";
 import { MessageRouter } from "./MessageRouter";
+import { SignalingConnection } from "./SignalingConnection";
 import type { HandlerContext } from "./types";
-import { WebsocketHandler } from "./WebSocketHandler";
+import { WebsocketJSONHandler } from "./WebSocketJSONHandler";
 
 export class SignalingServer {
   private server: Server;
@@ -20,7 +22,10 @@ export class SignalingServer {
   private leaderId?: string;
   private leaderName?: string;
   private leaderUserAgent?: string;
-  private websocketsHandlers: WebsocketHandler[] = [];
+  private websocketsHandlers: WebsocketJSONHandler[] = [];
+  private signalingConnections: SignalingConnection[] = [];
+  private matchedSignalingConnectinosProvider: MatchedSignalingConnectionsProvider =
+    new MatchedSignalingConnectionsProvider();
 
   constructor(port: number, hostname: string) {
     this.server = createServer();
@@ -34,15 +39,52 @@ export class SignalingServer {
 
   private setupWebSocketHandlers(): void {
     this.wss.on("connection", (ws: WebSocket) => {
-      const webSocketHandler = new WebsocketHandler(ws);
+      const webSocketHandler = new WebsocketJSONHandler(ws);
+      const signalingConnection = new SignalingConnection(
+        ws,
+        this.matchedSignalingConnectinosProvider,
+      );
+      this.matchedSignalingConnectinosProvider.add(
+        signalingConnection.localID,
+        signalingConnection,
+      );
+
       this.websocketsHandlers.push(webSocketHandler);
+      this.signalingConnections.push(signalingConnection);
+
+      console.log(
+        `[SignalingServer] New signaling connection: ${signalingConnection.localID}; Total connections: ${this.signalingConnections.length}`,
+      );
 
       webSocketHandler.onClose(() => {
-        const index = this.websocketsHandlers.findIndex(
+        const indexOfHandlers = this.websocketsHandlers.findIndex(
           (x) => x === webSocketHandler,
         );
-        this.websocketsHandlers.splice(index, 1);
+
+        this.websocketsHandlers.splice(indexOfHandlers, 1);
+
+        const indexOfSignalingConnection = this.signalingConnections.findIndex(
+          (x) => x === signalingConnection,
+        );
+
+        this.signalingConnections.splice(indexOfSignalingConnection, 1);
+
+        this.matchedSignalingConnectinosProvider.remove(
+          signalingConnection.localID,
+        );
+
+        console.log(
+          `[SignalingServer] Signaling connection got disconnected: ${signalingConnection.localID}; Total connections: ${this.signalingConnections.length}`,
+        );
+
         this.handleClientDisconnectLegacy(ws);
+
+        console.log(
+          "Websocket closed. Current number: ",
+          this.websocketsHandlers.length,
+          "SignalingConnections: ",
+          this.signalingConnections.length,
+        );
       });
 
       webSocketHandler.onMessage((msg) => this.handleLegacyMessage(msg, ws));
