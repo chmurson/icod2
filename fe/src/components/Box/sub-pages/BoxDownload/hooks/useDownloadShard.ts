@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import type { LockedBoxFile } from "@/stores/boxStore/common-types";
 import { useBoxDownloadState } from "./useBoxDownloadState";
 
 const defaultArgs = {};
@@ -13,7 +14,15 @@ export const useDownloadShard = ({
   const [error, setError] = useState<string | undefined>(undefined);
 
   const downloadKeyShardAndMessage = useCallback(() => {
-    setError(undefined);
+    if (
+      !state.encryptedMessage ||
+      !state.generatedKey ||
+      !state.threshold ||
+      !state.you
+    ) {
+      setError("Failed to download box due to missing data");
+      return;
+    }
 
     const data = {
       encryptedMessage: state.encryptedMessage,
@@ -26,7 +35,7 @@ export const useDownloadShard = ({
         state.type === "fromCreateBox"
           ? [state.leader, ...(state.keyHolders ?? [])]
           : [state.leader, ...(state.otherKeyHolders ?? []), state.you],
-    };
+    } satisfies LockedBoxFile;
 
     downloadFile(JSON.stringify(data, null, 2), "locked-box.json");
     onSuccess?.();

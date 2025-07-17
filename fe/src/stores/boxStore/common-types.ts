@@ -5,3 +5,14 @@ export type ParticipantType = {
   name: string;
   userAgent: string;
 };
+
+export type KeyHolderType = ParticipantType & { isOnline: boolean };
+
+export type LockedBoxFile = {
+  encryptedMessage: string;
+  key: string;
+  boxTitle: string;
+  keyHolderId: string;
+  keyThreshold: number;
+  keyHolders: ParticipantType[];
+};
