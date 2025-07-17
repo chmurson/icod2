@@ -5,7 +5,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { leaderService } from "@/services/web-rtc/leaderSingleton";
 import { useDownloadBoxStore } from "@/stores";
-import { useJoinBoxCreationState } from "@/stores/boxStore/joinBoxCreationStore";
+import { useJoinBoxStore } from "@/stores/boxStore/joinBoxStore";
 import { Button } from "@/ui/Button.tsx";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
@@ -83,7 +83,7 @@ export const CreateBox: React.FC = () => {
             JSON.stringify({ type: "offer", targetId: data.peerId, offer }),
           );
         // Add participant to store (excluding leader)
-        if (data.peerId !== useJoinBoxCreationState.getState().leader.id) {
+        if (data.peerId !== useJoinBoxStore.getState().leader.id) {
           actions.connectParticipant({
             id: data.peerId,
             name: data.name,

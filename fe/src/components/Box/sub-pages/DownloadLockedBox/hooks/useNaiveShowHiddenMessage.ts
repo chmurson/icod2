@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
-import { useBoxDownloadState } from "./useBoxDownloadState";
+import { useDownloadLockedBoxState } from "./useDownloadLockedBoxState";
 
 export const useNaiveShowHiddenMessage = () => {
-  const { content } = useBoxDownloadState();
+  const { content } = useDownloadLockedBoxState();
   const [visibleMessage, setVisisableMessage] = useState("");
 
   const hideMessage = useCallback(() => {

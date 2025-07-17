@@ -1,7 +1,7 @@
 import { useDownloadBoxStore } from "@/stores";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 
-export const useBoxDownloadState = () => {
+export const useDownloadLockedBoxState = () => {
   const state = useDownloadBoxStore((state) => state);
 
   if (state.type === "fromCreateBox") {
