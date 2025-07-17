@@ -1,8 +1,6 @@
 import { TextArea, TextField } from "@radix-ui/themes";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { leaderService } from "@/services/web-rtc/leaderSingleton";
-import { useDownloadBoxStore } from "@/stores";
 import { Button } from "@/ui/Button.tsx";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
@@ -22,8 +20,8 @@ export const CreateBox: React.FC = () => {
     Record<string, boolean>
   >({});
 
-  const { sendBoxUpdate, sendBoxCreated } = useCreateBoxConnection();
-  const { handleBoxCreation } = useLockBox();
+  const { sendBoxUpdate, sendBoxLocked } = useCreateBoxConnection();
+  const { lockBox } = useLockBox();
 
   useEffect(() => {
     const timeoutHandler = setTimeout(() => {
@@ -49,6 +47,32 @@ export const CreateBox: React.FC = () => {
   ]);
 
   const noParticipantConnected = state.keyHolders.length === 0;
+
+  const handleBoxCreation = async () => {
+    const isValid = validate();
+    if (!isValid) {
+      return;
+    }
+
+    const { encryptedMessage, key, keys } = lockBox();
+    const notLeaderKeys = keys.filter((k) => k !== key);
+    state.keyHolders.forEach((keyHolder) => {
+      const key = notLeaderKeys.shift();
+
+      if (!key) {
+        console.error("No key available for keyHolder:", keyHolder.id);
+        return;
+      }
+
+      if (key) {
+        sendBoxLocked({
+          localPeerID: keyHolder.id,
+          key,
+          encryptedMessage,
+        });
+      }
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6">

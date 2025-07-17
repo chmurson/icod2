@@ -4,14 +4,18 @@ import type {
 } from "./DataChannelManager";
 
 export class DataChannelMessageRouter<
-  TSignalingService extends PossibleSignalingServie<unknown>,
+  TSignalingService extends PossibleSignalingServie<TConnectionFailReason>,
+  TConnectionFailReason = unknown,
 > {
   private routes: {
     condition: (arg: object) => boolean;
     handler: (
       locaID: string,
       arg: object,
-      dataChannelManager: DataChannelManager<TSignalingService>,
+      dataChannelManager: DataChannelManager<
+        TSignalingService,
+        TConnectionFailReason
+      >,
     ) => void;
   }[] = [];
 
@@ -20,7 +24,10 @@ export class DataChannelMessageRouter<
     handler: (
       localId: string,
       msg: T,
-      dataChannelManager?: DataChannelManager<TSignalingService>,
+      dataChannelManager?: DataChannelManager<
+        TSignalingService,
+        TConnectionFailReason
+      >,
     ) => void,
   ) {
     this.routes.push({
@@ -28,7 +35,10 @@ export class DataChannelMessageRouter<
       handler: handler as (
         localId: string,
         arg: object,
-        dataChannelManager?: DataChannelManager<TSignalingService>,
+        dataChannelManager?: DataChannelManager<
+          TSignalingService,
+          TConnectionFailReason
+        >,
       ) => void,
     });
   }
@@ -40,7 +50,10 @@ export class DataChannelMessageRouter<
   router = (
     localId: string,
     msg: object,
-    dataChannelManager: DataChannelManager<TSignalingService>,
+    dataChannelManager: DataChannelManager<
+      TSignalingService,
+      TConnectionFailReason
+    >,
   ) => {
     for (const route of this.routes) {
       if (route.condition(msg)) {

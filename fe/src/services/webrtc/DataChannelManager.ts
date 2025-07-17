@@ -2,6 +2,7 @@ import type {
   SignalingService,
   SignalingServiceConnectionInitiator,
 } from "../signaling";
+import type { DataChannelMessageRouter } from "./DataChannelMessageRouter";
 
 export type PossibleSignalingServie<TConnectionFailReason> =
   | SignalingService
@@ -9,7 +10,8 @@ export type PossibleSignalingServie<TConnectionFailReason> =
       SignalingServiceConnectionInitiator<TConnectionFailReason>);
 
 export class DataChannelManager<
-  TSignalingService extends PossibleSignalingServie<TConnectionFailReason>,
+  TSignalingService extends
+    PossibleSignalingServie<TConnectionFailReason> = SignalingService,
   TConnectionFailReason = unknown,
 > {
   private signalingService: SignalingService;
@@ -20,14 +22,16 @@ export class DataChannelManager<
     onFailedToConnect?: (reason: TConnectionFailReason) => void;
     onPeerConnected?: (localID: string) => void;
     onPeerDisconnected?: (localID: string) => void;
-    onDataChannelMessage?: (
-      localID: string,
-      data: object,
-      dataChannelManager: DataChannelManager<
-        TSignalingService,
-        TConnectionFailReason
-      >,
-    ) => void;
+    onDataChannelMessage?:
+      | ((
+          localID: string,
+          data: object,
+          dataChannelManager: DataChannelManager<
+            TSignalingService,
+            TConnectionFailReason
+          >,
+        ) => void)
+      | DataChannelMessageRouter<TSignalingService, TConnectionFailReason>;
   };
 
   private peers = new WeakMap<
@@ -42,14 +46,16 @@ export class DataChannelManager<
       onFailedToConnect?: (reason: TConnectionFailReason) => void;
       onPeerConnected?: (localID: string) => void;
       onPeerDisconnected?: (localID: string) => void;
-      onDataChannelMessage?: (
-        localID: string,
-        data: object,
-        dataChannelManager: DataChannelManager<
-          TSignalingService,
-          TConnectionFailReason
-        >,
-      ) => void;
+      onDataChannelMessage?:
+        | ((
+            localID: string,
+            data: object,
+            dataChannelManager: DataChannelManager<
+              TSignalingService,
+              TConnectionFailReason
+            >,
+          ) => void)
+        | DataChannelMessageRouter<TSignalingService, TConnectionFailReason>;
     };
   }) {
     this.callbacks = args.callbacks ?? {};
@@ -131,7 +137,16 @@ export class DataChannelManager<
       if (typeof event.data === "string") {
         try {
           const data = JSON.parse(event.data);
-          this.callbacks.onDataChannelMessage?.(localID, data, this);
+          const { onDataChannelMessage } = this.callbacks;
+          if (!onDataChannelMessage) {
+            return;
+          }
+
+          if ("router" in onDataChannelMessage) {
+            onDataChannelMessage?.router(localID, data, this);
+          } else if (typeof onDataChannelMessage === "function") {
+            onDataChannelMessage?.(localID, data, this);
+          }
         } catch (error) {
           console.error("Failed to parse message:", error);
         }

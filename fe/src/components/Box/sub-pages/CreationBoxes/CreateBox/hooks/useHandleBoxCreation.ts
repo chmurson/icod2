@@ -32,19 +32,23 @@ export const useLockBox = () => {
       new ChunksConfiguration(threshold, numKeys - threshold),
     );
 
-    const actions;
-    .create(
-    title: title, content;
-    : content,
-      encryptedMessage: secured.encrypted_message[0] as string,
-      generatedKey: secured.chunks[0],
+    const encryptedMessage = secured.encrypted_message[0] as string;
+    const key = secured.chunks[0] as string;
+
+    actions.lock({
+      title: title,
+      content: content,
+      encryptedMessage: encryptedMessage,
+      generatedKey: key,
       generatedKeys: secured.chunks as string[],
-    )
+    });
 
     createDownloadStoreFromCreateBox();
 
     return {
-      enr,
+      encryptedMessage,
+      key: secured.chunks[0],
+      keys: secured.chunks as string[],
     };
   };
 
