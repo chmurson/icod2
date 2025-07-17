@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { CallerSignalingService } from "@/services/signaling";
 import { DataChannelManager } from "@/services/webrtc";
 import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
@@ -9,43 +9,30 @@ import {
   type KeyHolderWelcomesLeader,
 } from "../commons";
 
-function useMessageRouter() {
-  const storeActions = useJoinBoxStore((state) => state.actions);
+const router = new DataChannelMessageRouter();
 
-  const router = useMemo(() => {
-    return new DataChannelMessageRouter();
-  }, []);
+router.addHandler(isLeaderWelcomesKeyholder, (_, message) => {
+  const storeActions = useJoinBoxStore.getState().actions;
 
-  useEffect(() => {
-    router.addHandler(isLeaderWelcomesKeyholder, (_, message) => {
-      storeActions.connectYou({
-        leader: {
-          id: message.leaderInfo.name,
-          name: message.leaderInfo.name,
-          userAgent: message.leaderInfo.userAgent,
-        },
-        you: {
-          id: message.yourId,
-        },
-      });
-      storeActions.setInfoBox({
-        title: message.boxInfo.name,
-        content: "",
-        threshold: message.boxInfo.keyHolderTreshold,
-      });
-    });
+  storeActions.connectYou({
+    leader: {
+      id: message.leaderInfo.name,
+      name: message.leaderInfo.name,
+      userAgent: message.leaderInfo.userAgent,
+    },
+    you: {
+      id: message.yourId,
+    },
+  });
 
-    return () => {
-      router.clearHandlers();
-    };
-  }, [router, storeActions]);
-
-  return router.router;
-}
+  storeActions.setInfoBox({
+    title: message.boxInfo.name,
+    content: "",
+    threshold: message.boxInfo.keyHolderTreshold,
+  });
+});
 
 export function useJoinBoxConnection() {
-  const messageRouter = useMessageRouter();
-
   useEffect(() => {
     const dataChannelManager = new DataChannelManager({
       signalingService: new CallerSignalingService(createWebsocketConnection()),
@@ -69,7 +56,7 @@ export function useJoinBoxConnection() {
         onConnected: () => {
           console.log("Connected to signaling service");
         },
-        onDataChannelMessage: messageRouter,
+        onDataChannelMessage: router.router,
       },
     });
 
@@ -78,5 +65,5 @@ export function useJoinBoxConnection() {
     return () => {
       dataChannelManager.close();
     };
-  }, [messageRouter]);
+  }, []);
 }

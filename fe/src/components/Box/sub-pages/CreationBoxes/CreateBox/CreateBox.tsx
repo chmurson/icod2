@@ -24,7 +24,7 @@ export const CreateBox: React.FC = () => {
 
   const [localTitle, setLocalTitle] = useState(title);
   const [localContent, setLocalContent] = useState(content);
-  const [localThreshold, setLocalThreshold] = useState(threshold);
+  const [_localThreshold, setLocalThreshold] = useState(threshold);
   const [isContentSharedToPeer, setIsContentSharedToPeer] = useState<
     Record<string, boolean>
   >({});
