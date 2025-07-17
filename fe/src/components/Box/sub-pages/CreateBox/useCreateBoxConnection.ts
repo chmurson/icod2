@@ -1,55 +1,32 @@
 import { useEffect } from "react";
 import { CalleeSignalingService } from "@/services/signaling";
+import { DataChannelManager } from "@/services/webrtc";
 import { createWebsocketConnection } from "@/services/websocket/createWebsocketConnection";
 
 export function useCreateBoxConnection() {
   useEffect(() => {
-    const peers: {
-      connection: RTCPeerConnection;
-      dataChannel: RTCDataChannel;
-    }[] = [];
+    const dataChannelManager = new DataChannelManager({
+      signalingService: new CalleeSignalingService(createWebsocketConnection()),
+      callbacks: {
+        onPeerConnected: (localId) => {
+          console.log("Peer connected:", localId);
+        },
+        onPeerDisconnected: (localId) => {
+          console.log("Peer disconnected:", localId);
+        },
+        onFailedToConnect: (reason) => {
+          console.error("Failed to connect:", reason);
+        },
+        onConnected: () => {
+          console.log("Connected to signaling service");
+        },
+      },
+    });
 
-    const calleeConnection = new CalleeSignalingService(
-      createWebsocketConnection(),
-    );
-
-    calleeConnection.onPeerConnected = (peerConnection, dataChannel) => {
-      peers.push({ connection: peerConnection, dataChannel });
-      console.log("peer connected");
-    };
-
-    calleeConnection.onPeerDisconnected = (peerConnection) => {
-      const index = peers.findIndex((p) => p.connection === peerConnection);
-      if (index !== -1) {
-        peers.splice(index, 1);
-      }
-      console.log("peer disconnected");
-    };
-
-    calleeConnection.onConnected = () => {
-      console.log("connected - waiting peers to get connected");
-    };
-
-    calleeConnection.start();
+    dataChannelManager.start();
 
     return () => {
-      calleeConnection.close();
-
-      while (peers.length > 0) {
-        const peer = peers.pop();
-        peer?.connection.close();
-        peer?.dataChannel.close();
-      }
+      dataChannelManager.close();
     };
   }, []);
 }
-
-// further plan:
-// peer is -> connection and datachannel
-// accept new peers
-// remove peer when disconnected
-// assign unique local token to each peer
-// send json data to all peers
-// send json data to single peer
-// receive json data from all peers
-//

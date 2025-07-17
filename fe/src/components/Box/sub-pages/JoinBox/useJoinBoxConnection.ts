@@ -1,44 +1,32 @@
 import { useEffect } from "react";
 import { CallerSignalingService } from "@/services/signaling";
+import { DataChannelManager } from "@/services/webrtc";
 import { createWebsocketConnection } from "@/services/websocket/createWebsocketConnection";
 
 export function useJoinBoxConnection() {
   useEffect(() => {
-    let peer:
-      | {
-          connection: RTCPeerConnection;
-          dataChannel: RTCDataChannel;
-        }
-      | undefined;
+    const dataChannelManager = new DataChannelManager({
+      signalingService: new CallerSignalingService(createWebsocketConnection()),
+      callbacks: {
+        onPeerConnected: (localId) => {
+          console.log("Peer connected:", localId);
+        },
+        onPeerDisconnected: (localId) => {
+          console.log("Peer disconnected:", localId);
+        },
+        onFailedToConnect: (reason) => {
+          console.error("Failed to connect:", reason);
+        },
+        onConnected: () => {
+          console.log("Connected to signaling service");
+        },
+      },
+    });
 
-    const callerConnection = new CallerSignalingService(
-      createWebsocketConnection(),
-    );
-
-    callerConnection.onPeerConnected = (peerConnection, dataChannel) => {
-      peer = {
-        connection: peerConnection,
-        dataChannel: dataChannel,
-      };
-      console.log("peer connected");
-    };
-
-    callerConnection.onPeerDisconnected = () => {
-      peer = undefined;
-      console.log("peer disconnected");
-    };
-
-    callerConnection.onFailedToConnect = (reason) => {
-      console.error("Failed to connect:", reason);
-    };
-
-    callerConnection.start();
+    dataChannelManager.start();
 
     return () => {
-      peer?.dataChannel.close();
-      peer?.connection.close();
-      callerConnection.close();
-      peer = undefined;
+      dataChannelManager.close();
     };
   }, []);
 }
