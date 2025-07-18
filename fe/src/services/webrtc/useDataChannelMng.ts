@@ -87,7 +87,7 @@ const useRaiseErrorIfChanges = (value: unknown, valueName: string) => {
   useEffect(() => {
     if (previousValueRef.current !== value) {
       throw new Error(
-        `"${valueNameRef}": value has changed unexpectedly; this value should not change;`,
+        `"${valueNameRef.current}": value has changed unexpectedly; this value should not change;`,
       );
     }
 

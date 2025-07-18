@@ -3,6 +3,7 @@ import { useDownloadBoxStore, useJoinBoxStore } from "@/stores";
 import {
   isLeaderSendsBoxCreated,
   isLeaderSendsBoxUpdate,
+  isLeaderSendsKeyHolderList,
   isLeaderWelcomesKeyholder,
 } from "../commons";
 
@@ -47,4 +48,9 @@ router.addHandler(isLeaderSendsBoxCreated, (_, message) => {
 
   const { fromJoinBox } = useDownloadBoxStore.getState();
   fromJoinBox();
+});
+
+router.addHandler(isLeaderSendsKeyHolderList, (_, message) => {
+  const storeActions = useJoinBoxStore.getState().actions;
+  storeActions.updateKeyHoldersList(message.allKeyHolders);
 });

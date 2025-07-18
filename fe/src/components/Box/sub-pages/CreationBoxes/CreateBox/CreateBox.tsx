@@ -12,11 +12,6 @@ import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
 export const CreateBox: React.FC = () => {
   const { state, actions, getError, validate } = usePartOfCreateBoxStore();
-  const keyHoldersRef = useRef(state.keyHolders);
-
-  useEffect(() => {
-    keyHoldersRef.current = state.keyHolders;
-  }, [state.keyHolders]);
 
   const [localTitle, setLocalTitle] = useState(state.title);
   const [localContent, setLocalContent] = useState(state.content);
@@ -25,8 +20,16 @@ export const CreateBox: React.FC = () => {
     Record<string, boolean>
   >({});
 
-  const { sendBoxUpdate, sendBoxLocked } = useCreateBoxConnection();
+  const { sendBoxUpdate, sendBoxLocked, sendKeyholdersUpdate } =
+    useCreateBoxConnection();
   const { lockBox } = useLockBox();
+
+  const keyHoldersRef = useRef(state.keyHolders);
+
+  useEffect(() => {
+    keyHoldersRef.current = state.keyHolders;
+    sendKeyholdersUpdate(state.keyHolders);
+  }, [state.keyHolders, sendKeyholdersUpdate]);
 
   useEffect(() => {
     keyHoldersRef.current.forEach((keyHolder) => {

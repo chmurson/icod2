@@ -1,6 +1,11 @@
 import { useCallback } from "react";
 import { useCreateBoxStore } from "@/stores";
-import type { LeaderSendsBoxCreated, LeaderSendsBoxUpdate } from "../commons";
+import type { ParticipantType } from "@/stores/boxStore/common-types";
+import type {
+  LeaderSendsBoxCreated,
+  LeaderSendsBoxUpdate,
+  LeaderSendsKeyHolderList,
+} from "../commons";
 import { useCalleeDataChannelMng } from "./useCalleeDataChannelMng";
 
 export function useCreateBoxConnection() {
@@ -12,19 +17,16 @@ export function useCreateBoxConnection() {
   const { dataChannelMngRef } = useCalleeDataChannelMng({ onPeerDisconnected });
 
   const sendBoxUpdate = useCallback(
-    ({
-      id,
-      title,
-      keyHolderThreshold,
-      content,
-      isContentShared,
-    }: {
+    (params: {
       title: string;
       keyHolderThreshold: number;
       content?: string;
       id: string;
       isContentShared?: boolean;
     }) => {
+      const { id, title, keyHolderThreshold, content, isContentShared } =
+        params;
+
       const payload = isContentShared
         ? {
             name: title,
@@ -42,15 +44,13 @@ export function useCreateBoxConnection() {
   );
 
   const sendBoxLocked = useCallback(
-    ({
-      encryptedMessage,
-      key,
-      localPeerID,
-    }: {
+    (params: {
       localPeerID: string;
       key: string;
       encryptedMessage: string;
     }) => {
+      const { encryptedMessage, key, localPeerID } = params;
+
       dataChannelMngRef.current?.sendMessageToSinglePeer(localPeerID, {
         type: "leader:box-created",
         key,
@@ -60,8 +60,19 @@ export function useCreateBoxConnection() {
     [dataChannelMngRef],
   );
 
+  const sendKeyholdersUpdate = useCallback(
+    (keyHolders: ParticipantType[]) => {
+      dataChannelMngRef.current?.sendMessageToAllPeers({
+        type: "leader:keyholder-list",
+        allKeyHolders: keyHolders,
+      } satisfies LeaderSendsKeyHolderList);
+    },
+    [dataChannelMngRef],
+  );
+
   return {
     sendBoxUpdate,
     sendBoxLocked,
+    sendKeyholdersUpdate,
   };
 }

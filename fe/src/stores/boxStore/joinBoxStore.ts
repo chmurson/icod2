@@ -42,6 +42,7 @@ type JoinBoxState = {
       you: { id: string };
       leader: ParticipantType;
     }) => void;
+    updateKeyHoldersList: (participant: ParticipantType[]) => void;
     connectParticipant: (participant: ParticipantType) => void;
     disconnectParticipant: (participantId: string) => void;
     create: (message: {
@@ -74,6 +75,13 @@ export const useJoinBoxStore = create<JoinBoxState>()(
             userAgent,
           },
         })),
+      updateKeyHoldersList: (keyHolderList: ParticipantType[]) => {
+        set((state) => ({
+          otherKeyHolders: keyHolderList.filter(
+            (keyHolder) => keyHolder.id !== state.you.id,
+          ),
+        }));
+      },
       connectYou: ({
         you,
         leader,

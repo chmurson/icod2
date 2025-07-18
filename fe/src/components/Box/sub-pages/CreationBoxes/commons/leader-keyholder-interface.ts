@@ -95,3 +95,18 @@ export function isLeaderSendsBoxCreated(
     typeof payload.encryptedMessage === "string"
   );
 }
+
+export type LeaderSendsKeyHolderList = {
+  type: "leader:keyholder-list";
+  allKeyHolders: {
+    id: string;
+    name: string;
+    userAgent: string;
+  }[];
+};
+
+export const isLeaderSendsKeyHolderList = (
+  payload: object,
+): payload is LeaderSendsKeyHolderList => {
+  return "type" in payload && payload.type === "leader:keyholder-list";
+};
