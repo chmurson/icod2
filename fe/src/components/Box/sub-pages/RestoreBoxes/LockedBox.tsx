@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { DropLockedBox } from "./DropLockedBox/DropLockedBox";
@@ -8,14 +8,11 @@ import { OpenLockedBox } from "./OpenLockedBox/OpenLockedBox";
 
 const LockedBox: React.FC = () => {
   const { keyHolderId } = useParams();
-  console.log(keyHolderId);
-  const _navigate = useNavigate();
   const startJoinLockedBox = useJoinLockedBoxStore(
     (state) => state.actions.start,
   );
   useEffect(() => {
     if (keyHolderId) {
-      console.log("started");
       startJoinLockedBox();
     }
   }, [keyHolderId, startJoinLockedBox]);
