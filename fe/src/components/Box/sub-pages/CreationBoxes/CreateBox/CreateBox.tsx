@@ -1,6 +1,7 @@
 import { TextArea, TextField } from "@radix-ui/themes";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { SharePreviewButton } from "@/components/Box/components/SharePreviewButton";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button.tsx";
 import ErrorBoundary from "@/ui/ErrorBoundry";
@@ -167,7 +168,7 @@ export const CreateBoxContent: React.FC = () => {
           />
         </FieldArea>
         <FieldArea label="KeyHolders: ">
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 w-full">
             {state.keyHolders.length === 0 && (
               <Text variant="secondaryText">
                 No key holders yet. Waiting for others to join...
@@ -178,13 +179,17 @@ export const CreateBoxContent: React.FC = () => {
                 key={p.id}
                 name={p.name}
                 userAgent={p.userAgent}
-                isContentShared={!!isContentSharedToPeer[p.id]}
-                onContentShareChange={(checked) => {
-                  setIsContentSharedToPeer((prev) => ({
-                    ...prev,
-                    [p.id]: checked,
-                  }));
-                }}
+                buttonSlot={
+                  <SharePreviewButton
+                    checked={!!isContentSharedToPeer[p.id]}
+                    onToggle={(checked) =>
+                      setIsContentSharedToPeer((prev) => ({
+                        ...prev,
+                        [p.id]: checked,
+                      }))
+                    }
+                  />
+                }
               />
             ))}
           </div>

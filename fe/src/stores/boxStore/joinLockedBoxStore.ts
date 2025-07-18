@@ -26,6 +26,7 @@ const joinLockedBoxState = {
     userAgent: "",
   } satisfies ParticipantType,
   decryptedContent: "",
+  shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
 };
 
 export type JoinLockedBoxStateData = typeof joinLockedBoxState;
@@ -42,6 +43,8 @@ type JoinLockedBoxState = {
       keyHolders: ParticipantType[];
       keyThreshold: number;
     }) => void;
+    toggleShareAccessKey: (participantId: string, value?: boolean) => void;
+
     connectKeyHolder: (participant: ParticipantType) => void;
     disconnectKeyHolder: (participantId: string) => void;
     open: (message: {
@@ -58,6 +61,14 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
     ...joinLockedBoxState,
     actions: {
       start: () => set({ ...joinLockedBoxState, state: "drop-box" }),
+      toggleShareAccessKey: (keyHolderId: string, value?: boolean) =>
+        set((state) => ({
+          shareAccessKeyByKeyHolderId: {
+            ...state.shareAccessKeyByKeyHolderId,
+            [keyHolderId]:
+              value ?? !state.shareAccessKeyByKeyHolderId[keyHolderId],
+          },
+        })),
       connect: ({
         boxTitle,
         encryptedMessage,
