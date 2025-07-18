@@ -1,4 +1,5 @@
 import { DownloadIcon, PlusIcon, StarIcon } from "@radix-ui/react-icons";
+import { Alert } from "./ui";
 import { Button } from "./ui/Button";
 import { Text } from "./ui/Typography";
 
@@ -11,12 +12,17 @@ function ComponentsDemo() {
       <Buttons addIcon={false} />
       <Buttons addIcon={true} />
 
-      <div className="mt-12 space-y-2">
+      <div className="mt-18 space-y-2">
         <Text variant="pageTitle">Page title</Text>
         <Text variant="sectionTitle">Section title</Text>
         <Text variant="primaryText">Primary text</Text>
         <Text variant="label">Label</Text>
         <Text variant="secondaryText">Secondary text</Text>
+      </div>
+      <div className="mt-18 flex flex-col gap-4">
+        <Alert variant="info">Lorem ipsum...</Alert>
+        <Alert variant="warning">Lorem ipsum...</Alert>
+        <Alert variant="error">Lorem ipsum...</Alert>
       </div>
     </div>
   );

@@ -1,5 +1,17 @@
+@layer reset, radix, tailwind;
 
-@import "tailwindcss";
+@layer reset {
+  @import "tailwindcss/preflight.css";
+}
+
+@layer radix {
+  @import "@radix-ui/themes/styles.css";
+}
+
+@layer tailwind {
+  @import "tailwindcss/theme.css";
+  @import "tailwindcss/utilities.css";
+}
 
 @theme {
 	--font-family-sans: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -52,7 +64,7 @@ a:hover {
 }
 
 button {
-	@apply rounded-full px-[2em] py-[1em] text-sm font-bold;
+	@apply text-sm font-bold;
 	@apply cursor-pointer transition-colors;
 	@apply dark:bg-[--color-button-light];
 }

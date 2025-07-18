@@ -89,6 +89,7 @@ export class DataChannelManager<
       );
       if (!objectId) {
         console.warn(`No peer found with local ID: ${localId}`);
+        this.callbacks.onPeerDisconnected?.(localId);
         return false;
       }
 

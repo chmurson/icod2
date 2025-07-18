@@ -1,7 +1,9 @@
 import { TextArea, TextField } from "@radix-ui/themes";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button.tsx";
+import ErrorBoundary from "@/ui/ErrorBoundry";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { InputNumber } from "../../../components/InputNumber";
@@ -10,7 +12,34 @@ import { usePartOfCreateBoxStore } from "./hooks";
 import { useLockBox } from "./hooks/useHandleBoxCreation";
 import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
-export const CreateBox: React.FC = () => {
+export const CreateBox = () => {
+  return (
+    <div className="flex flex-col gap-6">
+      <Text variant="pageTitle" className="mt-4">
+        Create a box
+      </Text>
+      <ErrorBoundary
+        fallback={({ handleRetry, isRetrying }) => (
+          <div className="flex flex-col gap-4">
+            <Alert variant="error">Something went wrong</Alert>
+            <Button
+              variant="primary"
+              onClick={handleRetry}
+              className="self-start"
+              loading={isRetrying}
+            >
+              Try to connect again
+            </Button>
+          </div>
+        )}
+      >
+        <CreateBoxContent />
+      </ErrorBoundary>
+    </div>
+  );
+};
+
+export const CreateBoxContent: React.FC = () => {
   const { state, actions, getError, validate } = usePartOfCreateBoxStore();
 
   const [localTitle, setLocalTitle] = useState(state.title);
@@ -91,10 +120,7 @@ export const CreateBox: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <Text variant="pageTitle" className="mt-4">
-        Create a box
-      </Text>
+    <>
       <div className="flex flex-col gap-4">
         <FieldArea label="Name of the box">
           <TextField.Root
@@ -176,7 +202,7 @@ export const CreateBox: React.FC = () => {
           Create Box
         </Button>
       </div>
-    </div>
+    </>
   );
 };
 

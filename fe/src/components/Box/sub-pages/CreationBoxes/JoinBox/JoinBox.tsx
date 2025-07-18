@@ -1,14 +1,42 @@
 import { TextArea } from "@radix-ui/themes";
 import type React from "react";
 import { useJoinBoxStore } from "@/stores";
+import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
+import ErrorBoundary from "@/ui/ErrorBoundry";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { useJoinBoxConnection } from "./useJoinBoxConnection";
 
-// Singleton for the session
 export const JoinBox: React.FC = () => {
+  return (
+    <div className="flex flex-col gap-8">
+      <Text variant="pageTitle" className="mt-4">
+        Join a Box Creation
+      </Text>
+      <ErrorBoundary
+        fallback={({ handleRetry, isRetrying }) => (
+          <div className="flex flex-col gap-4">
+            <Alert variant="error">Something went wrong</Alert>
+            <Button
+              variant="primary"
+              onClick={handleRetry}
+              className="self-start"
+              loading={isRetrying}
+            >
+              Try to connect again
+            </Button>
+          </div>
+        )}
+      >
+        <JoinBoxContent />
+      </ErrorBoundary>
+    </div>
+  );
+};
+
+const JoinBoxContent = () => {
   const { leader, otherKeyholders, threshold, title, you, content } =
     useStoreSlice();
   const actions = useJoinBoxStore((state) => state.actions);
@@ -16,13 +44,12 @@ export const JoinBox: React.FC = () => {
   useJoinBoxConnection();
 
   return (
-    <div className="flex flex-col gap-8">
-      <Text variant="pageTitle" className="mt-4">
-        Join a Box Creation
-      </Text>
+    <>
       {!leader?.id && (
         <div className="flex flex-col items-start gap-4">
-          <Text variant="primaryError">No leader connected</Text>
+          <Alert variant="warning" className="self-stretch">
+            No leader has connected
+          </Alert>
           <Button variant="primary" onClick={actions.reset}>
             Go back
           </Button>
@@ -38,7 +65,7 @@ export const JoinBox: React.FC = () => {
           content={content}
         />
       )}
-    </div>
+    </>
   );
 };
 

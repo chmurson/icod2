@@ -23,7 +23,7 @@ const buttonVariantToProps: Record<
     color: "plum",
     size: "3",
     variant: "solid",
-    className: "py-4",
+    className: "py-4 px-8",
   },
   primary: { color: "plum", size: "2", variant: "solid" },
   secondary: { color: "plum", size: "2", variant: "outline" },
@@ -53,7 +53,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         size="2"
         {...variantProps}
         {...props}
-        className={twMerge(variantClassName, className)}
+        className={twMerge("px-4 rounded-xl", variantClassName, className)}
       >
         {!!iconSlot && <Spinner loading={loading}>{iconSlot}</Spinner>}
         {!iconSlot && <Spinner loading={loading} />}

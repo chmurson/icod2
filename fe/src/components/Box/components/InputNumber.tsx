@@ -96,6 +96,7 @@ export const InputNumber: React.FC<InputNumberProps> = ({
         onClick={handleDecrement}
         disabled={currentValue <= min}
         aria-label="Decrement value"
+        className="py-0"
       >
         <MinusIcon />
       </Button>
