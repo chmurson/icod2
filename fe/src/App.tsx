@@ -88,11 +88,15 @@ const router = createBrowserRouter([
         Component: DecodePlayground,
       },
       {
-        path: "/:keyHolderId",
+        path: "/",
         Component: Box,
       },
       {
         path: "/open-locked-box",
+        Component: LockedBox,
+      },
+      {
+        path: "/open-locked-box/:keyHolderId",
         Component: LockedBox,
       },
       {
