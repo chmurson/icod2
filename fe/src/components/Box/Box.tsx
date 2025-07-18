@@ -4,9 +4,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useJoinBoxStore } from "@/stores";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
+import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
+import { useStoreLeaderId } from "@/stores/boxStore/storeLeaderId";
 import { CreateBox, JoinBox } from "./sub-pages/CreationBoxes";
 import { DownloadLockedBox } from "./sub-pages/DownloadLockedBox";
 import { DropLockedBox } from "./sub-pages/RestoreBoxes/DropLockedBox/DropLockedBox";
+import { JoinLockedBox } from "./sub-pages/RestoreBoxes/JoinLockedBox";
 import { OpenLockedBox } from "./sub-pages/RestoreBoxes/OpenLockedBox";
 import Welcome from "./sub-pages/Welcome";
 import { WhatsYourName } from "./sub-pages/WhatsYourName";
@@ -21,20 +24,22 @@ interface BoxProps {
 const Box: React.FC<BoxProps> = () => {
   const { keyHolderId } = useParams();
   const navigate = useNavigate();
-  const openLockedBoxStore = useOpenLockedBoxStore();
+  const startJoinLockedBoxStore = useJoinLockedBoxStore();
+
+  const setLeaderId = useStoreLeaderId((s) => s.setLeaderId);
 
   useEffect(() => {
     if (keyHolderId) {
-      // Optionally, you could call a custom action to store the id
-      openLockedBoxStore.actions.start();
-      // After initializing, redirect to root
+      setLeaderId(keyHolderId);
+      startJoinLockedBoxStore.actions.start();
       navigate("/", { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    keyHolderId, // After initializing, redirect to root
-    navigate, // Optionally, you could call a custom action to store the id
-    openLockedBoxStore.actions.start,
+    keyHolderId,
+    navigate,
+    setLeaderId,
+    startJoinLockedBoxStore.actions.start,
   ]);
 
   const currentPage = useCurrentPage();
@@ -55,8 +60,10 @@ const Box: React.FC<BoxProps> = () => {
         return <DownloadLockedBox />;
       case "dropBox":
         return <DropLockedBox />;
-      case "openBox":
+      case "openLockedBox":
         return <OpenLockedBox />;
+      case "joinLockedBox":
+        return <JoinLockedBox />;
       default:
         return <Welcome />;
     }
@@ -68,14 +75,19 @@ const Box: React.FC<BoxProps> = () => {
 const useCurrentPage = () => {
   const createBoxState = useCreateBoxStore((state) => state.state);
   const joinBoxState = useJoinBoxStore((state) => state.state);
-  const openBoxState = useOpenLockedBoxStore((state) => state.state);
+  const openLockedBoxState = useOpenLockedBoxStore((state) => state.state);
+  const joinLockedBoxState = useJoinLockedBoxStore((state) => state.state);
 
-  if (openBoxState === "drop-box") {
+  if (openLockedBoxState === "drop-box" || joinLockedBoxState === "drop-box") {
     return "dropBox";
   }
 
-  if (openBoxState === "connecting") {
-    return "openBox";
+  if (openLockedBoxState === "connecting") {
+    return "openLockedBox";
+  }
+
+  if (joinLockedBoxState === "connecting") {
+    return "joinLockedBox";
   }
 
   if (createBoxState === "set-name") {

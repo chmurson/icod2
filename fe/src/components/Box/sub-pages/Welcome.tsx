@@ -9,7 +9,9 @@ import { Typography } from "@/ui/Typography";
 const Welcome: React.FC = () => {
   const startCreateBox = useCreateBoxStore((state) => state.actions.start);
   const startJoinBox = useJoinBoxStore((state) => state.actions.start);
-  const startOpenBox = useOpenLockedBoxStore((state) => state.actions.start);
+  const startOpenLockedBox = useOpenLockedBoxStore(
+    (state) => state.actions.start,
+  );
 
   return (
     <div className="flex flex-col gap-4 pb-12">
@@ -93,7 +95,7 @@ const Welcome: React.FC = () => {
           </>
         }
         buttonSlot={
-          <Button onClick={startOpenBox} variant="prominent">
+          <Button onClick={startOpenLockedBox} variant="prominent">
             Open a Locked Box
           </Button>
         }

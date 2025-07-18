@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import type { LockedBox } from "@/stores/boxStore/common-types";
+import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
+import { useStoreLeaderId } from "@/stores/boxStore/storeLeaderId";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 
@@ -31,10 +33,13 @@ function isLockedBoxFile(data: object): data is LockedBox {
 }
 
 export const DropLockedBox: React.FC = () => {
+  const leaderId = useStoreLeaderId((s) => s.leaderId);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<LockedBox | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const openBoxState = useOpenLockedBoxStore();
+  const joinLockedBoxState = useJoinLockedBoxStore();
+  const useJoin = Boolean(leaderId);
 
   const handleFile = async (file: File) => {
     setError(null);
@@ -51,7 +56,9 @@ export const DropLockedBox: React.FC = () => {
         return;
       }
       setSuccess(data);
-      openBoxState.actions.connect({
+      (useJoin
+        ? joinLockedBoxState.actions.connect
+        : openBoxState.actions.connect)({
         boxTitle: data.boxTitle,
         encryptedMessage: data.encryptedMessage,
         key: data.key,
@@ -59,6 +66,8 @@ export const DropLockedBox: React.FC = () => {
         keyHolders: data.keyHolders,
         keyThreshold: data.keyThreshold,
       });
+
+      console.log(JSON.stringify(joinLockedBoxState));
     } catch (_) {
       setError("Only JSON files are supported.");
     }
@@ -82,7 +91,7 @@ export const DropLockedBox: React.FC = () => {
   };
 
   const handleBackClick = () => {
-    openBoxState.actions.reset();
+    (useJoin ? joinLockedBoxState.actions.reset : openBoxState.actions.reset)();
     setError(null);
     setSuccess(null);
   };

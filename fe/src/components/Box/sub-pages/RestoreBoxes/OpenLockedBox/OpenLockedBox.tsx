@@ -11,21 +11,17 @@ export const OpenLockedBox: React.FC = () => {
 
   const sessionUrl = `${window.location.origin}/${state.keyHolderId}`;
 
-  useEffect(
-    () => {
-      if (
-        ["connecting", "connected", "opened"].includes(state.state) &&
-        state.keyHolderId
-      ) {
-        navigator.clipboard.writeText(sessionUrl).then(() => {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        });
-      }
-    },
-    [state.state, state.keyHolderId, sessionUrl],
-    sessionUrl,
-  );
+  useEffect(() => {
+    if (
+      ["connecting", "connected", "opened"].includes(state.state) &&
+      state.keyHolderId
+    ) {
+      navigator.clipboard.writeText(sessionUrl).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  }, [state.state, state.keyHolderId, sessionUrl]);
 
   if (!["connecting", "connected", "opened"].includes(state.state)) {
     return <div>Loading...</div>;

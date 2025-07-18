@@ -1,11 +1,11 @@
-import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
+import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 
 export const JoinLockedBox: React.FC = () => {
-  const state = useOpenLockedBoxStore();
+  const state = useJoinLockedBoxStore();
 
   if (!["connecting", "connected", "opened"].includes(state.state)) {
     return <div>Loading...</div>;
