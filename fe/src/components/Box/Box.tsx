@@ -1,11 +1,13 @@
 import type React from "react";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useJoinBoxStore } from "@/stores";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { CreateBox, JoinBox } from "./sub-pages/CreationBoxes";
 import { DownloadLockedBox } from "./sub-pages/DownloadLockedBox";
-import { DropLockedBox } from "./sub-pages/DropLockedBox";
-import { OpenLockedBox } from "./sub-pages/OpenLockedBox";
+import { DropLockedBox } from "./sub-pages/RestoreBoxes/DropLockedBox/DropLockedBox";
+import { OpenLockedBox } from "./sub-pages/RestoreBoxes/OpenLockedBox";
 import Welcome from "./sub-pages/Welcome";
 import { WhatsYourName } from "./sub-pages/WhatsYourName";
 
@@ -17,6 +19,24 @@ interface BoxProps {
 }
 
 const Box: React.FC<BoxProps> = () => {
+  const { keyHolderId } = useParams();
+  const navigate = useNavigate();
+  const openLockedBoxStore = useOpenLockedBoxStore();
+
+  useEffect(() => {
+    if (keyHolderId) {
+      // Optionally, you could call a custom action to store the id
+      openLockedBoxStore.actions.start();
+      // After initializing, redirect to root
+      navigate("/", { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    keyHolderId, // After initializing, redirect to root
+    navigate, // Optionally, you could call a custom action to store the id
+    openLockedBoxStore.actions.start,
+  ]);
+
   const currentPage = useCurrentPage();
 
   const renderCurrentPage = () => {

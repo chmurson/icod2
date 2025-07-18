@@ -1,6 +1,6 @@
 import { ExclamationTriangleIcon, ReloadIcon } from "@radix-ui/react-icons";
-import { Card, Flex, IconButton, Separator } from "@radix-ui/themes";
-import React, { Component, type ErrorInfo, type ReactNode } from "react";
+import { Card, Flex, Separator } from "@radix-ui/themes";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 import { Button } from "./Button";
 import { Text } from "./Typography";

@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { useCalleeDataChannelMng } from "@/services/webrtc";
 import { useCreateBoxStore } from "@/stores";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import type {
@@ -6,7 +7,6 @@ import type {
   LeaderSendsBoxUpdate,
   LeaderSendsKeyHolderList,
 } from "../commons";
-import { useCalleeDataChannelMng } from "./useCalleeDataChannelMng";
 
 export function useCreateBoxConnection() {
   const onPeerDisconnected = useCallback((localId: string) => {

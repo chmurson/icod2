@@ -63,6 +63,7 @@ const Root: FC = () => {
           <Route path="crypto-poc" element={<CryptoPlayground />} />
           <Route path="decode-poc" element={<DecodePlayground />} />
           <Route path="/components-demo" element={<ComponentsDemo />} />
+          <Route path="/:keyHolderId" element={<Box />} />
           <Route path="/" element={<Box />} />
           <Route path="*" element={<Box />} />
         </Routes>
@@ -83,6 +84,10 @@ const router = createBrowserRouter([
       {
         path: "/decode-poc",
         Component: DecodePlayground,
+      },
+      {
+        path: "/:keyHolderId",
+        Component: Box,
       },
       {
         path: "/",

@@ -2,12 +2,11 @@ import { DownloadIcon } from "@radix-ui/react-icons";
 import { TextArea } from "@radix-ui/themes";
 import { useCallback, useEffect, useState } from "react"; // Added useEffect
 import { useBlocker, useNavigate } from "react-router-dom"; // Added useBlocker, useNavigate
-import { useCreateBoxStore } from "@/stores";
+import { HiddenTextArea } from "@/components/Box/components/HiddenTextArea";
+import { ParticipantItem } from "@/components/Box/components/ParticipantItem";
+import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { useJoinBoxStore } from "../../../../stores/boxStore/joinBoxStore";
-import { HiddenTextArea } from "../../components/HiddenTextArea";
-import { ParticipantItem } from "../../components/ParticipantItem";
 import { ClosePageButton, GoBackAlert } from "./components";
 import { useDownloadLockedBox, useDownloadLockedBoxState } from "./hooks";
 import { useNaiveShowHiddenMessage } from "./hooks/useNaiveShowHiddenMessage";

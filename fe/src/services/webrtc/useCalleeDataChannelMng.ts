@@ -1,6 +1,6 @@
 import { CalleeSignalingService } from "@/services/signaling";
 import { useDataChannelMng } from "@/services/webrtc";
-import { router } from "./dataChannelRouter";
+import { router } from "../../components/Box/sub-pages/CreationBoxes/CreateBox/dataChannelRouter";
 
 export const useCalleeDataChannelMng = ({
   onPeerDisconnected,

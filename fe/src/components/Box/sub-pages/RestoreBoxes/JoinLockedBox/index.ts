@@ -1,0 +1,1 @@
+export { JoinLockedBox } from "./JoinLockedBox";

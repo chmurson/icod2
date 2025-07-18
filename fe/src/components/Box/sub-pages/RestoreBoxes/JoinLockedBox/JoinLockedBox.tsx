@@ -1,13 +1,12 @@
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { FieldArea } from "../../components/FieldArea";
-import { ParticipantItem } from "../../components/ParticipantItem";
+import { FieldArea } from "../../../components/FieldArea";
+import { ParticipantItem } from "../../../components/ParticipantItem";
 
-export const OpenLockedBox: React.FC = () => {
+export const JoinLockedBox: React.FC = () => {
   const state = useOpenLockedBoxStore();
 
-  // Only show UI when in connecting/connected/opened state
   if (!["connecting", "connected", "opened"].includes(state.state)) {
     return <div>Loading...</div>;
   }
@@ -19,7 +18,7 @@ export const OpenLockedBox: React.FC = () => {
   return (
     <div className="flex flex-col gap-8">
       <Text variant="pageTitle" className="mt-4">
-        Open a Locked Box
+        Join a Locked Box
       </Text>
       <Text variant="secondaryText" className="mt-4">
         {`The timer starts when someone has ${state.keyThreshold} of ${state.onlineKeyHolders.length + state.offLineKeyHolders.length + 1} keys`}
