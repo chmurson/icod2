@@ -9,7 +9,7 @@ export const OpenLockedBox: React.FC = () => {
   const state = useOpenLockedBoxStore();
   const [copied, setCopied] = useState(false);
 
-  const sessionUrl = `${window.location.origin}/${state.keyHolderId}`;
+  const sessionUrl = `${window.location.origin}/open-locked-box/${state.keyHolderId}`;
 
   useEffect(() => {
     if (

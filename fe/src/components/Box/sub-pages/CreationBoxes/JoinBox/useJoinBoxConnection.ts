@@ -1,10 +1,8 @@
 import { useCallback, useRef } from "react";
-import {
-  type DataChannelManager,
-  useCallerDataChannelMng,
-} from "@/services/webrtc";
+import type { DataChannelManager } from "@/services/webrtc";
 import { useJoinBoxStore } from "@/stores";
 import type { KeyHolderWelcomesLeader } from "../commons";
+import { useCallerDataChannelMng } from "./useCallerDataChannelMng";
 
 export function useJoinBoxConnection() {
   const dataChannelManagerRef = useRef<DataChannelManager>(undefined);

@@ -8,6 +8,7 @@ import {
   Routes,
 } from "react-router-dom";
 import Box from "./components/Box/sub-pages";
+import LockedBox from "./components/Box/sub-pages/RestoreBoxes/LockedBox";
 import ComponentsDemo from "./components/ComponentsDemo";
 import CryptoPlayground from "./components/CryptoPlayground";
 import DecodePlayground from "./components/DecodePlayground";
@@ -63,7 +64,8 @@ const Root: FC = () => {
           <Route path="crypto-poc" element={<CryptoPlayground />} />
           <Route path="decode-poc" element={<DecodePlayground />} />
           <Route path="/components-demo" element={<ComponentsDemo />} />
-          <Route path="/:keyHolderId" element={<Box />} />
+          <Route path="open-locked-box" element={<LockedBox />} />
+          <Route path="open-locked-box/:keyHolderId" element={<LockedBox />} />
           <Route path="/" element={<Box />} />
           <Route path="*" element={<Box />} />
         </Routes>
@@ -90,8 +92,8 @@ const router = createBrowserRouter([
         Component: Box,
       },
       {
-        path: "/",
-        Component: Box,
+        path: "/open-locked-box",
+        Component: LockedBox,
       },
       {
         path: "*",
