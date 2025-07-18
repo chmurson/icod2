@@ -1,5 +1,6 @@
 import { TextArea } from "@radix-ui/themes";
 import type React from "react";
+import { FiEye } from "react-icons/fi";
 import { useJoinBoxStore } from "@/stores";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
@@ -122,6 +123,13 @@ const BoxJoinContentForOK = ({
         {content !== undefined && (
           <FieldArea label="Content:">
             <TextArea disabled rows={6} value={content} className="w-full" />
+            <Text
+              variant="secondaryText"
+              className="inline-flex items-center gap-2 text-xs"
+            >
+              <FiEye />
+              Leaders shares content preview with you
+            </Text>
           </FieldArea>
         )}
       </div>

@@ -26,6 +26,7 @@ const openLockedBoxState = {
     userAgent: "",
   } satisfies ParticipantType,
   decryptedContent: "",
+  shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
 };
 
 export type OpenLockedBoxStateData = typeof openLockedBoxState;
@@ -42,6 +43,7 @@ type OpenLockedBoxState = {
       keyHolders: ParticipantType[];
       keyThreshold: number;
     }) => void;
+    toggleShareAccessKey: (participantId: string, value?: boolean) => void;
     connectKeyHolder: (participant: ParticipantType) => void;
     disconnectKeyHolder: (participantId: string) => void;
     open: (message: {
@@ -58,6 +60,14 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
     ...openLockedBoxState,
     actions: {
       start: () => set({ ...openLockedBoxState, state: "drop-box" }),
+      toggleShareAccessKey: (keyHolderId: string, value?: boolean) =>
+        set((state) => ({
+          shareAccessKeyByKeyHolderId: {
+            ...state.shareAccessKeyByKeyHolderId,
+            [keyHolderId]:
+              value ?? !state.shareAccessKeyByKeyHolderId[keyHolderId],
+          },
+        })),
       connect: ({
         boxTitle,
         encryptedMessage,
