@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { ParticipantType } from "./common-types";
 
-const openLockedBoxState = {
+const joinLockedBoxState = {
   state: "initial" as
     | "initial"
     | "drop-box"
@@ -29,9 +29,9 @@ const openLockedBoxState = {
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
 };
 
-export type OpenLockedBoxStateData = typeof openLockedBoxState;
+export type JoinLockedBoxStateData = typeof joinLockedBoxState;
 
-type OpenLockedBoxState = {
+type JoinLockedBoxState = {
   actions: {
     reset: () => void;
     start: () => void;
@@ -53,13 +53,13 @@ type OpenLockedBoxState = {
       generatedKey?: string;
     }) => void;
   };
-} & OpenLockedBoxStateData;
+} & JoinLockedBoxStateData;
 
-export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
+export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
   devtools((set) => ({
-    ...openLockedBoxState,
+    ...joinLockedBoxState,
     actions: {
-      start: () => set({ ...openLockedBoxState, state: "drop-box" }),
+      start: () => set({ ...joinLockedBoxState, state: "drop-box" }),
       toggleShareAccessKey: (keyHolderId: string, value?: boolean) =>
         set((state) => ({
           shareAccessKeyByKeyHolderId: {
@@ -134,7 +134,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         }),
       reset: () =>
         set({
-          ...openLockedBoxState,
+          ...joinLockedBoxState,
         }),
     },
   })),

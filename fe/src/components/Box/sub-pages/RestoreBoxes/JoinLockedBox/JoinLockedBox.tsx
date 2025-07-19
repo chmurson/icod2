@@ -1,27 +1,28 @@
-import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
+import { FieldArea } from "@/components/Box/components/FieldArea";
+import { ParticipantItem } from "@/components/Box/components/ParticipantItem";
+import { ShareAccessButton } from "@/components/Box/components/ShareAccessButton";
+import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { FieldArea } from "../../components/FieldArea";
-import { ParticipantItem } from "../../components/ParticipantItem";
-import { ShareAccessButton } from "../../components/ShareAccessButton";
 
-export const OpenLockedBox: React.FC = () => {
-  const onlineKeyHolders = useOpenLockedBoxStore(
+export const JoinLockedBox: React.FC = () => {
+  const state = useJoinLockedBoxStore((state) => state.state);
+
+  const onlineKeyHolders = useJoinLockedBoxStore(
     (state) => state.onlineKeyHolders,
   );
-  const offLineKeyHolders = useOpenLockedBoxStore(
+  const offLineKeyHolders = useJoinLockedBoxStore(
     (state) => state.offLineKeyHolders,
   );
-  const you = useOpenLockedBoxStore((state) => state.you);
-  const keyTresholdId = useOpenLockedBoxStore((state) => state.keyThreshold);
-  const storeState = useOpenLockedBoxStore((state) => state.state);
-  const actions = useOpenLockedBoxStore((state) => state.actions);
-  const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
+  const you = useJoinLockedBoxStore((state) => state.you);
+  const keyThresholdId = useJoinLockedBoxStore((state) => state.keyThreshold);
+  const actions = useJoinLockedBoxStore((state) => state.actions);
+  const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
     (state) => state.shareAccessKeyByKeyHolderId,
   );
 
   // Only show UI when in connecting/connected/opened state
-  if (!["connecting", "connected", "opened"].includes(storeState)) {
+  if (!["connecting", "connected", "opened"].includes(state)) {
     return <div>Loading...</div>;
   }
 
@@ -32,10 +33,12 @@ export const OpenLockedBox: React.FC = () => {
   return (
     <div className="flex flex-col gap-8">
       <Text variant="pageTitle" className="mt-4">
-        Open a Locked Box
+        Join a Locked Box
       </Text>
       <Text variant="secondaryText" className="mt-4">
-        {`The timer starts when someone has ${keyTresholdId} of ${onlineKeyHolders.length + offLineKeyHolders.length + 1} keys`}
+        {`The timer starts when someone has ${keyThresholdId} of ${
+          onlineKeyHolders.length + offLineKeyHolders.length + 1
+        } keys`}
       </Text>
       <div className="flex flex-col gap-4">
         <FieldArea label="Your access key">

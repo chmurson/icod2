@@ -1,5 +1,6 @@
 import type React from "react";
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { useJoinBoxStore } from "@/stores";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
@@ -9,7 +10,6 @@ import { Typography } from "@/ui/Typography";
 const Welcome: React.FC = () => {
   const startCreateBox = useCreateBoxStore((state) => state.actions.start);
   const startJoinBox = useJoinBoxStore((state) => state.actions.start);
-  const startOpenBox = useOpenLockedBoxStore((state) => state.actions.start);
 
   return (
     <div className="flex flex-col gap-4 pb-12">
@@ -93,9 +93,14 @@ const Welcome: React.FC = () => {
           </>
         }
         buttonSlot={
-          <Button onClick={startOpenBox} variant="prominent">
-            Open a Locked Box
-          </Button>
+          <Link to="/open-locked-box" style={{ textDecoration: "none" }}>
+            <Button
+              onClick={useOpenLockedBoxStore((state) => state.actions.start)}
+              variant="prominent"
+            >
+              Open a Locked Box
+            </Button>
+          </Link>
         }
       />
     </div>

@@ -1,11 +1,8 @@
 import type React from "react";
 import { useJoinBoxStore } from "@/stores";
-import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { CreateBox, JoinBox } from "./sub-pages/CreationBoxes";
 import { DownloadLockedBox } from "./sub-pages/DownloadLockedBox";
-import { DropLockedBox } from "./sub-pages/DropLockedBox";
-import { OpenLockedBox } from "./sub-pages/OpenLockedBox";
 import Welcome from "./sub-pages/Welcome";
 import { WhatsYourName } from "./sub-pages/WhatsYourName";
 
@@ -33,10 +30,6 @@ const Box: React.FC<BoxProps> = () => {
         return <JoinBox />;
       case "download":
         return <DownloadLockedBox />;
-      case "dropBox":
-        return <DropLockedBox />;
-      case "openBox":
-        return <OpenLockedBox />;
       default:
         return <Welcome />;
     }
@@ -48,15 +41,6 @@ const Box: React.FC<BoxProps> = () => {
 const useCurrentPage = () => {
   const createBoxState = useCreateBoxStore((state) => state.state);
   const joinBoxState = useJoinBoxStore((state) => state.state);
-  const openBoxState = useOpenLockedBoxStore((state) => state.state);
-
-  if (openBoxState === "drop-box") {
-    return "dropBox";
-  }
-
-  if (openBoxState === "connecting") {
-    return "openBox";
-  }
 
   if (createBoxState === "set-name") {
     return "createBoxSetName";

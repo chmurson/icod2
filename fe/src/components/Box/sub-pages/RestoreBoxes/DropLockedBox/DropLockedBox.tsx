@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import type { LockedBox } from "@/stores/boxStore/common-types";
+import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
@@ -34,7 +35,9 @@ export const DropLockedBox: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<LockedBox | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const openBoxState = useOpenLockedBoxStore();
+  const openLockedBoxState = useOpenLockedBoxStore();
+  const joinLockedBoxState = useJoinLockedBoxStore();
+  const useJoin = joinLockedBoxState.state === "drop-box";
 
   const handleFile = async (file: File) => {
     setError(null);
@@ -51,14 +54,27 @@ export const DropLockedBox: React.FC = () => {
         return;
       }
       setSuccess(data);
-      openBoxState.actions.connect({
-        boxTitle: data.boxTitle,
-        encryptedMessage: data.encryptedMessage,
-        key: data.key,
-        keyHolderId: data.keyHolderId,
-        keyHolders: data.keyHolders,
-        keyThreshold: data.keyThreshold,
-      });
+
+      console.log(useJoin);
+      if (useJoin) {
+        joinLockedBoxState.actions.connect({
+          boxTitle: data.boxTitle,
+          encryptedMessage: data.encryptedMessage,
+          key: data.key,
+          keyHolderId: data.keyHolderId,
+          keyHolders: data.keyHolders,
+          keyThreshold: data.keyThreshold,
+        });
+      } else {
+        openLockedBoxState.actions.connect({
+          boxTitle: data.boxTitle,
+          encryptedMessage: data.encryptedMessage,
+          key: data.key,
+          keyHolderId: data.keyHolderId,
+          keyHolders: data.keyHolders,
+          keyThreshold: data.keyThreshold,
+        });
+      }
     } catch (_) {
       setError("Only JSON files are supported.");
     }
@@ -82,7 +98,9 @@ export const DropLockedBox: React.FC = () => {
   };
 
   const handleBackClick = () => {
-    openBoxState.actions.reset();
+    (useJoin
+      ? joinLockedBoxState.actions.reset
+      : openLockedBoxState.actions.reset)();
     setError(null);
     setSuccess(null);
   };
