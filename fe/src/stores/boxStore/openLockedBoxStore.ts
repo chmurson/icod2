@@ -100,25 +100,6 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
           },
         });
       },
-      connectYou: ({
-        you,
-        leader,
-      }: {
-        you: ParticipantType;
-        leader: ParticipantType;
-      }) =>
-        set((state) => ({
-          leader,
-          you: {
-            ...state.you,
-            id: you.id,
-          },
-          connecting: false,
-          connected: true,
-          error: null,
-
-          state: "connected",
-        })),
       connectKeyHolder: (keyHolder: ParticipantType) => {
         set((state) => ({
           onlineKeyHolders: [

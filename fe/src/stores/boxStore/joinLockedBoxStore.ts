@@ -44,7 +44,6 @@ type JoinLockedBoxState = {
       keyThreshold: number;
     }) => void;
     toggleShareAccessKey: (participantId: string, value?: boolean) => void;
-
     connectKeyHolder: (participant: ParticipantType) => void;
     disconnectKeyHolder: (participantId: string) => void;
     open: (message: {
@@ -101,25 +100,6 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           },
         });
       },
-      connectYou: ({
-        you,
-        leader,
-      }: {
-        you: ParticipantType;
-        leader: ParticipantType;
-      }) =>
-        set((state) => ({
-          leader,
-          you: {
-            ...state.you,
-            id: you.id,
-          },
-          connecting: false,
-          connected: true,
-          error: null,
-
-          state: "connected",
-        })),
       connectKeyHolder: (keyHolder: ParticipantType) => {
         set((state) => ({
           onlineKeyHolders: [
