@@ -6,8 +6,6 @@ export type ParticipantType = {
   userAgent: string;
 };
 
-export type KeyHolderType = ParticipantType & { isOnline: boolean };
-
 export type LockedBox = {
   encryptedMessage: string;
   key: string;

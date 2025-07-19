@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { KeyHolderType, ParticipantType } from "./common-types";
+import type { ParticipantType } from "./common-types";
 
 const joinLockedBoxState = {
   state: "initial" as
@@ -17,8 +17,8 @@ const joinLockedBoxState = {
   encryptedMessage: "",
   key: "",
   keyHolderId: "",
-  onlineKeyHolders: [] as KeyHolderType[],
-  offLineKeyHolders: [] as KeyHolderType[],
+  onlineKeyHolders: [] as ParticipantType[],
+  offLineKeyHolders: [] as ParticipantType[],
   keyThreshold: 1,
   you: {
     id: "",
@@ -126,7 +126,6 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
             ...state.onlineKeyHolders,
             {
               ...keyHolder,
-              isOnline: true,
             },
           ],
           offLineKeyHolders: state.offLineKeyHolders.filter(
@@ -140,7 +139,6 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
             ...state.offLineKeyHolders,
             {
               ...keyHolder,
-              isOnline: true,
             },
           ],
           onlineKeyHolders: state.onlineKeyHolders.filter(

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { KeyHolderType, ParticipantType } from "./common-types";
+import type { ParticipantType } from "./common-types";
 
 const openLockedBoxState = {
   state: "initial" as
@@ -17,8 +17,8 @@ const openLockedBoxState = {
   encryptedMessage: "",
   key: "",
   keyHolderId: "",
-  onlineKeyHolders: [] as KeyHolderType[],
-  offLineKeyHolders: [] as KeyHolderType[],
+  onlineKeyHolders: [] as ParticipantType[],
+  offLineKeyHolders: [] as ParticipantType[],
   keyThreshold: 1,
   you: {
     id: "",
@@ -125,7 +125,6 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
             ...state.onlineKeyHolders,
             {
               ...keyHolder,
-              isOnline: true,
             },
           ],
           offLineKeyHolders: state.offLineKeyHolders.filter(
@@ -139,7 +138,6 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
             ...state.offLineKeyHolders,
             {
               ...keyHolder,
-              isOnline: true,
             },
           ],
           onlineKeyHolders: state.onlineKeyHolders.filter(
