@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { ShareAccessButton } from "@/components/Box/components/ShareAccessButton";
+import { ShareAccessDropdown } from "@/components/Box/components/ShareAccessDropdown";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
@@ -31,6 +33,12 @@ export const OpenLockedBox: React.FC = () => {
     state.actions.reset();
   };
 
+  const idsOfKeyHoldersToShareWith = Object.entries(
+    state.shareAccessKeyByKeyHolderId,
+  )
+    .filter(([_, isSharing]) => isSharing)
+    .map(([id]) => id);
+
   return (
     <div className="flex flex-col gap-8">
       {copied && (
@@ -49,6 +57,18 @@ export const OpenLockedBox: React.FC = () => {
           <ParticipantItem
             name={state.you.name}
             userAgent={state.you.userAgent}
+            buttonSlot={
+              <ShareAccessDropdown
+                value={idsOfKeyHoldersToShareWith}
+                onChange={state.actions.toggleSharesAccessKeys}
+                options={state.onlineKeyHolders.map((kh) => ({
+                  id: kh.id,
+                  name: kh.name,
+                  userAgent: kh.userAgent,
+                  avatar: undefined,
+                }))}
+              />
+            }
           />
         </FieldArea>
         {state.onlineKeyHolders.length !== 0 && (
@@ -59,6 +79,14 @@ export const OpenLockedBox: React.FC = () => {
                   key={p.id}
                   name={p.name}
                   userAgent={p.userAgent}
+                  buttonSlot={
+                    <ShareAccessButton
+                      checked={state.shareAccessKeyByKeyHolderId[p.id] === true}
+                      onToggle={(checked) =>
+                        state.actions.toggleShareAccessKey(p.id, checked)
+                      }
+                    />
+                  }
                 />
               ))}
             </div>
@@ -74,6 +102,7 @@ export const OpenLockedBox: React.FC = () => {
                 key={p.id}
                 name={p.name}
                 userAgent={p.userAgent}
+                buttonSlot={<ShareAccessButton checked={false} disabled />}
               />
             ))}
           </div>

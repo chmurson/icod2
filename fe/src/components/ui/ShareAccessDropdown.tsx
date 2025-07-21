@@ -13,7 +13,6 @@ interface ButtonProps extends Omit<RadixButtonProps, "variant"> {
   loading?: boolean;
   loadingText?: string;
   iconSlot?: React.ReactNode;
-  iconSlotEnd?: React.ReactNode;
 }
 
 const buttonVariantToProps: Record<
@@ -40,7 +39,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       disabled,
       variant,
       iconSlot = null,
-      iconSlotEnd = null,
       ...props
     },
     ref,
@@ -60,7 +58,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!!iconSlot && <Spinner loading={loading}>{iconSlot}</Spinner>}
         {!iconSlot && <Spinner loading={loading} />}
         {children}
-        {!!iconSlotEnd && iconSlotEnd}
       </RadixButton>
     );
   },
