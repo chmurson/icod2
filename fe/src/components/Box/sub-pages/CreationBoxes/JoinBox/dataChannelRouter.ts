@@ -14,7 +14,7 @@ router.addHandler(isLeaderWelcomesKeyholder, (_, message) => {
 
   storeActions.connectYou({
     leader: {
-      id: message.leaderInfo.name,
+      id: message.leaderInfo.id,
       name: message.leaderInfo.name,
       userAgent: message.leaderInfo.userAgent,
     },

@@ -57,7 +57,12 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
         ...createBoxDefaultState,
         connecting: true,
         state: "connecting",
-        leader: { id: "", name, userAgent },
+        // TODO remove this id creation, it should be created in DataChannelManager and propagated here upon connection creation
+        leader: {
+          id: `peer-${Math.random().toString(36).substring(2, 15)}`,
+          name,
+          userAgent,
+        },
       }),
     start: () => set({ ...createBoxDefaultState, state: "set-name" }),
     connectLeader: (leader) =>
