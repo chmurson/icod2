@@ -97,6 +97,7 @@ const Welcome: React.FC = () => {
             <Button
               onClick={useOpenLockedBoxStore((state) => state.actions.start)}
               variant="prominent"
+              className="whitespace-nowrap"
             >
               Open a Locked Box
             </Button>

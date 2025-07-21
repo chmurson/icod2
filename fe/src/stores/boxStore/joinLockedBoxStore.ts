@@ -44,6 +44,7 @@ type JoinLockedBoxState = {
       keyThreshold: number;
     }) => void;
     toggleShareAccessKey: (participantId: string, value?: boolean) => void;
+    toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
     connectKeyHolder: (participant: ParticipantType) => void;
     disconnectKeyHolder: (participantId: string) => void;
     open: (message: {
@@ -69,7 +70,12 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
               value ?? !state.shareAccessKeyByKeyHolderId[keyHolderId],
           },
         })),
-      setError: (error: string) => set({ error }),
+      toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) =>
+        set(() => ({
+          shareAccessKeyByKeyHolderId: Object.fromEntries(
+            idsOfKeyHoldersToShareWith.map((id) => [id, true]),
+          ),
+        })),
       connect: ({
         boxTitle,
         encryptedMessage,
@@ -138,6 +144,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
         set({
           ...joinLockedBoxState,
         }),
+      setError: (error: string) => set({ error }),
     },
   })),
 );
