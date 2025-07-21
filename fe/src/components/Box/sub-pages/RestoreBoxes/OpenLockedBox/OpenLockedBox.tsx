@@ -9,8 +9,11 @@ import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useNavigateToShareableLink } from "./hooks";
+import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
 export const OpenLockedBox: React.FC = () => {
+  useOpenLockedBoxConnection();
+
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
   const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
