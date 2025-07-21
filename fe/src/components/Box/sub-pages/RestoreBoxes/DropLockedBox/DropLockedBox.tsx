@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import type { LockedBox } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
+import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
+import { cn } from "@/utils/cn";
+import {
+  clearPersistedStartedUnlockingInfo,
+  isPersistedStartedUnlocking,
+} from "../commons/persistStartedUnlocking";
 
 function isLockedBoxFile(data: object): data is LockedBox {
   return (
@@ -32,12 +39,19 @@ function isLockedBoxFile(data: object): data is LockedBox {
 }
 
 export const DropLockedBox: React.FC = () => {
+  const navigate = useNavigate();
+  const { sessionId } = useParams();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<LockedBox | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const openLockedBoxState = useOpenLockedBoxStore();
   const joinLockedBoxState = useJoinLockedBoxStore();
-  const useJoin = joinLockedBoxState.state === "drop-box";
+
+  const isForcingLeader = sessionId
+    ? isPersistedStartedUnlocking(sessionId)
+    : false;
+  const isFollower = !isForcingLeader && (sessionId?.trim().length ?? 0) > 0;
   const joinLockedBoxError = useJoinLockedBoxStore((state) => state.error);
 
   useEffect(() => {
@@ -54,6 +68,7 @@ export const DropLockedBox: React.FC = () => {
       return;
     }
     try {
+      clearPersistedStartedUnlockingInfo();
       const text = await file.text();
       const data = JSON.parse(text);
       if (!isLockedBoxFile(data)) {
@@ -62,8 +77,7 @@ export const DropLockedBox: React.FC = () => {
       }
       setSuccess(data);
 
-      console.log(useJoin);
-      if (useJoin) {
+      if (isFollower) {
         joinLockedBoxState.actions.connect({
           boxTitle: data.boxTitle,
           encryptedMessage: data.encryptedMessage,
@@ -89,6 +103,7 @@ export const DropLockedBox: React.FC = () => {
 
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setIsDragOver(false);
     if (e.dataTransfer.files?.[0]) {
       await handleFile(e.dataTransfer.files[0]);
     }
@@ -98,62 +113,142 @@ export const DropLockedBox: React.FC = () => {
     e.preventDefault();
   };
 
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    window.clearTimeout(dragLeaveTimeoutHandler.current);
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const dragLeaveTimeoutHandler = useRef<number | undefined>(undefined);
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    window.clearTimeout(dragLeaveTimeoutHandler.current);
+    e.preventDefault();
+    // Only set isDragOver to false if we're actually leaving the drop zone
+    // This prevents flickering when dragging over child elements
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      dragLeaveTimeoutHandler.current = window.setTimeout(() => {
+        setIsDragOver(false);
+      }, 250);
+    }
+  };
+
   const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       await handleFile(e.target.files[0]);
     }
   };
 
-  const handleBackClick = () => {
-    (useJoin
+  useEffect(() => {
+    (isFollower
       ? joinLockedBoxState.actions.reset
       : openLockedBoxState.actions.reset)();
-    setError(null);
-    setSuccess(null);
-  };
+
+    // Prevent default drag and drop behavior on the entire page
+    const handleGlobalDragOver = (e: DragEvent) => {
+      e.preventDefault();
+    };
+
+    const handleGlobalDrop = (e: DragEvent) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener("dragover", handleGlobalDragOver);
+    document.addEventListener("drop", handleGlobalDrop);
+
+    return () => {
+      document.removeEventListener("dragover", handleGlobalDragOver);
+      document.removeEventListener("drop", handleGlobalDrop);
+      clearTimeout(dragLeaveTimeoutHandler.current);
+    };
+  }, [
+    joinLockedBoxState.actions.reset,
+    openLockedBoxState.actions.reset,
+    isFollower,
+  ]);
 
   return (
     <div className="max-w-2xl mx-auto p-6 flex flex-col gap-6">
-      <div className="flex items-center gap-8">
-        <div className="flex-1">
-          <Text variant="pageTitle" className="mb-4 text-center">
-            Open a locked box
-          </Text>
-          <div
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            className="rounded-xl border-2 border-dashed border-gray-400 bg-gradient-to-br from-slate-50 to-slate-200 dark:from-gray-800 dark:to-gray-900 shadow-md p-10 text-center transition-colors"
-          >
-            {error && <div className="text-red-600 mb-4">{error}</div>}
-            {success && (
-              <div className="text-green-600 mb-4">
-                Secret box loaded successfully!
+      <div className="flex flex-col gap-8">
+        <Text variant="pageTitle" className="mt-4">
+          {!isFollower && "Start Unlocking a Box"}
+          {isFollower && "Join Unlocking a Box"}
+        </Text>
+        {isFollower && (
+          <div className="flex flex-col gap-4">
+            <Alert variant="info">
+              <div className="flex justify-between">
+                <span>
+                  You are going to <b>join</b> process of unlocking a box.
+                </span>
+                <Button
+                  variant="secondary"
+                  className="self-end text-sm"
+                  size="1"
+                  onClick={() => {
+                    navigate("/unlock-box");
+                  }}
+                >
+                  Start unlocking instead
+                </Button>
               </div>
+            </Alert>
+            <div className="flex flex-col gap-1" />
+          </div>
+        )}
+        {!isFollower && (
+          <Alert variant="info">
+            You are going to <b>start</b> process of unlocking a box.
+          </Alert>
+        )}
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          className={`flex flex-col justify-center h-42 rounded-xl border-2 border-dashed shadow-md p-10 text-center transition-all duration-300 ease-in-out ${
+            isDragOver
+              ? "border-[var(--accent-9)] bg-[var(--accent-2)] bg-gradient-to-br shadow-lg border-3"
+              : "border-gray-400 bg-gradient-to-br from-slate-50 to-slate-200 dark:from-gray-800 dark:to-gray-900"
+          }`}
+        >
+          {error && <div className="text-red-600 mb-4">{error}</div>}
+          {success && (
+            <div className="text-green-600 mb-4">
+              Secret box loaded successfully!
+            </div>
+          )}
+          <div
+            className={cn(
+              "mb-3 transition-colors duration-300",
+              isDragOver && "text-[var(--accent-9)] text-3xl",
             )}
-            <div className="mb-3">Please upload your secret box</div>
+          >
+            {isDragOver
+              ? "Drop your file here!"
+              : "Please upload your locked box file"}
+          </div>
+          {!isDragOver && (
             <Button
               variant="primary"
               onClick={() => fileInputRef.current?.click()}
+              className={`transition-transform duration-300 self-center ${isDragOver ? "scale-110" : ""}`}
             >
               Select File
             </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="application/json,.json"
-              className="hidden"
-              onChange={handleFileInput}
-            />
-          </div>
-          <div className="flex justify-center mt-8">
-            <Button
-              variant="secondary"
-              onClick={handleBackClick}
-              className="h-12 min-w-[80px]"
-            >
-              Back
-            </Button>
-          </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={handleFileInput}
+          />
+        </div>
+        <div className="flex mt-8">
+          <Link style={{ textDecoration: "none" }} to="/">
+            <Button variant="secondary">Back</Button>
+          </Link>
         </div>
       </div>
     </div>

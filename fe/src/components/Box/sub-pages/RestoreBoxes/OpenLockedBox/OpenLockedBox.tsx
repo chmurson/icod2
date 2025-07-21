@@ -1,69 +1,72 @@
-import { useEffect, useState } from "react";
+import { TextField } from "@radix-ui/themes";
+import { useEffect } from "react";
 import { ShareAccessButton } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown } from "@/components/Box/components/ShareAccessDropdown";
-import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
+import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
-import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
+import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
+import { useNavigateToShareableLink } from "./hooks";
 
 export const OpenLockedBox: React.FC = () => {
-  useOpenLockedBoxConnection();
-  const state = useOpenLockedBoxStore();
-  const [copied, setCopied] = useState(false);
-
-  const sessionUrl = `${window.location.origin}/open-locked-box/${state.keyHolderId}`;
+  const { shareableURL, sessionId } = useNavigateToShareableLink();
+  const state = useOpenLockedBoxStore((state) => state.state);
+  const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
+    (state) => state.shareAccessKeyByKeyHolderId,
+  );
+  const offLineKeyHolders = useOpenLockedBoxStore(
+    (state) => state.offLineKeyHolders,
+  );
+  const onlineKeyHolders = useOpenLockedBoxStore(
+    (state) => state.onlineKeyHolders,
+  );
+  const keyThreshold = useOpenLockedBoxStore((state) => state.keyThreshold);
+  const you = useOpenLockedBoxStore((state) => state.you);
+  const actions = useOpenLockedBoxStore((state) => state.actions);
 
   useEffect(() => {
-    if (
-      ["connecting", "connected", "opened"].includes(state.state) &&
-      state.keyHolderId
-    ) {
-      navigator.clipboard.writeText(sessionUrl).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
+    if (sessionId) {
+      persistStartedUnlocking(sessionId);
     }
-  }, [state.state, state.keyHolderId, sessionUrl]);
+  }, [sessionId]);
 
-  if (!["connecting", "connected", "opened"].includes(state.state)) {
+  if (!["connecting", "connected", "opened"].includes(state)) {
     return <div>Loading...</div>;
   }
 
   const handleBackClick = () => {
-    state.actions.reset();
+    actions.reset();
   };
 
-  const idsOfKeyHoldersToShareWith = Object.entries(
-    state.shareAccessKeyByKeyHolderId,
-  )
+  const idsOfKeyHoldersToShareWith = Object.entries(shareAccessKeyByKeyHolderId)
     .filter(([_, isSharing]) => isSharing)
     .map(([id]) => id);
 
   return (
     <div className="flex flex-col gap-8">
-      {copied && (
-        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 text-white px-6 py-2 rounded shadow-lg transition-opacity duration-300">
-          Session URL copied to clipboard!
-        </div>
-      )}
       <Text variant="pageTitle" className="mt-4">
         Open a Locked Box
       </Text>
       <Text variant="secondaryText" className="mt-4">
-        {`The timer starts when someone has ${state.keyThreshold} of ${state.onlineKeyHolders.length + state.offLineKeyHolders.length + 1} keys`}
+        {`The timer starts when someone has ${keyThreshold} of ${onlineKeyHolders.length + offLineKeyHolders.length + 1} keys`}
       </Text>
       <div className="flex flex-col gap-4">
+        {shareableURL && (
+          <FieldArea label="Invite URL">
+            <TextField.Root value={shareableURL} readOnly />
+          </FieldArea>
+        )}
         <FieldArea label="Your access key">
           <ParticipantItem
-            name={state.you.name}
-            userAgent={state.you.userAgent}
+            name={you.name}
+            userAgent={you.userAgent}
             buttonSlot={
               <ShareAccessDropdown
                 value={idsOfKeyHoldersToShareWith}
-                onChange={state.actions.toggleSharesAccessKeys}
-                options={state.onlineKeyHolders.map((kh) => ({
+                onChange={actions.toggleSharesAccessKeys}
+                options={onlineKeyHolders.map((kh) => ({
                   id: kh.id,
                   name: kh.name,
                   userAgent: kh.userAgent,
@@ -73,19 +76,19 @@ export const OpenLockedBox: React.FC = () => {
             }
           />
         </FieldArea>
-        {state.onlineKeyHolders.length !== 0 && (
+        {onlineKeyHolders.length !== 0 && (
           <FieldArea label="Online users">
             <div className="flex flex-col gap-1.5">
-              {state.onlineKeyHolders.map((p) => (
+              {onlineKeyHolders.map((p) => (
                 <ParticipantItem
                   key={p.id}
                   name={p.name}
                   userAgent={p.userAgent}
                   buttonSlot={
                     <ShareAccessButton
-                      checked={state.shareAccessKeyByKeyHolderId[p.id] === true}
+                      checked={shareAccessKeyByKeyHolderId[p.id] === true}
                       onToggle={(checked) =>
-                        state.actions.toggleShareAccessKey(p.id, checked)
+                        actions.toggleShareAccessKey(p.id, checked)
                       }
                     />
                   }
@@ -96,10 +99,10 @@ export const OpenLockedBox: React.FC = () => {
         )}
         <FieldArea label="Offline users">
           <div className="flex flex-col gap-1.5">
-            {state.offLineKeyHolders.length === 0 && (
+            {offLineKeyHolders.length === 0 && (
               <Text variant="secondaryText">No offline keyholders.</Text>
             )}
-            {state.offLineKeyHolders.map((p) => (
+            {offLineKeyHolders.map((p) => (
               <ParticipantItem
                 key={p.id}
                 name={p.name}
