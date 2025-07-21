@@ -4,8 +4,10 @@ import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
+import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
 export const OpenLockedBox: React.FC = () => {
+  useOpenLockedBoxConnection();
   const state = useOpenLockedBoxStore();
   const [copied, setCopied] = useState(false);
 
@@ -30,6 +32,8 @@ export const OpenLockedBox: React.FC = () => {
   const handleBackClick = () => {
     state.actions.reset();
   };
+
+  console.log("state.offLineKeyHolders", state.offLineKeyHolders);
 
   return (
     <div className="flex flex-col gap-8">

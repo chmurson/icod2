@@ -52,6 +52,7 @@ type JoinLockedBoxState = {
       encryptedMessage?: string;
       generatedKey?: string;
     }) => void;
+    setError: (error: string) => void;
   };
 } & JoinLockedBoxStateData;
 
@@ -68,6 +69,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
               value ?? !state.shareAccessKeyByKeyHolderId[keyHolderId],
           },
         })),
+      setError: (error: string) => set({ error }),
       connect: ({
         boxTitle,
         encryptedMessage,

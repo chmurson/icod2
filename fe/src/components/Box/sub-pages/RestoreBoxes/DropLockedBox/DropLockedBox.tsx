@@ -38,6 +38,11 @@ export const DropLockedBox: React.FC = () => {
   const openLockedBoxState = useOpenLockedBoxStore();
   const joinLockedBoxState = useJoinLockedBoxStore();
   const useJoin = joinLockedBoxState.state === "drop-box";
+  const joinLockedBoxError = useJoinLockedBoxStore((state) => state.error);
+
+  if (joinLockedBoxError) {
+    setError(joinLockedBoxError);
+  }
 
   const handleFile = async (file: File) => {
     setError(null);

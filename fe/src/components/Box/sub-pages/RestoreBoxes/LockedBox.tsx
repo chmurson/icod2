@@ -39,8 +39,9 @@ const LockedBox: React.FC = () => {
 const useCurrentPage = () => {
   const openLockedBoxState = useOpenLockedBoxStore((state) => state.state);
   const joinLockedBoxState = useJoinLockedBoxStore((state) => state.state);
+  const joinLockedBoxError = useJoinLockedBoxStore((state) => state.error);
 
-  if (joinLockedBoxState === "connecting") {
+  if (joinLockedBoxState === "connecting" && !joinLockedBoxError) {
     return "join";
   }
 

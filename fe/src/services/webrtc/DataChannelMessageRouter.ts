@@ -30,6 +30,7 @@ export class DataChannelMessageRouter<
       >,
     ) => void,
   ) {
+    console.log();
     this.routes.push({
       condition,
       handler: handler as (
@@ -61,6 +62,10 @@ export class DataChannelMessageRouter<
         return;
       }
     }
+
+    console.log("localId", localId);
+    console.log("msg", msg);
+    console.log("this.routes", this.routes);
 
     console.warn("No route found for message:", msg);
   };
