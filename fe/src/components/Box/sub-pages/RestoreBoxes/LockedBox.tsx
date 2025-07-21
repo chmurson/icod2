@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { DropLockedBox } from "./DropLockedBox/DropLockedBox";
@@ -7,17 +6,6 @@ import { JoinLockedBox } from "./JoinLockedBox/JoinLockedBox";
 import { OpenLockedBox } from "./OpenLockedBox/OpenLockedBox";
 
 const LockedBox: React.FC = () => {
-  const { keyHolderId } = useParams();
-  const startJoinLockedBox = useJoinLockedBoxStore(
-    (state) => state.actions.start,
-  );
-  useEffect(() => {
-    if (keyHolderId) {
-      startJoinLockedBox();
-    }
-  }, [keyHolderId, startJoinLockedBox]);
-
-  console.log(useJoinLockedBoxStore().state);
   const currentPage = useCurrentPage();
 
   const renderCurrentPage = () => {
@@ -37,18 +25,36 @@ const LockedBox: React.FC = () => {
 };
 
 const useCurrentPage = () => {
+  const [currentPage, setCurrentPage] = useState<string | undefined>(undefined);
+
   const openLockedBoxState = useOpenLockedBoxStore((state) => state.state);
   const joinLockedBoxState = useJoinLockedBoxStore((state) => state.state);
+  const resetOpenLockedBoxState = useOpenLockedBoxStore(
+    (state) => state.actions.reset,
+  );
+  const resetJoinLockedBoxState = useJoinLockedBoxStore(
+    (state) => state.actions.reset,
+  );
+  const joinLockedBoxError = useJoinLockedBoxStore((state) => state.error);
 
-  if (joinLockedBoxState === "connecting") {
-    return "join";
-  }
+  useEffect(() => {
+    if (joinLockedBoxState === "connecting" && !joinLockedBoxError) {
+      return setCurrentPage("join");
+    }
 
-  if (openLockedBoxState === "connecting") {
-    return "open";
-  }
+    if (openLockedBoxState === "connecting") {
+      return setCurrentPage("open");
+    }
 
-  return "drop";
+    setCurrentPage("drop");
+  }, [joinLockedBoxState, joinLockedBoxError, openLockedBoxState]);
+
+  useEffect(() => {
+    resetJoinLockedBoxState();
+    resetOpenLockedBoxState();
+  }, [resetJoinLockedBoxState, resetOpenLockedBoxState]);
+
+  return currentPage;
 };
 
 export default LockedBox;
