@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { LockedBox } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
@@ -40,9 +40,11 @@ export const DropLockedBox: React.FC = () => {
   const useJoin = joinLockedBoxState.state === "drop-box";
   const joinLockedBoxError = useJoinLockedBoxStore((state) => state.error);
 
-  if (joinLockedBoxError) {
-    setError(joinLockedBoxError);
-  }
+  useEffect(() => {
+    if (joinLockedBoxError) {
+      setError(joinLockedBoxError);
+    }
+  }, [joinLockedBoxError]);
 
   const handleFile = async (file: File) => {
     setError(null);
