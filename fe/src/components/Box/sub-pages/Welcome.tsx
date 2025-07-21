@@ -93,7 +93,7 @@ const Welcome: React.FC = () => {
           </>
         }
         buttonSlot={
-          <Link to="/open-locked-box" style={{ textDecoration: "none" }}>
+          <Link to="/unlock-box" style={{ textDecoration: "none" }}>
             <Button
               onClick={useOpenLockedBoxStore((state) => state.actions.start)}
               variant="prominent"

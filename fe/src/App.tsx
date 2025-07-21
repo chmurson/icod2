@@ -64,8 +64,7 @@ const Root: FC = () => {
           <Route path="crypto-poc" element={<CryptoPlayground />} />
           <Route path="decode-poc" element={<DecodePlayground />} />
           <Route path="/components-demo" element={<ComponentsDemo />} />
-          <Route path="open-locked-box" element={<LockedBox />} />
-          <Route path="open-locked-box/:keyHolderId" element={<LockedBox />} />
+          <Route path="/unlock-box/:sessionId?" element={<LockedBox />} />
           <Route path="/" element={<Box />} />
           <Route path="*" element={<Box />} />
         </Routes>
@@ -92,11 +91,7 @@ const router = createBrowserRouter([
         Component: Box,
       },
       {
-        path: "/open-locked-box",
-        Component: LockedBox,
-      },
-      {
-        path: "/open-locked-box/:keyHolderId",
+        path: "/unlock-box/:sessionId?",
         Component: LockedBox,
       },
       {

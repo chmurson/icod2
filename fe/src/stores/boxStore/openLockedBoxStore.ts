@@ -120,18 +120,26 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
           ),
         }));
       },
-      disconnectKeyHolder: (keyHolder: ParticipantType) => {
-        set((state) => ({
-          offLineKeyHolders: [
-            ...state.offLineKeyHolders,
-            {
-              ...keyHolder,
-            },
-          ],
-          onlineKeyHolders: state.onlineKeyHolders.filter(
-            (x) => x.id !== keyHolder.id,
-          ),
-        }));
+      disconnectKeyHolder: (disconnectedKeyHolderId: string) => {
+        set((state) => {
+          const disconnectedKeyHolder = state.onlineKeyHolders.find(
+            (kh) => kh.id === disconnectedKeyHolderId,
+          );
+
+          if (!disconnectedKeyHolder) {
+            return {};
+          }
+
+          return {
+            onlineKeyHolders: state.onlineKeyHolders.filter(
+              (kh) => kh.id !== disconnectedKeyHolderId,
+            ),
+            offLineKeyHolders: [
+              disconnectedKeyHolder,
+              ...state.offLineKeyHolders,
+            ],
+          };
+        });
       },
       open: (message) =>
         set({
