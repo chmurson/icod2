@@ -47,15 +47,18 @@ export const DropLockedBox: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const openLockedBoxState = useOpenLockedBoxStore();
   const joinLockedBoxState = useJoinLockedBoxStore();
+
   const isForcingLeader = sessionId
     ? isPersistedStartedUnlocking(sessionId)
     : false;
   const isFollower = !isForcingLeader && (sessionId?.trim().length ?? 0) > 0;
   const joinLockedBoxError = useJoinLockedBoxStore((state) => state.error);
 
-  if (joinLockedBoxError) {
-    setError(joinLockedBoxError);
-  }
+  useEffect(() => {
+    if (joinLockedBoxError) {
+      setError(joinLockedBoxError);
+    }
+  }, [joinLockedBoxError]);
 
   const handleFile = async (file: File) => {
     setError(null);

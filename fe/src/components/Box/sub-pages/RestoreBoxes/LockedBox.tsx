@@ -29,6 +29,7 @@ const useCurrentPage = () => {
 
   const openLockedBoxState = useOpenLockedBoxStore((state) => state.state);
   const joinLockedBoxState = useJoinLockedBoxStore((state) => state.state);
+
   const resetOpenLockedBoxState = useOpenLockedBoxStore(
     (state) => state.actions.reset,
   );

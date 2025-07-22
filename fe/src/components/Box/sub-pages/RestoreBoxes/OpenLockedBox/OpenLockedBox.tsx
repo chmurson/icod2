@@ -9,8 +9,12 @@ import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useNavigateToShareableLink } from "./hooks";
+import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
 export const OpenLockedBox: React.FC = () => {
+  const { sendOnlineKeyholders, sendOfflineKeyholders } =
+    useOpenLockedBoxConnection();
+
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
   const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
@@ -32,6 +36,14 @@ export const OpenLockedBox: React.FC = () => {
     }
   }, [sessionId]);
 
+  useEffect(() => {
+    sendOnlineKeyholders(onlineKeyHolders);
+  }, [onlineKeyHolders, sendOnlineKeyholders]);
+
+  useEffect(() => {
+    sendOfflineKeyholders(offLineKeyHolders);
+  }, [offLineKeyHolders, sendOfflineKeyholders]);
+
   if (!["connecting", "connected", "opened"].includes(state)) {
     return <div>Loading...</div>;
   }
@@ -50,7 +62,9 @@ export const OpenLockedBox: React.FC = () => {
         Open a Locked Box
       </Text>
       <Text variant="secondaryText" className="mt-4">
-        {`The timer starts when someone has ${keyThreshold} of ${onlineKeyHolders.length + offLineKeyHolders.length + 1} keys`}
+        {`The timer starts when someone has ${keyThreshold} of ${
+          onlineKeyHolders.length + offLineKeyHolders.length + 1
+        } keys`}
       </Text>
       <div className="flex flex-col gap-4">
         {shareableURL && (

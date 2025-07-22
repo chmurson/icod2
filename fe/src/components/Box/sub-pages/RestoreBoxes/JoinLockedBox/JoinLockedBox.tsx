@@ -4,8 +4,10 @@ import { ShareAccessButton } from "@/components/Box/components/ShareAccessButton
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
+import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
+  useJoinLockedBoxConnection();
   const state = useJoinLockedBoxStore((state) => state.state);
 
   const onlineKeyHolders = useJoinLockedBoxStore(
@@ -15,7 +17,7 @@ export const JoinLockedBox: React.FC = () => {
     (state) => state.offLineKeyHolders,
   );
   const you = useJoinLockedBoxStore((state) => state.you);
-  const keyThresholdId = useJoinLockedBoxStore((state) => state.keyThreshold);
+  const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
   const actions = useJoinLockedBoxStore((state) => state.actions);
   const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
     (state) => state.shareAccessKeyByKeyHolderId,
@@ -36,7 +38,7 @@ export const JoinLockedBox: React.FC = () => {
         Join a Locked Box
       </Text>
       <Text variant="secondaryText" className="mt-4">
-        {`The timer starts when someone has ${keyThresholdId} of ${
+        {`The timer starts when someone has ${keyThreshold} of ${
           onlineKeyHolders.length + offLineKeyHolders.length + 1
         } keys`}
       </Text>

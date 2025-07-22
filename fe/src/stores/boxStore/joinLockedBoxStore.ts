@@ -46,13 +46,14 @@ type JoinLockedBoxState = {
     toggleShareAccessKey: (participantId: string, value?: boolean) => void;
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
     connectKeyHolder: (participant: ParticipantType) => void;
-    disconnectKeyHolder: (participantId: string) => void;
+    disconnectKeyHolder: (participant: ParticipantType) => void;
     open: (message: {
       title?: string;
       content?: string;
       encryptedMessage?: string;
       generatedKey?: string;
     }) => void;
+    setError: (error: string) => void;
   };
 } & JoinLockedBoxStateData;
 
@@ -143,6 +144,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
         set({
           ...joinLockedBoxState,
         }),
+      setError: (error: string) => set({ error }),
     },
   })),
 );
