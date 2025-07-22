@@ -2,6 +2,8 @@ import { useCallback } from "react";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
 import type {
   LeaderError,
+  LeaderOfflineKeyholders,
+  LeaderOnlineKeyholders,
   LeaderWelcome,
 } from "../commons/leader-keyholder-interface";
 import { useCalleeDataChannelMng } from "./useCalleeDataChannelMng";
@@ -32,8 +34,30 @@ export function useOpenLockedBoxConnection() {
     [dataChannelMngRef],
   );
 
+  const sendOnlineKeyholders = useCallback(
+    (onlineKeyHolders: LeaderOnlineKeyholders["onlineKeyHolders"]) => {
+      dataChannelMngRef.current?.sendMessageToAllPeers({
+        type: "leader:online-keyholders",
+        onlineKeyHolders,
+      } satisfies LeaderOnlineKeyholders);
+    },
+    [dataChannelMngRef],
+  );
+
+  const sendOfflineKeyholders = useCallback(
+    (offlineKeyHolders: LeaderOfflineKeyholders["offlineKeyHolders"]) => {
+      dataChannelMngRef.current?.sendMessageToAllPeers({
+        type: "leader:offline-keyholders",
+        offlineKeyHolders,
+      } satisfies LeaderOfflineKeyholders);
+    },
+    [dataChannelMngRef],
+  );
+
   return {
     sendError,
     sendWelcome,
+    sendOnlineKeyholders,
+    sendOfflineKeyholders,
   };
 }

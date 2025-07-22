@@ -46,7 +46,7 @@ type JoinLockedBoxState = {
     toggleShareAccessKey: (participantId: string, value?: boolean) => void;
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
     connectKeyHolder: (participant: ParticipantType) => void;
-    disconnectKeyHolder: (participantId: string) => void;
+    disconnectKeyHolder: (participant: ParticipantType) => void;
     open: (message: {
       title?: string;
       content?: string;
