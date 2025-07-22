@@ -1,5 +1,5 @@
 import { TextField } from "@radix-ui/themes";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { ShareAccessButton } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown } from "@/components/Box/components/ShareAccessDropdown";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
