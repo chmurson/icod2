@@ -7,6 +7,7 @@ import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
+import { CountWithInfo } from "../commons/CountWithInfo";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useNavigateToShareableLink } from "./hooks";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
@@ -61,11 +62,16 @@ export const OpenLockedBox: React.FC = () => {
       <Text variant="pageTitle" className="mt-4">
         Open a Locked Box
       </Text>
-      <Text variant="secondaryText" className="mt-4">
-        {`The timer starts when someone has ${keyThreshold} of ${
-          onlineKeyHolders.length + offLineKeyHolders.length + 1
-        } keys`}
-      </Text>
+      <CountWithInfo>
+        <Text variant="label">
+          {"The timer starts when someone has "}
+          <span className="text-purple-500">{keyThreshold}</span>
+          {" of "}
+          <span className="text-purple-500">
+            {onlineKeyHolders.length + offLineKeyHolders.length + 1} keys
+          </span>
+        </Text>
+      </CountWithInfo>
       <div className="flex flex-col gap-4">
         {shareableURL && (
           <FieldArea label="Invite URL">
