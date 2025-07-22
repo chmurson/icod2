@@ -5,24 +5,25 @@ import { ShareAccessDropdown } from "@/components/Box/components/ShareAccessDrop
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
-  useJoinLockedBoxConnection();
   const state = useJoinLockedBoxStore((state) => state.state);
 
   const onlineKeyHolders = useJoinLockedBoxStore(
     (state) => state.onlineKeyHolders,
   );
+
   const offLineKeyHolders = useJoinLockedBoxStore(
     (state) => state.offLineKeyHolders,
   );
+
   const you = useJoinLockedBoxStore((state) => state.you);
   const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
   const actions = useJoinLockedBoxStore((state) => state.actions);
   const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
     (state) => state.shareAccessKeyByKeyHolderId,
   );
+
   const idsOfKeyHoldersToShareWith = Object.entries(shareAccessKeyByKeyHolderId)
     .filter(([_, value]) => value === true)
     .map(([key]) => key);

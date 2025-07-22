@@ -4,7 +4,10 @@ import type {
   LeaderError,
   LeaderWelcome,
 } from "../commons/leader-keyholder-interface";
-import { isKeyholderHello } from "../commons/leader-keyholder-interface";
+import {
+  isFollowerSendsPartialStateMessage,
+  isKeyholderHello,
+} from "../commons/leader-keyholder-interface";
 
 export const router = new DataChannelMessageRouter();
 
@@ -15,8 +18,8 @@ router.addHandler(isKeyholderHello, (localId, message, dataChannelMng) => {
 
   const offline = store.offLineKeyHolders.find((x) => x.id === message.id);
   const online = store.onlineKeyHolders.find((x) => x.id === message.id);
-  const encryptedMatch = store.encryptedMessage === message.encryptedMessage;
-  const keyMatch = store.key === message.key;
+  const keyMatch = true;
+  const encryptedMatch = true;
 
   if (!offline || online || !encryptedMatch || keyMatch) {
     const errorMsg: LeaderError = {
@@ -51,4 +54,17 @@ router.addHandler(isKeyholderHello, (localId, message, dataChannelMng) => {
     ],
   };
   dataChannelMng?.sendMessageToSinglePeer(localId, welcomeMsg);
+});
+
+router.addHandler(isFollowerSendsPartialStateMessage, (localId, message) => {
+  const { actions } = useOpenLockedBoxStore.getState();
+
+  const shareAccessKeyByKeyholderId = Object.fromEntries(
+    message.keyHoldersIdsToSharedKeyWith.map((keyHolderId) => [
+      keyHolderId,
+      true,
+    ]),
+  );
+
+  actions.setShareAccessKeyByKeyholderId(localId, shareAccessKeyByKeyholderId);
 });

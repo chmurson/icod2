@@ -4,8 +4,6 @@ import type { ParticipantType } from "@/stores/boxStore/common-types";
 
 export interface KeyholderHello {
   type: "keyholder:hello";
-  key: string;
-  encryptedMessage: string;
   userAgent: string;
   id: string;
 }
@@ -40,13 +38,13 @@ export type RestoreBoxesMessage =
   | LeaderOnlineKeyholders
   | LeaderOfflineKeyholders;
 
-export function isKeyholderHello(msg: any): msg is KeyholderHello {
+export function isKeyholderHello(msg: object): msg is KeyholderHello {
   return (
-    msg &&
+    "type" in msg &&
     msg.type === "keyholder:hello" &&
+    "key" in msg &&
     typeof msg.key === "string" &&
-    typeof msg.encryptedMessage === "string" &&
-    typeof msg.userAgent === "string" &&
+    "id" in msg &&
     typeof msg.id === "string"
   );
 }
@@ -73,4 +71,15 @@ export function isLeaderOfflineKeyholders(
     msg.type === "leader:online-keyholders" &&
     typeof msg.keyholder === "object"
   );
+}
+
+export type FollowerSendsPartialStateMessage = {
+  type: "follower:send-partial-state";
+  keyHoldersIdsToSharedKeyWith: string[];
+};
+
+export function isFollowerSendsPartialStateMessage(
+  msg: object,
+): msg is FollowerSendsPartialStateMessage {
+  return !msg && "type" in msg;
 }
