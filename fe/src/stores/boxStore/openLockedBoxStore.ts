@@ -154,3 +154,17 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
     },
   })),
 );
+
+if (import.meta.env.DEV === true) {
+  //@ts-ignore
+  window.useOpenLockedBoxStore = {
+    connectAllOffLineKeyholders: () => {
+      const {
+        offLineKeyHolders,
+        actions: { connectKeyHolder },
+      } = useOpenLockedBoxStore.getState();
+
+      offLineKeyHolders.forEach(connectKeyHolder);
+    },
+  };
+}
