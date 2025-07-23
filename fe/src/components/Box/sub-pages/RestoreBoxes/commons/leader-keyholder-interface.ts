@@ -33,12 +33,18 @@ export interface LeaderOfflineKeyholders {
   offlineKeyHolders: ParticipantType[];
 }
 
+export interface LeaderCounterStart {
+  type: "leader:counter-start";
+  unlockingStartDate: string;
+}
+
 export type RestoreBoxesMessage =
   | KeyholderHello
   | LeaderWelcome
   | LeaderError
   | LeaderOnlineKeyholders
-  | LeaderOfflineKeyholders;
+  | LeaderOfflineKeyholders
+  | LeaderCounterStart;
 
 export function isKeyholderHello(msg: any): msg is KeyholderHello {
   return (
@@ -72,5 +78,13 @@ export function isLeaderOfflineKeyholders(
     msg &&
     msg.type === "leader:online-keyholders" &&
     typeof msg.keyholder === "object"
+  );
+}
+
+export function isLeaderCounterStart(msg: any): msg is LeaderCounterStart {
+  return (
+    msg &&
+    msg.type === "leader:counter-start" &&
+    msg.unlockingStartDate instanceof Date
   );
 }

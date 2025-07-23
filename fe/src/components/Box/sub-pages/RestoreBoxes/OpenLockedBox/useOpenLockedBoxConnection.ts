@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
 import type {
+  LeaderCounterStart,
   LeaderError,
   LeaderOfflineKeyholders,
   LeaderOnlineKeyholders,
@@ -54,10 +55,21 @@ export function useOpenLockedBoxConnection() {
     [dataChannelMngRef],
   );
 
+  const sendCounterStart = useCallback(
+    (unlockingStartDate: LeaderCounterStart["unlockingStartDate"]) => {
+      dataChannelMngRef.current?.sendMessageToAllPeers({
+        type: "leader:counter-start",
+        unlockingStartDate,
+      } satisfies LeaderCounterStart);
+    },
+    [dataChannelMngRef],
+  );
+
   return {
     sendError,
     sendWelcome,
     sendOnlineKeyholders,
     sendOfflineKeyholders,
+    sendCounterStart,
   };
 }

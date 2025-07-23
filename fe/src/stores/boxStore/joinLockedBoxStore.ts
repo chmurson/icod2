@@ -27,6 +27,7 @@ const joinLockedBoxState = {
   } satisfies ParticipantType,
   decryptedContent: "",
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
+  unlockingStartDate: null as Date | null,
 };
 
 export type JoinLockedBoxStateData = typeof joinLockedBoxState;
@@ -54,6 +55,7 @@ type JoinLockedBoxState = {
       generatedKey?: string;
     }) => void;
     setError: (error: string) => void;
+    setUnlockingStartDate: (unlockingStartDate: Date) => void;
   };
 } & JoinLockedBoxStateData;
 
@@ -145,6 +147,8 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           ...joinLockedBoxState,
         }),
       setError: (error: string) => set({ error }),
+      setUnlockingStartDate: (unlockingStartDate: Date) =>
+        set({ unlockingStartDate }),
     },
   })),
 );

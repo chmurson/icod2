@@ -5,13 +5,16 @@ import { ShareAccessDropdown } from "@/components/Box/components/ShareAccessDrop
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { CountWithInfo } from "../commons/CountWithInfo";
+import { CounterWithInfo } from "../commons/CountWithInfo";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
   useJoinLockedBoxConnection();
   const state = useJoinLockedBoxStore((state) => state.state);
 
+  const unlockingStartDate = useJoinLockedBoxStore(
+    (state) => state.unlockingStartDate,
+  );
   const onlineKeyHolders = useJoinLockedBoxStore(
     (state) => state.onlineKeyHolders,
   );
@@ -42,7 +45,7 @@ export const JoinLockedBox: React.FC = () => {
       <Text variant="pageTitle" className="mt-4">
         Join a Locked Box
       </Text>
-      <CountWithInfo>
+      <CounterWithInfo unlockingStartDate={unlockingStartDate}>
         <Text variant="label">
           {"The timer starts when someone has "}
           <span className="text-purple-500">{keyThreshold}</span>
@@ -51,7 +54,7 @@ export const JoinLockedBox: React.FC = () => {
             {onlineKeyHolders.length + offLineKeyHolders.length + 1} keys
           </span>
         </Text>
-      </CountWithInfo>
+      </CounterWithInfo>
       <div className="flex flex-col gap-4">
         <FieldArea label="Your access key">
           <ParticipantItem

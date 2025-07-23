@@ -27,6 +27,7 @@ const openLockedBoxState = {
   } satisfies ParticipantType,
   decryptedContent: "",
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
+  unlockingStartDate: null as Date | null,
 };
 
 export type OpenLockedBoxStateData = typeof openLockedBoxState;
@@ -53,6 +54,7 @@ type OpenLockedBoxState = {
       encryptedMessage?: string;
       generatedKey?: string;
     }) => void;
+    setUnlockingStartDate: (unlockingStartDate: Date) => void;
   };
 } & OpenLockedBoxStateData;
 
@@ -151,6 +153,8 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         set({
           ...openLockedBoxState,
         }),
+      setUnlockingStartDate: (unlockingStartDate: Date) =>
+        set({ unlockingStartDate }),
     },
   })),
 );
