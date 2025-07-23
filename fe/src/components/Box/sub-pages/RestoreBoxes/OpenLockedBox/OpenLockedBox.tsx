@@ -56,7 +56,7 @@ export const OpenLockedBox: React.FC = () => {
           onlineKeyHolders.length + offLineKeyHolders.length + 1
         } keys`}
       </Text>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-12">
         {shareableURL && (
           <FieldArea label="Invite URL">
             <TextField.Root value={shareableURL} readOnly />
@@ -100,7 +100,9 @@ export const OpenLockedBox: React.FC = () => {
         <FieldArea label="Offline users">
           <div className="flex flex-col gap-1.5">
             {offLineKeyHolders.length === 0 && (
-              <Text variant="secondaryText">No offline keyholders.</Text>
+              <Text variant="secondaryText" className="text-sm">
+                All key holders are online
+              </Text>
             )}
             {offLineKeyHolders.map((kh) => (
               <ParticipantItem

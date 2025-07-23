@@ -45,7 +45,7 @@ export function Typography<C extends ElementType = "div">({
         variant === "sectionTitle" && "text-xl font-medium mt-4",
         variant === "primaryText" && "text-base font-normal",
         variant === "primaryError" && "text-base font-normal text-red-600",
-        variant === "label" && "text-sm font-semibold text-gray-500",
+        variant === "label" && "text-sm font-medium text-gray-500",
         variant === "secondaryText" && "text-base text-gray-400",
         className,
       )}
