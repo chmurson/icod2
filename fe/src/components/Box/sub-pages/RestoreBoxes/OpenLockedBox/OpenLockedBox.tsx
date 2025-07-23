@@ -27,8 +27,8 @@ export const OpenLockedBox: React.FC = () => {
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
 
-  const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
-    (state) => state.shareAccessKeyByKeyHolderId,
+  const shareAccessKeyMapByKeyholderId = useOpenLockedBoxStore(
+    (state) => state.shareAccessKeyMapByKeyholderId,
   );
   const unlockingStartDate = useOpenLockedBoxStore(
     (state) => state.unlockingStartDate,
@@ -53,10 +53,11 @@ export const OpenLockedBox: React.FC = () => {
   }, [sessionId]);
 
   useEffect(() => {
+    const sharesRequiredToStartCounter = keyThreshold - 1;
     if (
-      Object.values(shareAccessKeyByKeyHolderId).filter(
-        (value) => value === true,
-      ).length >= keyThreshold
+      Object.values(shareAccessKeyMapByKeyholderId).filter(
+        (accesses) => accesses[you.id],
+      ).length >= sharesRequiredToStartCounter
     ) {
       const utcNow = new Date();
       actions.setUnlockingStartDate(utcNow);
@@ -66,11 +67,12 @@ export const OpenLockedBox: React.FC = () => {
       sendCounterStop();
     }
   }, [
-    shareAccessKeyByKeyHolderId,
+    shareAccessKeyMapByKeyholderId,
     sendCounterStart,
     actions,
     keyThreshold,
     sendCounterStop,
+    you.id,
   ]);
 
   if (!["connecting", "connected", "opened"].includes(state)) {
