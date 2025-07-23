@@ -8,7 +8,10 @@ import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
-import { ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb } from "../commons/components";
+import {
+  LoobbyKeyHolders,
+  ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
+} from "../commons/components";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useNavigateToShareableLink } from "./hooks";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
@@ -62,64 +65,15 @@ export const OpenLockedBox: React.FC = () => {
             <TextField.Root value={shareableURL} readOnly />
           </FieldArea>
         )}
-        <FieldArea label="Your access key">
-          <ParticipantItem
-            name={you.name}
-            userAgent={you.userAgent}
-            sharedKeysSlot={
-              <ShareAccesKeyAvatars
-                keyHolderId={you.id}
-                possibleKeyHolders={possibleKeyHolders}
-              />
-            }
-            buttonSlot={
-              <ShareAccessDropdown onlineKeyHolders={onlineKeyHolders} />
-            }
-          />
-        </FieldArea>
-        {onlineKeyHolders.length !== 0 && (
-          <FieldArea label="Online users">
-            <div className="flex flex-col gap-1.5">
-              {onlineKeyHolders.map((kh) => (
-                <ParticipantItem
-                  key={kh.id}
-                  name={kh.name}
-                  userAgent={kh.userAgent}
-                  sharedKeysSlot={
-                    <ShareAccesKeyAvatars
-                      keyHolderId={kh.id}
-                      possibleKeyHolders={possibleKeyHolders}
-                    />
-                  }
-                  buttonSlot={<ShareAccessButton keyHolderId={kh.id} />}
-                />
-              ))}
-            </div>
-          </FieldArea>
-        )}
-        <FieldArea label="Offline users">
-          <div className="flex flex-col gap-1.5">
-            {offLineKeyHolders.length === 0 && (
-              <Text variant="secondaryText" className="text-sm">
-                All key holders are online
-              </Text>
-            )}
-            {offLineKeyHolders.map((kh) => (
-              <ParticipantItem
-                key={kh.id}
-                name={kh.name}
-                userAgent={kh.userAgent}
-                sharedKeysSlot={
-                  <ShareAccesKeyAvatars
-                    keyHolderId={kh.id}
-                    possibleKeyHolders={possibleKeyHolders}
-                  />
-                }
-                buttonSlot={<ShareAccessButtonDumb checked={false} disabled />}
-              />
-            ))}
-          </div>
-        </FieldArea>
+        <LoobbyKeyHolders
+          offLineKeyHolders={offLineKeyHolders}
+          onlineKeyHolders={onlineKeyHolders}
+          you={you}
+          possibleKeyHolders={possibleKeyHolders}
+          ShareAccesKeyAvatars={ShareAccesKeyAvatars}
+          ShareAccessButton={ShareAccessButton}
+          ShareAccessDropdown={ShareAccessDropdown}
+        />
       </div>
       <div className="flex gap-4">
         <Button variant="secondary" onClick={handleBackClick}>
