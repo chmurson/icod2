@@ -1,7 +1,5 @@
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 
-// Message types for OpenLockedBox <-> JoinLockedBox WebRTC communication
-
 export interface KeyholderHello {
   type: "keyholder:hello";
   userAgent: string;
@@ -21,22 +19,11 @@ export interface LeaderError {
   reason: string;
 }
 
-export interface LeaderOnlineKeyholders {
-  type: "leader:online-keyholders";
-  onlineKeyHolders: ParticipantType[];
-}
-
-export interface LeaderOfflineKeyholders {
-  type: "leader:offline-keyholders";
-  offlineKeyHolders: ParticipantType[];
-}
-
 export type RestoreBoxesMessage =
   | KeyholderHello
   | LeaderWelcome
   | LeaderError
-  | LeaderOnlineKeyholders
-  | LeaderOfflineKeyholders;
+  | LeaderSendsPartialStateMessage;
 
 export function isKeyholderHello(msg: object): msg is KeyholderHello {
   return (
@@ -70,28 +57,6 @@ export function isLeaderError(msg: object): msg is LeaderError {
     msg.type === "leader:error" &&
     "reason" in msg &&
     typeof msg.reason === "string"
-  );
-}
-
-export function isLeaderOnlineKeyholders(
-  msg: object,
-): msg is LeaderOnlineKeyholders {
-  return (
-    "type" in msg &&
-    msg.type === "leader:online-keyholders" &&
-    "onlineKeyHolders" in msg &&
-    Array.isArray(msg.onlineKeyHolders)
-  );
-}
-
-export function isLeaderOfflineKeyholders(
-  msg: object,
-): msg is LeaderOfflineKeyholders {
-  return (
-    "type" in msg &&
-    msg.type === "leader:offline-keyholders" &&
-    "offlineKeyHolders" in msg &&
-    Array.isArray(msg.offlineKeyHolders)
   );
 }
 

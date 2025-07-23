@@ -3,8 +3,6 @@ import type { DataChannelManager } from "@/services/webrtc";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type {
   LeaderError,
-  LeaderOfflineKeyholders,
-  LeaderOnlineKeyholders,
   LeaderSendsPartialStateMessage,
   LeaderWelcome,
 } from "../commons/leader-keyholder-interface";
@@ -16,15 +14,11 @@ export const useDataChannelSendMessages = ({
 }) => {
   const sendError = useSendError(dataChannelManagerRef);
   const sendWelcome = useSendWelcome(dataChannelManagerRef);
-  const sendOnlineKeyholders = useSendOnlineKeyholders(dataChannelManagerRef);
-  const sendOfflineKeyholders = useSendOfflineKeyholders(dataChannelManagerRef);
   const sendPartialUpdate = useSendPartialStateUpdate(dataChannelManagerRef);
 
   return {
     sendError,
     sendWelcome,
-    sendOnlineKeyholders,
-    sendOfflineKeyholders,
     sendPartialUpdate,
   };
 };
@@ -57,32 +51,6 @@ const useSendWelcome = (
         id: you.id,
         onlineKeyHolders,
       } satisfies LeaderWelcome);
-    },
-    [dataChannelManagerRef],
-  );
-
-const useSendOnlineKeyholders = (
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
-) =>
-  useCallback(
-    (onlineKeyHolders: LeaderOnlineKeyholders["onlineKeyHolders"]) => {
-      dataChannelManagerRef.current?.sendMessageToAllPeers({
-        type: "leader:online-keyholders",
-        onlineKeyHolders,
-      } satisfies LeaderOnlineKeyholders);
-    },
-    [dataChannelManagerRef],
-  );
-
-const useSendOfflineKeyholders = (
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
-) =>
-  useCallback(
-    (offlineKeyHolders: LeaderOfflineKeyholders["offlineKeyHolders"]) => {
-      dataChannelManagerRef.current?.sendMessageToAllPeers({
-        type: "leader:offline-keyholders",
-        offlineKeyHolders,
-      } satisfies LeaderOfflineKeyholders);
     },
     [dataChannelManagerRef],
   );
