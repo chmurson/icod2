@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import type { LockedBox } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
@@ -11,6 +11,7 @@ import {
   clearPersistedStartedUnlockingInfo,
   isPersistedStartedUnlocking,
 } from "../commons/persistStartedUnlocking";
+import { useDevExpAutoLockedBoxUpload } from "./useDevExpAutoLockedBoxUpload";
 
 function isLockedBoxFile(data: object): data is LockedBox {
   return (
@@ -60,17 +61,8 @@ export const DropLockedBox: React.FC = () => {
     }
   }, [joinLockedBoxError]);
 
-  const handleFile = async (file: File) => {
-    setError(null);
-    setSuccess(null);
-    if (!file.name.endsWith(".json") && file.type !== "application/json") {
-      setError("Only JSON files are supported.");
-      return;
-    }
-    try {
-      clearPersistedStartedUnlockingInfo();
-      const text = await file.text();
-      const data = JSON.parse(text);
+  const consumeLockedBox = useCallback(
+    (data: object) => {
       if (!isLockedBoxFile(data)) {
         setError("File is not a valid LockedBoxFile.");
         return;
@@ -96,10 +88,35 @@ export const DropLockedBox: React.FC = () => {
           keyThreshold: data.keyThreshold,
         });
       }
+    },
+    [
+      isFollower,
+      joinLockedBoxState.actions.connect,
+      openLockedBoxState.actions.connect,
+    ],
+  );
+
+  const handleFile = async (file: File) => {
+    setError(null);
+    setSuccess(null);
+    if (!file.name.endsWith(".json") && file.type !== "application/json") {
+      setError("Only JSON files are supported.");
+      return;
+    }
+    try {
+      clearPersistedStartedUnlockingInfo();
+      const text = await file.text();
+      const data = JSON.parse(text);
+      consumeLockedBox(data);
     } catch (_) {
       setError("Only JSON files are supported.");
     }
   };
+
+  useDevExpAutoLockedBoxUpload({
+    onAutoUpload: consumeLockedBox,
+    skip: !!error,
+  });
 
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
