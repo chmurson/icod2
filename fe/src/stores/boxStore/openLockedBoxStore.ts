@@ -28,8 +28,7 @@ const openLockedBoxState = {
     userAgent: "",
   } satisfies ParticipantType,
   decryptedContent: "",
-  shareAccessKeyByKeyHolderId: {} as Record<string, boolean>, //legacy
-  currentUserShareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
+  shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
   shareAccessKeyMapByKeyholderId: {} as Record<
     KeyHolderId,
     Record<KeyHolderId, boolean>
@@ -191,9 +190,9 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         set({
           ...openLockedBoxState,
         }),
-      setUnlockingStartDate: (unlockingStartDate: Date) =>
+      setUnlockingStartDate: (unlockingStartDate: Date | null) =>
         set({ unlockingStartDate }),
-    },
+    } satisfies OpenLockedBoxState["actions"],
   })),
 );
 

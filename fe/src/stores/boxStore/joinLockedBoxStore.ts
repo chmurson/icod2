@@ -214,8 +214,8 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
             ].filter(
               (kh) =>
                 kh.id !== state.you.id &&
-                !newOnlineKeyHolders.some(
-                  (newOnlineKh) => kh.id !== newOnlineKh.id,
+                newOnlineKeyHolders.every(
+                  (newOnlineKh) => newOnlineKh.id !== kh.id,
                 ),
             );
 

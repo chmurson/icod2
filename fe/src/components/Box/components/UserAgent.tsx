@@ -19,9 +19,9 @@ export const UserAgent = memo(
     return (
       <div className={cn("flex gap-1 items-center", className)}>
         {getDeviceIcon(device.type, os)}
-        <span>{os.name}</span>
-        <span>-</span>
-        <span>{browser.name}</span>
+        <span className="text-ellipsis truncate">
+          {os.name}-{browser.name}
+        </span>
       </div>
     );
   },
