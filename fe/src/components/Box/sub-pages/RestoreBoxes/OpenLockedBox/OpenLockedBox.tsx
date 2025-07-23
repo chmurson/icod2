@@ -9,12 +9,14 @@ import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { CounterWithInfo } from "../commons/CountWithInfo";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
+import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useNavigateToShareableLink } from "./hooks";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
 export const OpenLockedBox: React.FC = () => {
-  const { sendOnlineKeyholders, sendOfflineKeyholders, sendCounterStart } =
-    useOpenLockedBoxConnection();
+  const { dataChannelManagerRef } = useOpenLockedBoxConnection();
+  const { sendOfflineKeyholders, sendOnlineKeyholders, sendCounterStart } =
+    useDataChannelSendMessages({ dataChannelManagerRef });
 
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);

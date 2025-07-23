@@ -1,90 +1,32 @@
-import { useCallback } from "react";
-import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
-import type {
-  LeaderCounterStart,
-  LeaderError,
-  LeaderOfflineKeyholders,
-  LeaderOnlineKeyholders,
-  LeaderWelcome,
-} from "../commons/leader-keyholder-interface";
+import { useRef } from "react";
+import { CalleeSignalingService } from "@/services/signaling";
+import { type DataChannelManager, useDataChannelMng } from "@/services/webrtc";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
-import { useCalleeDataChannelMng } from "./useCalleeDataChannelMng";
+import { router } from "./dataChannelRouter";
+import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 
 export function useOpenLockedBoxConnection() {
+  const dataChannelManagerRef = useRef<
+    DataChannelManager<CalleeSignalingService> | undefined
+  >(undefined);
+
   const { peerToKeyHolderMapRef } = usePeerToHolderMapRef();
 
-  const onPeerDisconnected = useCallback(
-    (peerId: string) => {
-      const storeActions = useOpenLockedBoxStore.getState().actions;
-      const keyHolderId = peerToKeyHolderMapRef.current.getKeyholerId(peerId);
+  const { sendWelcome } = useDataChannelSendMessages({ dataChannelManagerRef });
 
-      if (!keyHolderId) {
-        console.warn("keyHolderId not found for peerId: ", peerId);
-        return;
-      }
-
-      storeActions.disconnectKeyHolder(keyHolderId);
+  useDataChannelMng({
+    SignalingService: CalleeSignalingService,
+    router,
+    onPeerConnected: (peerId: string) => {
+      sendWelcome(peerId);
     },
-    [peerToKeyHolderMapRef],
-  );
-
-  const { dataChannelMngRef } = useCalleeDataChannelMng({
-    onPeerDisconnected,
+    onPeerDisconnected: (peerId: string) => {
+      peerToKeyHolderMapRef.current.removeByPeerId(peerId);
+    },
+    ref: dataChannelManagerRef,
   });
 
-  const sendError = useCallback(
-    (peerId: string, reason: string) => {
-      const errorMsg: LeaderError = {
-        type: "leader:error",
-        reason,
-      };
-      dataChannelMngRef.current?.sendMessageToSinglePeer(peerId, errorMsg);
-    },
-    [dataChannelMngRef],
-  );
-
-  const sendWelcome = useCallback(
-    (peerId: string, welcomeMsg: LeaderWelcome) => {
-      dataChannelMngRef.current?.sendMessageToSinglePeer(peerId, welcomeMsg);
-    },
-    [dataChannelMngRef],
-  );
-
-  const sendOnlineKeyholders = useCallback(
-    (onlineKeyHolders: LeaderOnlineKeyholders["onlineKeyHolders"]) => {
-      dataChannelMngRef.current?.sendMessageToAllPeers({
-        type: "leader:online-keyholders",
-        onlineKeyHolders,
-      } satisfies LeaderOnlineKeyholders);
-    },
-    [dataChannelMngRef],
-  );
-
-  const sendOfflineKeyholders = useCallback(
-    (offlineKeyHolders: LeaderOfflineKeyholders["offlineKeyHolders"]) => {
-      dataChannelMngRef.current?.sendMessageToAllPeers({
-        type: "leader:offline-keyholders",
-        offlineKeyHolders,
-      } satisfies LeaderOfflineKeyholders);
-    },
-    [dataChannelMngRef],
-  );
-
-  const sendCounterStart = useCallback(
-    (unlockingStartDate: LeaderCounterStart["unlockingStartDate"]) => {
-      dataChannelMngRef.current?.sendMessageToAllPeers({
-        type: "leader:counter-start",
-        unlockingStartDate,
-      } satisfies LeaderCounterStart);
-    },
-    [dataChannelMngRef],
-  );
-
   return {
-    sendError,
-    sendWelcome,
-    sendOnlineKeyholders,
-    sendOfflineKeyholders,
-    sendCounterStart,
+    dataChannelManagerRef,
   };
 }
