@@ -114,12 +114,12 @@ export class CalleeSignalingService implements SignalingService {
         };
       };
 
-      dataChannel.onmessage = (event) =>
-        console.log("Received from Caller:", event.data);
       dataChannel.onmessage = (event) => {
-        event.data === callerIntroduction;
-        this.onPeerConnected?.(peerConnection, dataChannel);
+        if (event.data === callerIntroduction) {
+          this.onPeerConnected?.(peerConnection, dataChannel);
+        }
       };
+
       dataChannel.send(calleeIntroduction);
     };
 
