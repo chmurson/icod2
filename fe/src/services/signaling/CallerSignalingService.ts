@@ -100,8 +100,8 @@ export class CallerSignalingService
   }
 
   close(): void {
-    this.peerConnection?.close();
     this.dataChannel?.close();
+    this.peerConnection?.close();
     this.websocketJSONHandler.close();
   }
 

@@ -4,8 +4,6 @@ import type { ParticipantType } from "@/stores/boxStore/common-types";
 
 export interface KeyholderHello {
   type: "keyholder:hello";
-  key: string;
-  encryptedMessage: string;
   userAgent: string;
   id: string;
 }
@@ -46,38 +44,78 @@ export type RestoreBoxesMessage =
   | LeaderOfflineKeyholders
   | LeaderCounterStart;
 
-export function isKeyholderHello(msg: any): msg is KeyholderHello {
+export function isKeyholderHello(msg: object): msg is KeyholderHello {
   return (
-    msg &&
+    "type" in msg &&
     msg.type === "keyholder:hello" &&
-    typeof msg.key === "string" &&
-    typeof msg.encryptedMessage === "string" &&
-    typeof msg.userAgent === "string" &&
-    typeof msg.id === "string"
+    "id" in msg &&
+    typeof msg.id === "string" &&
+    "userAgent" in msg &&
+    typeof msg.userAgent === "string"
   );
 }
 
-export function isLeaderWelcome(msg: any): msg is LeaderWelcome {
-  return msg && msg.type === "leader:welcome";
+export function isLeaderWelcome(msg: object): msg is LeaderWelcome {
+  return (
+    "type" in msg &&
+    msg.type === "leader:welcome" &&
+    "name" in msg &&
+    typeof msg.name === "string" &&
+    "userAgent" in msg &&
+    typeof msg.userAgent === "string" &&
+    "id" in msg &&
+    typeof msg.id === "string" &&
+    "onlineKeyHolders" in msg &&
+    Array.isArray(msg.onlineKeyHolders)
+  );
 }
 
-export function isLeaderError(msg: any): msg is LeaderError {
-  return msg && msg.type === "leader:error";
+export function isLeaderError(msg: object): msg is LeaderError {
+  return (
+    "type" in msg &&
+    msg.type === "leader:error" &&
+    "reason" in msg &&
+    typeof msg.reason === "string"
+  );
 }
 
 export function isLeaderOnlineKeyholders(
-  msg: any,
+  msg: object,
 ): msg is LeaderOnlineKeyholders {
-  return msg && msg.type === "leader:online-keyholders";
+  return (
+    "type" in msg &&
+    msg.type === "leader:online-keyholders" &&
+    "onlineKeyHolders" in msg &&
+    Array.isArray(msg.onlineKeyHolders)
+  );
 }
 
 export function isLeaderOfflineKeyholders(
-  msg: any,
+  msg: object,
 ): msg is LeaderOfflineKeyholders {
   return (
-    msg &&
-    msg.type === "leader:online-keyholders" &&
-    typeof msg.keyholder === "object"
+    "type" in msg &&
+    msg.type === "leader:offline-keyholders" &&
+    "offlineKeyHolders" in msg &&
+    Array.isArray(msg.offlineKeyHolders)
+  );
+}
+
+export type FollowerSendsPartialStateMessage = {
+  type: "follower:send-partial-state";
+  keyHoldersIdsToSharedKeyWith: string[];
+};
+
+export function isFollowerSendsPartialStateMessage(
+  msg: object,
+): msg is FollowerSendsPartialStateMessage {
+  return (
+    typeof msg === "object" &&
+    msg !== null &&
+    "type" in msg &&
+    msg.type === "follower:send-partial-state" &&
+    "keyHoldersIdsToSharedKeyWith" in msg &&
+    Array.isArray(msg.keyHoldersIdsToSharedKeyWith)
   );
 }
 

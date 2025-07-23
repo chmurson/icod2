@@ -7,15 +7,30 @@ import type {
   LeaderOnlineKeyholders,
   LeaderWelcome,
 } from "../commons/leader-keyholder-interface";
+import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 import { useCalleeDataChannelMng } from "./useCalleeDataChannelMng";
 
 export function useOpenLockedBoxConnection() {
-  const onPeerDisconnected = useCallback((localId: string) => {
-    const storeActions = useOpenLockedBoxStore.getState().actions;
-    storeActions.disconnectKeyHolder(localId);
-  }, []);
+  const { peerToKeyHolderMapRef } = usePeerToHolderMapRef();
 
-  const { dataChannelMngRef } = useCalleeDataChannelMng({ onPeerDisconnected });
+  const onPeerDisconnected = useCallback(
+    (peerId: string) => {
+      const storeActions = useOpenLockedBoxStore.getState().actions;
+      const keyHolderId = peerToKeyHolderMapRef.current.getKeyholerId(peerId);
+
+      if (!keyHolderId) {
+        console.warn("keyHolderId not found for peerId: ", peerId);
+        return;
+      }
+
+      storeActions.disconnectKeyHolder(keyHolderId);
+    },
+    [peerToKeyHolderMapRef],
+  );
+
+  const { dataChannelMngRef } = useCalleeDataChannelMng({
+    onPeerDisconnected,
+  });
 
   const sendError = useCallback(
     (peerId: string, reason: string) => {

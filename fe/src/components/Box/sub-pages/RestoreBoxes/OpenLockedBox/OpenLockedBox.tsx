@@ -18,6 +18,7 @@ export const OpenLockedBox: React.FC = () => {
 
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
+
   const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
     (state) => state.shareAccessKeyByKeyHolderId,
   );
@@ -27,9 +28,11 @@ export const OpenLockedBox: React.FC = () => {
   const offLineKeyHolders = useOpenLockedBoxStore(
     (state) => state.offLineKeyHolders,
   );
+
   const onlineKeyHolders = useOpenLockedBoxStore(
     (state) => state.onlineKeyHolders,
   );
+
   const keyThreshold = useOpenLockedBoxStore((state) => state.keyThreshold);
   const you = useOpenLockedBoxStore((state) => state.you);
   const actions = useOpenLockedBoxStore((state) => state.actions);

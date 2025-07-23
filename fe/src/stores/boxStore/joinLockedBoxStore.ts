@@ -17,6 +17,7 @@ const joinLockedBoxState = {
   encryptedMessage: "",
   key: "",
   keyHolderId: "",
+  connectedLeaderId: undefined as string | undefined,
   onlineKeyHolders: [] as ParticipantType[],
   offLineKeyHolders: [] as ParticipantType[],
   keyThreshold: 1,
@@ -46,7 +47,9 @@ type JoinLockedBoxState = {
     }) => void;
     toggleShareAccessKey: (participantId: string, value?: boolean) => void;
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
-    connectKeyHolder: (participant: ParticipantType) => void;
+    connectKeyHolder: (
+      participant: ParticipantType & { isLeader?: boolean },
+    ) => void;
     disconnectKeyHolder: (participant: ParticipantType) => void;
     open: (message: {
       title?: string;
@@ -110,31 +113,64 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           },
         });
       },
-      connectKeyHolder: (keyHolder: ParticipantType) => {
-        set((state) => ({
-          onlineKeyHolders: [
+      connectKeyHolder: (
+        keyHolder: ParticipantType & { isLeader?: boolean },
+      ) => {
+        set((state) => {
+          const { isLeader, ...keyHolderObject } = keyHolder;
+
+          const onlineKeyHolders = [
             ...state.onlineKeyHolders,
             {
-              ...keyHolder,
+              ...keyHolderObject,
             },
-          ],
-          offLineKeyHolders: state.offLineKeyHolders.filter(
+          ];
+
+          const offLineKeyHolders = state.offLineKeyHolders.filter(
             (x) => x.id !== keyHolder.id,
-          ),
-        }));
+          );
+
+          if (isLeader) {
+            const connectedLeaderId = keyHolderObject.id;
+
+            return {
+              connectedLeaderId,
+              onlineKeyHolders,
+              offLineKeyHolders,
+            };
+          }
+
+          return {
+            onlineKeyHolders,
+            offLineKeyHolders,
+          };
+        });
       },
       disconnectKeyHolder: (keyHolder: ParticipantType) => {
-        set((state) => ({
-          offLineKeyHolders: [
+        set((state) => {
+          const offLineKeyHolders = [
             ...state.offLineKeyHolders,
             {
               ...keyHolder,
             },
-          ],
-          onlineKeyHolders: state.onlineKeyHolders.filter(
+          ];
+
+          const onlineKeyHolders = state.onlineKeyHolders.filter(
             (x) => x.id !== keyHolder.id,
-          ),
-        }));
+          );
+
+          if (keyHolder.id === state.connectedLeaderId) {
+            return {
+              connectedLeaderId: undefined,
+              offLineKeyHolders,
+              onlineKeyHolders,
+            };
+          }
+          return {
+            offLineKeyHolders,
+            onlineKeyHolders,
+          };
+        });
       },
       open: (message) =>
         set({
@@ -152,3 +188,16 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
     },
   })),
 );
+if (import.meta.env.DEV === true) {
+  //@ts-ignore
+  window.useJoinLockedBoxStore = {
+    connectAllOffLineKeyholders: () => {
+      const {
+        offLineKeyHolders,
+        actions: { connectKeyHolder },
+      } = useJoinLockedBoxStore.getState();
+
+      offLineKeyHolders.forEach(connectKeyHolder);
+    },
+  };
+}
