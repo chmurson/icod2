@@ -6,22 +6,23 @@ import {
   isLeaderOnlineKeyholders,
   isLeaderWelcome,
 } from "../commons/leader-keyholder-interface";
+import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 
 export const router = new DataChannelMessageRouter();
 
-router.addHandler(isLeaderWelcome, (_, message) => {
-  console.log("[JoinLockedBox] Received leader:welcome message:", message);
+router.addHandler(isLeaderWelcome, (peerId, message) => {
   const actions = useJoinLockedBoxStore.getState().actions;
-  // Update state with leader info and online keyholders
+  usePeerToHolderMapRef.getValue().setPair({ peerId, keyHolderId: message.id });
+
   actions.connectKeyHolder({
     id: message.id,
     name: message.name,
     userAgent: message.userAgent,
+    isLeader: true,
   });
 });
 
 router.addHandler(isLeaderError, (_, message) => {
-  console.log("[JoinLockedBox] Received leader:error message:", message);
   const actions = useJoinLockedBoxStore.getState().actions;
   actions.setError(message.reason);
 });

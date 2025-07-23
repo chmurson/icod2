@@ -79,8 +79,8 @@ export class CalleeSignalingService implements SignalingService {
 
   close(): void {
     this.peerConnections.forEach((peerConnection) => {
-      peerConnection.peer.close();
       peerConnection.dataChannel?.close();
+      peerConnection.peer.close();
     });
     this.peerConnections.clear();
     this.websocketJSONHandler.close();

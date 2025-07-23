@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { ParticipantType } from "./common-types";
 
+type KeyHolderId = string;
+
 const openLockedBoxState = {
   state: "initial" as
     | "initial"
@@ -26,7 +28,12 @@ const openLockedBoxState = {
     userAgent: "",
   } satisfies ParticipantType,
   decryptedContent: "",
-  shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
+  shareAccessKeyByKeyHolderId: {} as Record<string, boolean>, //legacy
+  currentUserShareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
+  shareAccessKeyMapByKeyholderId: {} as Record<
+    KeyHolderId,
+    Record<KeyHolderId, boolean>
+  >,
 };
 
 export type OpenLockedBoxStateData = typeof openLockedBoxState;
@@ -45,6 +52,10 @@ type OpenLockedBoxState = {
     }) => void;
     toggleShareAccessKey: (participantId: string, value?: boolean) => void;
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
+    setShareAccessKeyByKeyholderId: (
+      keyHolderId: string,
+      shareAccessKeyMapByKeyholderId: Record<KeyHolderId, boolean>,
+    ) => void;
     connectKeyHolder: (participant: ParticipantType) => void;
     disconnectKeyHolder: (participantId: string) => void;
     open: (message: {
@@ -75,6 +86,17 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
             idsOfKeyHoldersToShareWith.map((id) => [id, true]),
           ),
         })),
+      setShareAccessKeyByKeyholderId: (
+        keyholderId: string,
+        shareAccessKeyMapByKeyholderId: Record<KeyHolderId, boolean>,
+      ) => {
+        set((state) => ({
+          shareAccessKeyMapByKeyholderId: {
+            ...state.shareAccessKeyMapByKeyholderId,
+            [keyholderId]: shareAccessKeyMapByKeyholderId,
+          },
+        }));
+      },
       connect: ({
         boxTitle,
         encryptedMessage,

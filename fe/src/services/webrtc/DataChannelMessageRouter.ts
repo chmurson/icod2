@@ -10,7 +10,7 @@ export class DataChannelMessageRouter<
   private routes: {
     condition: (arg: object) => boolean;
     handler: (
-      localID: string,
+      peerId: string,
       arg: object,
       dataChannelManager: DataChannelManager<
         TSignalingService,
@@ -22,7 +22,7 @@ export class DataChannelMessageRouter<
   addHandler<T extends object>(
     condition: (arg: object) => arg is T,
     handler: (
-      localId: string,
+      peerId: string,
       msg: T,
       dataChannelManager?: DataChannelManager<
         TSignalingService,
@@ -30,11 +30,10 @@ export class DataChannelMessageRouter<
       >,
     ) => void,
   ) {
-    console.log();
     this.routes.push({
       condition,
       handler: handler as (
-        localId: string,
+        peerId: string,
         arg: object,
         dataChannelManager?: DataChannelManager<
           TSignalingService,
@@ -49,7 +48,7 @@ export class DataChannelMessageRouter<
   }
 
   router = (
-    localId: string,
+    peerId: string,
     msg: object,
     dataChannelManager: DataChannelManager<
       TSignalingService,
@@ -58,15 +57,17 @@ export class DataChannelMessageRouter<
   ) => {
     for (const route of this.routes) {
       if (route.condition(msg)) {
-        route.handler(localId, msg, dataChannelManager);
+        console.log(
+          `Found route for ${"type" in msg ? msg.type : JSON.stringify(msg)}; peerId: ${peerId}`,
+        );
+        route.handler(peerId, msg, dataChannelManager);
         return;
       }
     }
 
-    console.log("localId", localId);
-    console.log("msg", msg);
-    console.log("this.routes", this.routes);
-
-    console.warn("No route found for message:", msg);
+    console.warn(
+      "No route found for message:",
+      "type" in msg ? msg.type : JSON.stringify(msg),
+    );
   };
 }

@@ -8,21 +8,24 @@ import { Text } from "@/ui/Typography";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
-  useJoinLockedBoxConnection();
   const state = useJoinLockedBoxStore((state) => state.state);
+  useJoinLockedBoxConnection();
 
   const onlineKeyHolders = useJoinLockedBoxStore(
     (state) => state.onlineKeyHolders,
   );
+
   const offLineKeyHolders = useJoinLockedBoxStore(
     (state) => state.offLineKeyHolders,
   );
+
   const you = useJoinLockedBoxStore((state) => state.you);
   const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
   const actions = useJoinLockedBoxStore((state) => state.actions);
   const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
     (state) => state.shareAccessKeyByKeyHolderId,
   );
+
   const idsOfKeyHoldersToShareWith = Object.entries(shareAccessKeyByKeyHolderId)
     .filter(([_, value]) => value === true)
     .map(([key]) => key);
