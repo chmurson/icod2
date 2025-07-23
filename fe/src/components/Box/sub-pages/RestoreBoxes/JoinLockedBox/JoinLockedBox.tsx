@@ -9,12 +9,16 @@ import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
 } from "../commons/components";
+import { CounterWithInfo } from "../commons/components/CounterWithInfo";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
   const state = useJoinLockedBoxStore((state) => state.state);
   useJoinLockedBoxConnection();
 
+  const unlockingStartDate = useJoinLockedBoxStore(
+    (state) => state.unlockingStartDate,
+  );
   const onlineKeyHolders = useJoinLockedBoxStore(
     (state) => state.onlineKeyHolders,
   );
@@ -43,11 +47,13 @@ export const JoinLockedBox: React.FC = () => {
       <Text variant="pageTitle" className="mt-4">
         Join a Locked Box
       </Text>
-      <Text variant="secondaryText" className="mt-4">
-        {`The timer starts when someone has ${keyThreshold} of ${
+      <CounterWithInfo
+        unlockingStartDate={unlockingStartDate}
+        keyThreshold={keyThreshold}
+        onlineKeyHoldersCount={
           onlineKeyHolders.length + offLineKeyHolders.length + 1
-        } keys`}
-      </Text>
+        }
+      />
       <LoobbyKeyHolders
         offLineKeyHolders={offLineKeyHolders}
         onlineKeyHolders={onlineKeyHolders}
@@ -58,7 +64,11 @@ export const JoinLockedBox: React.FC = () => {
         ShareAccessDropdown={ShareAccessDropdown}
       />
       <div className="flex gap-4">
-        <Button variant="secondary" onClick={handleBackClick}>
+        <Button
+          variant="secondary"
+          onClick={handleBackClick}
+          disabled={unlockingStartDate !== null}
+        >
           Leave Lobby
         </Button>
       </div>

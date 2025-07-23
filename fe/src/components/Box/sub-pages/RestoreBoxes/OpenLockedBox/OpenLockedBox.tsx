@@ -11,14 +11,28 @@ import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
 } from "../commons/components";
+import { CounterWithInfo } from "../commons/components/CounterWithInfo";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
+import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useNavigateToShareableLink } from "./hooks";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
 export const OpenLockedBox: React.FC = () => {
+  const { dataChannelManagerRef } = useOpenLockedBoxConnection();
+  const { sendCounterStart, sendCounterStop } = useDataChannelSendMessages({
+    dataChannelManagerRef,
+  });
+
   useOpenLockedBoxConnection();
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
+
+  const shareAccessKeyMapByKeyholderId = useOpenLockedBoxStore(
+    (state) => state.shareAccessKeyMapByKeyholderId,
+  );
+  const unlockingStartDate = useOpenLockedBoxStore(
+    (state) => state.unlockingStartDate,
+  );
 
   const offLineKeyHolders = useOpenLockedBoxStore(
     (state) => state.offLineKeyHolders,
@@ -38,6 +52,29 @@ export const OpenLockedBox: React.FC = () => {
     }
   }, [sessionId]);
 
+  useEffect(() => {
+    const sharesRequiredToStartCounter = keyThreshold - 1;
+    if (
+      Object.values(shareAccessKeyMapByKeyholderId).filter(
+        (accesses) => accesses[you.id],
+      ).length >= sharesRequiredToStartCounter
+    ) {
+      const utcNow = new Date();
+      actions.setUnlockingStartDate(utcNow);
+      sendCounterStart(utcNow.toISOString());
+    } else {
+      actions.setUnlockingStartDate(null);
+      sendCounterStop();
+    }
+  }, [
+    shareAccessKeyMapByKeyholderId,
+    sendCounterStart,
+    actions,
+    keyThreshold,
+    sendCounterStop,
+    you.id,
+  ]);
+
   if (!["connecting", "connected", "opened"].includes(state)) {
     return <div>Loading...</div>;
   }
@@ -53,12 +90,14 @@ export const OpenLockedBox: React.FC = () => {
       <Text variant="pageTitle" className="mt-4">
         Open a Locked Box
       </Text>
-      <Text variant="secondaryText" className="mt-4">
-        {`The timer starts when someone has ${keyThreshold} of ${
+      <CounterWithInfo
+        unlockingStartDate={unlockingStartDate}
+        keyThreshold={keyThreshold}
+        onlineKeyHoldersCount={
           onlineKeyHolders.length + offLineKeyHolders.length + 1
-        } keys`}
-      </Text>
-      <div className="flex flex-col gap-12">
+        }
+      />
+      <div className="flex flex-col gap-4">
         {shareableURL && (
           <FieldArea label="Invite URL">
             <TextField.Root value={shareableURL} readOnly />
@@ -75,7 +114,11 @@ export const OpenLockedBox: React.FC = () => {
         />
       </div>
       <div className="flex gap-4">
-        <Button variant="secondary" onClick={handleBackClick}>
+        <Button
+          variant="secondary"
+          onClick={handleBackClick}
+          disabled={unlockingStartDate !== null}
+        >
           Leave Lobby
         </Button>
       </div>

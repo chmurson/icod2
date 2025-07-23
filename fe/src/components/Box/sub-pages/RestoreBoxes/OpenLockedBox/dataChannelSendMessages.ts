@@ -2,6 +2,8 @@ import { type RefObject, useCallback } from "react";
 import type { DataChannelManager } from "@/services/webrtc";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type {
+  LeaderCounterStart,
+  LeaderCounterStop,
   LeaderError,
   LeaderSendsPartialStateMessage,
   LeaderWelcome,
@@ -14,11 +16,15 @@ export const useDataChannelSendMessages = ({
 }) => {
   const sendError = useSendError(dataChannelManagerRef);
   const sendWelcome = useSendWelcome(dataChannelManagerRef);
+  const sendCounterStart = useSendCounterStart(dataChannelManagerRef);
+  const sendCounterStop = useSendCounterStop(dataChannelManagerRef);
   const sendPartialUpdate = useSendPartialStateUpdate(dataChannelManagerRef);
 
   return {
     sendError,
     sendWelcome,
+    sendCounterStart,
+    sendCounterStop,
     sendPartialUpdate,
   };
 };
@@ -67,3 +73,25 @@ const useSendPartialStateUpdate = (
     },
     [dataChannelManagerRef],
   );
+
+const useSendCounterStart = (
+  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+) =>
+  useCallback(
+    (unlockingStartDate: LeaderCounterStart["unlockingStartDate"]) => {
+      dataChannelManagerRef.current?.sendMessageToAllPeers({
+        type: "leader:counter-start",
+        unlockingStartDate,
+      } satisfies LeaderCounterStart);
+    },
+    [dataChannelManagerRef],
+  );
+
+const useSendCounterStop = (
+  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+) =>
+  useCallback(() => {
+    dataChannelManagerRef.current?.sendMessageToAllPeers({
+      type: "leader:counter-stop",
+    } satisfies LeaderCounterStop);
+  }, [dataChannelManagerRef]);

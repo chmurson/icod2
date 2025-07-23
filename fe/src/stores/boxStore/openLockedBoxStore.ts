@@ -33,6 +33,7 @@ const openLockedBoxState = {
     KeyHolderId,
     Record<KeyHolderId, boolean>
   >,
+  unlockingStartDate: null as Date | null,
 };
 
 export type OpenLockedBoxStateData = typeof openLockedBoxState;
@@ -63,6 +64,7 @@ type OpenLockedBoxState = {
       encryptedMessage?: string;
       generatedKey?: string;
     }) => void;
+    setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
   };
 } & OpenLockedBoxStateData;
 
@@ -188,6 +190,8 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         set({
           ...openLockedBoxState,
         }),
+      setUnlockingStartDate: (unlockingStartDate: Date | null) =>
+        set({ unlockingStartDate }),
     } satisfies OpenLockedBoxState["actions"],
   })),
 );

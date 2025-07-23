@@ -30,6 +30,7 @@ const joinLockedBoxState = {
   } satisfies ParticipantType,
   decryptedContent: "",
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
+  unlockingStartDate: null as Date | null,
   shareAccessKeyMapByKeyHolderId: {} as Record<string, Record<string, boolean>>,
 };
 
@@ -59,11 +60,15 @@ type JoinLockedBoxState = {
       generatedKey?: string;
     }) => void;
     setError: (error: string) => void;
+    setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     setPartialStateUpdate: (
       payload: Partial<
         Pick<
           JoinLockedBoxStateData,
-          "shareAccessKeyMapByKeyHolderId" | "onlineKeyHolders"
+          | "shareAccessKeyMapByKeyHolderId"
+          | "onlineKeyHolders"
+          | "offLineKeyHolders"
+          | "unlockingStartDate"
         >
       >,
     ) => void;
@@ -167,6 +172,8 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           ...joinLockedBoxState,
         }),
       setError: (error: string) => set({ error }),
+      setUnlockingStartDate: (unlockingStartDate: Date) =>
+        set({ unlockingStartDate }),
       setPartialStateUpdate: (
         payload: Partial<
           Pick<

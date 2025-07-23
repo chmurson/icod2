@@ -19,10 +19,27 @@ export interface LeaderError {
   reason: string;
 }
 
+export interface LeaderCounterStart {
+  type: "leader:counter-start";
+  unlockingStartDate: string;
+}
+
+export interface LeaderCounterStop {
+  type: "leader:counter-stop";
+}
+
+export interface LeaderSendsPartialStateMessage {
+  type: "leader:send-partial-state";
+  shareAccessKeyMapByKeyHolderId?: Record<string, Record<string, boolean>>;
+  onlineKeyHolders?: ParticipantType[];
+}
+
 export type RestoreBoxesMessage =
   | KeyholderHello
   | LeaderWelcome
   | LeaderError
+  | LeaderCounterStart
+  | LeaderCounterStop
   | LeaderSendsPartialStateMessage;
 
 export function isKeyholderHello(msg: object): msg is KeyholderHello {
@@ -78,11 +95,17 @@ export function isFollowerSendsPartialStateMessage(
   );
 }
 
-export type LeaderSendsPartialStateMessage = {
-  type: "leader:send-partial-state";
-  shareAccessKeyMapByKeyHolderId?: Record<string, Record<string, boolean>>;
-  onlineKeyHolders?: ParticipantType[];
-};
+export function isLeaderCounterStart(msg: any): msg is LeaderCounterStart {
+  return (
+    msg &&
+    msg.type === "leader:counter-start" &&
+    typeof msg.unlockingStartDate === "string"
+  );
+}
+
+export function isLeaderCounterStop(msg: any): msg is LeaderCounterStop {
+  return msg && msg.type === "leader:counter-stop";
+}
 
 export function isLeaderSendsPartialStateMessage(
   msg: object,
