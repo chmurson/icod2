@@ -13,12 +13,12 @@ const formatTime = (ms: number) => {
 
 export const CounterWithInfo = ({
   unlockingStartDate,
-  children,
-  finalCallText,
+  keyThreshold,
+  onlineKeyHoldersCount,
 }: {
   unlockingStartDate: Date | null;
-  children: React.ReactNode;
-  finalCallText: React.ReactNode;
+  keyThreshold: number;
+  onlineKeyHoldersCount: number;
 }) => {
   const [remainingTime, setRemainingTime] = useState(TWO_MINUTES_IN_MS);
 
@@ -53,7 +53,20 @@ export const CounterWithInfo = ({
       >
         {formatTime(remainingTime)}
       </Text>
-      {remainingTime <= 10000 ? finalCallText : children}
+      {remainingTime <= 10000 ? (
+        <Text variant="label">
+          Final call to exchange keys before unlocking
+        </Text>
+      ) : unlockingStartDate ? (
+        <Text variant="label">Unlocking soon - last chance to share keys</Text>
+      ) : (
+        <Text variant="label">
+          {"The timer starts when someone has "}
+          <span className="text-purple-500">{keyThreshold}</span>
+          {" of "}
+          <span className="text-purple-500">{onlineKeyHoldersCount} keys</span>
+        </Text>
+      )}
     </div>
   );
 };

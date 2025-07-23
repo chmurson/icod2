@@ -5,11 +5,11 @@ import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { CounterWithInfo } from "../commons/CountWithInfo";
 import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
 } from "../commons/components";
+import { CounterWithInfo } from "../commons/components/CounterWithInfo";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
@@ -49,27 +49,11 @@ export const JoinLockedBox: React.FC = () => {
       </Text>
       <CounterWithInfo
         unlockingStartDate={unlockingStartDate}
-        finalCallText={
-          <Text variant="label">
-            Final call to exchange keys before unlocking
-          </Text>
+        keyThreshold={keyThreshold}
+        onlineKeyHoldersCount={
+          onlineKeyHolders.length + offLineKeyHolders.length + 1
         }
-      >
-        {unlockingStartDate ? (
-          <Text variant="label">
-            Unlocking soon - last chance to share keys
-          </Text>
-        ) : (
-          <Text variant="label">
-            {"The timer starts when someone has "}
-            <span className="text-purple-500">{keyThreshold}</span>
-            {" of "}
-            <span className="text-purple-500">
-              {onlineKeyHolders.length + offLineKeyHolders.length + 1} keys
-            </span>
-          </Text>
-        )}
-      </CounterWithInfo>
+      />
       <LoobbyKeyHolders
         offLineKeyHolders={offLineKeyHolders}
         onlineKeyHolders={onlineKeyHolders}

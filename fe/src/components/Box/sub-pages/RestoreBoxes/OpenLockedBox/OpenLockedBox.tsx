@@ -7,11 +7,11 @@ import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
-import { CounterWithInfo } from "../commons/CountWithInfo";
 import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
 } from "../commons/components";
+import { CounterWithInfo } from "../commons/components/CounterWithInfo";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useNavigateToShareableLink } from "./hooks";
@@ -92,27 +92,11 @@ export const OpenLockedBox: React.FC = () => {
       </Text>
       <CounterWithInfo
         unlockingStartDate={unlockingStartDate}
-        finalCallText={
-          <Text variant="label">
-            Final call to exchange keys before unlocking
-          </Text>
+        keyThreshold={keyThreshold}
+        onlineKeyHoldersCount={
+          onlineKeyHolders.length + offLineKeyHolders.length + 1
         }
-      >
-        {unlockingStartDate ? (
-          <Text variant="label">
-            Unlocking soon - last chance to share keys
-          </Text>
-        ) : (
-          <Text variant="label">
-            {"The timer starts when someone has "}
-            <span className="text-purple-500">{keyThreshold}</span>
-            {" of "}
-            <span className="text-purple-500">
-              {onlineKeyHolders.length + offLineKeyHolders.length + 1} keys
-            </span>
-          </Text>
-        )}
-      </CounterWithInfo>
+      />
       <div className="flex flex-col gap-4">
         {shareableURL && (
           <FieldArea label="Invite URL">
