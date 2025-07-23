@@ -82,5 +82,8 @@ router.addHandler(isFollowerSendsPartialStateMessage, (peerId, message) => {
     ]),
   );
 
-  actions.setShareAccessKeyByKeyholderId(peerId, shareAccessKeyByKeyholderId);
+  actions.setShareAccessKeyByKeyholderId(
+    keyHolderId,
+    shareAccessKeyByKeyholderId,
+  );
 });

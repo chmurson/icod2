@@ -1,25 +1,22 @@
 import { TextField } from "@radix-ui/themes";
-import { useEffect } from "react";
-import { ShareAccessButton } from "@/components/Box/components/ShareAccessButton";
-import { ShareAccessDropdown } from "@/components/Box/components/ShareAccessDropdown";
+import { type FC, useEffect, useMemo } from "react";
+import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
+import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
+import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
+import { ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb } from "../commons/components";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useNavigateToShareableLink } from "./hooks";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
 export const OpenLockedBox: React.FC = () => {
   useOpenLockedBoxConnection();
-
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
-
-  const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
-    (state) => state.shareAccessKeyByKeyHolderId,
-  );
 
   const offLineKeyHolders = useOpenLockedBoxStore(
     (state) => state.offLineKeyHolders,
@@ -47,9 +44,7 @@ export const OpenLockedBox: React.FC = () => {
     actions.reset();
   };
 
-  const idsOfKeyHoldersToShareWith = Object.entries(shareAccessKeyByKeyHolderId)
-    .filter(([_, isSharing]) => isSharing)
-    .map(([id]) => id);
+  const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
 
   return (
     <div className="flex flex-col gap-8">
@@ -71,36 +66,32 @@ export const OpenLockedBox: React.FC = () => {
           <ParticipantItem
             name={you.name}
             userAgent={you.userAgent}
-            buttonSlot={
-              <ShareAccessDropdown
-                value={idsOfKeyHoldersToShareWith}
-                onChange={actions.toggleSharesAccessKeys}
-                options={onlineKeyHolders.map((kh) => ({
-                  id: kh.id,
-                  name: kh.name,
-                  userAgent: kh.userAgent,
-                  avatar: undefined,
-                }))}
+            sharedKeysSlot={
+              <ShareAccesKeyAvatars
+                keyHolderId={you.id}
+                possibleKeyHolders={possibleKeyHolders}
               />
+            }
+            buttonSlot={
+              <ShareAccessDropdown onlineKeyHolders={onlineKeyHolders} />
             }
           />
         </FieldArea>
         {onlineKeyHolders.length !== 0 && (
           <FieldArea label="Online users">
             <div className="flex flex-col gap-1.5">
-              {onlineKeyHolders.map((p) => (
+              {onlineKeyHolders.map((kh) => (
                 <ParticipantItem
-                  key={p.id}
-                  name={p.name}
-                  userAgent={p.userAgent}
-                  buttonSlot={
-                    <ShareAccessButton
-                      checked={shareAccessKeyByKeyHolderId[p.id] === true}
-                      onToggle={(checked) =>
-                        actions.toggleShareAccessKey(p.id, checked)
-                      }
+                  key={kh.id}
+                  name={kh.name}
+                  userAgent={kh.userAgent}
+                  sharedKeysSlot={
+                    <ShareAccesKeyAvatars
+                      keyHolderId={kh.id}
+                      possibleKeyHolders={possibleKeyHolders}
                     />
                   }
+                  buttonSlot={<ShareAccessButton keyHolderId={kh.id} />}
                 />
               ))}
             </div>
@@ -111,12 +102,18 @@ export const OpenLockedBox: React.FC = () => {
             {offLineKeyHolders.length === 0 && (
               <Text variant="secondaryText">No offline keyholders.</Text>
             )}
-            {offLineKeyHolders.map((p) => (
+            {offLineKeyHolders.map((kh) => (
               <ParticipantItem
-                key={p.id}
-                name={p.name}
-                userAgent={p.userAgent}
-                buttonSlot={<ShareAccessButton checked={false} disabled />}
+                key={kh.id}
+                name={kh.name}
+                userAgent={kh.userAgent}
+                sharedKeysSlot={
+                  <ShareAccesKeyAvatars
+                    keyHolderId={kh.id}
+                    possibleKeyHolders={possibleKeyHolders}
+                  />
+                }
+                buttonSlot={<ShareAccessButtonDumb checked={false} disabled />}
               />
             ))}
           </div>
@@ -128,5 +125,74 @@ export const OpenLockedBox: React.FC = () => {
         </Button>
       </div>
     </div>
+  );
+};
+
+const ShareAccesKeyAvatars: FC<{
+  keyHolderId: string;
+  possibleKeyHolders: ParticipantType[];
+}> = ({ keyHolderId, possibleKeyHolders }) => {
+  const shareAccessKeyMapByKeyHolderId = useOpenLockedBoxStore(
+    (state) => state.shareAccessKeyMapByKeyholderId,
+  );
+
+  const keyholdersSharingTheirKeys = useMemo(() => {
+    return Object.entries(shareAccessKeyMapByKeyHolderId)
+      .map(([sharingKeyHolderId, withWhoMap]) => {
+        return withWhoMap[keyHolderId] === true
+          ? sharingKeyHolderId
+          : undefined;
+      })
+      .filter((x) => x !== undefined);
+  }, [shareAccessKeyMapByKeyHolderId, keyHolderId]);
+
+  return (
+    <ShareAccessKeysAvatarsDumb
+      keyHolderId={keyHolderId}
+      keyholdersSharingTheirKeys={keyholdersSharingTheirKeys}
+      possibleKeyHolders={possibleKeyHolders}
+    />
+  );
+};
+
+const ShareAccessButton = ({ keyHolderId }: { keyHolderId: string }) => {
+  const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
+    (state) => state.shareAccessKeyByKeyHolderId,
+  );
+  const { toggleShareAccessKey } = useOpenLockedBoxStore(
+    (state) => state.actions,
+  );
+  return (
+    <ShareAccessButtonDumb
+      checked={shareAccessKeyByKeyHolderId[keyHolderId] === true}
+      onToggle={(checked) => toggleShareAccessKey(keyHolderId, checked)}
+    />
+  );
+};
+
+const ShareAccessDropdown: FC<{
+  onlineKeyHolders: ParticipantType[];
+}> = ({ onlineKeyHolders }) => {
+  const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
+    (state) => state.shareAccessKeyByKeyHolderId,
+  );
+  const { toggleSharesAccessKeys } = useOpenLockedBoxStore(
+    (state) => state.actions,
+  );
+  const idsOfKeyHoldersToShareWith = Object.entries(shareAccessKeyByKeyHolderId)
+    .filter(([_, isSharing]) => isSharing)
+    .map(([id]) => id);
+
+  return (
+    <ShareAccessDropdownDumb
+      value={idsOfKeyHoldersToShareWith}
+      onChange={toggleSharesAccessKeys}
+      options={onlineKeyHolders.map((kh) => ({
+        id: kh.id,
+        name: kh.name,
+        userAgent: kh.userAgent,
+        avatar: undefined,
+      }))}
+    />
   );
 };

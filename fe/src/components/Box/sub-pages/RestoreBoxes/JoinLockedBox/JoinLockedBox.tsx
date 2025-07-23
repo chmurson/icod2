@@ -1,10 +1,13 @@
+import { type FC, useMemo } from "react";
 import { FieldArea } from "@/components/Box/components/FieldArea";
 import { ParticipantItem } from "@/components/Box/components/ParticipantItem";
-import { ShareAccessButton } from "@/components/Box/components/ShareAccessButton";
-import { ShareAccessDropdown } from "@/components/Box/components/ShareAccessDropdown";
+import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
+import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
+import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
+import { ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb } from "../commons/components";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
@@ -22,16 +25,6 @@ export const JoinLockedBox: React.FC = () => {
   const you = useJoinLockedBoxStore((state) => state.you);
   const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
   const actions = useJoinLockedBoxStore((state) => state.actions);
-  const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
-    (state) => state.shareAccessKeyByKeyHolderId,
-  );
-  const shareAccessKeyMapByKeyHolderId = useJoinLockedBoxStore(
-    (state) => state.shareAccessKeyMapByKeyHolderId,
-  );
-
-  const idsOfKeyHoldersToShareWith = Object.entries(shareAccessKeyByKeyHolderId)
-    .filter(([_, value]) => value === true)
-    .map(([key]) => key);
 
   // Only show UI when in connecting/connected/opened state
   if (!["connecting", "connected", "opened"].includes(state)) {
@@ -42,12 +35,13 @@ export const JoinLockedBox: React.FC = () => {
     actions.reset();
   };
 
+  const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
+
   return (
     <div className="flex flex-col gap-8">
       <Text variant="pageTitle" className="mt-4">
         Join a Locked Box
       </Text>
-      {JSON.stringify(shareAccessKeyMapByKeyHolderId, null, 2)}
       <Text variant="secondaryText" className="mt-4">
         {`The timer starts when someone has ${keyThreshold} of ${
           onlineKeyHolders.length + offLineKeyHolders.length + 1
@@ -58,36 +52,32 @@ export const JoinLockedBox: React.FC = () => {
           <ParticipantItem
             name={you.name}
             userAgent={you.userAgent}
-            buttonSlot={
-              <ShareAccessDropdown
-                value={idsOfKeyHoldersToShareWith}
-                onChange={actions.toggleSharesAccessKeys}
-                options={onlineKeyHolders.map((kh) => ({
-                  id: kh.id,
-                  name: kh.name,
-                  userAgent: kh.userAgent,
-                  avatar: undefined,
-                }))}
+            sharedKeysSlot={
+              <ShareAccesKeyAvatars
+                keyHolderId={you.id}
+                possibleKeyHolders={possibleKeyHolders}
               />
+            }
+            buttonSlot={
+              <ShareAccessDropdown onlineKeyHolders={onlineKeyHolders} />
             }
           />
         </FieldArea>
         {onlineKeyHolders.length !== 0 && (
           <FieldArea label="Online users">
             <div className="flex flex-col gap-1.5">
-              {onlineKeyHolders.map((p) => (
+              {onlineKeyHolders.map((kh) => (
                 <ParticipantItem
-                  key={p.id}
-                  name={p.name}
-                  userAgent={p.userAgent}
-                  buttonSlot={
-                    <ShareAccessButton
-                      checked={shareAccessKeyByKeyHolderId[p.id] === true}
-                      onToggle={(checked) =>
-                        actions.toggleShareAccessKey(p.id, checked)
-                      }
+                  key={kh.id}
+                  name={kh.name}
+                  userAgent={kh.userAgent}
+                  sharedKeysSlot={
+                    <ShareAccesKeyAvatars
+                      keyHolderId={kh.id}
+                      possibleKeyHolders={possibleKeyHolders}
                     />
                   }
+                  buttonSlot={<ShareAccessButton keyHolderId={kh.id} />}
                 />
               ))}
             </div>
@@ -103,7 +93,13 @@ export const JoinLockedBox: React.FC = () => {
                 key={p.id}
                 name={p.name}
                 userAgent={p.userAgent}
-                buttonSlot={<ShareAccessButton checked={false} disabled />}
+                sharedKeysSlot={
+                  <ShareAccesKeyAvatars
+                    keyHolderId={p.id}
+                    possibleKeyHolders={possibleKeyHolders}
+                  />
+                }
+                buttonSlot={<ShareAccessButtonDumb checked={false} disabled />}
               />
             ))}
           </div>
@@ -115,5 +111,74 @@ export const JoinLockedBox: React.FC = () => {
         </Button>
       </div>
     </div>
+  );
+};
+
+const ShareAccesKeyAvatars: FC<{
+  keyHolderId: string;
+  possibleKeyHolders: ParticipantType[];
+}> = ({ keyHolderId, possibleKeyHolders }) => {
+  const shareAccessKeyMapByKeyHolderId = useJoinLockedBoxStore(
+    (state) => state.shareAccessKeyMapByKeyHolderId,
+  );
+
+  const keyholdersSharingTheirKeys = useMemo(() => {
+    return Object.entries(shareAccessKeyMapByKeyHolderId)
+      .map(([sharingKeyHolderId, withWhoMap]) => {
+        return withWhoMap[keyHolderId] === true
+          ? sharingKeyHolderId
+          : undefined;
+      })
+      .filter((x) => x !== undefined);
+  }, [shareAccessKeyMapByKeyHolderId, keyHolderId]);
+
+  return (
+    <ShareAccessKeysAvatarsDumb
+      keyHolderId={keyHolderId}
+      keyholdersSharingTheirKeys={keyholdersSharingTheirKeys}
+      possibleKeyHolders={possibleKeyHolders}
+    />
+  );
+};
+
+const ShareAccessButton = ({ keyHolderId }: { keyHolderId: string }) => {
+  const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
+    (state) => state.shareAccessKeyByKeyHolderId,
+  );
+  const { toggleShareAccessKey } = useJoinLockedBoxStore(
+    (state) => state.actions,
+  );
+  return (
+    <ShareAccessButtonDumb
+      checked={shareAccessKeyByKeyHolderId[keyHolderId] === true}
+      onToggle={(checked) => toggleShareAccessKey(keyHolderId, checked)}
+    />
+  );
+};
+
+const ShareAccessDropdown: FC<{
+  onlineKeyHolders: ParticipantType[];
+}> = ({ onlineKeyHolders }) => {
+  const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
+    (state) => state.shareAccessKeyByKeyHolderId,
+  );
+  const { toggleSharesAccessKeys } = useJoinLockedBoxStore(
+    (state) => state.actions,
+  );
+  const idsOfKeyHoldersToShareWith = Object.entries(shareAccessKeyByKeyHolderId)
+    .filter(([_, isSharing]) => isSharing)
+    .map(([id]) => id);
+
+  return (
+    <ShareAccessDropdownDumb
+      value={idsOfKeyHoldersToShareWith}
+      onChange={toggleSharesAccessKeys}
+      options={onlineKeyHolders.map((kh) => ({
+        id: kh.id,
+        name: kh.name,
+        userAgent: kh.userAgent,
+        avatar: undefined,
+      }))}
+    />
   );
 };
