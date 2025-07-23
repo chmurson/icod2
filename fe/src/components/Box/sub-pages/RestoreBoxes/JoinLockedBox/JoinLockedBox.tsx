@@ -25,6 +25,9 @@ export const JoinLockedBox: React.FC = () => {
   const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
     (state) => state.shareAccessKeyByKeyHolderId,
   );
+  const shareAccessKeyMapByKeyHolderId = useJoinLockedBoxStore(
+    (state) => state.shareAccessKeyMapByKeyHolderId,
+  );
 
   const idsOfKeyHoldersToShareWith = Object.entries(shareAccessKeyByKeyHolderId)
     .filter(([_, value]) => value === true)
@@ -44,6 +47,7 @@ export const JoinLockedBox: React.FC = () => {
       <Text variant="pageTitle" className="mt-4">
         Join a Locked Box
       </Text>
+      {JSON.stringify(shareAccessKeyMapByKeyHolderId, null, 2)}
       <Text variant="secondaryText" className="mt-4">
         {`The timer starts when someone has ${keyThreshold} of ${
           onlineKeyHolders.length + offLineKeyHolders.length + 1

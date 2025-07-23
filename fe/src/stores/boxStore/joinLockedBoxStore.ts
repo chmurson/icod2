@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import { areArraysOfPrimitiveEqual } from "@/utils/areArraysOfPrimitiveEqual";
+import { hasSameTrueKeys } from "@/utils/hasSameTrueKeys";
 import type { ParticipantType } from "./common-types";
 
 const joinLockedBoxState = {
@@ -28,6 +30,7 @@ const joinLockedBoxState = {
   } satisfies ParticipantType,
   decryptedContent: "",
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
+  shareAccessKeyMapByKeyHolderId: {} as Record<string, Record<string, boolean>>,
 };
 
 export type JoinLockedBoxStateData = typeof joinLockedBoxState;
@@ -57,6 +60,14 @@ type JoinLockedBoxState = {
       generatedKey?: string;
     }) => void;
     setError: (error: string) => void;
+    setPartialStateUpdate: (
+      payload: Partial<
+        Pick<
+          JoinLockedBoxStateData,
+          "shareAccessKeyMapByKeyHolderId" | "onlineKeyHolders"
+        >
+      >,
+    ) => void;
   };
 } & JoinLockedBoxStateData;
 
@@ -183,6 +194,57 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           ...joinLockedBoxState,
         }),
       setError: (error: string) => set({ error }),
+      setPartialStateUpdate: (
+        payload: Partial<
+          Pick<
+            JoinLockedBoxStateData,
+            | "shareAccessKeyMapByKeyHolderId"
+            | "onlineKeyHolders"
+            | "offLineKeyHolders"
+          >
+        >,
+      ) =>
+        set((state) => {
+          const filteredPayload: typeof payload = {};
+
+          if (
+            !hasSameTrueKeys(
+              state.shareAccessKeyMapByKeyHolderId,
+              payload.shareAccessKeyMapByKeyHolderId ?? {},
+            )
+          ) {
+            filteredPayload.shareAccessKeyMapByKeyHolderId =
+              payload.shareAccessKeyMapByKeyHolderId ?? {};
+          }
+
+          const newOnlineKeyHolders = (payload.onlineKeyHolders ?? []).filter(
+            (kh) => kh.id !== state.you.id,
+          );
+
+          if (
+            payload.onlineKeyHolders &&
+            !areArraysOfPrimitiveEqual(
+              state.onlineKeyHolders,
+              newOnlineKeyHolders,
+            )
+          ) {
+            const newOffLineKeyHolders = [
+              ...state.onlineKeyHolders,
+              ...state.offLineKeyHolders,
+            ].filter(
+              (kh) =>
+                kh.id !== state.you.id &&
+                !newOnlineKeyHolders.some(
+                  (newOnlineKh) => kh.id !== newOnlineKh.id,
+                ),
+            );
+
+            filteredPayload.onlineKeyHolders = newOnlineKeyHolders;
+            filteredPayload.offLineKeyHolders = newOffLineKeyHolders;
+          }
+
+          return filteredPayload;
+        }),
     },
   })),
 );

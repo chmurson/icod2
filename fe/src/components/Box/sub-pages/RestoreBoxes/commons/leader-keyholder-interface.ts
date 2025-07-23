@@ -112,3 +112,23 @@ export function isFollowerSendsPartialStateMessage(
     Array.isArray(msg.keyHoldersIdsToSharedKeyWith)
   );
 }
+
+export type LeaderSendsPartialStateMessage = {
+  type: "leader:send-partial-state";
+  shareAccessKeyMapByKeyHolderId?: Record<string, Record<string, boolean>>;
+  onlineKeyHolders?: ParticipantType[];
+};
+
+export function isLeaderSendsPartialStateMessage(
+  msg: object,
+): msg is LeaderSendsPartialStateMessage {
+  return (
+    typeof msg === "object" &&
+    msg !== null &&
+    "type" in msg &&
+    msg.type === "leader:send-partial-state" &&
+    (!("shareAccessKeyMapByKeyHolderId" in msg) ||
+      (typeof msg.shareAccessKeyMapByKeyHolderId === "object" &&
+        msg.shareAccessKeyMapByKeyHolderId !== null))
+  );
+}

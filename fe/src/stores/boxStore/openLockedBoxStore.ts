@@ -73,19 +73,35 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
     actions: {
       start: () => set({ ...openLockedBoxState, state: "drop-box" }),
       toggleShareAccessKey: (keyHolderId: string, value?: boolean) =>
-        set((state) => ({
-          shareAccessKeyByKeyHolderId: {
+        set((state) => {
+          const shareAccessKeyByKeyHolderId = {
             ...state.shareAccessKeyByKeyHolderId,
             [keyHolderId]:
               value ?? !state.shareAccessKeyByKeyHolderId[keyHolderId],
-          },
-        })),
+          };
+
+          return {
+            shareAccessKeyByKeyHolderId,
+            shareAccessKeyMapByKeyholderId: {
+              ...state.shareAccessKeyMapByKeyholderId,
+              [state.you.id]: shareAccessKeyByKeyHolderId,
+            },
+          };
+        }),
       toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) =>
-        set(() => ({
-          shareAccessKeyByKeyHolderId: Object.fromEntries(
+        set((state) => {
+          const shareAccessKeyByKeyHolderId = Object.fromEntries(
             idsOfKeyHoldersToShareWith.map((id) => [id, true]),
-          ),
-        })),
+          );
+
+          return {
+            shareAccessKeyByKeyHolderId,
+            shareAccessKeyMapByKeyholderId: {
+              ...state.shareAccessKeyMapByKeyholderId,
+              [state.you.id]: shareAccessKeyByKeyHolderId,
+            },
+          };
+        }),
       setShareAccessKeyByKeyholderId: (
         keyholderId: string,
         shareAccessKeyMapByKeyholderId: Record<KeyHolderId, boolean>,

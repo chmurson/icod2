@@ -4,6 +4,7 @@ import {
   isLeaderError,
   isLeaderOfflineKeyholders,
   isLeaderOnlineKeyholders,
+  isLeaderSendsPartialStateMessage,
   isLeaderWelcome,
 } from "../commons/leader-keyholder-interface";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
@@ -51,4 +52,9 @@ router.addHandler(isLeaderOfflineKeyholders, (_, message) => {
       actions.disconnectKeyHolder(offline);
     }
   }
+});
+
+router.addHandler(isLeaderSendsPartialStateMessage, (_, message) => {
+  const { actions } = useJoinLockedBoxStore.getState();
+  actions.setPartialStateUpdate(message);
 });
