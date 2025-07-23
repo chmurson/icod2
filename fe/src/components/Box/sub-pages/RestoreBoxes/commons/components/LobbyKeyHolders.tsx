@@ -55,7 +55,7 @@ export const LoobbyKeyHolders: FC<{
             possibleKeyHolders={possibleKeyHolders}
           />
         </div>
-        <div className="flex justify-end py-3 border-b  border-gray-200">
+        <div className="flex justify-end items-center py-3 border-b  border-gray-200 ">
           <ShareAccessDropdown onlineKeyHolders={onlineKeyHolders} />
         </div>
         {onlineKeyHolders.length > 0 && (
@@ -83,7 +83,7 @@ export const LoobbyKeyHolders: FC<{
                   possibleKeyHolders={possibleKeyHolders}
                 />
               </div>
-              <div className="flex justify-end py-3 border-b  border-gray-200">
+              <div className="flex justify-end items-center py-3 border-b  border-gray-200">
                 <ShareAccessButton keyHolderId={kh.id} />
               </div>
             </Fragment>
@@ -117,7 +117,7 @@ export const LoobbyKeyHolders: FC<{
                 possibleKeyHolders={possibleKeyHolders}
               />
             </div>
-            <div className="flex justify-end py-3 border-b  border-gray-200">
+            <div className="flex justify-end items-center py-3 border-b  border-gray-200">
               <ShareAccessButtonDumb checked={false} disabled />
             </div>
           </Fragment>
