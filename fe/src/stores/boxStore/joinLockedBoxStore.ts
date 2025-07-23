@@ -52,7 +52,6 @@ type JoinLockedBoxState = {
     connectKeyHolder: (
       participant: ParticipantType & { isLeader?: boolean },
     ) => void;
-    disconnectKeyHolder: (participant: ParticipantType) => void;
     open: (message: {
       title?: string;
       content?: string;
@@ -154,32 +153,6 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           return {
             onlineKeyHolders,
             offLineKeyHolders,
-          };
-        });
-      },
-      disconnectKeyHolder: (keyHolder: ParticipantType) => {
-        set((state) => {
-          const offLineKeyHolders = [
-            ...state.offLineKeyHolders,
-            {
-              ...keyHolder,
-            },
-          ];
-
-          const onlineKeyHolders = state.onlineKeyHolders.filter(
-            (x) => x.id !== keyHolder.id,
-          );
-
-          if (keyHolder.id === state.connectedLeaderId) {
-            return {
-              connectedLeaderId: undefined,
-              offLineKeyHolders,
-              onlineKeyHolders,
-            };
-          }
-          return {
-            offLineKeyHolders,
-            onlineKeyHolders,
           };
         });
       },
