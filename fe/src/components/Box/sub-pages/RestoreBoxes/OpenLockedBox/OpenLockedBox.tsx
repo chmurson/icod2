@@ -8,12 +8,14 @@ import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
+import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useNavigateToShareableLink } from "./hooks";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
 export const OpenLockedBox: React.FC = () => {
-  const { sendOnlineKeyholders, sendOfflineKeyholders } =
-    useOpenLockedBoxConnection();
+  const { dataChannelManagerRef } = useOpenLockedBoxConnection();
+  const { sendOfflineKeyholders, sendOnlineKeyholders } =
+    useDataChannelSendMessages({ dataChannelManagerRef });
 
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
