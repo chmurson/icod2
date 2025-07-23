@@ -48,15 +48,28 @@ export const JoinLockedBox: React.FC = () => {
       <Text variant="pageTitle" className="mt-4">
         Join a Locked Box
       </Text>
-      <CounterWithInfo unlockingStartDate={unlockingStartDate}>
-        <Text variant="label">
-          {"The timer starts when someone has "}
-          <span className="text-purple-500">{keyThreshold}</span>
-          {" of "}
-          <span className="text-purple-500">
-            {onlineKeyHolders.length + offLineKeyHolders.length + 1} keys
-          </span>
-        </Text>
+      <CounterWithInfo
+        unlockingStartDate={unlockingStartDate}
+        finalCallText={
+          <Text variant="label">
+            Final call to exchange keys before unlocking
+          </Text>
+        }
+      >
+        {unlockingStartDate ? (
+          <Text variant="label">
+            Unlocking soon - last chance to share keys
+          </Text>
+        ) : (
+          <Text variant="label">
+            {"The timer starts when someone has "}
+            <span className="text-purple-500">{keyThreshold}</span>
+            {" of "}
+            <span className="text-purple-500">
+              {onlineKeyHolders.length + offLineKeyHolders.length + 1} keys
+            </span>
+          </Text>
+        )}
       </CounterWithInfo>
       <div className="flex flex-col gap-4">
         <FieldArea label="Your access key">
@@ -115,7 +128,11 @@ export const JoinLockedBox: React.FC = () => {
         </FieldArea>
       </div>
       <div className="flex gap-4">
-        <Button variant="secondary" onClick={handleBackClick}>
+        <Button
+          variant="secondary"
+          onClick={handleBackClick}
+          disabled={unlockingStartDate !== null}
+        >
           Leave Lobby
         </Button>
       </div>

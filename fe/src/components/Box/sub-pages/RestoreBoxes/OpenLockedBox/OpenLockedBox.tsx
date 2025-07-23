@@ -15,8 +15,12 @@ import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
 export const OpenLockedBox: React.FC = () => {
   const { dataChannelManagerRef } = useOpenLockedBoxConnection();
-  const { sendOfflineKeyholders, sendOnlineKeyholders, sendCounterStart } =
-    useDataChannelSendMessages({ dataChannelManagerRef });
+  const {
+    sendOfflineKeyholders,
+    sendOnlineKeyholders,
+    sendCounterStart,
+    sendCounterStop,
+  } = useDataChannelSendMessages({ dataChannelManagerRef });
 
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
@@ -57,17 +61,21 @@ export const OpenLockedBox: React.FC = () => {
     if (
       Object.values(shareAccessKeyByKeyHolderId).filter(
         (value) => value === true,
-      ).length === keyThreshold
+      ).length >= keyThreshold
     ) {
       const utcNow = new Date();
       actions.setUnlockingStartDate(utcNow);
       sendCounterStart(utcNow.toISOString());
+    } else {
+      actions.setUnlockingStartDate(null);
+      sendCounterStop();
     }
   }, [
     shareAccessKeyByKeyHolderId,
     sendCounterStart,
-    actions.setUnlockingStartDate,
+    actions,
     keyThreshold,
+    sendCounterStop,
   ]);
 
   if (!["connecting", "connected", "opened"].includes(state)) {
@@ -87,15 +95,28 @@ export const OpenLockedBox: React.FC = () => {
       <Text variant="pageTitle" className="mt-4">
         Open a Locked Box
       </Text>
-      <CounterWithInfo unlockingStartDate={unlockingStartDate}>
-        <Text variant="label">
-          {"The timer starts when someone has "}
-          <span className="text-purple-500">{keyThreshold}</span>
-          {" of "}
-          <span className="text-purple-500">
-            {onlineKeyHolders.length + offLineKeyHolders.length + 1} keys
-          </span>
-        </Text>
+      <CounterWithInfo
+        unlockingStartDate={unlockingStartDate}
+        finalCallText={
+          <Text variant="label">
+            Final call to exchange keys before unlocking
+          </Text>
+        }
+      >
+        {unlockingStartDate ? (
+          <Text variant="label">
+            Unlocking soon - last chance to share keys
+          </Text>
+        ) : (
+          <Text variant="label">
+            {"The timer starts when someone has "}
+            <span className="text-purple-500">{keyThreshold}</span>
+            {" of "}
+            <span className="text-purple-500">
+              {onlineKeyHolders.length + offLineKeyHolders.length + 1} keys
+            </span>
+          </Text>
+        )}
       </CounterWithInfo>
       <div className="flex flex-col gap-4">
         {shareableURL && (
@@ -159,7 +180,11 @@ export const OpenLockedBox: React.FC = () => {
         </FieldArea>
       </div>
       <div className="flex gap-4">
-        <Button variant="secondary" onClick={handleBackClick}>
+        <Button
+          variant="secondary"
+          onClick={handleBackClick}
+          disabled={unlockingStartDate !== null}
+        >
           Leave Lobby
         </Button>
       </div>

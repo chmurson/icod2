@@ -36,13 +36,18 @@ export interface LeaderCounterStart {
   unlockingStartDate: string;
 }
 
+export interface LeaderCounterStop {
+  type: "leader:counter-stop";
+}
+
 export type RestoreBoxesMessage =
   | KeyholderHello
   | LeaderWelcome
   | LeaderError
   | LeaderOnlineKeyholders
   | LeaderOfflineKeyholders
-  | LeaderCounterStart;
+  | LeaderCounterStart
+  | LeaderCounterStop;
 
 export function isKeyholderHello(msg: object): msg is KeyholderHello {
   return (
@@ -123,6 +128,10 @@ export function isLeaderCounterStart(msg: any): msg is LeaderCounterStart {
   return (
     msg &&
     msg.type === "leader:counter-start" &&
-    msg.unlockingStartDate instanceof Date
+    typeof msg.unlockingStartDate === "string"
   );
+}
+
+export function isLeaderCounterStop(msg: any): msg is LeaderCounterStop {
+  return msg && msg.type === "leader:counter-stop";
 }

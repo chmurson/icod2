@@ -58,7 +58,7 @@ type JoinLockedBoxState = {
       generatedKey?: string;
     }) => void;
     setError: (error: string) => void;
-    setUnlockingStartDate: (unlockingStartDate: Date) => void;
+    setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
   };
 } & JoinLockedBoxStateData;
 

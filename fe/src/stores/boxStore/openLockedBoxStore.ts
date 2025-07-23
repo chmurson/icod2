@@ -65,7 +65,7 @@ type OpenLockedBoxState = {
       encryptedMessage?: string;
       generatedKey?: string;
     }) => void;
-    setUnlockingStartDate: (unlockingStartDate: Date) => void;
+    setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
   };
 } & OpenLockedBoxStateData;
 

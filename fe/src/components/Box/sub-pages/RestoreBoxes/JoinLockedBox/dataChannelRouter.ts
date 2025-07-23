@@ -2,6 +2,7 @@ import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRo
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import {
   isLeaderCounterStart,
+  isLeaderCounterStop,
   isLeaderError,
   isLeaderOfflineKeyholders,
   isLeaderOnlineKeyholders,
@@ -58,4 +59,9 @@ router.addHandler(isLeaderCounterStart, (_, message) => {
   const { unlockingStartDate } = message;
   const { actions } = useJoinLockedBoxStore.getState();
   actions.setUnlockingStartDate(new Date(unlockingStartDate));
+});
+
+router.addHandler(isLeaderCounterStop, (_, __) => {
+  const { actions } = useJoinLockedBoxStore.getState();
+  actions.setUnlockingStartDate(null);
 });

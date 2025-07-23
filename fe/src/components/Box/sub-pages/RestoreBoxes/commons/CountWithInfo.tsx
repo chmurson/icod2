@@ -14,9 +14,11 @@ const formatTime = (ms: number) => {
 export const CounterWithInfo = ({
   unlockingStartDate,
   children,
+  finalCallText,
 }: {
   unlockingStartDate: Date | null;
   children: React.ReactNode;
+  finalCallText: React.ReactNode;
 }) => {
   const [remainingTime, setRemainingTime] = useState(TWO_MINUTES_IN_MS);
 
@@ -45,10 +47,13 @@ export const CounterWithInfo = ({
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <Text variant="pageTitle" className="text-7xl">
+      <Text
+        variant="pageTitle"
+        className={`text-7xl ${remainingTime <= 10000 ? "text-red-400" : ""}`}
+      >
         {formatTime(remainingTime)}
       </Text>
-      {children}
+      {remainingTime <= 10000 ? finalCallText : children}
     </div>
   );
 };

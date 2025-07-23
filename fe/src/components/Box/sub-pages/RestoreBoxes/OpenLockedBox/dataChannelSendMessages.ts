@@ -3,6 +3,7 @@ import type { DataChannelManager } from "@/services/webrtc";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type {
   LeaderCounterStart,
+  LeaderCounterStop,
   LeaderError,
   LeaderOfflineKeyholders,
   LeaderOnlineKeyholders,
@@ -19,6 +20,7 @@ export const useDataChannelSendMessages = ({
   const sendOnlineKeyholders = useSendOnlineKeyholders(dataChannelManagerRef);
   const sendOfflineKeyholders = useSendOfflineKeyholders(dataChannelManagerRef);
   const sendCounterStart = useSendCounterStart(dataChannelManagerRef);
+  const sendCounterStop = useSendCounterStop(dataChannelManagerRef);
 
   return {
     sendError,
@@ -26,6 +28,7 @@ export const useDataChannelSendMessages = ({
     sendOnlineKeyholders,
     sendOfflineKeyholders,
     sendCounterStart,
+    sendCounterStop,
   };
 };
 
@@ -99,3 +102,12 @@ const useSendCounterStart = (
     },
     [dataChannelManagerRef],
   );
+
+const useSendCounterStop = (
+  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+) =>
+  useCallback(() => {
+    dataChannelManagerRef.current?.sendMessageToAllPeers({
+      type: "leader:counter-stop",
+    } satisfies LeaderCounterStop);
+  }, [dataChannelManagerRef]);
