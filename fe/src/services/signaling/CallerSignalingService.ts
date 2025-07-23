@@ -117,8 +117,7 @@ export class CallerSignalingService
     this.dataChannel.onopen = () => {
       this.dataChannel?.send(callerIntroduction);
     };
-    this.dataChannel.onmessage = (event) =>
-      console.log("Received from Callee:", event.data);
+
     this.dataChannel.onmessage = (event) => {
       event.data === calleeIntroduction;
       if (this.peerConnection && !this.peerConnected && this.dataChannel) {
