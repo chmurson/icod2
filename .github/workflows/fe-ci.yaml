@@ -31,3 +31,6 @@ jobs:
       - name: TypeScript Compile Check
         run: yarn workspace @icod2/fe build
         working-directory: .
+      - name: Run Tests
+        run: yarn workspace @icod2/fe test
+        working-directory: .
