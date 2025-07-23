@@ -7,9 +7,11 @@ export const ParticipantItem = ({
   name,
   userAgent,
   buttonSlot,
+  sharedKeysSlot,
 }: {
   name: string;
   userAgent: string;
+  sharedKeysSlot?: ReactNode;
   buttonSlot?: ReactNode;
 }) => {
   return (
@@ -28,6 +30,7 @@ export const ParticipantItem = ({
           <UserAgent ua={userAgent} className="text-sm text-gray-400" />
         </div>
       </div>
+      {sharedKeysSlot}
       {buttonSlot}
     </div>
   );
