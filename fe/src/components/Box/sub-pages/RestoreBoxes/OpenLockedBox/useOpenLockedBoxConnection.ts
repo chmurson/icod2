@@ -4,6 +4,7 @@ import { type DataChannelManager, useDataChannelMng } from "@/services/webrtc";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 import { router } from "./dataChannelRouter";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
+import { useOnChangeShareablePartOfState } from "./useSelectiveStatePusher";
 
 export function useOpenLockedBoxConnection() {
   const dataChannelManagerRef = useRef<
@@ -12,7 +13,13 @@ export function useOpenLockedBoxConnection() {
 
   const { peerToKeyHolderMapRef } = usePeerToHolderMapRef();
 
-  const { sendWelcome } = useDataChannelSendMessages({ dataChannelManagerRef });
+  const { sendWelcome, sendPartialUpdate } = useDataChannelSendMessages({
+    dataChannelManagerRef,
+  });
+
+  useOnChangeShareablePartOfState({
+    onChange: sendPartialUpdate,
+  });
 
   useDataChannelMng({
     SignalingService: CalleeSignalingService,

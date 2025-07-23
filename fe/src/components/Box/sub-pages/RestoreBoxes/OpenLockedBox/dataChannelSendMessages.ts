@@ -5,6 +5,7 @@ import type {
   LeaderError,
   LeaderOfflineKeyholders,
   LeaderOnlineKeyholders,
+  LeaderSendsPartialStateMessage,
   LeaderWelcome,
 } from "../commons/leader-keyholder-interface";
 
@@ -17,12 +18,14 @@ export const useDataChannelSendMessages = ({
   const sendWelcome = useSendWelcome(dataChannelManagerRef);
   const sendOnlineKeyholders = useSendOnlineKeyholders(dataChannelManagerRef);
   const sendOfflineKeyholders = useSendOfflineKeyholders(dataChannelManagerRef);
+  const sendPartialUpdate = useSendPartialStateUpdate(dataChannelManagerRef);
 
   return {
     sendError,
     sendWelcome,
     sendOnlineKeyholders,
     sendOfflineKeyholders,
+    sendPartialUpdate,
   };
 };
 
@@ -80,6 +83,19 @@ const useSendOfflineKeyholders = (
         type: "leader:offline-keyholders",
         offlineKeyHolders,
       } satisfies LeaderOfflineKeyholders);
+    },
+    [dataChannelManagerRef],
+  );
+
+const useSendPartialStateUpdate = (
+  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+) =>
+  useCallback(
+    (payload: Omit<LeaderSendsPartialStateMessage, "type">) => {
+      dataChannelManagerRef.current?.sendMessageToAllPeers({
+        type: "leader:send-partial-state",
+        ...payload,
+      });
     },
     [dataChannelManagerRef],
   );
