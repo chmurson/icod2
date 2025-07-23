@@ -22,14 +22,14 @@ export class PeerIdKeyholderMap {
   }
 
   public removeByKeyHolderId(keyHolderId: string) {
-    const peerId = this.getPeerId(keyHolderId)
-    if (peerId){
-      this.removeByPeerId(peerId)
+    const peerId = this.getPeerId(keyHolderId);
+    if (peerId) {
+      this.removeByPeerId(peerId);
     }
   }
 
-  public removeByPeerId(peerId: string){
-    this.mapPeerIdToKeyHolderId.delete(peerId)
+  public removeByPeerId(peerId: string) {
+    this.mapPeerIdToKeyHolderId.delete(peerId);
   }
 
   public setPair({

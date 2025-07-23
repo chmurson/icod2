@@ -4,12 +4,15 @@ import { router } from "./dataChannelRouter";
 
 export const useCalleeDataChannelMng = ({
   onPeerDisconnected,
+  onPeerConnected,
 }: {
-  onPeerDisconnected: (localID: string) => void;
+  onPeerDisconnected: (peerId: string) => void;
+  onPeerConnected?: (peerId: string) => void;
 }) => {
   return useDataChannelMng({
     SignalingService: CalleeSignalingService,
     onPeerDisconnected,
+    onPeerConnected,
     router,
   });
 };

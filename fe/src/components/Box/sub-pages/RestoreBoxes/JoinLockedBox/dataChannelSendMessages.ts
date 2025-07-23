@@ -3,6 +3,7 @@ import type { DataChannelManager } from "@/services/webrtc";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import type { FollowerSendsPartialStateMessage } from "../commons";
 import type { KeyholderHello } from "../commons/leader-keyholder-interface";
+import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 
 export const useDataChannelSendMessages = ({
   dataChannelManagerRef,
@@ -40,6 +41,7 @@ const useSendHelloToPeer = (
 const useSendPartialState = (
   dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
 ) => {
+  const { peerToKeyHolderMapRef } = usePeerToHolderMapRef();
   return useCallback(
     (partialState: Omit<FollowerSendsPartialStateMessage, "type">) => {
       const { connectedLeaderId } = useJoinLockedBoxStore.getState();
@@ -48,14 +50,21 @@ const useSendPartialState = (
         return;
       }
 
-      dataChannelManagerRef.current?.sendMessageToSinglePeer(
-        connectedLeaderId,
-        {
-          type: "follower:send-partial-state",
-          ...partialState,
-        } satisfies FollowerSendsPartialStateMessage,
-      );
+      const peerId = peerToKeyHolderMapRef.current.getPeerId(connectedLeaderId);
+
+      if (!peerId) {
+        console.warn(
+          "No peer ID found for the connected leader ID:",
+          connectedLeaderId,
+        );
+        return;
+      }
+
+      dataChannelManagerRef.current?.sendMessageToSinglePeer(peerId, {
+        type: "follower:send-partial-state",
+        ...partialState,
+      } satisfies FollowerSendsPartialStateMessage);
     },
-    [dataChannelManagerRef],
+    [dataChannelManagerRef, peerToKeyHolderMapRef],
   );
 };

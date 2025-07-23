@@ -15,8 +15,8 @@ export const useDataChannelMng = <
   SignalingService,
   router,
 }: {
-  onPeerConnected?: (localId: string) => void;
-  onPeerDisconnected?: (localId: string) => void;
+  onPeerConnected?: (peerId: string) => void;
+  onPeerDisconnected?: (peerId: string) => void;
   ref?: RefObject<
     DataChannelManager<TSignalingService, TConnectionFailReason> | undefined
   >;
@@ -36,16 +36,27 @@ export const useDataChannelMng = <
     DataChannelManager<TSignalingService, TConnectionFailReason> | undefined
   >(undefined);
 
+  const onPeerConnectedRef = useRef(onPeerConnected);
+  const onPeerDisconnectedRef = useRef(onPeerDisconnected);
+
+  useEffect(() => {
+    onPeerConnectedRef.current = onPeerConnected;
+  }, [onPeerConnected]);
+
+  useEffect(() => {
+    onPeerDisconnectedRef.current = onPeerDisconnected;
+  }, [onPeerDisconnected]);
+
   useEffect(() => {
     const dataChannelManager = new DataChannelManager({
       signalingService: new SignalingService(createWebsocketConnection()),
       callbacks: {
         onPeerConnected: (localId) => {
           console.log("Peer connected:", localId);
-          onPeerConnected?.(localId);
+          onPeerConnectedRef.current?.(localId);
         },
         onPeerDisconnected: (localId) => {
-          onPeerDisconnected?.(localId);
+          onPeerDisconnectedRef.current?.(localId);
           console.log("Peer disconnected:", localId);
         },
         onFailedToConnect: (reason) => {
@@ -64,7 +75,7 @@ export const useDataChannelMng = <
     return () => {
       dataChannelManager.close();
     };
-  }, [onPeerConnected, onPeerDisconnected, SignalingService, router]);
+  }, [SignalingService, router]);
 
   useEffect(() => {
     if (ref) {
@@ -74,8 +85,6 @@ export const useDataChannelMng = <
 
   useRaiseErrorIfChanges(router, "router");
   useRaiseErrorIfChanges(SignalingService, "SignalingService");
-  useRaiseErrorIfChanges(onPeerConnected, "onPeerConnected");
-  useRaiseErrorIfChanges(onPeerDisconnected, "onPeerDisconnected");
 
   return { dataChannelMngRef };
 };

@@ -8,40 +8,45 @@ import {
   isFollowerSendsPartialStateMessage,
   isKeyholderHello,
 } from "../commons/leader-keyholder-interface";
+import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 
 export const router = new DataChannelMessageRouter();
 
-router.addHandler(isKeyholderHello, (localId, message, dataChannelMng) => {
-  console.log("[OpenLockedBox] Received message in handler:", message);
+router.addHandler(isKeyholderHello, (peerId, message, dataChannelMng) => {
   const store = useOpenLockedBoxStore.getState();
   const actions = useOpenLockedBoxStore.getState().actions;
 
   const offline = store.offLineKeyHolders.find((x) => x.id === message.id);
   const online = store.onlineKeyHolders.find((x) => x.id === message.id);
-  const keyMatch = true;
   const encryptedMatch = true;
 
-  if (!offline || online || !encryptedMatch || keyMatch) {
+  let errorReason: string | null = null;
+
+  if (!offline && !online) {
+    errorReason = "Keyholder not found";
+  } else if (online) {
+    errorReason = "Keyholder not found or already online.";
+  } else if (!encryptedMatch) {
+    errorReason = "Encrypted message does not match.";
+  }
+
+  if (errorReason) {
     const errorMsg: LeaderError = {
       type: "leader:error",
-      reason: keyMatch
-        ? "You are trying to connect with key that is already present in session"
-        : !offline
-          ? "Keyholder not found or already online."
-          : !encryptedMatch
-            ? "Encrypted message does not match."
-            : "Unknown error.",
+      reason: errorReason,
     };
-    dataChannelMng?.sendMessageToSinglePeer(localId, errorMsg);
+    dataChannelMng?.sendMessageToSinglePeer(peerId, errorMsg);
     return;
   }
 
   // All good, add to onlineKeyHolders
   actions.connectKeyHolder({
     id: message.id,
-    name: offline.name,
+    name: offline?.name ?? "",
     userAgent: message.userAgent,
   });
+
+  const keyHolderId = message.id;
 
   const welcomeMsg: LeaderWelcome = {
     type: "leader:welcome",
@@ -50,14 +55,25 @@ router.addHandler(isKeyholderHello, (localId, message, dataChannelMng) => {
     id: store.you.id,
     onlineKeyHolders: [
       ...store.onlineKeyHolders,
-      { id: message.id, name: offline.name, userAgent: message.userAgent },
+      {
+        id: message.id,
+        name: offline?.name ?? "",
+        userAgent: message.userAgent,
+      },
     ],
   };
-  dataChannelMng?.sendMessageToSinglePeer(localId, welcomeMsg);
+  usePeerToHolderMapRef.getValue().setPair({ peerId, keyHolderId });
+  dataChannelMng?.sendMessageToSinglePeer(peerId, welcomeMsg);
 });
 
-router.addHandler(isFollowerSendsPartialStateMessage, (localId, message) => {
+router.addHandler(isFollowerSendsPartialStateMessage, (peerId, message) => {
   const { actions } = useOpenLockedBoxStore.getState();
+
+  const keyHolderId = usePeerToHolderMapRef.getValue().getKeyholerId(peerId);
+  if (!keyHolderId) {
+    console.warn(`Keyholder id not found for peer: ${peerId}`);
+    return;
+  }
 
   const shareAccessKeyByKeyholderId = Object.fromEntries(
     message.keyHoldersIdsToSharedKeyWith.map((keyHolderId) => [
@@ -66,5 +82,5 @@ router.addHandler(isFollowerSendsPartialStateMessage, (localId, message) => {
     ]),
   );
 
-  actions.setShareAccessKeyByKeyholderId(localId, shareAccessKeyByKeyholderId);
+  actions.setShareAccessKeyByKeyholderId(peerId, shareAccessKeyByKeyholderId);
 });

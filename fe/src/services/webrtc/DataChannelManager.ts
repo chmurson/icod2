@@ -99,6 +99,9 @@ export class DataChannelManager<
         return false;
       }
 
+      console.log(
+        `Sending message ${"type" in message ? message.type : JSON.stringify(message)} to peer ${localId}`,
+      );
       peer.channel.send(JSON.stringify(message));
       return true;
     } catch (error) {
@@ -111,6 +114,9 @@ export class DataChannelManager<
     this.objectIdSet.forEach((objectId) => {
       const peer = this.peers.get(objectId);
       if (peer && peer.channel.readyState === "open") {
+        console.log(
+          `Sending message ${"type" in message ? message.type : JSON.stringify(message)} to peer ${objectId.localID}`,
+        );
         peer.channel.send(JSON.stringify(message));
       } else {
         console.warn(

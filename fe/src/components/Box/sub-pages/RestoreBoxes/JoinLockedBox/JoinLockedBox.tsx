@@ -5,9 +5,11 @@ import { ShareAccessDropdown } from "@/components/Box/components/ShareAccessDrop
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
+import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
   const state = useJoinLockedBoxStore((state) => state.state);
+  useJoinLockedBoxConnection();
 
   const onlineKeyHolders = useJoinLockedBoxStore(
     (state) => state.onlineKeyHolders,
