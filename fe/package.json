@@ -10,7 +10,8 @@
     "lint": "yarn run -T biome check",
     "lint:fix": "yarn run -T biome check --write",
     "type-check": "tsc --noEmit --project tsconfig.app.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -43,7 +44,8 @@
     "@vitejs/plugin-react": "^4.5.2",
     "tailwindcss": "^4.1.11",
     "typescript": "~5.8.3",
-    "vite": "^7.0.0"
+    "vite": "^7.0.0",
+    "vitest": "^3.2.4"
   },
   "packageManager": "yarn@4.9.2"
 }

@@ -5,8 +5,7 @@ import type {
   LeaderCounterStart,
   LeaderCounterStop,
   LeaderError,
-  LeaderOfflineKeyholders,
-  LeaderOnlineKeyholders,
+  LeaderSendsPartialStateMessage,
   LeaderWelcome,
 } from "../commons/leader-keyholder-interface";
 
@@ -17,18 +16,16 @@ export const useDataChannelSendMessages = ({
 }) => {
   const sendError = useSendError(dataChannelManagerRef);
   const sendWelcome = useSendWelcome(dataChannelManagerRef);
-  const sendOnlineKeyholders = useSendOnlineKeyholders(dataChannelManagerRef);
-  const sendOfflineKeyholders = useSendOfflineKeyholders(dataChannelManagerRef);
   const sendCounterStart = useSendCounterStart(dataChannelManagerRef);
   const sendCounterStop = useSendCounterStop(dataChannelManagerRef);
+  const sendPartialUpdate = useSendPartialStateUpdate(dataChannelManagerRef);
 
   return {
     sendError,
     sendWelcome,
-    sendOnlineKeyholders,
-    sendOfflineKeyholders,
     sendCounterStart,
     sendCounterStop,
+    sendPartialUpdate,
   };
 };
 
@@ -64,28 +61,15 @@ const useSendWelcome = (
     [dataChannelManagerRef],
   );
 
-const useSendOnlineKeyholders = (
+const useSendPartialStateUpdate = (
   dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
 ) =>
   useCallback(
-    (onlineKeyHolders: LeaderOnlineKeyholders["onlineKeyHolders"]) => {
+    (payload: Omit<LeaderSendsPartialStateMessage, "type">) => {
       dataChannelManagerRef.current?.sendMessageToAllPeers({
-        type: "leader:online-keyholders",
-        onlineKeyHolders,
-      } satisfies LeaderOnlineKeyholders);
-    },
-    [dataChannelManagerRef],
-  );
-
-const useSendOfflineKeyholders = (
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
-) =>
-  useCallback(
-    (offlineKeyHolders: LeaderOfflineKeyholders["offlineKeyHolders"]) => {
-      dataChannelManagerRef.current?.sendMessageToAllPeers({
-        type: "leader:offline-keyholders",
-        offlineKeyHolders,
-      } satisfies LeaderOfflineKeyholders);
+        type: "leader:send-partial-state",
+        ...payload,
+      });
     },
     [dataChannelManagerRef],
   );

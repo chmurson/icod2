@@ -15,12 +15,11 @@ import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
 export const OpenLockedBox: React.FC = () => {
   const { dataChannelManagerRef } = useOpenLockedBoxConnection();
-  const {
-    sendOfflineKeyholders,
-    sendOnlineKeyholders,
-    sendCounterStart,
-    sendCounterStop,
-  } = useDataChannelSendMessages({ dataChannelManagerRef });
+  const { sendCounterStart, sendCounterStop } = useDataChannelSendMessages({
+    dataChannelManagerRef,
+  });
+
+  useOpenLockedBoxConnection();
 
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
@@ -48,14 +47,6 @@ export const OpenLockedBox: React.FC = () => {
       persistStartedUnlocking(sessionId);
     }
   }, [sessionId]);
-
-  useEffect(() => {
-    sendOnlineKeyholders(onlineKeyHolders);
-  }, [onlineKeyHolders, sendOnlineKeyholders]);
-
-  useEffect(() => {
-    sendOfflineKeyholders(offLineKeyHolders);
-  }, [offLineKeyHolders, sendOfflineKeyholders]);
 
   useEffect(() => {
     if (

@@ -1,7 +1,5 @@
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 
-// Message types for OpenLockedBox <-> JoinLockedBox WebRTC communication
-
 export interface KeyholderHello {
   type: "keyholder:hello";
   userAgent: string;
@@ -21,16 +19,6 @@ export interface LeaderError {
   reason: string;
 }
 
-export interface LeaderOnlineKeyholders {
-  type: "leader:online-keyholders";
-  onlineKeyHolders: ParticipantType[];
-}
-
-export interface LeaderOfflineKeyholders {
-  type: "leader:offline-keyholders";
-  offlineKeyHolders: ParticipantType[];
-}
-
 export interface LeaderCounterStart {
   type: "leader:counter-start";
   unlockingStartDate: string;
@@ -40,14 +28,19 @@ export interface LeaderCounterStop {
   type: "leader:counter-stop";
 }
 
+export interface LeaderSendsPartialStateMessage {
+  type: "leader:send-partial-state";
+  shareAccessKeyMapByKeyHolderId?: Record<string, Record<string, boolean>>;
+  onlineKeyHolders?: ParticipantType[];
+}
+
 export type RestoreBoxesMessage =
   | KeyholderHello
   | LeaderWelcome
   | LeaderError
-  | LeaderOnlineKeyholders
-  | LeaderOfflineKeyholders
   | LeaderCounterStart
-  | LeaderCounterStop;
+  | LeaderCounterStop
+  | LeaderSendsPartialStateMessage;
 
 export function isKeyholderHello(msg: object): msg is KeyholderHello {
   return (
@@ -84,28 +77,6 @@ export function isLeaderError(msg: object): msg is LeaderError {
   );
 }
 
-export function isLeaderOnlineKeyholders(
-  msg: object,
-): msg is LeaderOnlineKeyholders {
-  return (
-    "type" in msg &&
-    msg.type === "leader:online-keyholders" &&
-    "onlineKeyHolders" in msg &&
-    Array.isArray(msg.onlineKeyHolders)
-  );
-}
-
-export function isLeaderOfflineKeyholders(
-  msg: object,
-): msg is LeaderOfflineKeyholders {
-  return (
-    "type" in msg &&
-    msg.type === "leader:offline-keyholders" &&
-    "offlineKeyHolders" in msg &&
-    Array.isArray(msg.offlineKeyHolders)
-  );
-}
-
 export type FollowerSendsPartialStateMessage = {
   type: "follower:send-partial-state";
   keyHoldersIdsToSharedKeyWith: string[];
@@ -134,4 +105,18 @@ export function isLeaderCounterStart(msg: any): msg is LeaderCounterStart {
 
 export function isLeaderCounterStop(msg: any): msg is LeaderCounterStop {
   return msg && msg.type === "leader:counter-stop";
+}
+
+export function isLeaderSendsPartialStateMessage(
+  msg: object,
+): msg is LeaderSendsPartialStateMessage {
+  return (
+    typeof msg === "object" &&
+    msg !== null &&
+    "type" in msg &&
+    msg.type === "leader:send-partial-state" &&
+    (!("shareAccessKeyMapByKeyHolderId" in msg) ||
+      (typeof msg.shareAccessKeyMapByKeyHolderId === "object" &&
+        msg.shareAccessKeyMapByKeyHolderId !== null))
+  );
 }

@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import { areArraysOfPrimitiveEqual } from "@/utils/areArraysOfPrimitiveEqual";
+import { hasSameTrueKeys } from "@/utils/hasSameTrueKeys";
 import type { ParticipantType } from "./common-types";
 
 const joinLockedBoxState = {
@@ -29,6 +31,7 @@ const joinLockedBoxState = {
   decryptedContent: "",
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
   unlockingStartDate: null as Date | null,
+  shareAccessKeyMapByKeyHolderId: {} as Record<string, Record<string, boolean>>,
 };
 
 export type JoinLockedBoxStateData = typeof joinLockedBoxState;
@@ -50,7 +53,6 @@ type JoinLockedBoxState = {
     connectKeyHolder: (
       participant: ParticipantType & { isLeader?: boolean },
     ) => void;
-    disconnectKeyHolder: (participant: ParticipantType) => void;
     open: (message: {
       title?: string;
       content?: string;
@@ -59,6 +61,17 @@ type JoinLockedBoxState = {
     }) => void;
     setError: (error: string) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
+    setPartialStateUpdate: (
+      payload: Partial<
+        Pick<
+          JoinLockedBoxStateData,
+          | "shareAccessKeyMapByKeyHolderId"
+          | "onlineKeyHolders"
+          | "offLineKeyHolders"
+          | "unlockingStartDate"
+        >
+      >,
+    ) => void;
   };
 } & JoinLockedBoxStateData;
 
@@ -148,32 +161,6 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           };
         });
       },
-      disconnectKeyHolder: (keyHolder: ParticipantType) => {
-        set((state) => {
-          const offLineKeyHolders = [
-            ...state.offLineKeyHolders,
-            {
-              ...keyHolder,
-            },
-          ];
-
-          const onlineKeyHolders = state.onlineKeyHolders.filter(
-            (x) => x.id !== keyHolder.id,
-          );
-
-          if (keyHolder.id === state.connectedLeaderId) {
-            return {
-              connectedLeaderId: undefined,
-              offLineKeyHolders,
-              onlineKeyHolders,
-            };
-          }
-          return {
-            offLineKeyHolders,
-            onlineKeyHolders,
-          };
-        });
-      },
       open: (message) =>
         set({
           ...message,
@@ -187,6 +174,57 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
       setError: (error: string) => set({ error }),
       setUnlockingStartDate: (unlockingStartDate: Date) =>
         set({ unlockingStartDate }),
+      setPartialStateUpdate: (
+        payload: Partial<
+          Pick<
+            JoinLockedBoxStateData,
+            | "shareAccessKeyMapByKeyHolderId"
+            | "onlineKeyHolders"
+            | "offLineKeyHolders"
+          >
+        >,
+      ) =>
+        set((state) => {
+          const filteredPayload: typeof payload = {};
+
+          if (
+            !hasSameTrueKeys(
+              state.shareAccessKeyMapByKeyHolderId,
+              payload.shareAccessKeyMapByKeyHolderId ?? {},
+            )
+          ) {
+            filteredPayload.shareAccessKeyMapByKeyHolderId =
+              payload.shareAccessKeyMapByKeyHolderId ?? {};
+          }
+
+          const newOnlineKeyHolders = (payload.onlineKeyHolders ?? []).filter(
+            (kh) => kh.id !== state.you.id,
+          );
+
+          if (
+            payload.onlineKeyHolders &&
+            !areArraysOfPrimitiveEqual(
+              state.onlineKeyHolders,
+              newOnlineKeyHolders,
+            )
+          ) {
+            const newOffLineKeyHolders = [
+              ...state.onlineKeyHolders,
+              ...state.offLineKeyHolders,
+            ].filter(
+              (kh) =>
+                kh.id !== state.you.id &&
+                !newOnlineKeyHolders.some(
+                  (newOnlineKh) => kh.id !== newOnlineKh.id,
+                ),
+            );
+
+            filteredPayload.onlineKeyHolders = newOnlineKeyHolders;
+            filteredPayload.offLineKeyHolders = newOffLineKeyHolders;
+          }
+
+          return filteredPayload;
+        }),
     },
   })),
 );
