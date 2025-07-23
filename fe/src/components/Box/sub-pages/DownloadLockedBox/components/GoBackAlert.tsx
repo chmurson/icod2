@@ -17,7 +17,9 @@ export const GoBackAlert = ({
     <AlertDialog.Root open={open}>
       {triggerSlot && <AlertDialog.Trigger>{triggerSlot}</AlertDialog.Trigger>}
       <AlertDialog.Content maxWidth="450px">
-        <AlertDialog.Title>The Locked Box is not downloaded</AlertDialog.Title>
+        <AlertDialog.Title as="h2">
+          The Locked Box is not downloaded
+        </AlertDialog.Title>
         <AlertDialog.Description size="2">
           Are you sure? This application will no longer be accessible, and you
           will lose your chance to download the Locked Box.
