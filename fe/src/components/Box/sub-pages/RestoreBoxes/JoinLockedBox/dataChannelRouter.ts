@@ -12,6 +12,7 @@ export const router = new DataChannelMessageRouter();
 
 router.addHandler(isLeaderWelcome, (peerId, message) => {
   const actions = useJoinLockedBoxStore.getState().actions;
+
   usePeerToHolderMapRef.getValue().setPair({ peerId, keyHolderId: message.id });
 
   actions.connectKeyHolder({

@@ -118,7 +118,9 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           const { isLeader, ...keyHolderObject } = keyHolder;
 
           const onlineKeyHolders = [
-            ...state.onlineKeyHolders,
+            ...state.onlineKeyHolders.filter(
+              (kh) => kh.id !== keyHolderObject.id,
+            ),
             {
               ...keyHolderObject,
             },
