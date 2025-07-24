@@ -59,7 +59,13 @@ export const OpenLockedBox: React.FC = () => {
     },
   });
 
-  if (!["connecting", "connected", "opened"].includes(state)) {
+  const loadingStates = [
+    "connecting",
+    "connected",
+    "ready-to-unlock",
+  ] satisfies (typeof state)[];
+
+  if (!(loadingStates as string[]).includes(state)) {
     return <div>Loading...</div>;
   }
 

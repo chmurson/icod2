@@ -10,6 +10,7 @@ import {
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
 } from "../commons/components";
 import { CounterWithInfo } from "../commons/components/CounterWithInfo";
+import { OpenBoxButton as OpenBoxButtonDumb } from "../commons/components/OpenBoxButton";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
@@ -31,8 +32,13 @@ export const JoinLockedBox: React.FC = () => {
   const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
   const actions = useJoinLockedBoxStore((state) => state.actions);
 
-  // Only show UI when in connecting/connected/opened state
-  if (!["connecting", "connected", "opened"].includes(state)) {
+  const loadingStates = [
+    "connecting",
+    "connected",
+    "ready-to-unlock",
+  ] satisfies (typeof state)[];
+
+  if (!(loadingStates as string[]).includes(state)) {
     return <div>Loading...</div>;
   }
 
@@ -42,20 +48,24 @@ export const JoinLockedBox: React.FC = () => {
 
   const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
 
-  console.log(unlockingStartDate, "unlockingStartDate");
+  const showUnlockBoxButton =
+    state === "ready-to-unlock" && actions.hasEnoughKeysToUnlock();
 
   return (
     <div className="flex flex-col gap-8">
       <Text variant="pageTitle" className="mt-4">
         Join a Locked Box
       </Text>
-      <CounterWithInfo
-        unlockingStartDate={unlockingStartDate}
-        keyThreshold={keyThreshold}
-        onlineKeyHoldersCount={
-          onlineKeyHolders.length + offLineKeyHolders.length + 1
-        }
-      />
+      {!showUnlockBoxButton && (
+        <CounterWithInfo
+          unlockingStartDate={unlockingStartDate}
+          keyThreshold={keyThreshold}
+          onlineKeyHoldersCount={
+            onlineKeyHolders.length + offLineKeyHolders.length + 1
+          }
+        />
+      )}
+      {showUnlockBoxButton && <OpenBoxButton />}
       <LoobbyKeyHolders
         offLineKeyHolders={offLineKeyHolders}
         onlineKeyHolders={onlineKeyHolders}
@@ -145,4 +155,20 @@ const ShareAccessDropdown: FC<{
       }))}
     />
   );
+};
+
+const OpenBoxButton = () => {
+  const receivedKeysByKeyHolderId = useJoinLockedBoxStore(
+    (state) => state.receivedKeysByKeyHolderId,
+  );
+
+  const key = useJoinLockedBoxStore((state) => state.key);
+
+  const encryptedMessage = useJoinLockedBoxStore(
+    (state) => state.encryptedMessage,
+  );
+
+  const keys = [...Object.values(receivedKeysByKeyHolderId ?? {}), key];
+
+  return <OpenBoxButtonDumb encryptedMessage={encryptedMessage} keys={keys} />;
 };

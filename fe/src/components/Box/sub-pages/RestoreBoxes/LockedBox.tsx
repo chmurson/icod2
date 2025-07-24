@@ -5,6 +5,15 @@ import { DropLockedBox } from "./DropLockedBox/DropLockedBox";
 import { JoinLockedBox } from "./JoinLockedBox/JoinLockedBox";
 import { OpenLockedBox } from "./OpenLockedBox/OpenLockedBox";
 
+type UnlockingPageState = ReturnType<
+  (typeof useOpenLockedBoxStore)["getState"]
+>["state"];
+
+const lobbyStates = [
+  "connecting",
+  "ready-to-unlock",
+] satisfies UnlockingPageState[] as string[];
+
 const LockedBox: React.FC = () => {
   const currentPage = useCurrentPage();
 
@@ -39,11 +48,11 @@ const useCurrentPage = () => {
   const joinLockedBoxError = useJoinLockedBoxStore((state) => state.error);
 
   useEffect(() => {
-    if (joinLockedBoxState === "connecting" && !joinLockedBoxError) {
+    if (lobbyStates.includes(joinLockedBoxState) && !joinLockedBoxError) {
       return setCurrentPage("join");
     }
 
-    if (openLockedBoxState === "connecting") {
+    if (lobbyStates.includes(openLockedBoxState)) {
       return setCurrentPage("open");
     }
 
