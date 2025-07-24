@@ -31,6 +31,17 @@
 	--color-background-light: #ffffff;
 	--color-text-light: #213547;
 	--color-button-light: #f9f9f9;
+
+	/*alternane accent color*/
+	--alt-accent-1: #F0FDF4;
+	--alt-accent-2: #DCFCE7;
+	--alt-accent-3: #BEFAD6;
+	--alt-accent-4: #86EFAC;
+	--alt-accent-5: #4ADE80;
+	--alt-accent-6: #22C55E;
+	--alt-accent-7: #16A34A;
+	--alt-accent-8: #15803D;
+	--alt-accent-9: #1F6F3F
 }
 
 /* Base styles that complement Tailwind */
@@ -61,12 +72,6 @@ a {
 a:hover {
 	@apply text-[--color-primary-hover];
 	@apply dark:text-[--color-primary-light];
-}
-
-button {
-	@apply text-sm font-bold;
-	@apply cursor-pointer transition-colors;
-	@apply dark:bg-[--color-button-light];
 }
 
 @media (prefers-color-scheme: light) {

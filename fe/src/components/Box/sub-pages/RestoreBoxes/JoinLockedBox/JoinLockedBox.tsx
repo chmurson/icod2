@@ -65,7 +65,14 @@ export const JoinLockedBox: React.FC = () => {
           }
         />
       )}
-      {showUnlockBoxButton && <OpenBoxButton />}
+      {showUnlockBoxButton && (
+        <div className="flex flex-col gap-4 items-center">
+          <OpenBoxButton />
+          <Text variant="secondaryText">
+            All keys collected - ready to unlock
+          </Text>
+        </div>
+      )}
       <LoobbyKeyHolders
         offLineKeyHolders={offLineKeyHolders}
         onlineKeyHolders={onlineKeyHolders}

@@ -61,6 +61,7 @@ type OpenLockedBoxState = {
     disconnectKeyHolder: (participantId: string) => void;
     addReceivedKey: (message: { fromKeyHolderId: string; key: string }) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
+    hasEnoughKeysToUnlock: () => boolean;
   };
 } & OpenLockedBoxStateData;
 
@@ -190,6 +191,16 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         }),
       setUnlockingStartDate: (unlockingStartDate: Date | null) =>
         set({ unlockingStartDate }),
+      hasEnoughKeysToUnlock: () => {
+        const { receivedKeysByKeyHolderId, keyThreshold, key } = get();
+
+        const receivedKeysNumber = Object.keys(
+          receivedKeysByKeyHolderId ?? {},
+        ).length;
+        const hasKeyHimself = !!key?.trim();
+
+        return receivedKeysNumber + (hasKeyHimself ? 1 : 0) >= keyThreshold;
+      },
     } satisfies OpenLockedBoxState["actions"],
   })),
 );
@@ -205,7 +216,12 @@ if (import.meta.env.DEV === true) {
 
       offLineKeyHolders.forEach(connectKeyHolder);
     },
-    addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) =>
-      useOpenLockedBoxStore.getState().actions.addReceivedKey(arg),
+    setReadyToUnlock: () => {
+      useOpenLockedBoxStore.getState().actions.setReadyToUnlock();
+    },
+    addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) => {
+      useOpenLockedBoxStore.getState().actions.addReceivedKey(arg);
+      useOpenLockedBoxStore.getState().actions.setReadyToUnlock();
+    },
   };
 }
