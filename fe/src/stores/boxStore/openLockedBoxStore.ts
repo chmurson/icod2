@@ -42,6 +42,7 @@ type OpenLockedBoxState = {
   actions: {
     reset: () => void;
     start: () => void;
+    setReadyToUnlock: () => void;
     connect: (args: {
       boxTitle: string;
       encryptedMessage: string;
@@ -58,18 +59,17 @@ type OpenLockedBoxState = {
     ) => void;
     connectKeyHolder: (participant: ParticipantType) => void;
     disconnectKeyHolder: (participantId: string) => void;
-    setReceivedKeysByKeyHolderId: (message: {
-      keysByKeyHolderId?: Record<string, string>;
-    }) => void;
+    addReceivedKey: (message: { fromKeyHolderId: string; key: string }) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
   };
 } & OpenLockedBoxStateData;
 
 export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
-  devtools((set) => ({
+  devtools((set, get) => ({
     ...openLockedBoxState,
     actions: {
       start: () => set({ ...openLockedBoxState, state: "drop-box" }),
+      setReadyToUnlock: () => set({ state: "ready-to-unlock" }),
       toggleShareAccessKey: (keyHolderId: string, value?: boolean) =>
         set((state) => {
           const shareAccessKeyByKeyHolderId = {
@@ -177,10 +177,12 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
           };
         });
       },
-      setReceivedKeysByKeyHolderId: (message) =>
+      addReceivedKey: ({ fromKeyHolderId, key }) =>
         set({
-          receivedKeysByKeyHolderId: message.keysByKeyHolderId,
-          state: "ready-to-unlock",
+          receivedKeysByKeyHolderId: {
+            ...get().receivedKeysByKeyHolderId,
+            [fromKeyHolderId]: key,
+          },
         }),
       reset: () =>
         set({
@@ -203,5 +205,7 @@ if (import.meta.env.DEV === true) {
 
       offLineKeyHolders.forEach(connectKeyHolder);
     },
+    addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) =>
+      useOpenLockedBoxStore.getState().actions.addReceivedKey(arg),
   };
 }
