@@ -12,6 +12,7 @@ import {
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
 } from "../commons/components";
 import { CounterWithInfo } from "../commons/components/CounterWithInfo";
+import { OpenBoxButton as OpenBoxButtonDumb } from "../commons/components/OpenBoxButton";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useNavigateToShareableLink } from "./hooks";
@@ -75,16 +76,31 @@ export const OpenLockedBox: React.FC = () => {
 
   const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
 
+  const showUnlockBoxButton =
+    state === "ready-to-unlock" && actions.hasEnoughKeysToUnlock();
+
   return (
     <div className="flex flex-col gap-8">
       <Text variant="pageTitle" className="mt-4">
         Open a Locked Box
       </Text>
-      <CounterWithInfo
-        unlockingStartDate={unlockingStartDate}
-        keyThreshold={keyThreshold}
-        onlineKeyHoldersCount={possibleKeyHolders.length}
-      />
+      {!showUnlockBoxButton && (
+        <CounterWithInfo
+          unlockingStartDate={unlockingStartDate}
+          keyThreshold={keyThreshold}
+          onlineKeyHoldersCount={
+            onlineKeyHolders.length + offLineKeyHolders.length + 1
+          }
+        />
+      )}
+      {showUnlockBoxButton && (
+        <div className="flex flex-col gap-4 items-center">
+          <OpenBoxButton />
+          <Text variant="secondaryText">
+            All keys collected - ready to unlock
+          </Text>
+        </div>
+      )}
       <div className="flex flex-col gap-4">
         {shareableURL && (
           <FieldArea label="Invite URL">
@@ -181,4 +197,20 @@ const ShareAccessDropdown: FC<{
       }))}
     />
   );
+};
+
+const OpenBoxButton = () => {
+  const receivedKeysByKeyHolderId = useOpenLockedBoxStore(
+    (state) => state.receivedKeysByKeyHolderId,
+  );
+
+  const key = useOpenLockedBoxStore((state) => state.key);
+
+  const encryptedMessage = useOpenLockedBoxStore(
+    (state) => state.encryptedMessage,
+  );
+
+  const keys = [...Object.values(receivedKeysByKeyHolderId ?? {}), key];
+
+  return <OpenBoxButtonDumb encryptedMessage={encryptedMessage} keys={keys} />;
 };
