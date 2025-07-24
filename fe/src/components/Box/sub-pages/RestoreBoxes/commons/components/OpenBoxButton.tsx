@@ -2,6 +2,8 @@ import { Button, Dialog, TextArea } from "@radix-ui/themes";
 import type { FC } from "react";
 import { lazy, Suspense, useCallback, useState } from "react";
 import { Alert } from "@/ui/Alert";
+import { AlternateProminentButton } from "./AlternateProminentButton";
+import tokenSvg from "./assets/token.svg";
 
 const MessageDecryptor = lazy(() =>
   import("./MessageDecryptor").then((module) => ({
@@ -36,7 +38,10 @@ export const OpenBoxButton: FC<Props> = ({ encryptedMessage, keys }) => {
   return (
     <Dialog.Root open={isDialogOpen} onOpenChange={handleBoxOpen}>
       <Dialog.Trigger>
-        <Button>Open Box</Button>
+        <AlternateProminentButton className="self-center">
+          <img alt="box" src={tokenSvg} width={18} height={18} />
+          Open Box
+        </AlternateProminentButton>
       </Dialog.Trigger>
 
       <Dialog.Content style={{ maxWidth: 450 }}>
