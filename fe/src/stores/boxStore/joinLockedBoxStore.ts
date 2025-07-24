@@ -267,7 +267,12 @@ if (import.meta.env.DEV === true) {
 
       offLineKeyHolders.forEach(connectKeyHolder);
     },
-    addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) =>
-      useJoinLockedBoxStore.getState().actions.addReceivedKey(arg),
+    setReadyToUnlock: () => {
+      useJoinLockedBoxStore.getState().actions.setReadyToUnlock();
+    },
+    addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) => {
+      useJoinLockedBoxStore.getState().actions.addReceivedKey(arg);
+      useJoinLockedBoxStore.getState().actions.setReadyToUnlock();
+    },
   };
 }
