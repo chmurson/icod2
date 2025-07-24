@@ -1,7 +1,9 @@
+import { isEqual, startOfSecond } from "date-fns";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { areArraysOfPrimitiveEqual } from "@/utils/areArraysOfPrimitiveEqual";
 import { hasSameTrueKeys } from "@/utils/hasSameTrueKeys";
+import { safeParseAndCheckRecent } from "@/utils/safeDateParseAndCheckRecent";
 import type { ParticipantType } from "./common-types";
 
 const joinLockedBoxState = {
@@ -36,6 +38,17 @@ const joinLockedBoxState = {
 
 export type JoinLockedBoxStateData = typeof joinLockedBoxState;
 
+type SetPartialStateUpdate = (
+  payload: Partial<
+    Pick<
+      JoinLockedBoxStateData,
+      | "shareAccessKeyMapByKeyHolderId"
+      | "onlineKeyHolders"
+      | "offLineKeyHolders"
+    > & { unlockingStartDate?: string | null }
+  >,
+) => void;
+
 type JoinLockedBoxState = {
   actions: {
     reset: () => void;
@@ -61,17 +74,7 @@ type JoinLockedBoxState = {
     }) => void;
     setError: (error: string) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
-    setPartialStateUpdate: (
-      payload: Partial<
-        Pick<
-          JoinLockedBoxStateData,
-          | "shareAccessKeyMapByKeyHolderId"
-          | "onlineKeyHolders"
-          | "offLineKeyHolders"
-          | "unlockingStartDate"
-        >
-      >,
-    ) => void;
+    setPartialStateUpdate: SetPartialStateUpdate;
   };
 } & JoinLockedBoxStateData;
 
@@ -174,18 +177,11 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
       setError: (error: string) => set({ error }),
       setUnlockingStartDate: (unlockingStartDate: Date) =>
         set({ unlockingStartDate }),
-      setPartialStateUpdate: (
-        payload: Partial<
-          Pick<
-            JoinLockedBoxStateData,
-            | "shareAccessKeyMapByKeyHolderId"
-            | "onlineKeyHolders"
-            | "offLineKeyHolders"
-          >
-        >,
-      ) =>
+      setPartialStateUpdate: (payload: Parameters<SetPartialStateUpdate>[0]) =>
         set((state) => {
-          const filteredPayload: typeof payload = {};
+          const filteredPayload: Omit<typeof payload, "unlockingStartDate"> & {
+            unlockingStartDate?: Date | null;
+          } = {};
 
           if (
             !hasSameTrueKeys(
@@ -221,6 +217,30 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
 
             filteredPayload.onlineKeyHolders = newOnlineKeyHolders;
             filteredPayload.offLineKeyHolders = newOffLineKeyHolders;
+          }
+
+          if (payload.unlockingStartDate !== undefined) {
+            const payloadStartDate =
+              payload.unlockingStartDate === null
+                ? null
+                : safeParseAndCheckRecent(payload.unlockingStartDate);
+
+            // only one null means dates are different
+            if (
+              [payloadStartDate, state.unlockingStartDate].filter(
+                (x) => x === null,
+              ).length === 1
+            ) {
+              filteredPayload.unlockingStartDate = payloadStartDate;
+            } else if (
+              !!payloadStartDate &&
+              !!state.unlockingStartDate &&
+              !isEqual(
+                startOfSecond(payloadStartDate),
+                startOfSecond(state.unlockingStartDate),
+              )
+            )
+              filteredPayload.unlockingStartDate = payloadStartDate;
           }
 
           return filteredPayload;

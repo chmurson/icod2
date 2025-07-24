@@ -22,17 +22,3 @@ export interface LeaderError {
   type: "leader:error";
   reason: string;
 }
-
-export type RestoreBoxesMessage = KeyholderHello | LeaderWelcome | LeaderError;
-
-export function isKeyholderHello(msg: any): msg is KeyholderHello {
-  return msg && msg.type === "keyholder:hello";
-}
-
-export function isLeaderWelcome(msg: any): msg is LeaderWelcome {
-  return msg && msg.type === "leader:welcome";
-}
-
-export function isLeaderError(msg: any): msg is LeaderError {
-  return msg && msg.type === "leader:error";
-}

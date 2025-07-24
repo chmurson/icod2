@@ -25,6 +25,7 @@
     "@redux-devtools/extension": "^3.3.0",
     "@tailwindcss/vite": "^4.1.11",
     "@types/node": "^24.0.8",
+    "date-fns": "^4.1.0",
     "detect-browser": "^5.3.0",
     "icod-crypto-js": "workspace:*",
     "postcss": "^8.5.6",
