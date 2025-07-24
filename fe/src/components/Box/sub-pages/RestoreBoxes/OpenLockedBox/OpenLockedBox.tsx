@@ -20,7 +20,8 @@ import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
 export const OpenLockedBox: React.FC = () => {
   const { dataChannelManagerRef } = useOpenLockedBoxConnection();
-  const { sendCounterStart, sendCounterStop } = useDataChannelSendMessages({
+
+  useDataChannelSendMessages({
     dataChannelManagerRef,
   });
 
@@ -51,12 +52,10 @@ export const OpenLockedBox: React.FC = () => {
 
   useInitiateCounter({
     onStart: (date) => {
-      sendCounterStart(date);
       actions.setUnlockingStartDate(date);
     },
     onStop: () => {
       actions.setUnlockingStartDate(null);
-      sendCounterStop();
     },
   });
 

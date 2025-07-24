@@ -1,8 +1,6 @@
 import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import {
-  isLeaderCounterStart,
-  isLeaderCounterStop,
   isLeaderError,
   isLeaderSendsPartialStateMessage,
   isLeaderWelcome,
@@ -31,15 +29,4 @@ router.addHandler(isLeaderError, (_, message) => {
 router.addHandler(isLeaderSendsPartialStateMessage, (_, message) => {
   const { actions } = useJoinLockedBoxStore.getState();
   actions.setPartialStateUpdate(message);
-});
-
-router.addHandler(isLeaderCounterStart, (_, message) => {
-  const { unlockingStartDate } = message;
-  const { actions } = useJoinLockedBoxStore.getState();
-  actions.setUnlockingStartDate(new Date(unlockingStartDate));
-});
-
-router.addHandler(isLeaderCounterStop, (_, __) => {
-  const { actions } = useJoinLockedBoxStore.getState();
-  actions.setUnlockingStartDate(null);
 });

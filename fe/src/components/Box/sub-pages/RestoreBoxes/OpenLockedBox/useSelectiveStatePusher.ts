@@ -14,6 +14,9 @@ export const useOnChangeShareablePartOfState = ({
     (state) => state.onlineKeyHolders,
   );
   const you = useOpenLockedBoxStore((state) => state.you);
+  const unlockingStartDate = useOpenLockedBoxStore(
+    (state) => state.unlockingStartDate,
+  );
 
   useEffect(() => {
     if (!onChange) {
@@ -23,6 +26,13 @@ export const useOnChangeShareablePartOfState = ({
     onChange({
       shareAccessKeyMapByKeyHolderId: shareAccessKeyMapByKeyholderId,
       onlineKeyHolders: [...onlineKeyHolders, you],
+      unlockingStartDate: unlockingStartDate?.toISOString(),
     });
-  }, [shareAccessKeyMapByKeyholderId, onlineKeyHolders, onChange, you]);
+  }, [
+    shareAccessKeyMapByKeyholderId,
+    onlineKeyHolders,
+    onChange,
+    you,
+    unlockingStartDate,
+  ]);
 };
