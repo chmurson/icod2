@@ -38,24 +38,24 @@ export const LoobbyKeyHolders: FC<{
         <div className="col-span-full py-1">
           <Text variant="label">Your access key</Text>
         </div>
-        <div className="py-3 border-b  border-gray-200 ">
+        <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
           <ParticipantItemAvatar name={you.name} />
         </div>
-        <div className="py-3 border-b  border-gray-200">
+        <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
           <ParticipantItemDescription name={you.name} ua={you.userAgent} />
         </div>
-        <div className="py-3 border-b  border-gray-200 flex items-center">
+        <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
           <Text variant="secondaryText" className="text-sm">
             Ready to unlock
           </Text>
         </div>
-        <div className="py-3 border-b  border-gray-200 flex items-center">
+        <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
           <ShareAccesKeyAvatars
             keyHolderId={you.id}
             possibleKeyHolders={possibleKeyHolders}
           />
         </div>
-        <div className="flex justify-end items-center py-3 border-b  border-gray-200 ">
+        <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700 ">
           <ShareAccessDropdown onlineKeyHolders={onlineKeyHolders} />
         </div>
         {onlineKeyHolders.length > 0 && (
@@ -66,24 +66,24 @@ export const LoobbyKeyHolders: FC<{
         {onlineKeyHolders.length !== 0 &&
           onlineKeyHolders.map((kh) => (
             <Fragment key={kh.id}>
-              <div className="py-3 border-b  border-gray-200">
+              <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
                 <ParticipantItemAvatar name={kh.name} />
               </div>
-              <div className="py-3 border-b  border-gray-200">
+              <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
                 <ParticipantItemDescription name={kh.name} ua={kh.userAgent} />
               </div>
-              <div className="py-3 border-b  border-gray-200 flex items-center">
+              <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
                 <Text variant="secondaryText" className="text-sm">
                   Ready to unlock
                 </Text>
               </div>
-              <div className="py-3 border-b  border-gray-200 flex items-center">
+              <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
                 <ShareAccesKeyAvatars
                   keyHolderId={kh.id}
                   possibleKeyHolders={possibleKeyHolders}
                 />
               </div>
-              <div className="flex justify-end items-center py-3 border-b  border-gray-200">
+              <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700">
                 <ShareAccessButton keyHolderId={kh.id} />
               </div>
             </Fragment>
@@ -100,24 +100,24 @@ export const LoobbyKeyHolders: FC<{
         )}
         {offLineKeyHolders.map((kh) => (
           <Fragment key={kh.id}>
-            <div className="py-3 border-b  border-gray-200">
+            <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
               <ParticipantItemAvatar name={kh.name} />
             </div>
-            <div className="py-3 border-b  border-gray-200">
+            <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
               <ParticipantItemDescription name={kh.name} ua={kh.userAgent} />
             </div>
-            <div className="py-3 border-b  border-gray-200 flex items-center">
+            <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
               <Text variant="secondaryText" className="text-sm">
                 Ready to unlock
               </Text>
             </div>
-            <div className="py-3 border-b  border-gray-200 flex items-center">
+            <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
               <ShareAccesKeyAvatars
                 keyHolderId={kh.id}
                 possibleKeyHolders={possibleKeyHolders}
               />
             </div>
-            <div className="flex justify-end items-center py-3 border-b  border-gray-200">
+            <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700">
               <ShareAccessButtonDumb checked={false} disabled />
             </div>
           </Fragment>

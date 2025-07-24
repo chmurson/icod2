@@ -31,6 +31,7 @@ export const ParticipantItemAvatar: FC<{ name: string }> = ({ name }) => {
     <Avatar
       fallback={name[0]}
       radius="full"
+      variant="soft"
       style={{ height: 48, width: 48 }}
     />
   );
