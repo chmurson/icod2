@@ -12,15 +12,15 @@ const joinLockedBoxState = {
     | "drop-box"
     | "connecting"
     | "connected"
-    | "opened",
+    | "ready-to-unlock",
   connecting: false,
   connected: false,
-  created: false,
   error: null as string | null,
   boxTitle: "",
   encryptedMessage: "",
   key: "",
   keyHolderId: "",
+  receivedKeysByKeyHolderId: undefined as Record<string, string> | undefined,
   connectedLeaderId: undefined as string | undefined,
   onlineKeyHolders: [] as ParticipantType[],
   offLineKeyHolders: [] as ParticipantType[],
@@ -66,11 +66,8 @@ type JoinLockedBoxState = {
     connectKeyHolder: (
       participant: ParticipantType & { isLeader?: boolean },
     ) => void;
-    open: (message: {
-      title?: string;
-      content?: string;
-      encryptedMessage?: string;
-      generatedKey?: string;
+    setReceivedKeysByKeyHolderId: (message: {
+      keysByKeyHolderId?: Record<string, string>;
     }) => void;
     setError: (error: string) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
@@ -164,11 +161,10 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           };
         });
       },
-      open: (message) =>
+      setReceivedKeysByKeyHolderId: (message) =>
         set({
-          ...message,
-          created: true,
-          state: "opened",
+          receivedKeysByKeyHolderId: message.keysByKeyHolderId,
+          state: "ready-to-unlock",
         }),
       reset: () =>
         set({

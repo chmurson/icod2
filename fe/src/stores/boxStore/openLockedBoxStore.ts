@@ -10,10 +10,9 @@ const openLockedBoxState = {
     | "drop-box"
     | "connecting"
     | "connected"
-    | "opened",
+    | "ready-to-unlock",
   connecting: false,
   connected: false,
-  created: false,
   error: null as string | null,
   boxTitle: "",
   encryptedMessage: "",
@@ -28,6 +27,7 @@ const openLockedBoxState = {
     userAgent: "",
   } satisfies ParticipantType,
   decryptedContent: "",
+  receivedKeysByKeyHolderId: undefined as Record<string, string> | undefined,
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
   shareAccessKeyMapByKeyholderId: {} as Record<
     KeyHolderId,
@@ -58,11 +58,8 @@ type OpenLockedBoxState = {
     ) => void;
     connectKeyHolder: (participant: ParticipantType) => void;
     disconnectKeyHolder: (participantId: string) => void;
-    open: (message: {
-      title?: string;
-      content?: string;
-      encryptedMessage?: string;
-      generatedKey?: string;
+    setReceivedKeysByKeyHolderId: (message: {
+      keysByKeyHolderId?: Record<string, string>;
     }) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
   };
@@ -180,11 +177,10 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
           };
         });
       },
-      open: (message) =>
+      setReceivedKeysByKeyHolderId: (message) =>
         set({
-          ...message,
-          created: true,
-          state: "opened",
+          receivedKeysByKeyHolderId: message.keysByKeyHolderId,
+          state: "ready-to-unlock",
         }),
       reset: () =>
         set({
