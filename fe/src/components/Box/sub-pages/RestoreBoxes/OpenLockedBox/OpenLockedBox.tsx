@@ -15,6 +15,7 @@ import { CounterWithInfo } from "../commons/components/CounterWithInfo";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useNavigateToShareableLink } from "./hooks";
+import { useInitiateCounter } from "./hooks/useInitiateCounter";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
 export const OpenLockedBox: React.FC = () => {
@@ -23,13 +24,9 @@ export const OpenLockedBox: React.FC = () => {
     dataChannelManagerRef,
   });
 
-  useOpenLockedBoxConnection();
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
 
-  const shareAccessKeyMapByKeyholderId = useOpenLockedBoxStore(
-    (state) => state.shareAccessKeyMapByKeyholderId,
-  );
   const unlockingStartDate = useOpenLockedBoxStore(
     (state) => state.unlockingStartDate,
   );
@@ -52,28 +49,16 @@ export const OpenLockedBox: React.FC = () => {
     }
   }, [sessionId]);
 
-  useEffect(() => {
-    const sharesRequiredToStartCounter = keyThreshold - 1;
-    if (
-      Object.values(shareAccessKeyMapByKeyholderId).filter(
-        (accesses) => accesses[you.id],
-      ).length >= sharesRequiredToStartCounter
-    ) {
-      const utcNow = new Date();
-      actions.setUnlockingStartDate(utcNow);
-      sendCounterStart(utcNow.toISOString());
-    } else {
+  useInitiateCounter({
+    onStart: (date) => {
+      sendCounterStart(date);
+      actions.setUnlockingStartDate(date);
+    },
+    onStop: () => {
       actions.setUnlockingStartDate(null);
       sendCounterStop();
-    }
-  }, [
-    shareAccessKeyMapByKeyholderId,
-    sendCounterStart,
-    actions,
-    keyThreshold,
-    sendCounterStop,
-    you.id,
-  ]);
+    },
+  });
 
   if (!["connecting", "connected", "opened"].includes(state)) {
     return <div>Loading...</div>;
@@ -93,9 +78,7 @@ export const OpenLockedBox: React.FC = () => {
       <CounterWithInfo
         unlockingStartDate={unlockingStartDate}
         keyThreshold={keyThreshold}
-        onlineKeyHoldersCount={
-          onlineKeyHolders.length + offLineKeyHolders.length + 1
-        }
+        onlineKeyHoldersCount={possibleKeyHolders.length}
       />
       <div className="flex flex-col gap-4">
         {shareableURL && (
