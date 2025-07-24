@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 
 export function useInitiateCounter({
@@ -19,17 +19,22 @@ export function useInitiateCounter({
   onStartRef.current = onStart;
   onStopRef.current = onStop;
 
-  useEffect(() => {
-    const sharesRequiredToStartCounter = keyThreshold - 1;
-    if (
+  const sharesRequiredToStartCounter = keyThreshold - 1;
+
+  const isTresholdReached = useMemo(() => {
+    return (
       Object.values(shareAccessKeyMapByKeyholderId).filter(
         (accesses) => accesses[you.id],
       ).length >= sharesRequiredToStartCounter
-    ) {
+    );
+  }, [sharesRequiredToStartCounter, you, shareAccessKeyMapByKeyholderId]);
+
+  useEffect(() => {
+    if (isTresholdReached) {
       const now = new Date();
       onStartRef.current?.(now);
     } else {
       onStopRef.current?.();
     }
-  }, [shareAccessKeyMapByKeyholderId, keyThreshold, you.id]);
+  }, [isTresholdReached]);
 }
