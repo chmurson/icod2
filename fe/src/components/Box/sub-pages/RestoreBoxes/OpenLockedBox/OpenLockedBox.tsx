@@ -21,7 +21,7 @@ import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 export const OpenLockedBox: React.FC = () => {
   const { dataChannelManagerRef } = useOpenLockedBoxConnection();
 
-  useDataChannelSendMessages({
+  const { sendKey } = useDataChannelSendMessages({
     dataChannelManagerRef,
   });
 
@@ -43,12 +43,34 @@ export const OpenLockedBox: React.FC = () => {
   const keyThreshold = useOpenLockedBoxStore((state) => state.keyThreshold);
   const you = useOpenLockedBoxStore((state) => state.you);
   const actions = useOpenLockedBoxStore((state) => state.actions);
+  const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
+    (state) => state.shareAccessKeyByKeyHolderId,
+  );
 
   useEffect(() => {
     if (sessionId) {
       persistStartedUnlocking(sessionId);
     }
   }, [sessionId]);
+
+  useEffect(() => {
+    if (
+      state === "ready-to-unlock" &&
+      Object.values(shareAccessKeyByKeyHolderId).some((x) => x === true)
+    ) {
+      const idsToShareKey = Object.keys(shareAccessKeyByKeyHolderId).reduce(
+        (accumulator, key) => {
+          if (shareAccessKeyByKeyHolderId[key] === true) {
+            accumulator[key] = true; //
+          }
+          return accumulator;
+        },
+        {} as Record<string, boolean>,
+      );
+
+      sendKey(Object.keys(idsToShareKey));
+    }
+  }, [sendKey, state, shareAccessKeyByKeyHolderId]);
 
   useInitiateCounter({
     onStart: (date) => {
@@ -84,6 +106,7 @@ export const OpenLockedBox: React.FC = () => {
         unlockingStartDate={unlockingStartDate}
         keyThreshold={keyThreshold}
         onlineKeyHoldersCount={possibleKeyHolders.length}
+        onFinish={() => actions.setReadyToUnlock()}
       />
       <div className="flex flex-col gap-4">
         {shareableURL && (

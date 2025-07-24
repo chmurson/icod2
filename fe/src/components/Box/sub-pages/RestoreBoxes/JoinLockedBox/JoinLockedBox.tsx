@@ -1,4 +1,4 @@
-import { type FC, useMemo } from "react";
+import { type FC, useEffect, useMemo } from "react";
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
@@ -11,11 +11,16 @@ import {
 } from "../commons/components";
 import { CounterWithInfo } from "../commons/components/CounterWithInfo";
 import { OpenBoxButton as OpenBoxButtonDumb } from "../commons/components/OpenBoxButton";
+import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
   const state = useJoinLockedBoxStore((state) => state.state);
-  useJoinLockedBoxConnection();
+  const { dataChannelManagerRef } = useJoinLockedBoxConnection();
+
+  const { sendKey } = useDataChannelSendMessages({
+    dataChannelManagerRef,
+  });
 
   const unlockingStartDate = useJoinLockedBoxStore(
     (state) => state.unlockingStartDate,
@@ -31,12 +36,24 @@ export const JoinLockedBox: React.FC = () => {
   const you = useJoinLockedBoxStore((state) => state.you);
   const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
   const actions = useJoinLockedBoxStore((state) => state.actions);
+  const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
+    (state) => state.shareAccessKeyByKeyHolderId,
+  );
 
   const loadingStates = [
     "connecting",
     "connected",
     "ready-to-unlock",
   ] satisfies (typeof state)[];
+
+  useEffect(() => {
+    if (
+      state === "ready-to-unlock" &&
+      Object.values(shareAccessKeyByKeyHolderId).some((x) => x === true)
+    ) {
+      sendKey();
+    }
+  }, [sendKey, state, shareAccessKeyByKeyHolderId]);
 
   if (!(loadingStates as string[]).includes(state)) {
     return <div>Loading...</div>;
@@ -63,6 +80,7 @@ export const JoinLockedBox: React.FC = () => {
           onlineKeyHoldersCount={
             onlineKeyHolders.length + offLineKeyHolders.length + 1
           }
+          onFinish={() => actions.setReadyToUnlock()}
         />
       )}
       {showUnlockBoxButton && <OpenBoxButton />}

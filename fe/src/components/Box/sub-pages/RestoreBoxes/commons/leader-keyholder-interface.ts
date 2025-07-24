@@ -6,6 +6,24 @@ export interface KeyholderHello {
   id: string;
 }
 
+export interface KeyholderKey {
+  type: "keyholder:key";
+  key: string;
+  keyHolderId: string;
+}
+
+export interface LeaderKey {
+  type: "leader:key";
+  key: string;
+  keyHolderId: string;
+}
+
+export interface LeaderRelayKey {
+  type: "leader:relay-key";
+  keyToRelay: string;
+  keyHolderId: string;
+}
+
 export interface LeaderWelcome {
   type: "leader:welcome";
   name: string;
@@ -40,6 +58,39 @@ export function isKeyholderHello(msg: object): msg is KeyholderHello {
     typeof msg.id === "string" &&
     "userAgent" in msg &&
     typeof msg.userAgent === "string"
+  );
+}
+
+export function isKeyholderKey(msg: object): msg is KeyholderKey {
+  return (
+    "type" in msg &&
+    msg.type === "keyholder:key" &&
+    "keyHolderId" in msg &&
+    typeof msg.keyHolderId === "string" &&
+    "key" in msg &&
+    typeof msg.key === "string"
+  );
+}
+
+export function isLeaderKey(msg: object): msg is LeaderKey {
+  return (
+    "type" in msg &&
+    msg.type === "leader:key" &&
+    "keyHolderId" in msg &&
+    typeof msg.keyHolderId === "string" &&
+    "key" in msg &&
+    typeof msg.key === "string"
+  );
+}
+
+export function isLeaderRelayKey(msg: object): msg is LeaderRelayKey {
+  return (
+    "type" in msg &&
+    msg.type === "leader:relay-key" &&
+    "keyHolderId" in msg &&
+    typeof msg.keyHolderId === "string" &&
+    "keyToRelay" in msg &&
+    typeof msg.keyToRelay === "string"
   );
 }
 

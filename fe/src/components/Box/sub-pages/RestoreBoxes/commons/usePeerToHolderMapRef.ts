@@ -1,4 +1,4 @@
-import { type RefObject, useEffect, useRef } from "react";
+import { type RefObject, useRef } from "react";
 import { PeerIdKeyholderMap } from "./usePeerIdToKeyholderId";
 
 /*
@@ -14,7 +14,7 @@ import { PeerIdKeyholderMap } from "./usePeerIdToKeyholderId";
  * dataChannelManager, but this integration has been left for later implementation
  * to allow for faster development progress.
  */
-let peerToKeyHolderMap = new PeerIdKeyholderMap();
+const peerToKeyHolderMap = new PeerIdKeyholderMap();
 
 interface UsePeerToHolderMapRef {
   getValue: () => PeerIdKeyholderMap;
@@ -41,11 +41,7 @@ interface UsePeerToHolderMapRef {
  */
 export const usePeerToHolderMapRef: UsePeerToHolderMapRef = (() => {
   const fn = () => {
-    const peerToKeyHolderMapRef = useRef(new PeerIdKeyholderMap());
-
-    useEffect(() => {
-      peerToKeyHolderMap = peerToKeyHolderMapRef.current;
-    }, []);
+    const peerToKeyHolderMapRef = useRef(peerToKeyHolderMap);
 
     return {
       peerToKeyHolderMapRef,
