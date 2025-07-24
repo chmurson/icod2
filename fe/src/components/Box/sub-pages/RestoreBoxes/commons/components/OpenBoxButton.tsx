@@ -1,6 +1,6 @@
 import { Button, Dialog, TextArea } from "@radix-ui/themes";
 import type { FC } from "react";
-import { lazy, Suspense, useCallback, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Alert } from "@/ui/Alert";
 import { AlternateProminentButton } from "./AlternateProminentButton";
 import tokenSvg from "./assets/token.svg";
