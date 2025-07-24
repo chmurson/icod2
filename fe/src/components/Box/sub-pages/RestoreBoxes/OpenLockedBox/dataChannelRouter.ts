@@ -81,16 +81,16 @@ router.addHandler(isFollowerSendsPartialStateMessage, (peerId, message) => {
     message.keyHoldersIdsToSharedKeyWith.map((keyHolderId) => [
       keyHolderId,
       true,
-    ]),
+    ])
   );
 
   actions.setShareAccessKeyByKeyholderId(
     keyHolderId,
-    shareAccessKeyByKeyholderId,
+    shareAccessKeyByKeyholderId
   );
 });
 
-router.addHandler(isKeyholderKey, (_, message, dataChannelManager) => {
+router.addHandler(isKeyholderKey, (_, message, dataChannelMng) => {
   const { keyHolderId, key } = message;
   const { actions, shareAccessKeyMapByKeyholderId, you } =
     useOpenLockedBoxStore.getState();
@@ -106,20 +106,21 @@ router.addHandler(isKeyholderKey, (_, message, dataChannelManager) => {
 
   const toSharePeersToShareKey = Object.keys(peersShareToKeys).reduce(
     (accumulator, key) => {
-      if (peersShareToKeys[key] === true) {
-        accumulator[key] = true; //
+      if (peersShareToKeys[key] === true && key !== you.id) {
+        accumulator[key] = true;
       }
       return accumulator;
     },
-    {} as Record<string, boolean>,
+    {} as Record<string, boolean>
   );
 
   if (toSharePeersToShareKey) {
-    if (!dataChannelManager) {
+    if (!dataChannelMng) {
       return;
     }
+
     for (const keyReceiverId of Object.keys(toSharePeersToShareKey)) {
-      relayKey(dataChannelManager, {
+      relayKey(dataChannelMng, {
         keyHolderId,
         keyReceiverId,
         keyToRelay: key,

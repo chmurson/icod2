@@ -5,8 +5,9 @@ import { cn } from "@/utils/cn";
 const TWO_MINUTES_IN_MS = 10 * 1000;
 
 const formatTime = (ms: number) => {
-  const minutes = Math.floor(ms / 60000);
-  const seconds = Math.floor((ms % 60000) / 1000);
+  const clampedMs = Math.max(0, ms);
+  const minutes = Math.floor(clampedMs / 60000);
+  const seconds = Math.floor((clampedMs % 60000) / 1000);
   return `${minutes.toString().padStart(2, "0")}:${seconds
     .toString()
     .padStart(2, "0")}`;
@@ -27,7 +28,6 @@ export const CounterWithInfo = ({
 
   useEffect(() => {
     if (!unlockingStartDate) {
-      setRemainingTime(TWO_MINUTES_IN_MS);
       return;
     }
 

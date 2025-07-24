@@ -55,12 +55,13 @@ type OpenLockedBoxState = {
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
     setShareAccessKeyByKeyholderId: (
       keyHolderId: string,
-      shareAccessKeyMapByKeyholderId: Record<KeyHolderId, boolean>,
+      shareAccessKeyMapByKeyholderId: Record<KeyHolderId, boolean>
     ) => void;
     connectKeyHolder: (participant: ParticipantType) => void;
     disconnectKeyHolder: (participantId: string) => void;
     addReceivedKey: (message: { fromKeyHolderId: string; key: string }) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
+    hasEnoughKeysToUnlock: () => boolean;
   };
 } & OpenLockedBoxStateData;
 
@@ -89,7 +90,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
       toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) =>
         set((state) => {
           const shareAccessKeyByKeyHolderId = Object.fromEntries(
-            idsOfKeyHoldersToShareWith.map((id) => [id, true]),
+            idsOfKeyHoldersToShareWith.map((id) => [id, true])
           );
 
           return {
@@ -102,7 +103,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         }),
       setShareAccessKeyByKeyholderId: (
         keyholderId: string,
-        shareAccessKeyMapByKeyholderId: Record<KeyHolderId, boolean>,
+        shareAccessKeyMapByKeyholderId: Record<KeyHolderId, boolean>
       ) => {
         set((state) => ({
           shareAccessKeyMapByKeyholderId: {
@@ -152,14 +153,14 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
             },
           ],
           offLineKeyHolders: state.offLineKeyHolders.filter(
-            (x) => x.id !== keyHolder.id,
+            (x) => x.id !== keyHolder.id
           ),
         }));
       },
       disconnectKeyHolder: (disconnectedKeyHolderId: string) => {
         set((state) => {
           const disconnectedKeyHolder = state.onlineKeyHolders.find(
-            (kh) => kh.id === disconnectedKeyHolderId,
+            (kh) => kh.id === disconnectedKeyHolderId
           );
 
           if (!disconnectedKeyHolder) {
@@ -168,7 +169,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
 
           return {
             onlineKeyHolders: state.onlineKeyHolders.filter(
-              (kh) => kh.id !== disconnectedKeyHolderId,
+              (kh) => kh.id !== disconnectedKeyHolderId
             ),
             offLineKeyHolders: [
               disconnectedKeyHolder,
@@ -190,8 +191,17 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         }),
       setUnlockingStartDate: (unlockingStartDate: Date | null) =>
         set({ unlockingStartDate }),
+      hasEnoughKeysToUnlock: () => {
+        const { receivedKeysByKeyHolderId, keyThreshold, key } = get();
+        const receivedKeysNumber = Object.keys(
+          receivedKeysByKeyHolderId ?? {}
+        ).length;
+        const hasKeyHimself = !!key?.trim();
+
+        return receivedKeysNumber + (hasKeyHimself ? 1 : 0) >= keyThreshold;
+      },
     } satisfies OpenLockedBoxState["actions"],
-  })),
+  }))
 );
 
 if (import.meta.env.DEV === true) {
