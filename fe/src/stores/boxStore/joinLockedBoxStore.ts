@@ -53,6 +53,7 @@ type JoinLockedBoxState = {
   actions: {
     reset: () => void;
     start: () => void;
+    setReadyToUnlock: () => void;
     connect: (args: {
       boxTitle: string;
       encryptedMessage: string;
@@ -66,9 +67,7 @@ type JoinLockedBoxState = {
     connectKeyHolder: (
       participant: ParticipantType & { isLeader?: boolean },
     ) => void;
-    setReceivedKeysByKeyHolderId: (message: {
-      keysByKeyHolderId?: Record<string, string>;
-    }) => void;
+    addReceivedKey: (message: { fromKeyHolderId: string; key: string }) => void;
     setError: (error: string) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     setPartialStateUpdate: SetPartialStateUpdate;
@@ -81,6 +80,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
     ...joinLockedBoxState,
     actions: {
       start: () => set({ ...joinLockedBoxState, state: "drop-box" }),
+      setReadyToUnlock: () => set({ state: "ready-to-unlock" }),
       toggleShareAccessKey: (keyHolderId: string, value?: boolean) =>
         set((state) => ({
           shareAccessKeyByKeyHolderId: {
@@ -162,10 +162,12 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           };
         });
       },
-      setReceivedKeysByKeyHolderId: (message) =>
+      addReceivedKey: ({ fromKeyHolderId, key }) =>
         set({
-          receivedKeysByKeyHolderId: message.keysByKeyHolderId,
-          state: "ready-to-unlock",
+          receivedKeysByKeyHolderId: {
+            ...get().receivedKeysByKeyHolderId,
+            [fromKeyHolderId]: key,
+          },
         }),
       reset: () =>
         set({
@@ -265,9 +267,7 @@ if (import.meta.env.DEV === true) {
 
       offLineKeyHolders.forEach(connectKeyHolder);
     },
-    setReceivedKeysByKeyHolderId: (arg: Record<string, string>) =>
-      useJoinLockedBoxStore
-        .getState()
-        .actions.setReceivedKeysByKeyHolderId(arg),
+    addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) =>
+      useJoinLockedBoxStore.getState().actions.addReceivedKey(arg),
   };
 }
