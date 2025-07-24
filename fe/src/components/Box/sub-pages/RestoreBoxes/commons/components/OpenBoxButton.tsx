@@ -28,15 +28,8 @@ type Props = {
 export const OpenBoxButton: FC<Props> = ({ encryptedMessage, keys }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleBoxOpen = useCallback((newState: boolean) => {
-    if (newState === true) {
-      console.log("open");
-    }
-    setIsDialogOpen(newState);
-  }, []);
-
   return (
-    <Dialog.Root open={isDialogOpen} onOpenChange={handleBoxOpen}>
+    <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Dialog.Trigger>
         <AlternateProminentButton className="self-center">
           <img alt="box" src={tokenSvg} width={18} height={18} />
