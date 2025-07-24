@@ -26,7 +26,7 @@ export const useOnChangeShareablePartOfState = ({
     onChange({
       shareAccessKeyMapByKeyHolderId: shareAccessKeyMapByKeyholderId,
       onlineKeyHolders: [...onlineKeyHolders, you],
-      unlockingStartDate: unlockingStartDate?.toISOString(),
+      unlockingStartDate: unlockingStartDate?.toISOString() ?? null,
     });
   }, [
     shareAccessKeyMapByKeyholderId,

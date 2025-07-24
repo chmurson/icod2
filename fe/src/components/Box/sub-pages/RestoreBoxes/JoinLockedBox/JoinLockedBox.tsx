@@ -42,6 +42,8 @@ export const JoinLockedBox: React.FC = () => {
 
   const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
 
+  console.log(unlockingStartDate, "unlockingStartDate");
+
   return (
     <div className="flex flex-col gap-8">
       <Text variant="pageTitle" className="mt-4">
