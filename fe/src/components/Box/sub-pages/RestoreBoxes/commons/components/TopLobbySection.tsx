@@ -1,5 +1,7 @@
-import { useOpenLockedBoxStore } from "@/stores/boxStore";
+import type { StoreApi, UseBoundStore } from "zustand";
+import type { LockedBoxStoreCommonPart } from "@/stores/boxStore/common-types";
 import { Text } from "@/ui/Typography";
+import { cn } from "@/utils/cn";
 import {
   LoadingTextReceiveingKeys,
   useGetTopLobbyMetaStatus,
@@ -7,20 +9,26 @@ import {
 import { CounterWithInfo } from "../../commons/components/CounterWithInfo";
 import { OpenBoxButton as OpenBoxButtonDumb } from "../../commons/components/OpenBoxButton";
 
-export const TopLobbySection = () => {
-  const metaStatus = useGetTopLobbyMetaStatus(useOpenLockedBoxStore);
+type StoreStateSubset = LockedBoxStoreCommonPart;
 
-  const keyThreshold = useOpenLockedBoxStore((state) => state.keyThreshold);
-  const actions = useOpenLockedBoxStore((state) => state.actions);
+type StoreHookType = UseBoundStore<StoreApi<StoreStateSubset>>;
 
-  const onlineKeyHoldersCount = useOpenLockedBoxStore(
+export const TopLobbySection = ({
+  useStoreHook,
+}: {
+  useStoreHook: StoreHookType;
+}) => {
+  const metaStatus = useGetTopLobbyMetaStatus(useStoreHook);
+
+  const keyThreshold = useStoreHook((state) => state.keyThreshold);
+  const actions = useStoreHook((state) => state.actions);
+
+  const onlineKeyHoldersCount = useStoreHook(
     (state) =>
       state.onlineKeyHolders.length + state.offLineKeyHolders.length + 1,
   );
 
-  const unlockingStartDate = useOpenLockedBoxStore(
-    (state) => state.unlockingStartDate,
-  );
+  const unlockingStartDate = useStoreHook((state) => state.unlockingStartDate);
 
   return (
     <>
@@ -31,12 +39,23 @@ export const TopLobbySection = () => {
           keyThreshold={keyThreshold}
           onlineKeyHoldersCount={onlineKeyHoldersCount}
           onFinish={() => actions.setReadyToUnlock()}
+          timeClassName={cn(
+            metaStatus === "keyholder-not-able-to-unlock" && "opacity-25",
+          )}
+          textReplacement={
+            metaStatus === "keyholder-not-able-to-unlock" ? (
+              <Text variant="label" className="text-red-400">
+                Not enough key holders have shared their keys to unlock the box
+              </Text>
+            ) : null
+          }
         />
       )}
       <div className="flex flex-col gap-4">
         {(metaStatus === "keyholder-able-to-unlock" ||
           metaStatus === "keyholder-not-yet-able-to-unlock") && (
           <OpenBoxButton
+            useStoreHook={useStoreHook}
             disabled={metaStatus === "keyholder-not-yet-able-to-unlock"}
           />
         )}
@@ -52,16 +71,20 @@ export const TopLobbySection = () => {
     </>
   );
 };
-const OpenBoxButton = ({ disabled = false }: { disabled?: boolean }) => {
-  const receivedKeysByKeyHolderId = useOpenLockedBoxStore(
+const OpenBoxButton = ({
+  disabled = false,
+  useStoreHook,
+}: {
+  disabled?: boolean;
+  useStoreHook: StoreHookType;
+}) => {
+  const receivedKeysByKeyHolderId = useStoreHook(
     (state) => state.receivedKeysByKeyHolderId,
   );
 
-  const key = useOpenLockedBoxStore((state) => state.key);
+  const key = useStoreHook((state) => state.key);
 
-  const encryptedMessage = useOpenLockedBoxStore(
-    (state) => state.encryptedMessage,
-  );
+  const encryptedMessage = useStoreHook((state) => state.encryptedMessage);
 
   const keys = [...Object.values(receivedKeysByKeyHolderId ?? {}), key];
 

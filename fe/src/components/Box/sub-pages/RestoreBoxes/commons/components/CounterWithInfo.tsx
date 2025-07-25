@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Text } from "@/components/ui";
 import { cn } from "@/utils/cn";
 
@@ -18,11 +18,15 @@ export const CounterWithInfo = ({
   keyThreshold,
   onlineKeyHoldersCount,
   onFinish,
+  timeClassName,
+  textReplacement,
 }: {
   unlockingStartDate: Date | null;
   keyThreshold: number;
   onlineKeyHoldersCount: number;
   onFinish: () => void;
+  timeClassName?: string;
+  textReplacement?: ReactNode;
 }) => {
   const [remainingTime, setRemainingTime] = useState(TWO_MINUTES_IN_MS);
 
@@ -62,24 +66,28 @@ export const CounterWithInfo = ({
           "text-7xl",
           remainingTime <= 10000 && "text-red-400",
           unlockingStartDate === null && "text-gray-300 dark:text-gray-600",
+          timeClassName,
         )}
       >
         {formatTime(remainingTime)}
       </Text>
-      {remainingTime <= 10000 ? (
+      {textReplacement}
+      {!textReplacement && (
         <Text variant="label">
-          Final call to exchange keys before unlocking
-        </Text>
-      ) : unlockingStartDate ? (
-        <Text variant="label">Unlocking soon - last chance to share keys</Text>
-      ) : (
-        <Text variant="label">
-          {"The timer starts when someone has "}
-          <span className="text-[var(--accent-8)]">{keyThreshold}</span>
-          {" of "}
-          <span className="text-[var(--accent-8)]">
-            {onlineKeyHoldersCount} keys
-          </span>
+          {remainingTime <= 10000 ? (
+            "Final call to exchange keys before unlocking"
+          ) : unlockingStartDate ? (
+            "Unlocking soon - last chance to share keys"
+          ) : (
+            <>
+              {"The timer starts when someone has "}
+              <span className="text-[var(--accent-8)]">{keyThreshold}</span>
+              {" of "}
+              <span className="text-[var(--accent-8)]">
+                {onlineKeyHoldersCount} keys
+              </span>
+            </>
+          )}
         </Text>
       )}
     </div>

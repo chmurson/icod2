@@ -5,3 +5,4 @@ export { MessageDecryptor } from "./MessageDecryptor";
 export { OpenBoxButton } from "./OpenBoxButton";
 export { LoadingTextReceiveingKeys } from "./RecevingKeysText";
 export { ShareAccessKeysAvatars } from "./ShareAccessKeysAvatars";
+export { TopLobbySection } from "./TopLobbySection";

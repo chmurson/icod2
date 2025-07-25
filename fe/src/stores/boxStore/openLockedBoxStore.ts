@@ -1,39 +1,23 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { ParticipantType } from "./common-types";
+import {
+  type LockedBoxStoreCommonPart,
+  lockedBoxStoreStateCommonPart,
+  type ParticipantType,
+} from "./common-types";
 
 type KeyHolderId = string;
 
 const openLockedBoxState = {
-  state: "initial" as
-    | "initial"
-    | "drop-box"
-    | "connecting"
-    | "connected"
-    | "ready-to-unlock",
+  ...lockedBoxStoreStateCommonPart,
   connecting: false,
   connected: false,
   error: null as string | null,
   boxTitle: "",
-  encryptedMessage: "",
-  key: "",
   keyHolderId: "",
-  onlineKeyHolders: [] as ParticipantType[],
-  offLineKeyHolders: [] as ParticipantType[],
-  keyThreshold: 1,
-  you: {
-    id: "",
-    name: "",
-    userAgent: "",
-  } satisfies ParticipantType,
   decryptedContent: "",
   receivedKeysByKeyHolderId: undefined as Record<string, string> | undefined,
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
-  shareAccessKeyMapByKeyHolderId: {} as Record<
-    KeyHolderId,
-    Record<KeyHolderId, boolean>
-  >,
-  unlockingStartDate: null as Date | null,
 };
 
 export type OpenLockedBoxStateData = typeof openLockedBoxState;
@@ -42,7 +26,6 @@ export type OpenLockedBoxState = {
   actions: {
     reset: () => void;
     start: () => void;
-    setReadyToUnlock: () => void;
     connect: (args: {
       boxTitle: string;
       encryptedMessage: string;
@@ -62,7 +45,7 @@ export type OpenLockedBoxState = {
     addReceivedKey: (message: { fromKeyHolderId: string; key: string }) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     hasEnoughKeysToUnlock: () => boolean;
-  };
+  } & LockedBoxStoreCommonPart["actions"];
 } & OpenLockedBoxStateData;
 
 export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(

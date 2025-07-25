@@ -31,6 +31,14 @@ export const lockedBoxStoreStateCommonPart = {
   key: "",
   receivedKeysByKeyHolderId: undefined as Record<string, string> | undefined,
   shareAccessKeyMapByKeyHolderId: {} as Record<string, Record<string, boolean>>,
+  onlineKeyHolders: [] as ParticipantType[],
+  offLineKeyHolders: [] as ParticipantType[],
+  unlockingStartDate: null as Date | null,
+  encryptedMessage: "",
 };
 
-export type LockedBoxStoreCommonPart = typeof lockedBoxStoreStateCommonPart;
+export type LockedBoxStoreCommonPart = typeof lockedBoxStoreStateCommonPart & {
+  actions: {
+    setReadyToUnlock: () => void;
+  };
+};
