@@ -5,10 +5,16 @@ import {
   ParticipantItemDescription,
 } from "@/components/Box/components/ParticipantItem";
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
-import type { ParticipantType } from "@/stores/boxStore/common-types";
+import type {
+  LockedBoxStoreCommonPart,
+  ParticipantType,
+} from "@/stores/boxStore/common-types";
 import { Text } from "@/ui/Typography";
+import tokenSvg from "./assets/token.svg";
+import { AltProminentBadgeButton } from "./BoxUnlockedButtonBadge";
 
 export const LoobbyKeyHolders: FC<{
+  status: LockedBoxStoreCommonPart["state"];
   you: ParticipantType;
   onlineKeyHolders: ParticipantType[];
   offLineKeyHolders: ParticipantType[];
@@ -24,6 +30,7 @@ export const LoobbyKeyHolders: FC<{
     keyHolderId: string;
   }>;
 }> = ({
+  status,
   offLineKeyHolders,
   onlineKeyHolders,
   possibleKeyHolders,
@@ -32,6 +39,8 @@ export const LoobbyKeyHolders: FC<{
   ShareAccessDropdown,
   ShareAccessButton,
 }) => {
+  const hideShareButtons = status === "ready-to-unlock";
+
   return (
     <div className="flex flex-col gap-12">
       <div className="grid grid-cols-[60px_200px_120px_1fr_200px]">
@@ -56,7 +65,15 @@ export const LoobbyKeyHolders: FC<{
           />
         </div>
         <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700 ">
-          <ShareAccessDropdown onlineKeyHolders={onlineKeyHolders} />
+          {!hideShareButtons && (
+            <ShareAccessDropdown onlineKeyHolders={onlineKeyHolders} />
+          )}
+          {hideShareButtons && (
+            <AltProminentBadgeButton>
+              <img height={16} width={16} src={tokenSvg} alt="box-logo" />
+              Box unlocked
+            </AltProminentBadgeButton>
+          )}
         </div>
         {onlineKeyHolders.length > 0 && (
           <div className="col-span-full py-1 mb-1 mt-12">
@@ -84,7 +101,7 @@ export const LoobbyKeyHolders: FC<{
                 />
               </div>
               <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700">
-                <ShareAccessButton keyHolderId={kh.id} />
+                {!hideShareButtons && <ShareAccessButton keyHolderId={kh.id} />}
               </div>
             </Fragment>
           ))}
@@ -118,7 +135,9 @@ export const LoobbyKeyHolders: FC<{
               />
             </div>
             <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700">
-              <ShareAccessButtonDumb checked={false} disabled />
+              {!hideShareButtons && (
+                <ShareAccessButtonDumb checked={false} disabled />
+              )}
             </div>
           </Fragment>
         ))}

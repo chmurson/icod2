@@ -62,6 +62,7 @@ export const JoinLockedBox: React.FC = () => {
 
       <TopLobbySection useStoreHook={useJoinLockedBoxStore} />
       <LoobbyKeyHolders
+        status={state}
         offLineKeyHolders={offLineKeyHolders}
         onlineKeyHolders={onlineKeyHolders}
         possibleKeyHolders={possibleKeyHolders}
