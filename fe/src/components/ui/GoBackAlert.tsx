@@ -1,0 +1,73 @@
+import { AlertDialog } from "@radix-ui/themes";
+import { type ReactNode, useEffect } from "react";
+import { useBlocker } from "react-router-dom";
+import { Button } from "@/ui/Button";
+
+export const GoBackAlert = ({
+  triggerSlot,
+  onGoBack,
+  open,
+  onClose,
+  textCancelButton = "Upps, cancel",
+  textDescription = "Are you sure you want to leave? You might loose your changes.",
+  textProceedButton = "Ignore the alert and close the page",
+  textTitle = "You may loose your data",
+}: {
+  triggerSlot?: ReactNode;
+  onGoBack: () => void;
+  onClose?: () => void;
+  open?: boolean;
+  textTitle?: string;
+  textDescription?: string;
+  textCancelButton?: string;
+  textProceedButton?: string;
+}) => {
+  return (
+    <AlertDialog.Root open={open}>
+      {triggerSlot && <AlertDialog.Trigger>{triggerSlot}</AlertDialog.Trigger>}
+      <AlertDialog.Content maxWidth="450px">
+        <AlertDialog.Title as="h2">{textTitle}</AlertDialog.Title>
+        <AlertDialog.Description size="2">
+          {textDescription}
+        </AlertDialog.Description>
+        <div className="flex justify-between mt-4">
+          <AlertDialog.Cancel>
+            <Button variant="primary" onClick={onClose}>
+              {textCancelButton}
+            </Button>
+          </AlertDialog.Cancel>
+          <AlertDialog.Action>
+            <Button variant="secondary" onClick={onGoBack}>
+              {textProceedButton}
+            </Button>
+          </AlertDialog.Action>
+        </div>
+      </AlertDialog.Content>
+    </AlertDialog.Root>
+  );
+};
+
+export const useGoBackAlertHook = ({
+  shouldNavigationBeBlocked,
+}: {
+  shouldNavigationBeBlocked: () => boolean;
+}) => {
+  const blocker = useBlocker(shouldNavigationBeBlocked);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (shouldNavigationBeBlocked()) {
+        event.preventDefault();
+        event.returnValue = ""; // Required for browser to show prompt
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [shouldNavigationBeBlocked]);
+
+  return blocker;
+};

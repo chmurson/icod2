@@ -13,6 +13,7 @@ import {
   TopLobbySection,
 } from "../commons/components";
 import { LeaveLobbyButton } from "../commons/components/LeaveLobbyButton";
+import { NavigationAwayBlocker } from "../commons/components/NavigationAwayBlocker";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import {
@@ -106,6 +107,7 @@ export const OpenLockedBox: React.FC = () => {
       <ContentCard.OutsideSlot asChild>
         <LeaveLobbyButton useHookStore={useOpenLockedBoxStore} />
       </ContentCard.OutsideSlot>
+      <NavigationAwayBlocker useHookStore={useOpenLockedBoxStore} />
     </div>
   );
 };
