@@ -68,6 +68,7 @@ export const JoinLockedBox: React.FC = () => {
       <Text variant="pageTitle" className="mt-4">
         Join a Locked Box
       </Text>
+
       <TopLobbySection />
       <LoobbyKeyHolders
         offLineKeyHolders={offLineKeyHolders}

@@ -243,6 +243,16 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
 
           return filteredPayload;
         }),
+      hasEnoughKeysToUnlock: () => {
+        const { receivedKeysByKeyHolderId, keyThreshold, key } = get();
+
+        const receivedKeysNumber = Object.keys(
+          receivedKeysByKeyHolderId ?? {},
+        ).length;
+
+        const hasKeyHimself = !!key?.trim();
+        return receivedKeysNumber + (hasKeyHimself ? 1 : 0) >= keyThreshold;
+      },
     },
   })),
 );
@@ -257,7 +267,12 @@ if (import.meta.env.DEV === true) {
 
       offLineKeyHolders.forEach(connectKeyHolder);
     },
-    addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) =>
-      useJoinLockedBoxStore.getState().actions.addReceivedKey(arg),
+    setReadyToUnlock: () => {
+      useJoinLockedBoxStore.getState().actions.setReadyToUnlock();
+    },
+    addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) => {
+      useJoinLockedBoxStore.getState().actions.addReceivedKey(arg);
+      useJoinLockedBoxStore.getState().actions.setReadyToUnlock();
+    },
   };
 }
