@@ -65,11 +65,8 @@ export const LoobbyKeyHolders: FC<{
           <ParticipantItemDescription name={you.name} ua={you.userAgent} />
         </div>
         <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
-          {isMissingOne ? (
-            <MissingOneKeyLabel />
-          ) : isReadyToUnlock ? (
-            <ReadyToUnlockLabel />
-          ) : null}
+          {isMissingOne && <MissingOneKeyLabel />}
+          {isReadyToUnlock && <ReadyToUnlockLabel />}
         </div>
         <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
           <ShareAccesKeyAvatars
@@ -111,11 +108,8 @@ export const LoobbyKeyHolders: FC<{
                   />
                 </div>
                 <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
-                  {isMissingOne ? (
-                    <MissingOneKeyLabel />
-                  ) : isReadyToUnlock ? (
-                    <ReadyToUnlockLabel />
-                  ) : null}
+                  {isMissingOne && <MissingOneKeyLabel />}
+                  {isReadyToUnlock && <ReadyToUnlockLabel />}
                 </div>
                 <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
                   <ShareAccesKeyAvatars
