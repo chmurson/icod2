@@ -10,6 +10,8 @@ import type {
   ParticipantType,
 } from "@/stores/boxStore/common-types";
 import { Text } from "@/ui/Typography";
+import tokenSvg from "./assets/token.svg";
+import { AltProminentBadgeButton } from "./BoxUnlockedButtonBadge";
 
 export const LoobbyKeyHolders: FC<{
   status: LockedBoxStoreCommonPart["state"];
@@ -65,6 +67,12 @@ export const LoobbyKeyHolders: FC<{
         <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700 ">
           {!hideShareButtons && (
             <ShareAccessDropdown onlineKeyHolders={onlineKeyHolders} />
+          )}
+          {hideShareButtons && (
+            <AltProminentBadgeButton>
+              <img height={16} width={16} src={tokenSvg} alt="box-logo" />
+              Box unlocked
+            </AltProminentBadgeButton>
           )}
         </div>
         {onlineKeyHolders.length > 0 && (
