@@ -43,6 +43,12 @@ export const OpenLockedBox: React.FC = () => {
     (state) => state.onlineKeyHolders,
   );
 
+  const shareAccessKeyMapByKeyHolderId = useOpenLockedBoxStore(
+    (state) => state.shareAccessKeyMapByKeyHolderId,
+  );
+
+  const keyThreshold = useOpenLockedBoxStore((state) => state.keyThreshold);
+
   const you = useOpenLockedBoxStore((state) => state.you);
   const actions = useOpenLockedBoxStore((state) => state.actions);
 
@@ -97,6 +103,8 @@ export const OpenLockedBox: React.FC = () => {
           onlineKeyHolders={onlineKeyHolders}
           you={you}
           possibleKeyHolders={possibleKeyHolders}
+          keyThreshold={keyThreshold}
+          shareAccessKeyMapByKeyHolderId={shareAccessKeyMapByKeyHolderId}
           ShareAccesKeyAvatars={ShareAccesKeyAvatars}
           ShareAccessButton={ShareAccessButton}
           ShareAccessDropdown={ShareAccessDropdown}
