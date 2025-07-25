@@ -3,7 +3,7 @@ import { type ReactNode, useEffect } from "react";
 import { useBlocker } from "react-router-dom";
 import { Button } from "@/ui/Button";
 
-export const GoBackAlert = ({
+export const NavigateAwayAlert = ({
   triggerSlot,
   onGoBack,
   open,
@@ -47,7 +47,7 @@ export const GoBackAlert = ({
   );
 };
 
-export const useGoBackAlertHook = ({
+export const useNavigateAwayBlocker = ({
   shouldNavigationBeBlocked,
 }: {
   shouldNavigationBeBlocked: () => boolean;
