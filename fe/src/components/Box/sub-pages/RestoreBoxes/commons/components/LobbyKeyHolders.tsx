@@ -50,7 +50,7 @@ export const LoobbyKeyHolders: FC<{
     keyThreshold,
     you.id,
   );
-  const hideShareButtons = status === "ready-to-unlock";
+  const isReadyToUnLockStatus = status === "ready-to-unlock";
 
   return (
     <div className="flex flex-col gap-12">
@@ -69,9 +69,7 @@ export const LoobbyKeyHolders: FC<{
             <MissingOneKeyLabel />
           ) : isReadyToUnlock ? (
             <ReadyToUnlockLabel />
-          ) : (
-            <></>
-          )}
+          ) : null}
         </div>
         <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
           <ShareAccesKeyAvatars
@@ -80,14 +78,11 @@ export const LoobbyKeyHolders: FC<{
           />
         </div>
         <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700 ">
-          {!hideShareButtons && (
+          {!isReadyToUnLockStatus && (
             <ShareAccessDropdown onlineKeyHolders={onlineKeyHolders} />
           )}
-          {hideShareButtons && (
-            <AltProminentBadgeButton>
-              <img height={16} width={16} src={tokenSvg} alt="box-logo" />
-              Box unlocked
-            </AltProminentBadgeButton>
+          {isReadyToUnLockStatus && isReadyToUnlock && (
+            <BoxUnlockedBadgeButton />
           )}
         </div>
         {onlineKeyHolders.length > 0 && (
@@ -120,9 +115,7 @@ export const LoobbyKeyHolders: FC<{
                     <MissingOneKeyLabel />
                   ) : isReadyToUnlock ? (
                     <ReadyToUnlockLabel />
-                  ) : (
-                    <></>
-                  )}
+                  ) : null}
                 </div>
                 <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
                   <ShareAccesKeyAvatars
@@ -131,7 +124,12 @@ export const LoobbyKeyHolders: FC<{
                   />
                 </div>
                 <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700">
-                  <ShareAccessButton keyHolderId={kh.id} />
+                  {!isReadyToUnLockStatus && (
+                    <ShareAccessButton keyHolderId={kh.id} />
+                  )}
+                  {isReadyToUnLockStatus && isReadyToUnlock && (
+                    <BoxUnlockedBadgeButton />
+                  )}
                 </div>
               </Fragment>
             );
@@ -164,7 +162,7 @@ export const LoobbyKeyHolders: FC<{
               />
             </div>
             <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700">
-              {!hideShareButtons && (
+              {!isReadyToUnLockStatus && (
                 <ShareAccessButtonDumb checked={false} disabled />
               )}
             </div>
@@ -191,3 +189,10 @@ const isReadyToUnlockAndMissingOne = (
 
   return { isReadyToUnlock, isMissingOne };
 };
+
+const BoxUnlockedBadgeButton = () => (
+  <AltProminentBadgeButton>
+    <img height={16} width={16} src={tokenSvg} alt="box-logo" />
+    Box unlocked
+  </AltProminentBadgeButton>
+);
