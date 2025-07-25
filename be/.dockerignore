@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+*/node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+*/dist/
+**/dist/
+*.tsbuildinfo
+
+# Development files
+*.log
+*.swp
+*.swo
+*~
+.DS_Store
+.vscode/
+.idea/
+*.iml
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Tests
+__tests__/
+*.test.ts
+*.spec.ts
+coverage/
+.nyc_output/
+
+# Environment files (we'll copy only what's needed)
+.env.local
+.env.development
+.env.test
+
+# TypeScript cache
+*.tscache/
+.tscache/
+
+# Yarn
+.yarn/cache/
+.yarn/install-state.gz
+.pnp.*
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Temporary files
+tmp/
+temp/

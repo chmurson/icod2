@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "target": "ES2020",
-    "module": "ESNext",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
@@ -14,7 +12,8 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "composite": true
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]
