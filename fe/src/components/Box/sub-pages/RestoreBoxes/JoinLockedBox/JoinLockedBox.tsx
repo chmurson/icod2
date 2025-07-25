@@ -1,6 +1,7 @@
 import { type FC, useMemo } from "react";
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
+import { ContentCard } from "@/components/layout/MainLayout";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { Button } from "@/ui/Button";
@@ -61,7 +62,7 @@ export const JoinLockedBox: React.FC = () => {
   const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 py-4">
       <Text variant="pageTitle" className="mt-4">
         Join a Locked Box
       </Text>
@@ -79,15 +80,18 @@ export const JoinLockedBox: React.FC = () => {
         ShareAccessButton={ShareAccessButton}
         ShareAccessDropdown={ShareAccessDropdown}
       />
-      <div className="flex gap-4">
-        <Button
-          variant="secondary"
-          onClick={handleBackClick}
-          disabled={unlockingStartDate !== null}
-        >
-          Leave Lobby
-        </Button>
-      </div>
+      <ContentCard.OutsideSlot asChild>
+        <div className="flex justify-center mt-8">
+          <Button
+            className="px-20"
+            variant="alt-primary"
+            onClick={handleBackClick}
+            disabled={unlockingStartDate !== null}
+          >
+            Leave Lobby
+          </Button>
+        </div>
+      </ContentCard.OutsideSlot>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { TextField } from "@radix-ui/themes";
 import { type FC, useEffect, useMemo } from "react";
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
+import { ContentCard } from "@/components/layout/MainLayout";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { Button } from "@/ui/Button";
@@ -91,7 +92,7 @@ export const OpenLockedBox: React.FC = () => {
         Open a Locked Box
       </Text>
       <TopLobbySection useStoreHook={useOpenLockedBoxStore} />
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 py-4">
         {shareableURL && (
           <FieldArea label="Invite URL">
             <TextField.Root value={shareableURL} readOnly />
@@ -110,15 +111,18 @@ export const OpenLockedBox: React.FC = () => {
           ShareAccessDropdown={ShareAccessDropdown}
         />
       </div>
-      <div className="flex gap-4">
-        <Button
-          variant="secondary"
-          onClick={handleBackClick}
-          disabled={unlockingStartDate !== null}
-        >
-          Leave Lobby
-        </Button>
-      </div>
+      <ContentCard.OutsideSlot asChild>
+        <div className="flex justify-center mt-8">
+          <Button
+            className="px-20"
+            variant="alt-primary"
+            onClick={handleBackClick}
+            disabled={unlockingStartDate !== null}
+          >
+            Leave Lobby
+          </Button>
+        </div>
+      </ContentCard.OutsideSlot>
     </div>
   );
 };

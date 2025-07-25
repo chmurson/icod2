@@ -12,7 +12,7 @@ import LockedBox from "./components/Box/sub-pages/RestoreBoxes/LockedBox";
 import ComponentsDemo from "./components/ComponentsDemo";
 import CryptoPlayground from "./components/CryptoPlayground";
 import DecodePlayground from "./components/DecodePlayground";
-import { MainLayout } from "./components/MainLayout";
+import { MainLayout } from "./components/layout/MainLayout";
 
 function useSystemTheme() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
