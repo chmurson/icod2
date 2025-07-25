@@ -11,6 +11,7 @@ import {
   TopLobbySection,
 } from "../commons/components";
 import { LeaveLobbyButton } from "../commons/components/LeaveLobbyButton";
+import { NavigationAwayBlocker } from "../commons/components/NavigationAwayBlocker";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useSendKeyToLeader } from "./hooks";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
@@ -75,6 +76,7 @@ export const JoinLockedBox: React.FC = () => {
       <ContentCard.OutsideSlot asChild>
         <LeaveLobbyButton useHookStore={useJoinLockedBoxStore} />
       </ContentCard.OutsideSlot>
+      <NavigationAwayBlocker useHookStore={useJoinLockedBoxStore} />
     </div>
   );
 };

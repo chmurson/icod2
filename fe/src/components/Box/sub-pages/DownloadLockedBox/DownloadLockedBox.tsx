@@ -51,7 +51,7 @@ export const DownloadLockedBox: React.FC = () => {
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!isLockedBoxDownloaded) {
+      if (!shouldNavigationBeBlocked()) {
         event.preventDefault();
         event.returnValue = ""; // Required for browser to show prompt
       }
@@ -62,7 +62,7 @@ export const DownloadLockedBox: React.FC = () => {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [isLockedBoxDownloaded]);
+  }, [shouldNavigationBeBlocked]);
 
   return (
     <div className="flex flex-col gap-8">
