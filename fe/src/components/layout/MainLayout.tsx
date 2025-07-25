@@ -39,7 +39,7 @@ export const ContentCard: ContentCardComponent = ({ children }) => {
 
   return (
     <ContentCardContext.Provider value={contextValue}>
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-5xl py-12">
         <Card className="mx-4 px-4 -mt-20 mb-4 min-h-96 box-border max-sm:px-0">
           <div className="p-6 px-24 max-md:px-8">{children}</div>
         </Card>

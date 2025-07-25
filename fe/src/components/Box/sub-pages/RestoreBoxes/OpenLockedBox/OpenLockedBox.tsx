@@ -5,7 +5,6 @@ import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box
 import { ContentCard } from "@/components/layout/MainLayout";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
-import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import {
@@ -13,6 +12,7 @@ import {
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
   TopLobbySection,
 } from "../commons/components";
+import { LeaveLobbyButton } from "../commons/components/LeaveLobbyButton";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import {
@@ -31,10 +31,6 @@ export const OpenLockedBox: React.FC = () => {
 
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
-
-  const unlockingStartDate = useOpenLockedBoxStore(
-    (state) => state.unlockingStartDate,
-  );
 
   const offLineKeyHolders = useOpenLockedBoxStore(
     (state) => state.offLineKeyHolders,
@@ -80,10 +76,6 @@ export const OpenLockedBox: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  const handleBackClick = () => {
-    actions.reset();
-  };
-
   const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
 
   return (
@@ -112,16 +104,7 @@ export const OpenLockedBox: React.FC = () => {
         />
       </div>
       <ContentCard.OutsideSlot asChild>
-        <div className="flex justify-center mt-8">
-          <Button
-            className="px-20"
-            variant="alt-primary"
-            onClick={handleBackClick}
-            disabled={unlockingStartDate !== null}
-          >
-            Leave Lobby
-          </Button>
-        </div>
+        <LeaveLobbyButton useHookStore={useOpenLockedBoxStore} />
       </ContentCard.OutsideSlot>
     </div>
   );

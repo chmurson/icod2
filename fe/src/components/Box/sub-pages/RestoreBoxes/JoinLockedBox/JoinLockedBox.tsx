@@ -4,13 +4,13 @@ import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box
 import { ContentCard } from "@/components/layout/MainLayout";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
-import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
   TopLobbySection,
 } from "../commons/components";
+import { LeaveLobbyButton } from "../commons/components/LeaveLobbyButton";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useSendKeyToLeader } from "./hooks";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
@@ -23,9 +23,6 @@ export const JoinLockedBox: React.FC = () => {
     dataChannelManagerRef,
   });
 
-  const unlockingStartDate = useJoinLockedBoxStore(
-    (state) => state.unlockingStartDate,
-  );
   const onlineKeyHolders = useJoinLockedBoxStore(
     (state) => state.onlineKeyHolders,
   );
@@ -37,7 +34,6 @@ export const JoinLockedBox: React.FC = () => {
   const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
 
   const you = useJoinLockedBoxStore((state) => state.you);
-  const actions = useJoinLockedBoxStore((state) => state.actions);
 
   const shareAccessKeyMapByKeyHolderId = useJoinLockedBoxStore(
     (state) => state.shareAccessKeyMapByKeyHolderId,
@@ -54,10 +50,6 @@ export const JoinLockedBox: React.FC = () => {
   if (!(loadingStates as string[]).includes(state)) {
     return <div>Loading...</div>;
   }
-
-  const handleBackClick = () => {
-    actions.reset();
-  };
 
   const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
 
@@ -81,16 +73,7 @@ export const JoinLockedBox: React.FC = () => {
         ShareAccessDropdown={ShareAccessDropdown}
       />
       <ContentCard.OutsideSlot asChild>
-        <div className="flex justify-center mt-8">
-          <Button
-            className="px-20"
-            variant="alt-primary"
-            onClick={handleBackClick}
-            disabled={unlockingStartDate !== null}
-          >
-            Leave Lobby
-          </Button>
-        </div>
+        <LeaveLobbyButton useHookStore={useJoinLockedBoxStore} />
       </ContentCard.OutsideSlot>
     </div>
   );
