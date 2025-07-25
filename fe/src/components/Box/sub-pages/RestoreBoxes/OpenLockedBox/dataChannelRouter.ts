@@ -81,12 +81,12 @@ router.addHandler(isFollowerSendsPartialStateMessage, (peerId, message) => {
     message.keyHoldersIdsToSharedKeyWith.map((keyHolderId) => [
       keyHolderId,
       true,
-    ])
+    ]),
   );
 
   actions.setShareAccessKeyByKeyholderId(
     keyHolderId,
-    shareAccessKeyByKeyholderId
+    shareAccessKeyByKeyholderId,
   );
 });
 
@@ -111,7 +111,7 @@ router.addHandler(isKeyholderKey, (_, message, dataChannelMng) => {
       }
       return accumulator;
     },
-    {} as Record<string, boolean>
+    {} as Record<string, boolean>,
   );
 
   if (toSharePeersToShareKey) {

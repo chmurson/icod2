@@ -11,7 +11,6 @@ import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
 } from "../commons/components";
-import { OpenBoxButton as OpenBoxButtonDumb } from "../commons/components/OpenBoxButton";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { TopLobbySection } from "./components";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
