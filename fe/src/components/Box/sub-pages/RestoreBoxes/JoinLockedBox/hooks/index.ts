@@ -1,2 +1,2 @@
+export { useGetTopLobbyMetaStatus } from "./useGetMetaLobbyStatus";
 export { useSendKeyToLeader } from "./useSendKeyToLeader";
-export { useShouldShowUnlockButton } from "./useShouldShowUnlockButton";
