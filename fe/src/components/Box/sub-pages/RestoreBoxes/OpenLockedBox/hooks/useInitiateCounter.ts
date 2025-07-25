@@ -9,7 +9,6 @@ export function useInitiateCounter({
   onStop: () => void;
 }) {
   const keyThreshold = useOpenLockedBoxStore((state) => state.keyThreshold);
-  const you = useOpenLockedBoxStore((state) => state.you);
   const shareAccessKeyMapByKeyholderId = useOpenLockedBoxStore(
     (state) => state.shareAccessKeyMapByKeyholderId,
   );
@@ -22,19 +21,45 @@ export function useInitiateCounter({
   const sharesRequiredToStartCounter = keyThreshold - 1;
 
   const isTresholdReached = useMemo(() => {
-    return (
-      Object.values(shareAccessKeyMapByKeyholderId).filter(
-        (accesses) => accesses[you.id],
-      ).length >= sharesRequiredToStartCounter
+    const numberOfSharesByKeyHolderId = Object.values(
+      shareAccessKeyMapByKeyholderId,
+    ).reduce(
+      (prev, accesses) => {
+        Object.entries(accesses).map(([key, hasShare]) => {
+          if (hasShare === true) {
+            prev[key] = (prev[key] ?? 0) + 1;
+          }
+        });
+
+        return prev;
+      },
+      {} as Record<string, number>,
     );
-  }, [sharesRequiredToStartCounter, you, shareAccessKeyMapByKeyholderId]);
+
+    return Object.values(numberOfSharesByKeyHolderId).some(
+      (sharesNumber) => sharesNumber >= sharesRequiredToStartCounter,
+    );
+  }, [sharesRequiredToStartCounter, shareAccessKeyMapByKeyholderId]);
+
+  const prevIsTresholdReached = usePrevious(isTresholdReached);
 
   useEffect(() => {
-    if (isTresholdReached) {
+    if (prevIsTresholdReached !== true && isTresholdReached) {
       const now = new Date();
       onStartRef.current?.(now);
-    } else {
+    } else if (prevIsTresholdReached === true && isTresholdReached === false) {
       onStopRef.current?.();
     }
-  }, [isTresholdReached]);
+  }, [isTresholdReached, prevIsTresholdReached]);
+}
+
+function usePrevious<T>(
+  value: T,
+  initialValue: T | undefined = undefined,
+): T | undefined {
+  const ref = useRef<T>(initialValue);
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+  return ref.current;
 }

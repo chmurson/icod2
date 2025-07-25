@@ -7,7 +7,7 @@ import { defineConfig, loadEnv, type UserConfig } from "vite";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
   const signalingServerUrl = `ws://${env.VITE_SIGNALING_HOSTNAME}:${env.VITE_SIGNALING_PORT}`;
-  console.log(`Frontned calls Signaling Server at: ${signalingServerUrl}
+  console.log(`Vite: Frontned calls Signaling Server at: ${signalingServerUrl}
     `);
   return {
     plugins: [react(), tailwindcss()],

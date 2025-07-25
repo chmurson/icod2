@@ -23,21 +23,21 @@ export const JoinLockedBox: React.FC = () => {
   });
 
   const unlockingStartDate = useJoinLockedBoxStore(
-    (state) => state.unlockingStartDate
+    (state) => state.unlockingStartDate,
   );
   const onlineKeyHolders = useJoinLockedBoxStore(
-    (state) => state.onlineKeyHolders
+    (state) => state.onlineKeyHolders,
   );
 
   const offLineKeyHolders = useJoinLockedBoxStore(
-    (state) => state.offLineKeyHolders
+    (state) => state.offLineKeyHolders,
   );
 
   const you = useJoinLockedBoxStore((state) => state.you);
   const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
   const actions = useJoinLockedBoxStore((state) => state.actions);
   const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
-    (state) => state.shareAccessKeyByKeyHolderId
+    (state) => state.shareAccessKeyByKeyHolderId,
   );
 
   const loadingStates = [
@@ -102,16 +102,6 @@ export const JoinLockedBox: React.FC = () => {
           Leave Lobby
         </Button>
       </div>
-      {JSON.stringify(useJoinLockedBoxStore().shareAccessKeyByKeyHolderId)}
-      {JSON.stringify(useJoinLockedBoxStore().shareAccessKeyMapByKeyHolderId)}
-      {"-----"}
-      {Object.values(
-        useJoinLockedBoxStore().receivedKeysByKeyHolderId ?? {}
-      )}{" "}
-      {"-----"}
-      {Object.entries(
-        useJoinLockedBoxStore().receivedKeysByKeyHolderId ?? {}
-      )}{" "}
     </div>
   );
 };
@@ -121,7 +111,7 @@ const ShareAccesKeyAvatars: FC<{
   possibleKeyHolders: ParticipantType[];
 }> = ({ keyHolderId, possibleKeyHolders }) => {
   const shareAccessKeyMapByKeyHolderId = useJoinLockedBoxStore(
-    (state) => state.shareAccessKeyMapByKeyHolderId
+    (state) => state.shareAccessKeyMapByKeyHolderId,
   );
 
   const keyholdersSharingTheirKeys = useMemo(() => {
@@ -145,10 +135,10 @@ const ShareAccesKeyAvatars: FC<{
 
 const ShareAccessButton = ({ keyHolderId }: { keyHolderId: string }) => {
   const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
-    (state) => state.shareAccessKeyByKeyHolderId
+    (state) => state.shareAccessKeyByKeyHolderId,
   );
   const { toggleShareAccessKey } = useJoinLockedBoxStore(
-    (state) => state.actions
+    (state) => state.actions,
   );
   return (
     <ShareAccessButtonDumb
@@ -162,10 +152,10 @@ const ShareAccessDropdown: FC<{
   onlineKeyHolders: ParticipantType[];
 }> = ({ onlineKeyHolders }) => {
   const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
-    (state) => state.shareAccessKeyByKeyHolderId
+    (state) => state.shareAccessKeyByKeyHolderId,
   );
   const { toggleSharesAccessKeys } = useJoinLockedBoxStore(
-    (state) => state.actions
+    (state) => state.actions,
   );
   const idsOfKeyHoldersToShareWith = Object.entries(shareAccessKeyByKeyHolderId)
     .filter(([_, isSharing]) => isSharing)
@@ -187,13 +177,13 @@ const ShareAccessDropdown: FC<{
 
 const OpenBoxButton = () => {
   const receivedKeysByKeyHolderId = useJoinLockedBoxStore(
-    (state) => state.receivedKeysByKeyHolderId
+    (state) => state.receivedKeysByKeyHolderId,
   );
 
   const key = useJoinLockedBoxStore((state) => state.key);
 
   const encryptedMessage = useJoinLockedBoxStore(
-    (state) => state.encryptedMessage
+    (state) => state.encryptedMessage,
   );
 
   const keys = [...Object.values(receivedKeysByKeyHolderId ?? {}), key];
