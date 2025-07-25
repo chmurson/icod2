@@ -71,7 +71,6 @@ type JoinLockedBoxState = {
     setError: (error: string) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     setPartialStateUpdate: SetPartialStateUpdate;
-    hasEnoughKeysToUnlock: () => boolean;
   };
 } & JoinLockedBoxStateData;
 
@@ -244,15 +243,6 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
 
           return filteredPayload;
         }),
-      hasEnoughKeysToUnlock: () => {
-        const { receivedKeysByKeyHolderId, keyThreshold, key } = get();
-        const receivedKeysNumber = Object.keys(
-          receivedKeysByKeyHolderId ?? {},
-        ).length;
-        const hasKeyHimself = !!key?.trim();
-
-        return receivedKeysNumber + (hasKeyHimself ? 1 : 0) >= keyThreshold;
-      },
     },
   })),
 );

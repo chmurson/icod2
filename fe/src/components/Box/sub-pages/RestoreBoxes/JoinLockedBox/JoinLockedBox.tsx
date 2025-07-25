@@ -9,8 +9,7 @@ import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
 } from "../commons/components";
-import { CounterWithInfo } from "../commons/components/CounterWithInfo";
-import { OpenBoxButton as OpenBoxButtonDumb } from "../commons/components/OpenBoxButton";
+import { TopLobbySection } from "./components";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
@@ -34,7 +33,6 @@ export const JoinLockedBox: React.FC = () => {
   );
 
   const you = useJoinLockedBoxStore((state) => state.you);
-  const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
   const actions = useJoinLockedBoxStore((state) => state.actions);
   const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
     (state) => state.shareAccessKeyByKeyHolderId,
@@ -65,25 +63,12 @@ export const JoinLockedBox: React.FC = () => {
 
   const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
 
-  const showUnlockBoxButton =
-    state === "ready-to-unlock" && actions.hasEnoughKeysToUnlock();
-
   return (
     <div className="flex flex-col gap-8">
       <Text variant="pageTitle" className="mt-4">
         Join a Locked Box
       </Text>
-      {!showUnlockBoxButton && (
-        <CounterWithInfo
-          unlockingStartDate={unlockingStartDate}
-          keyThreshold={keyThreshold}
-          onlineKeyHoldersCount={
-            onlineKeyHolders.length + offLineKeyHolders.length + 1
-          }
-          onFinish={() => actions.setReadyToUnlock()}
-        />
-      )}
-      {showUnlockBoxButton && <OpenBoxButton />}
+      <TopLobbySection />
       <LoobbyKeyHolders
         offLineKeyHolders={offLineKeyHolders}
         onlineKeyHolders={onlineKeyHolders}
@@ -173,20 +158,4 @@ const ShareAccessDropdown: FC<{
       }))}
     />
   );
-};
-
-const OpenBoxButton = () => {
-  const receivedKeysByKeyHolderId = useJoinLockedBoxStore(
-    (state) => state.receivedKeysByKeyHolderId,
-  );
-
-  const key = useJoinLockedBoxStore((state) => state.key);
-
-  const encryptedMessage = useJoinLockedBoxStore(
-    (state) => state.encryptedMessage,
-  );
-
-  const keys = [...Object.values(receivedKeysByKeyHolderId ?? {}), key];
-
-  return <OpenBoxButtonDumb encryptedMessage={encryptedMessage} keys={keys} />;
 };
