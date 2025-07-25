@@ -6,7 +6,7 @@ import {
 import { forwardRef } from "react";
 import { twMerge } from "tailwind-merge";
 
-type ButtonVariant = "prominent" | "primary" | "secondary";
+type ButtonVariant = "prominent" | "primary" | "secondary" | "alt-primary";
 
 interface ButtonProps extends Omit<RadixButtonProps, "variant"> {
   variant?: ButtonVariant;
@@ -28,6 +28,7 @@ const buttonVariantToProps: Record<
   },
   primary: { color: "plum", size: "2", variant: "solid" },
   secondary: { color: "plum", size: "2", variant: "outline" },
+  "alt-primary": { color: "indigo", size: "2", variant: "solid" },
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(

@@ -2,9 +2,9 @@ import { TextField } from "@radix-ui/themes";
 import { type FC, useEffect, useMemo } from "react";
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
+import { ContentCard } from "@/components/layout/MainLayout";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
-import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import {
@@ -12,6 +12,7 @@ import {
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
   TopLobbySection,
 } from "../commons/components";
+import { LeaveLobbyButton } from "../commons/components/LeaveLobbyButton";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import {
@@ -30,10 +31,6 @@ export const OpenLockedBox: React.FC = () => {
 
   const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
-
-  const unlockingStartDate = useOpenLockedBoxStore(
-    (state) => state.unlockingStartDate,
-  );
 
   const offLineKeyHolders = useOpenLockedBoxStore(
     (state) => state.offLineKeyHolders,
@@ -79,10 +76,6 @@ export const OpenLockedBox: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  const handleBackClick = () => {
-    actions.reset();
-  };
-
   const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
 
   return (
@@ -91,7 +84,7 @@ export const OpenLockedBox: React.FC = () => {
         Open a Locked Box
       </Text>
       <TopLobbySection useStoreHook={useOpenLockedBoxStore} />
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 py-4">
         {shareableURL && (
           <FieldArea label="Invite URL">
             <TextField.Root value={shareableURL} readOnly />
@@ -110,15 +103,9 @@ export const OpenLockedBox: React.FC = () => {
           ShareAccessDropdown={ShareAccessDropdown}
         />
       </div>
-      <div className="flex gap-4">
-        <Button
-          variant="secondary"
-          onClick={handleBackClick}
-          disabled={unlockingStartDate !== null}
-        >
-          Leave Lobby
-        </Button>
-      </div>
+      <ContentCard.OutsideSlot asChild>
+        <LeaveLobbyButton useHookStore={useOpenLockedBoxStore} />
+      </ContentCard.OutsideSlot>
     </div>
   );
 };
