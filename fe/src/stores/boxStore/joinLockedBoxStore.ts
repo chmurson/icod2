@@ -49,7 +49,7 @@ type SetPartialStateUpdate = (
   >,
 ) => void;
 
-type JoinLockedBoxState = {
+export type JoinLockedBoxState = {
   actions: {
     reset: () => void;
     start: () => void;
