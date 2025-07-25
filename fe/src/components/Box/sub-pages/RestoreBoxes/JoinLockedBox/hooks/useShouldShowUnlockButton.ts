@@ -13,12 +13,12 @@ export function useShouldShowUnlockButton() {
 
   const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
 
-  const hasEnoughtKeysToUnlock = useMemo(() => {
+  const hasEnoughKeysToUnlock = useMemo(() => {
     return receivedKeysNumber + (hasKeyHimself ? 1 : 0) >= keyThreshold;
   }, [keyThreshold, receivedKeysNumber, hasKeyHimself]);
 
   const shouldShowUnlockButton =
-    state === "ready-to-unlock" && hasEnoughtKeysToUnlock;
+    state === "ready-to-unlock" && hasEnoughKeysToUnlock;
 
   return { shouldShowUnlockButton };
 }

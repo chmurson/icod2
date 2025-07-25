@@ -7,12 +7,16 @@ import {
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { Text } from "@/ui/Typography";
+import { MissingOneKeyLabel } from "./MIssingOneKeyLabel";
+import { ReadyToUnlockLabel } from "./ReadyToUnlockLabel";
 
 export const LoobbyKeyHolders: FC<{
   you: ParticipantType;
   onlineKeyHolders: ParticipantType[];
   offLineKeyHolders: ParticipantType[];
   possibleKeyHolders: ParticipantType[];
+  shareAccessKeyMapByKeyHolderId: Record<string, Record<string, boolean>>;
+  keyThreshold: number;
   ShareAccesKeyAvatars: ComponentType<{
     keyHolderId: string;
     possibleKeyHolders: ParticipantType[];
@@ -28,10 +32,17 @@ export const LoobbyKeyHolders: FC<{
   onlineKeyHolders,
   possibleKeyHolders,
   you,
+  shareAccessKeyMapByKeyHolderId,
+  keyThreshold,
   ShareAccesKeyAvatars,
   ShareAccessDropdown,
   ShareAccessButton,
 }) => {
+  const { isReadyToUnlock, isMissingOne } = isReadyToUnlockAndMissingOne(
+    shareAccessKeyMapByKeyHolderId,
+    keyThreshold,
+    you.id,
+  );
   return (
     <div className="flex flex-col gap-12">
       <div className="grid grid-cols-[60px_200px_120px_1fr_200px]">
@@ -45,9 +56,13 @@ export const LoobbyKeyHolders: FC<{
           <ParticipantItemDescription name={you.name} ua={you.userAgent} />
         </div>
         <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
-          <Text variant="secondaryText" className="text-sm">
-            Ready to unlock
-          </Text>
+          {isMissingOne ? (
+            <MissingOneKeyLabel />
+          ) : isReadyToUnlock ? (
+            <ReadyToUnlockLabel />
+          ) : (
+            <></>
+          )}
         </div>
         <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
           <ShareAccesKeyAvatars
@@ -64,30 +79,46 @@ export const LoobbyKeyHolders: FC<{
           </div>
         )}
         {onlineKeyHolders.length !== 0 &&
-          onlineKeyHolders.map((kh) => (
-            <Fragment key={kh.id}>
-              <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
-                <ParticipantItemAvatar name={kh.name} />
-              </div>
-              <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
-                <ParticipantItemDescription name={kh.name} ua={kh.userAgent} />
-              </div>
-              <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
-                <Text variant="secondaryText" className="text-sm">
-                  Ready to unlock
-                </Text>
-              </div>
-              <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
-                <ShareAccesKeyAvatars
-                  keyHolderId={kh.id}
-                  possibleKeyHolders={possibleKeyHolders}
-                />
-              </div>
-              <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700">
-                <ShareAccessButton keyHolderId={kh.id} />
-              </div>
-            </Fragment>
-          ))}
+          onlineKeyHolders.map((kh) => {
+            const { isReadyToUnlock, isMissingOne } =
+              isReadyToUnlockAndMissingOne(
+                shareAccessKeyMapByKeyHolderId,
+                keyThreshold,
+                kh.id,
+              );
+
+            return (
+              <Fragment key={kh.id}>
+                <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
+                  <ParticipantItemAvatar name={kh.name} />
+                </div>
+                <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
+                  <ParticipantItemDescription
+                    name={kh.name}
+                    ua={kh.userAgent}
+                  />
+                </div>
+                <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
+                  {isMissingOne ? (
+                    <MissingOneKeyLabel />
+                  ) : isReadyToUnlock ? (
+                    <ReadyToUnlockLabel />
+                  ) : (
+                    <></>
+                  )}
+                </div>
+                <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
+                  <ShareAccesKeyAvatars
+                    keyHolderId={kh.id}
+                    possibleKeyHolders={possibleKeyHolders}
+                  />
+                </div>
+                <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700">
+                  <ShareAccessButton keyHolderId={kh.id} />
+                </div>
+              </Fragment>
+            );
+          })}
         <div className="col-span-full py-1 mt-12">
           <Text variant="label">Offline key holders:</Text>
         </div>
@@ -107,9 +138,7 @@ export const LoobbyKeyHolders: FC<{
               <ParticipantItemDescription name={kh.name} ua={kh.userAgent} />
             </div>
             <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
-              <Text variant="secondaryText" className="text-sm">
-                Ready to unlock
-              </Text>
+              <Text variant="secondaryText" className="text-sm" />
             </div>
             <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
               <ShareAccesKeyAvatars
@@ -125,4 +154,21 @@ export const LoobbyKeyHolders: FC<{
       </div>
     </div>
   );
+};
+
+const isReadyToUnlockAndMissingOne = (
+  shareAccessKeyMapByKeyHolderId: Record<string, Record<string, boolean>>,
+  keyThreshold: number,
+  keyHolderId: string,
+) => {
+  const numberOfAccesses = Object.entries(
+    shareAccessKeyMapByKeyHolderId,
+  ).filter(([_, withWhoMap]) => {
+    return withWhoMap[keyHolderId] === true;
+  }).length;
+  const fullAmountOfKeys = numberOfAccesses + 1;
+  const isReadyToUnlock = fullAmountOfKeys >= keyThreshold;
+  const isMissingOne = fullAmountOfKeys === keyThreshold - 1;
+
+  return { isReadyToUnlock, isMissingOne };
 };

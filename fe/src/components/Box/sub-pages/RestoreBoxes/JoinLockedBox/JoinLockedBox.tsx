@@ -33,8 +33,14 @@ export const JoinLockedBox: React.FC = () => {
     (state) => state.offLineKeyHolders,
   );
 
+  const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
+
   const you = useJoinLockedBoxStore((state) => state.you);
   const actions = useJoinLockedBoxStore((state) => state.actions);
+
+  const shareAccessKeyMapByKeyHolderId = useJoinLockedBoxStore(
+    (state) => state.shareAccessKeyMapByKeyHolderId,
+  );
 
   const loadingStates = [
     "connecting",
@@ -66,6 +72,8 @@ export const JoinLockedBox: React.FC = () => {
         onlineKeyHolders={onlineKeyHolders}
         possibleKeyHolders={possibleKeyHolders}
         you={you}
+        shareAccessKeyMapByKeyHolderId={shareAccessKeyMapByKeyHolderId}
+        keyThreshold={keyThreshold}
         ShareAccesKeyAvatars={ShareAccesKeyAvatars}
         ShareAccessButton={ShareAccessButton}
         ShareAccessDropdown={ShareAccessDropdown}
