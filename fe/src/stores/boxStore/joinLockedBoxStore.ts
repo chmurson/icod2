@@ -269,10 +269,15 @@ if (import.meta.env.DEV === true) {
     },
     setReadyToUnlock: () => {
       useJoinLockedBoxStore.getState().actions.setReadyToUnlock();
+      const nowMinus2Minutes = new Date(Date.now() - 2 * 60 * 1000);
+      useJoinLockedBoxStore
+        .getState()
+        .actions.setUnlockingStartDate(nowMinus2Minutes);
     },
     addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) => {
       useJoinLockedBoxStore.getState().actions.addReceivedKey(arg);
-      useJoinLockedBoxStore.getState().actions.setReadyToUnlock();
+      //@ts-ignore
+      window.useJoinLockedBoxStore.setReadyToUnlock();
     },
   };
 }
