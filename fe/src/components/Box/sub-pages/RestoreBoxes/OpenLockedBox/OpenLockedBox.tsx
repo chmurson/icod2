@@ -14,7 +14,10 @@ import {
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { TopLobbySection } from "./components";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
-import { useNavigateToShareableLink } from "./hooks";
+import {
+  useNavigateToShareableLink,
+  useShareKeyWithParticipants,
+} from "./hooks";
 import { useInitiateCounter } from "./hooks/useInitiateCounter";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
@@ -42,9 +45,6 @@ export const OpenLockedBox: React.FC = () => {
 
   const you = useOpenLockedBoxStore((state) => state.you);
   const actions = useOpenLockedBoxStore((state) => state.actions);
-  const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
-    (state) => state.shareAccessKeyByKeyHolderId,
-  );
 
   useEffect(() => {
     if (sessionId) {
@@ -52,25 +52,7 @@ export const OpenLockedBox: React.FC = () => {
     }
   }, [sessionId]);
 
-  // dark hook - to @michał: extract to separate hook; and add tests
-  useEffect(() => {
-    if (
-      state === "ready-to-unlock" &&
-      Object.values(shareAccessKeyByKeyHolderId).some((x) => x === true)
-    ) {
-      const idsToShareKey = Object.keys(shareAccessKeyByKeyHolderId).reduce(
-        (accumulator, key) => {
-          if (shareAccessKeyByKeyHolderId[key] === true && key !== you.id) {
-            accumulator[key] = true; //
-          }
-          return accumulator;
-        },
-        {} as Record<string, boolean>,
-      );
-
-      sendKey(Object.keys(idsToShareKey));
-    }
-  }, [sendKey, state, shareAccessKeyByKeyHolderId, you.id]);
+  useShareKeyWithParticipants(sendKey);
 
   useInitiateCounter({
     onStart: (date) => {

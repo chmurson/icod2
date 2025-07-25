@@ -1,4 +1,4 @@
-import { type FC, useEffect, useMemo } from "react";
+import { type FC, useMemo } from "react";
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
@@ -11,6 +11,7 @@ import {
 } from "../commons/components";
 import { TopLobbySection } from "./components";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
+import { useSendKeyToLeader } from "./hooks";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
@@ -34,9 +35,6 @@ export const JoinLockedBox: React.FC = () => {
 
   const you = useJoinLockedBoxStore((state) => state.you);
   const actions = useJoinLockedBoxStore((state) => state.actions);
-  const shareAccessKeyByKeyHolderId = useJoinLockedBoxStore(
-    (state) => state.shareAccessKeyByKeyHolderId,
-  );
 
   const loadingStates = [
     "connecting",
@@ -44,14 +42,7 @@ export const JoinLockedBox: React.FC = () => {
     "ready-to-unlock",
   ] satisfies (typeof state)[];
 
-  useEffect(() => {
-    if (
-      state === "ready-to-unlock" &&
-      Object.values(shareAccessKeyByKeyHolderId).some((x) => x === true)
-    ) {
-      sendKey();
-    }
-  }, [sendKey, state, shareAccessKeyByKeyHolderId]);
+  useSendKeyToLeader(sendKey);
 
   if (!(loadingStates as string[]).includes(state)) {
     return <div>Loading...</div>;
