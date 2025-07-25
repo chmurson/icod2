@@ -6,7 +6,6 @@ import {
 } from "@/stores/boxStore/joinLockedBoxStore";
 import { useSendKeyToLeader } from "./useSendKeyToLeader";
 
-// Mock the store
 vi.mock("@/stores/boxStore/joinLockedBoxStore", () => ({
   useJoinLockedBoxStore: vi.fn(),
 }));

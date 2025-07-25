@@ -7,7 +7,6 @@ import {
 } from "@/stores/boxStore";
 import { useShareKeyWithParticipants } from "./useShareKeyWithParticipants";
 
-// Mock the store
 vi.mock("@/stores/boxStore", () => ({
   useOpenLockedBoxStore: vi.fn(),
 }));
