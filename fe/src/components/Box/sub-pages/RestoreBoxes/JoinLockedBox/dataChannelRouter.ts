@@ -2,6 +2,8 @@ import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRo
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import {
   isLeaderError,
+  isLeaderKey,
+  isLeaderRelayKey,
   isLeaderSendsPartialStateMessage,
   isLeaderWelcome,
 } from "../commons/leader-keyholder-interface";
@@ -29,4 +31,26 @@ router.addHandler(isLeaderError, (_, message) => {
 router.addHandler(isLeaderSendsPartialStateMessage, (_, message) => {
   const { actions } = useJoinLockedBoxStore.getState();
   actions.setPartialStateUpdate(message);
+});
+
+router.addHandler(isLeaderRelayKey, (_, message) => {
+  const { actions } = useJoinLockedBoxStore.getState();
+
+  const { keyToRelay, keyHolderId } = message;
+
+  actions.addReceivedKey({
+    fromKeyHolderId: keyHolderId,
+    key: keyToRelay,
+  });
+});
+
+router.addHandler(isLeaderKey, (_, message) => {
+  const { actions } = useJoinLockedBoxStore.getState();
+
+  const { key, keyHolderId } = message;
+
+  actions.addReceivedKey({
+    fromKeyHolderId: keyHolderId,
+    key,
+  });
 });

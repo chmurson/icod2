@@ -49,7 +49,7 @@ type SetPartialStateUpdate = (
   >,
 ) => void;
 
-type JoinLockedBoxState = {
+export type JoinLockedBoxState = {
   actions: {
     reset: () => void;
     start: () => void;
@@ -71,7 +71,6 @@ type JoinLockedBoxState = {
     setError: (error: string) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     setPartialStateUpdate: SetPartialStateUpdate;
-    hasEnoughKeysToUnlock: () => boolean;
   };
 } & JoinLockedBoxStateData;
 

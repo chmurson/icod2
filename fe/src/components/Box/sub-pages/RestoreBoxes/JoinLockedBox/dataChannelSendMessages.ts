@@ -2,7 +2,10 @@ import { type RefObject, useCallback } from "react";
 import type { DataChannelManager } from "@/services/webrtc";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import type { FollowerSendsPartialStateMessage } from "../commons";
-import type { KeyholderHello } from "../commons/leader-keyholder-interface";
+import type {
+  KeyholderHello,
+  KeyholderKey,
+} from "../commons/leader-keyholder-interface";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 
 export const useDataChannelSendMessages = ({
@@ -12,10 +15,12 @@ export const useDataChannelSendMessages = ({
 }) => {
   const sendPartialState = useSendPartialState(dataChannelManagerRef);
   const sendHelloToPeer = useSendHelloToPeer(dataChannelManagerRef);
+  const sendKey = useSendKey(dataChannelManagerRef);
 
   return {
     sendPartialState,
     sendHelloToPeer,
+    sendKey,
   };
 };
 
@@ -24,7 +29,6 @@ const useSendHelloToPeer = (
 ) =>
   useCallback(
     (peerId: string) => {
-      console.log(peerId, "localPeerId");
       const { you } = useJoinLockedBoxStore.getState();
 
       const msg: KeyholderHello = {
@@ -67,4 +71,36 @@ const useSendPartialState = (
     },
     [dataChannelManagerRef, peerToKeyHolderMapRef],
   );
+};
+
+const useSendKey = (
+  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+) => {
+  const { peerToKeyHolderMapRef } = usePeerToHolderMapRef();
+
+  return useCallback(() => {
+    const { you, key, connectedLeaderId } = useJoinLockedBoxStore.getState();
+
+    if (!connectedLeaderId) {
+      return;
+    }
+
+    const peerId = peerToKeyHolderMapRef.current.getPeerId(connectedLeaderId);
+
+    if (!peerId) {
+      console.warn(
+        "No peer ID found for the connected leader ID:",
+        connectedLeaderId,
+      );
+      return;
+    }
+
+    const msg: KeyholderKey = {
+      type: "keyholder:key",
+      key: key,
+      keyHolderId: you.id,
+    };
+
+    dataChannelManagerRef.current?.sendMessageToSinglePeer(peerId, msg);
+  }, [dataChannelManagerRef, peerToKeyHolderMapRef.current.getPeerId]);
 };

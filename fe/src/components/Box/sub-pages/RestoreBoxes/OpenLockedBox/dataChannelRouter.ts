@@ -7,8 +7,10 @@ import type {
 import {
   isFollowerSendsPartialStateMessage,
   isKeyholderHello,
+  isKeyholderKey,
 } from "../commons/leader-keyholder-interface";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
+import { relayKey } from "./dataChannelSendMessages";
 
 export const router = new DataChannelMessageRouter();
 
@@ -86,4 +88,43 @@ router.addHandler(isFollowerSendsPartialStateMessage, (peerId, message) => {
     keyHolderId,
     shareAccessKeyByKeyholderId,
   );
+});
+
+router.addHandler(isKeyholderKey, (_, message, dataChannelMng) => {
+  const { keyHolderId, key } = message;
+  const { actions, shareAccessKeyMapByKeyholderId, you } =
+    useOpenLockedBoxStore.getState();
+
+  if (shareAccessKeyMapByKeyholderId[keyHolderId][you.id]) {
+    actions.addReceivedKey({
+      fromKeyHolderId: keyHolderId,
+      key,
+    });
+  }
+
+  const peersShareToKeys = shareAccessKeyMapByKeyholderId[keyHolderId];
+
+  const toSharePeersToShareKey = Object.keys(peersShareToKeys).reduce(
+    (accumulator, key) => {
+      if (peersShareToKeys[key] === true && key !== you.id) {
+        accumulator[key] = true;
+      }
+      return accumulator;
+    },
+    {} as Record<string, boolean>,
+  );
+
+  if (toSharePeersToShareKey) {
+    if (!dataChannelMng) {
+      return;
+    }
+
+    for (const keyReceiverId of Object.keys(toSharePeersToShareKey)) {
+      relayKey(dataChannelMng, {
+        keyHolderId,
+        keyReceiverId,
+        keyToRelay: key,
+      });
+    }
+  }
 });

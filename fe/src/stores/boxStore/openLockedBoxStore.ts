@@ -38,7 +38,7 @@ const openLockedBoxState = {
 
 export type OpenLockedBoxStateData = typeof openLockedBoxState;
 
-type OpenLockedBoxState = {
+export type OpenLockedBoxState = {
   actions: {
     reset: () => void;
     start: () => void;

@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Text } from "@/components/ui";
 import { cn } from "@/utils/cn";
 
-const TWO_MINUTES_IN_MS = 2 * 60 * 1000;
+const TWO_MINUTES_IN_MS = 10 * 1000;
 
 const formatTime = (ms: number) => {
-  const minutes = Math.floor(ms / 60000);
-  const seconds = Math.floor((ms % 60000) / 1000);
+  const clampedMs = Math.max(0, ms);
+  const minutes = Math.floor(clampedMs / 60000);
+  const seconds = Math.floor((clampedMs % 60000) / 1000);
   return `${minutes.toString().padStart(2, "0")}:${seconds
     .toString()
     .padStart(2, "0")}`;
@@ -16,16 +17,17 @@ export const CounterWithInfo = ({
   unlockingStartDate,
   keyThreshold,
   onlineKeyHoldersCount,
+  onFinish,
 }: {
   unlockingStartDate: Date | null;
   keyThreshold: number;
   onlineKeyHoldersCount: number;
+  onFinish: () => void;
 }) => {
   const [remainingTime, setRemainingTime] = useState(TWO_MINUTES_IN_MS);
 
   useEffect(() => {
     if (!unlockingStartDate) {
-      setRemainingTime(TWO_MINUTES_IN_MS);
       return;
     }
 
@@ -43,13 +45,14 @@ export const CounterWithInfo = ({
       if (remaining <= 0) {
         setRemainingTime(0);
         clearInterval(interval);
+        onFinish();
       } else {
         setRemainingTime(remaining);
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [unlockingStartDate]);
+  }, [unlockingStartDate, onFinish]);
 
   return (
     <div className="flex flex-col items-center gap-1">

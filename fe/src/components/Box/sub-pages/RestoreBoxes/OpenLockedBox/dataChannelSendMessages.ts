@@ -3,9 +3,12 @@ import type { DataChannelManager } from "@/services/webrtc";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type {
   LeaderError,
+  LeaderKey,
+  LeaderRelayKey,
   LeaderSendsPartialStateMessage,
   LeaderWelcome,
 } from "../commons/leader-keyholder-interface";
+import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 
 export const useDataChannelSendMessages = ({
   dataChannelManagerRef,
@@ -15,12 +18,42 @@ export const useDataChannelSendMessages = ({
   const sendError = useSendError(dataChannelManagerRef);
   const sendWelcome = useSendWelcome(dataChannelManagerRef);
   const sendPartialUpdate = useSendPartialStateUpdate(dataChannelManagerRef);
+  const sendKey = useSendKey(dataChannelManagerRef);
 
   return {
     sendError,
     sendWelcome,
     sendPartialUpdate,
+    sendKey,
   };
+};
+
+export const relayKey = (
+  dataChannelManager: DataChannelManager,
+  {
+    keyHolderId,
+    keyReceiverId,
+    keyToRelay,
+  }: {
+    keyHolderId: string;
+    keyReceiverId: string;
+    keyToRelay: string;
+  },
+) => {
+  const peerId = usePeerToHolderMapRef.getValue().getPeerId(keyReceiverId);
+
+  if (!peerId) {
+    console.warn("No peer ID found for the keyReceiver ID:", keyReceiverId);
+    return;
+  }
+
+  const msg: LeaderRelayKey = {
+    type: "leader:relay-key",
+    keyToRelay,
+    keyHolderId,
+  };
+
+  dataChannelManager.sendMessageToSinglePeer(peerId, msg);
 };
 
 const useSendError = (
@@ -67,3 +100,30 @@ const useSendPartialStateUpdate = (
     },
     [dataChannelManagerRef],
   );
+
+const useSendKey = (
+  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+) => {
+  return useCallback(
+    (receiverIds: string[]) => {
+      const { you, key } = useOpenLockedBoxStore.getState();
+
+      for (const id of receiverIds) {
+        const peerId = usePeerToHolderMapRef.getValue().getPeerId(id);
+
+        if (!peerId) {
+          console.warn("No peer ID found for the receiver ID:", id);
+          return;
+        }
+
+        const msg: LeaderKey = {
+          type: "leader:key",
+          key: key,
+          keyHolderId: you.id,
+        };
+        dataChannelManagerRef.current?.sendMessageToSinglePeer(peerId, msg);
+      }
+    },
+    [dataChannelManagerRef],
+  );
+};
