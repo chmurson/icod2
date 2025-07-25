@@ -1,3 +1,4 @@
+import { Strong } from "@radix-ui/themes";
 import type { StoreApi, UseBoundStore } from "zustand";
 import type { LockedBoxStoreCommonPart } from "@/stores/boxStore/common-types";
 import { Text } from "@/ui/Typography";
@@ -30,6 +31,14 @@ export const TopLobbySection = ({
 
   const unlockingStartDate = useStoreHook((state) => state.unlockingStartDate);
 
+  const allKeysCurrentKeyholderHas = useStoreHook((state) =>
+    Object.keys(state.receivedKeysByKeyHolderId ?? {}).length +
+      state.key?.trim() !==
+    ""
+      ? 1
+      : 0,
+  );
+
   return (
     <>
       {(metaStatus === "not-ready-to-unlock" ||
@@ -44,8 +53,10 @@ export const TopLobbySection = ({
           )}
           textReplacement={
             metaStatus === "keyholder-not-able-to-unlock" ? (
-              <Text variant="label" className="text-red-400">
-                Not enough key holders have shared their keys to unlock the box
+              <Text variant="label" className="text-red-400 dark:text-red-300">
+                Time’s up — you had only{" "}
+                <Strong>{allKeysCurrentKeyholderHas}</Strong> of{" "}
+                <Strong>{keyThreshold}</Strong> required keys to unlock the box.
               </Text>
             ) : null
           }

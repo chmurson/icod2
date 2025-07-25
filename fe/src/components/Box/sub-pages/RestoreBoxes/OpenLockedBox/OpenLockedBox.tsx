@@ -107,7 +107,7 @@ export const OpenLockedBox: React.FC = () => {
       <ContentCard.OutsideSlot asChild>
         <LeaveLobbyButton useHookStore={useOpenLockedBoxStore} />
       </ContentCard.OutsideSlot>
-      <NavigationAwayBlocker useHookStore={useOpenLockedBoxStore} />
+      <NavigationAwayBlocker useHookStore={useOpenLockedBoxStore} isLeader />
     </div>
   );
 };
