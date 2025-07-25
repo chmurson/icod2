@@ -92,6 +92,7 @@ export const OpenLockedBox: React.FC = () => {
           </FieldArea>
         )}
         <LoobbyKeyHolders
+          status={state}
           offLineKeyHolders={offLineKeyHolders}
           onlineKeyHolders={onlineKeyHolders}
           you={you}
