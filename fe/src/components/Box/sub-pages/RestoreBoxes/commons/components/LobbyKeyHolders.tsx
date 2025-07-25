@@ -181,7 +181,7 @@ const isReadyToUnlockAndMissingOne = (
   keyHolderId: string,
 ) => {
   const numberOfAccesses = Object.entries(
-    shareAccessKeyMapByKeyHolderId,
+    shareAccessKeyMapByKeyHolderId ?? {},
   ).filter(([_, withWhoMap]) => {
     return withWhoMap[keyHolderId] === true;
   }).length;

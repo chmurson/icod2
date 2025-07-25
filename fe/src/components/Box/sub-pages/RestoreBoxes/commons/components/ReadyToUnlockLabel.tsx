@@ -3,7 +3,10 @@ import type { FC } from "react";
 
 export const ReadyToUnlockLabel: FC = () => {
   return (
-    <Badge color="grass" variant="soft" radius="large">
+    <Badge
+      className="bg-[var(--alt-accent-3)] text-[var(--alt-accent-8)]"
+      radius="large"
+    >
       Ready to unlock
     </Badge>
   );
