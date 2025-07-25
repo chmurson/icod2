@@ -5,6 +5,7 @@ import { areArraysOfPrimitiveEqual } from "@/utils/areArraysOfPrimitiveEqual";
 import { hasSameTrueKeys } from "@/utils/hasSameTrueKeys";
 import { safeParseAndCheckRecent } from "@/utils/safeDateParseAndCheckRecent";
 import {
+  type LockedBoxStoreCommonPart,
   lockedBoxStoreStateCommonPart,
   type ParticipantType,
 } from "./common-types";
@@ -15,10 +16,7 @@ const joinLockedBoxState = {
   connected: false,
   error: null as string | null,
   boxTitle: "",
-  encryptedMessage: "",
   connectedLeaderId: undefined as string | undefined,
-  onlineKeyHolders: [] as ParticipantType[],
-  offLineKeyHolders: [] as ParticipantType[],
   keyHolderId: "",
   you: {
     id: "",
@@ -27,7 +25,6 @@ const joinLockedBoxState = {
   } satisfies ParticipantType,
   decryptedContent: "",
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
-  unlockingStartDate: null as Date | null,
 };
 
 export type JoinLockedBoxStateData = typeof joinLockedBoxState;
@@ -47,7 +44,6 @@ export type JoinLockedBoxState = {
   actions: {
     reset: () => void;
     start: () => void;
-    setReadyToUnlock: () => void;
     connect: (args: {
       boxTitle: string;
       encryptedMessage: string;
@@ -65,7 +61,7 @@ export type JoinLockedBoxState = {
     setError: (error: string) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     setPartialStateUpdate: SetPartialStateUpdate;
-  };
+  } & LockedBoxStoreCommonPart["actions"];
 } & JoinLockedBoxStateData;
 
 export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(

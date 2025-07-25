@@ -10,9 +10,9 @@ import { FieldArea } from "../../../components/FieldArea";
 import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
+  TopLobbySection,
 } from "../commons/components";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
-import { TopLobbySection } from "./components";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import {
   useNavigateToShareableLink,
@@ -84,7 +84,7 @@ export const OpenLockedBox: React.FC = () => {
       <Text variant="pageTitle" className="mt-4">
         Open a Locked Box
       </Text>
-      <TopLobbySection />
+      <TopLobbySection useStoreHook={useOpenLockedBoxStore} />
       <div className="flex flex-col gap-4">
         {shareableURL && (
           <FieldArea label="Invite URL">
