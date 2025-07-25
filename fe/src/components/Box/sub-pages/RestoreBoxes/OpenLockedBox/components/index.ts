@@ -1,1 +1,1 @@
-export { TopLobbySection } from "./TopLobbySection";
+export { TopLobbySection } from "../../commons/components/TopLobbySection";

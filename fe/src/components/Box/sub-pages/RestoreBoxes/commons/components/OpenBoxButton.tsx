@@ -2,6 +2,7 @@ import { Button, Dialog, TextArea } from "@radix-ui/themes";
 import type { FC } from "react";
 import { lazy, Suspense, useState } from "react";
 import { Alert } from "@/ui/Alert";
+import { cn } from "@/utils/cn";
 import { AlternateProminentButton } from "./AlternateProminentButton";
 import tokenSvg from "./assets/token.svg";
 
@@ -23,15 +24,25 @@ const DecryptorFallback: FC = () => (
 type Props = {
   keys: string[];
   encryptedMessage: string;
+  disabled?: boolean;
+  className?: string;
 };
 
-export const OpenBoxButton: FC<Props> = ({ encryptedMessage, keys }) => {
+export const OpenBoxButton: FC<Props> = ({
+  encryptedMessage,
+  keys,
+  disabled = false,
+  className,
+}) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
     <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Dialog.Trigger>
-        <AlternateProminentButton className="self-center">
+        <AlternateProminentButton
+          className={cn("self-center", className)}
+          disabled={disabled}
+        >
           <img alt="box" src={tokenSvg} width={18} height={18} />
           Open Box
         </AlternateProminentButton>

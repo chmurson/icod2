@@ -4,27 +4,20 @@ import { devtools } from "zustand/middleware";
 import { areArraysOfPrimitiveEqual } from "@/utils/areArraysOfPrimitiveEqual";
 import { hasSameTrueKeys } from "@/utils/hasSameTrueKeys";
 import { safeParseAndCheckRecent } from "@/utils/safeDateParseAndCheckRecent";
-import type { ParticipantType } from "./common-types";
+import {
+  type LockedBoxStoreCommonPart,
+  lockedBoxStoreStateCommonPart,
+  type ParticipantType,
+} from "./common-types";
 
 const joinLockedBoxState = {
-  state: "initial" as
-    | "initial"
-    | "drop-box"
-    | "connecting"
-    | "connected"
-    | "ready-to-unlock",
+  ...lockedBoxStoreStateCommonPart,
   connecting: false,
   connected: false,
   error: null as string | null,
   boxTitle: "",
-  encryptedMessage: "",
-  key: "",
-  keyHolderId: "",
-  receivedKeysByKeyHolderId: undefined as Record<string, string> | undefined,
   connectedLeaderId: undefined as string | undefined,
-  onlineKeyHolders: [] as ParticipantType[],
-  offLineKeyHolders: [] as ParticipantType[],
-  keyThreshold: 1,
+  keyHolderId: "",
   you: {
     id: "",
     name: "",
@@ -32,8 +25,6 @@ const joinLockedBoxState = {
   } satisfies ParticipantType,
   decryptedContent: "",
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
-  unlockingStartDate: null as Date | null,
-  shareAccessKeyMapByKeyHolderId: {} as Record<string, Record<string, boolean>>,
 };
 
 export type JoinLockedBoxStateData = typeof joinLockedBoxState;
@@ -53,7 +44,6 @@ export type JoinLockedBoxState = {
   actions: {
     reset: () => void;
     start: () => void;
-    setReadyToUnlock: () => void;
     connect: (args: {
       boxTitle: string;
       encryptedMessage: string;
@@ -71,7 +61,7 @@ export type JoinLockedBoxState = {
     setError: (error: string) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     setPartialStateUpdate: SetPartialStateUpdate;
-  };
+  } & LockedBoxStoreCommonPart["actions"];
 } & JoinLockedBoxStateData;
 
 export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
@@ -269,10 +259,15 @@ if (import.meta.env.DEV === true) {
     },
     setReadyToUnlock: () => {
       useJoinLockedBoxStore.getState().actions.setReadyToUnlock();
+      const nowMinus2Minutes = new Date(Date.now() - 2 * 60 * 1000);
+      useJoinLockedBoxStore
+        .getState()
+        .actions.setUnlockingStartDate(nowMinus2Minutes);
     },
     addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) => {
       useJoinLockedBoxStore.getState().actions.addReceivedKey(arg);
-      useJoinLockedBoxStore.getState().actions.setReadyToUnlock();
+      //@ts-ignore
+      window.useJoinLockedBoxStore.setReadyToUnlock();
     },
   };
 }

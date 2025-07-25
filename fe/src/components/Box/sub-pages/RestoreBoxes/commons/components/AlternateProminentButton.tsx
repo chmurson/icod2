@@ -6,14 +6,16 @@ import { cn } from "@/utils/cn";
 type Props = Omit<RadixButtonProps, "variant">;
 
 export const AlternateProminentButton: FC<Props> = (props) => {
-  const { className, ...restOfProps } = props;
+  const { className, disabled, ...restOfProps } = props;
   return (
     <Button
       {...restOfProps}
+      disabled={disabled}
       className={cn(
-        className,
-        "py-8.5 px-26 bg-[var(--alt-accent-3)] text-[var(--alt-accent-9)] text-2xl font-semibold rounded-full border-2 border-white shadow-xl",
+        "cursor-pointer py-8.5 px-26 bg-[var(--alt-accent-3)] text-[var(--alt-accent-9)] text-2xl font-semibold rounded-full border-2 border-white shadow-xl",
         " dark:border-gray-300 dark:shadow-gray-100/25 dark:shadow-lg",
+        disabled && "opacity-50",
+        className,
       )}
     />
   );

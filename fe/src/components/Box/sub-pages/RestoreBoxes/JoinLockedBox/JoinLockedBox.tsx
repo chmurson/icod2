@@ -8,8 +8,8 @@ import { Text } from "@/ui/Typography";
 import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
+  TopLobbySection,
 } from "../commons/components";
-import { TopLobbySection } from "./components";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useSendKeyToLeader } from "./hooks";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
@@ -66,8 +66,9 @@ export const JoinLockedBox: React.FC = () => {
         Join a Locked Box
       </Text>
 
-      <TopLobbySection />
+      <TopLobbySection useStoreHook={useJoinLockedBoxStore} />
       <LoobbyKeyHolders
+        status={state}
         offLineKeyHolders={offLineKeyHolders}
         onlineKeyHolders={onlineKeyHolders}
         possibleKeyHolders={possibleKeyHolders}

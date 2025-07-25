@@ -9,8 +9,8 @@ export function useInitiateCounter({
   onStop: () => void;
 }) {
   const keyThreshold = useOpenLockedBoxStore((state) => state.keyThreshold);
-  const shareAccessKeyMapByKeyholderId = useOpenLockedBoxStore(
-    (state) => state.shareAccessKeyMapByKeyholderId,
+  const shareAccessKeyMapByKeyHolderId = useOpenLockedBoxStore(
+    (state) => state.shareAccessKeyMapByKeyHolderId,
   );
 
   const onStartRef = useRef<(startDate: Date) => void>(undefined);
@@ -22,7 +22,7 @@ export function useInitiateCounter({
 
   const isTresholdReached = useMemo(() => {
     const numberOfSharesByKeyHolderId = Object.values(
-      shareAccessKeyMapByKeyholderId,
+      shareAccessKeyMapByKeyHolderId,
     ).reduce(
       (prev, accesses) => {
         Object.entries(accesses).map(([key, hasShare]) => {
@@ -39,7 +39,7 @@ export function useInitiateCounter({
     return Object.values(numberOfSharesByKeyHolderId).some(
       (sharesNumber) => sharesNumber >= sharesRequiredToStartCounter,
     );
-  }, [sharesRequiredToStartCounter, shareAccessKeyMapByKeyholderId]);
+  }, [sharesRequiredToStartCounter, shareAccessKeyMapByKeyHolderId]);
 
   const prevIsTresholdReached = usePrevious(isTresholdReached);
 

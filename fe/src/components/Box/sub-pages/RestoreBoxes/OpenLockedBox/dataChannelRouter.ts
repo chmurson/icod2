@@ -92,17 +92,17 @@ router.addHandler(isFollowerSendsPartialStateMessage, (peerId, message) => {
 
 router.addHandler(isKeyholderKey, (_, message, dataChannelMng) => {
   const { keyHolderId, key } = message;
-  const { actions, shareAccessKeyMapByKeyholderId, you } =
+  const { actions, shareAccessKeyMapByKeyHolderId, you } =
     useOpenLockedBoxStore.getState();
 
-  if (shareAccessKeyMapByKeyholderId[keyHolderId][you.id]) {
+  if (shareAccessKeyMapByKeyHolderId[keyHolderId][you.id]) {
     actions.addReceivedKey({
       fromKeyHolderId: keyHolderId,
       key,
     });
   }
 
-  const peersShareToKeys = shareAccessKeyMapByKeyholderId[keyHolderId];
+  const peersShareToKeys = shareAccessKeyMapByKeyHolderId[keyHolderId];
 
   const toSharePeersToShareKey = Object.keys(peersShareToKeys).reduce(
     (accumulator, key) => {

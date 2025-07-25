@@ -1,39 +1,23 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { ParticipantType } from "./common-types";
+import {
+  type LockedBoxStoreCommonPart,
+  lockedBoxStoreStateCommonPart,
+  type ParticipantType,
+} from "./common-types";
 
 type KeyHolderId = string;
 
 const openLockedBoxState = {
-  state: "initial" as
-    | "initial"
-    | "drop-box"
-    | "connecting"
-    | "connected"
-    | "ready-to-unlock",
+  ...lockedBoxStoreStateCommonPart,
   connecting: false,
   connected: false,
   error: null as string | null,
   boxTitle: "",
-  encryptedMessage: "",
-  key: "",
   keyHolderId: "",
-  onlineKeyHolders: [] as ParticipantType[],
-  offLineKeyHolders: [] as ParticipantType[],
-  keyThreshold: 1,
-  you: {
-    id: "",
-    name: "",
-    userAgent: "",
-  } satisfies ParticipantType,
   decryptedContent: "",
   receivedKeysByKeyHolderId: undefined as Record<string, string> | undefined,
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
-  shareAccessKeyMapByKeyholderId: {} as Record<
-    KeyHolderId,
-    Record<KeyHolderId, boolean>
-  >,
-  unlockingStartDate: null as Date | null,
 };
 
 export type OpenLockedBoxStateData = typeof openLockedBoxState;
@@ -42,7 +26,6 @@ export type OpenLockedBoxState = {
   actions: {
     reset: () => void;
     start: () => void;
-    setReadyToUnlock: () => void;
     connect: (args: {
       boxTitle: string;
       encryptedMessage: string;
@@ -55,14 +38,14 @@ export type OpenLockedBoxState = {
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
     setShareAccessKeyByKeyholderId: (
       keyHolderId: string,
-      shareAccessKeyMapByKeyholderId: Record<KeyHolderId, boolean>,
+      shareAccessKeyMapByKeyHolderId: Record<KeyHolderId, boolean>,
     ) => void;
     connectKeyHolder: (participant: ParticipantType) => void;
     disconnectKeyHolder: (participantId: string) => void;
     addReceivedKey: (message: { fromKeyHolderId: string; key: string }) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     hasEnoughKeysToUnlock: () => boolean;
-  };
+  } & LockedBoxStoreCommonPart["actions"];
 } & OpenLockedBoxStateData;
 
 export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
@@ -81,8 +64,8 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
 
           return {
             shareAccessKeyByKeyHolderId,
-            shareAccessKeyMapByKeyholderId: {
-              ...state.shareAccessKeyMapByKeyholderId,
+            shareAccessKeyMapByKeyHolderId: {
+              ...state.shareAccessKeyMapByKeyHolderId,
               [state.you.id]: shareAccessKeyByKeyHolderId,
             },
           };
@@ -95,20 +78,20 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
 
           return {
             shareAccessKeyByKeyHolderId,
-            shareAccessKeyMapByKeyholderId: {
-              ...state.shareAccessKeyMapByKeyholderId,
+            shareAccessKeyMapByKeyHolderId: {
+              ...state.shareAccessKeyMapByKeyHolderId,
               [state.you.id]: shareAccessKeyByKeyHolderId,
             },
           };
         }),
       setShareAccessKeyByKeyholderId: (
         keyholderId: string,
-        shareAccessKeyMapByKeyholderId: Record<KeyHolderId, boolean>,
+        shareAccessKeyMapByKeyHolderId: Record<KeyHolderId, boolean>,
       ) => {
         set((state) => ({
-          shareAccessKeyMapByKeyholderId: {
-            ...state.shareAccessKeyMapByKeyholderId,
-            [keyholderId]: shareAccessKeyMapByKeyholderId,
+          shareAccessKeyMapByKeyHolderId: {
+            ...state.shareAccessKeyMapByKeyHolderId,
+            [keyholderId]: shareAccessKeyMapByKeyHolderId,
           },
         }));
       },
