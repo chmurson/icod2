@@ -1,12 +1,14 @@
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { Text } from "@/ui/Typography";
-import { LoadingTextReceiveingKeys } from "../../commons";
+import {
+  LoadingTextReceiveingKeys,
+  useGetTopLobbyMetaStatus,
+} from "../../commons";
 import { CounterWithInfo } from "../../commons/components/CounterWithInfo";
 import { OpenBoxButton as OpenBoxButtonDumb } from "../../commons/components/OpenBoxButton";
-import { useGetTopLobbyMetaStatus } from "../hooks";
 
 export const TopLobbySection = () => {
-  const metaStatus = useGetTopLobbyMetaStatus();
+  const metaStatus = useGetTopLobbyMetaStatus(useOpenLockedBoxStore);
 
   const keyThreshold = useOpenLockedBoxStore((state) => state.keyThreshold);
   const actions = useOpenLockedBoxStore((state) => state.actions);

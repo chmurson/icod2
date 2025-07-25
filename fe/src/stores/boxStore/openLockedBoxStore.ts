@@ -29,7 +29,7 @@ const openLockedBoxState = {
   decryptedContent: "",
   receivedKeysByKeyHolderId: undefined as Record<string, string> | undefined,
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
-  shareAccessKeyMapByKeyholderId: {} as Record<
+  shareAccessKeyMapByKeyHolderId: {} as Record<
     KeyHolderId,
     Record<KeyHolderId, boolean>
   >,
@@ -55,7 +55,7 @@ export type OpenLockedBoxState = {
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
     setShareAccessKeyByKeyholderId: (
       keyHolderId: string,
-      shareAccessKeyMapByKeyholderId: Record<KeyHolderId, boolean>,
+      shareAccessKeyMapByKeyHolderId: Record<KeyHolderId, boolean>,
     ) => void;
     connectKeyHolder: (participant: ParticipantType) => void;
     disconnectKeyHolder: (participantId: string) => void;
@@ -81,8 +81,8 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
 
           return {
             shareAccessKeyByKeyHolderId,
-            shareAccessKeyMapByKeyholderId: {
-              ...state.shareAccessKeyMapByKeyholderId,
+            shareAccessKeyMapByKeyHolderId: {
+              ...state.shareAccessKeyMapByKeyHolderId,
               [state.you.id]: shareAccessKeyByKeyHolderId,
             },
           };
@@ -95,20 +95,20 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
 
           return {
             shareAccessKeyByKeyHolderId,
-            shareAccessKeyMapByKeyholderId: {
-              ...state.shareAccessKeyMapByKeyholderId,
+            shareAccessKeyMapByKeyHolderId: {
+              ...state.shareAccessKeyMapByKeyHolderId,
               [state.you.id]: shareAccessKeyByKeyHolderId,
             },
           };
         }),
       setShareAccessKeyByKeyholderId: (
         keyholderId: string,
-        shareAccessKeyMapByKeyholderId: Record<KeyHolderId, boolean>,
+        shareAccessKeyMapByKeyHolderId: Record<KeyHolderId, boolean>,
       ) => {
         set((state) => ({
-          shareAccessKeyMapByKeyholderId: {
-            ...state.shareAccessKeyMapByKeyholderId,
-            [keyholderId]: shareAccessKeyMapByKeyholderId,
+          shareAccessKeyMapByKeyHolderId: {
+            ...state.shareAccessKeyMapByKeyHolderId,
+            [keyholderId]: shareAccessKeyMapByKeyHolderId,
           },
         }));
       },

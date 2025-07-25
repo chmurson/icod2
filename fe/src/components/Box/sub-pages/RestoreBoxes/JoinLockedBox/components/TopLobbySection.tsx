@@ -1,12 +1,12 @@
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { Text } from "@/ui/Typography";
+import { useGetTopLobbyMetaStatus } from "../../commons";
 import { LoadingTextReceiveingKeys } from "../../commons/components";
 import { CounterWithInfo } from "../../commons/components/CounterWithInfo";
 import { OpenBoxButton as OpenBoxButtonDumb } from "../../commons/components/OpenBoxButton";
-import { useGetTopLobbyMetaStatus } from "../hooks";
 
 export const TopLobbySection = () => {
-  const metaStatus = useGetTopLobbyMetaStatus();
+  const metaStatus = useGetTopLobbyMetaStatus(useJoinLockedBoxStore);
 
   const keyThreshold = useJoinLockedBoxStore((state) => state.keyThreshold);
   const actions = useJoinLockedBoxStore((state) => state.actions);
