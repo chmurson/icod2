@@ -1,7 +1,10 @@
 import { type FC, useCallback, useState } from "react";
 import type { StoreApi, UseBoundStore } from "zustand";
 import type { LockedBoxStoreCommonPart } from "@/stores/boxStore/common-types";
-import { GoBackAlert, useGoBackAlertHook } from "@/ui/GoBackAlert";
+import {
+  NavigateAwayAlert,
+  useNavigateAwayBlocker,
+} from "@/ui/NavigateAwayAlert";
 
 type Props = {
   useHookStore: UseBoundStore<
@@ -18,7 +21,7 @@ type Props = {
     >
   >;
   onGoBack?: () => void;
-  isLeader: boolean;
+  isLeader?: boolean;
 };
 
 type BlockReason =
@@ -29,7 +32,7 @@ type BlockReason =
 export const NavigationAwayBlocker: FC<Props> = ({
   useHookStore,
   onGoBack,
-  isLeader,
+  isLeader = false,
 }) => {
   const [shouldBeBlockedReason, setShouldBeBlokedReason] = useState<
     BlockReason | undefined
@@ -83,7 +86,7 @@ export const NavigationAwayBlocker: FC<Props> = ({
     };
   }, [status, unlockingStartDate, shouldHaveEnoughKeysToUnlock, isLeader]);
 
-  const blocker = useGoBackAlertHook({
+  const blocker = useNavigateAwayBlocker({
     shouldNavigationBeBlocked: () => {
       const result = shouldNavigationBeBlocked();
 
@@ -96,7 +99,7 @@ export const NavigationAwayBlocker: FC<Props> = ({
   });
 
   return (
-    <GoBackAlert
+    <NavigateAwayAlert
       {...getGoBackTextByShouldBeBlockedReason(shouldBeBlockedReason)}
       open={blocker.state === "blocked"}
       onClose={() => {

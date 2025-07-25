@@ -1,13 +1,17 @@
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { TextArea } from "@radix-ui/themes";
-import { useCallback, useEffect, useState } from "react"; // Added useEffect
-import { useBlocker, useNavigate } from "react-router-dom"; // Added useBlocker, useNavigate
+import { useCallback, useState } from "react"; // Added useEffect
+import { useNavigate } from "react-router-dom"; // Added useBlocker, useNavigate
 import { HiddenTextArea } from "@/components/Box/components/HiddenTextArea";
 import { ParticipantItem } from "@/components/Box/components/ParticipantItem";
 import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
+import {
+  NavigateAwayAlert,
+  useNavigateAwayBlocker,
+} from "@/ui/NavigateAwayAlert";
 import { Text } from "@/ui/Typography";
-import { ClosePageButton, GoBackAlert } from "./components";
+import { ClosePageButton } from "./components";
 import { useDownloadLockedBox, useDownloadLockedBoxState } from "./hooks";
 import { useNaiveShowHiddenMessage } from "./hooks/useNaiveShowHiddenMessage";
 
@@ -47,22 +51,11 @@ export const DownloadLockedBox: React.FC = () => {
     [isLockedBoxDownloaded],
   );
 
-  const blocker = useBlocker(shouldNavigationBeBlocked);
+  const blocker = useNavigateAwayBlocker({
+    shouldNavigationBeBlocked,
+  });
 
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!shouldNavigationBeBlocked()) {
-        event.preventDefault();
-        event.returnValue = ""; // Required for browser to show prompt
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [shouldNavigationBeBlocked]);
+  const [manuallyShowAlert, setManuallyShowAlert] = useState(false);
 
   return (
     <div className="flex flex-col gap-8">
@@ -146,8 +139,13 @@ export const DownloadLockedBox: React.FC = () => {
             <DownloadIcon /> Download the Locked Box
           </Button>
           <ClosePageButton
-            showAlert={!isLockedBoxDownloaded}
-            onClose={resetAndNavigateAway}
+            onClose={() => {
+              if (shouldNavigationBeBlocked()) {
+                setManuallyShowAlert(true);
+                return;
+              }
+              resetAndNavigateAway();
+            }}
           />
         </div>
         <div>
@@ -158,13 +156,15 @@ export const DownloadLockedBox: React.FC = () => {
           )}
         </div>
       </div>
-      <GoBackAlert
-        open={blocker.state === "blocked"}
+      <NavigateAwayAlert
+        textTitle="The Locked Box is not downloaded"
+        textDescription="Are you sure? This application will no longer be accessible, and you
+        will lose your chance to download the Locked Box."
+        open={blocker.state === "blocked" || manuallyShowAlert}
         onClose={() => {
-          blocker.reset?.();
+          setManuallyShowAlert(false);
         }}
         onGoBack={() => {
-          blocker.proceed?.();
           resetAndNavigateAway();
         }}
       />
