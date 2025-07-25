@@ -4,27 +4,22 @@ import { devtools } from "zustand/middleware";
 import { areArraysOfPrimitiveEqual } from "@/utils/areArraysOfPrimitiveEqual";
 import { hasSameTrueKeys } from "@/utils/hasSameTrueKeys";
 import { safeParseAndCheckRecent } from "@/utils/safeDateParseAndCheckRecent";
-import type { ParticipantType } from "./common-types";
+import {
+  lockedBoxStoreStateCommonPart,
+  type ParticipantType,
+} from "./common-types";
 
 const joinLockedBoxState = {
-  state: "initial" as
-    | "initial"
-    | "drop-box"
-    | "connecting"
-    | "connected"
-    | "ready-to-unlock",
+  ...lockedBoxStoreStateCommonPart,
   connecting: false,
   connected: false,
   error: null as string | null,
   boxTitle: "",
   encryptedMessage: "",
-  key: "",
-  keyHolderId: "",
-  receivedKeysByKeyHolderId: undefined as Record<string, string> | undefined,
   connectedLeaderId: undefined as string | undefined,
   onlineKeyHolders: [] as ParticipantType[],
   offLineKeyHolders: [] as ParticipantType[],
-  keyThreshold: 1,
+  keyHolderId: "",
   you: {
     id: "",
     name: "",
@@ -33,7 +28,6 @@ const joinLockedBoxState = {
   decryptedContent: "",
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
   unlockingStartDate: null as Date | null,
-  shareAccessKeyMapByKeyHolderId: {} as Record<string, Record<string, boolean>>,
 };
 
 export type JoinLockedBoxStateData = typeof joinLockedBoxState;

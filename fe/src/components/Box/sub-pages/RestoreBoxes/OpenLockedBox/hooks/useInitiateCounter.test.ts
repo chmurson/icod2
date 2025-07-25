@@ -17,7 +17,7 @@ const mockUseOpenLockedBoxStore = vi.mocked(
     StoreApi<
       Pick<
         OpenLockedBoxState,
-        "keyThreshold" | "shareAccessKeyMapByKeyholderId"
+        "keyThreshold" | "shareAccessKeyMapByKeyHolderId"
       >
     >
   >,
@@ -50,7 +50,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 3,
-          shareAccessKeyMapByKeyholderId: {},
+          shareAccessKeyMapByKeyHolderId: {},
         }),
       );
 
@@ -66,7 +66,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 3,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
               user3: false,
@@ -89,7 +89,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 4,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
               user3: true,
@@ -121,7 +121,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 3,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
               user3: false,
@@ -149,7 +149,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 3,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
               user3: true,
@@ -183,7 +183,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 3,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
               user3: false,
@@ -218,7 +218,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 3,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
               user3: false,
@@ -240,7 +240,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 3,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
               user3: false,
@@ -267,7 +267,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 3,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
               user3: false,
@@ -288,7 +288,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 3,
-          shareAccessKeyMapByKeyholderId: {},
+          shareAccessKeyMapByKeyHolderId: {},
         }),
       );
 
@@ -307,7 +307,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 1,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
             },
@@ -322,11 +322,11 @@ describe("useInitiateCounter", () => {
       expect(mockOnStart).toHaveBeenCalledWith(fixedDate);
     });
 
-    it("should not call any callbacks with empty shareAccessKeyMapByKeyholderId and higher threshold", () => {
+    it("should not call any callbacks with empty shareAccessKeyMapByKeyHolderId and higher threshold", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 5,
-          shareAccessKeyMapByKeyholderId: {},
+          shareAccessKeyMapByKeyHolderId: {},
         }),
       );
 
@@ -340,7 +340,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 4,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
               user3: false,
@@ -370,7 +370,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 3,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
               user3: false,
@@ -404,7 +404,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 3,
-          shareAccessKeyMapByKeyholderId: {
+          shareAccessKeyMapByKeyHolderId: {
             user1: {
               user2: true,
               user3: true,
@@ -453,7 +453,7 @@ describe("useInitiateCounter", () => {
       mockUseOpenLockedBoxStore.mockImplementation((selector) =>
         selector({
           keyThreshold: 5,
-          shareAccessKeyMapByKeyholderId: shareMap,
+          shareAccessKeyMapByKeyHolderId: shareMap,
         }),
       );
 

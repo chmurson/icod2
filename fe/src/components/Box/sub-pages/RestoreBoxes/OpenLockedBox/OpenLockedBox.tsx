@@ -119,7 +119,7 @@ const ShareAccesKeyAvatars: FC<{
   possibleKeyHolders: ParticipantType[];
 }> = ({ keyHolderId, possibleKeyHolders }) => {
   const shareAccessKeyMapByKeyHolderId = useOpenLockedBoxStore(
-    (state) => state.shareAccessKeyMapByKeyholderId,
+    (state) => state.shareAccessKeyMapByKeyHolderId,
   );
 
   const keyholdersSharingTheirKeys = useMemo(() => {

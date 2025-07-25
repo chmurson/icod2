@@ -7,8 +7,8 @@ export const useOnChangeShareablePartOfState = ({
 }: {
   onChange: (arg: Omit<LeaderSendsPartialStateMessage, "type">) => void;
 }) => {
-  const shareAccessKeyMapByKeyholderId = useOpenLockedBoxStore(
-    (state) => state.shareAccessKeyMapByKeyholderId,
+  const shareAccessKeyMapByKeyHolderId = useOpenLockedBoxStore(
+    (state) => state.shareAccessKeyMapByKeyHolderId,
   );
   const onlineKeyHolders = useOpenLockedBoxStore(
     (state) => state.onlineKeyHolders,
@@ -24,12 +24,12 @@ export const useOnChangeShareablePartOfState = ({
     }
 
     onChange({
-      shareAccessKeyMapByKeyHolderId: shareAccessKeyMapByKeyholderId,
+      shareAccessKeyMapByKeyHolderId: shareAccessKeyMapByKeyHolderId,
       onlineKeyHolders: [...onlineKeyHolders, you],
       unlockingStartDate: unlockingStartDate?.toISOString() ?? null,
     });
   }, [
-    shareAccessKeyMapByKeyholderId,
+    shareAccessKeyMapByKeyHolderId,
     onlineKeyHolders,
     onChange,
     you,
