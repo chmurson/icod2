@@ -82,9 +82,10 @@ export const JoinLockedBox: React.FC = () => {
 };
 
 const ShareAccesKeyAvatars: FC<{
+  isYou?: boolean;
   keyHolderId: string;
   possibleKeyHolders: ParticipantType[];
-}> = ({ keyHolderId, possibleKeyHolders }) => {
+}> = ({ keyHolderId, possibleKeyHolders, isYou = false }) => {
   const shareAccessKeyMapByKeyHolderId = useJoinLockedBoxStore(
     (state) => state.shareAccessKeyMapByKeyHolderId,
   );
@@ -101,6 +102,7 @@ const ShareAccesKeyAvatars: FC<{
 
   return (
     <ShareAccessKeysAvatarsDumb
+      isYou={isYou}
       keyHolderId={keyHolderId}
       keyholdersSharingTheirKeys={keyholdersSharingTheirKeys}
       possibleKeyHolders={possibleKeyHolders}

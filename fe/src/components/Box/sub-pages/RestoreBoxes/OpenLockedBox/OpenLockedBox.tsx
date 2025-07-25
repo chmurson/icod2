@@ -113,9 +113,10 @@ export const OpenLockedBox: React.FC = () => {
 };
 
 const ShareAccesKeyAvatars: FC<{
+  isYou?: boolean;
   keyHolderId: string;
   possibleKeyHolders: ParticipantType[];
-}> = ({ keyHolderId, possibleKeyHolders }) => {
+}> = ({ keyHolderId, possibleKeyHolders, isYou = false }) => {
   const shareAccessKeyMapByKeyHolderId = useOpenLockedBoxStore(
     (state) => state.shareAccessKeyMapByKeyHolderId,
   );
@@ -132,6 +133,7 @@ const ShareAccesKeyAvatars: FC<{
 
   return (
     <ShareAccessKeysAvatarsDumb
+      isYou={isYou}
       keyHolderId={keyHolderId}
       keyholdersSharingTheirKeys={keyholdersSharingTheirKeys}
       possibleKeyHolders={possibleKeyHolders}

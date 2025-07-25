@@ -25,6 +25,7 @@ export const LoobbyKeyHolders: FC<{
   keyThreshold: number;
   ShareAccesKeyAvatars: ComponentType<{
     keyHolderId: string;
+    isYou?: boolean;
     possibleKeyHolders: ParticipantType[];
   }>;
   ShareAccessDropdown: ComponentType<{
@@ -70,6 +71,7 @@ export const LoobbyKeyHolders: FC<{
         </div>
         <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
           <ShareAccesKeyAvatars
+            isYou
             keyHolderId={you.id}
             possibleKeyHolders={possibleKeyHolders}
           />

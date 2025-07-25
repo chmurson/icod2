@@ -4,6 +4,7 @@ import { IoMdKey } from "react-icons/io";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 
 type Props = {
+  isYou: boolean;
   keyHolderId: string;
   possibleKeyHolders: ParticipantType[];
   keyholdersSharingTheirKeys: string[];
@@ -13,31 +14,33 @@ export const ShareAccessKeysAvatars: FC<Props> = ({
   keyHolderId,
   possibleKeyHolders,
   keyholdersSharingTheirKeys,
+  isYou,
 }) => {
   return (
     <div className="flex flex-1 gap-1">
       {possibleKeyHolders.map((kh) => (
         <div key={kh.id}>
-          {(kh.id === keyHolderId ||
+          {kh.id === keyHolderId && isYou && <SimpleKeyAvatar type="accent" />}
+          {((kh.id === keyHolderId && !isYou) ||
             keyholdersSharingTheirKeys.includes(kh.id)) && (
             <SharedKeyAvatar name={kh.name} />
           )}
           {kh.id !== keyHolderId &&
-            !keyholdersSharingTheirKeys.includes(kh.id) && <GreyKeyAvatar />}
+            !keyholdersSharingTheirKeys.includes(kh.id) && <SimpleKeyAvatar />}
         </div>
       ))}
     </div>
   );
 };
 
-const GreyKeyAvatar = () => {
+const SimpleKeyAvatar = ({ type = "gray" }: { type?: "gray" | "accent" }) => {
   return (
     <Avatar
       size="1"
       fallback={<IoMdKey size={18} />}
       variant="solid"
-      color="gray"
-      className="opacity-25"
+      color={type === "gray" ? "gray" : undefined}
+      className={type === "gray" ? "opacity-25" : "opacity-90"}
       radius="full"
     />
   );
