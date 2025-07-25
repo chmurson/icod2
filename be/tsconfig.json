@@ -7,7 +7,13 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@icod2/contracts/client-server": [
+        "../libs/contracts/dist/client-server"
+      ],
+      "@icod2/contracts": ["../libs/contracts/dist"]
+    }
   },
   "references": [{ "path": "../libs/contracts" }]
 }

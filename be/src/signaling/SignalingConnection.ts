@@ -8,7 +8,7 @@ import {
   type OfferRequest,
   type SendsOfferRequest,
   type SendsOfferResponse,
-} from "@icod2/contracts/src/client-server";
+} from "@icod2/contracts/dist/client-server/index.js";
 import { v4 as uuidv4 } from "uuid";
 import type { WebSocket } from "ws";
 import type { MatchedSignalingConnectionsProvider } from "./MatchedSignalingConnectionsProvider";
