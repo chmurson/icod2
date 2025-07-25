@@ -53,7 +53,6 @@ export const relayKey = (
     keyHolderId,
   };
 
-  console.log("SENDING RELAY TO:", peerId);
   dataChannelManager.sendMessageToSinglePeer(peerId, msg);
 };
 

@@ -29,7 +29,6 @@ const useSendHelloToPeer = (
 ) =>
   useCallback(
     (peerId: string) => {
-      console.log(peerId, "localPeerId");
       const { you } = useJoinLockedBoxStore.getState();
 
       const msg: KeyholderHello = {
