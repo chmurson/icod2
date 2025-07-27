@@ -5,7 +5,6 @@ import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box
 import { ContentCard } from "@/components/layout/MainLayout";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
-import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import {
   LoobbyKeyHolders,
@@ -14,6 +13,7 @@ import {
 } from "../commons/components";
 import { LeaveLobbyButton } from "../commons/components/LeaveLobbyButton";
 import { NavigationAwayBlocker } from "../commons/components/NavigationAwayBlocker";
+import { PageTitle } from "../commons/components/PageTitle";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import {
@@ -49,6 +49,7 @@ export const OpenLockedBox: React.FC = () => {
 
   const you = useOpenLockedBoxStore((state) => state.you);
   const actions = useOpenLockedBoxStore((state) => state.actions);
+  const boxTitle = useOpenLockedBoxStore((state) => state.boxTitle);
 
   useEffect(() => {
     if (sessionId) {
@@ -81,9 +82,7 @@ export const OpenLockedBox: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <Text variant="pageTitle" className="mt-4">
-        Open a Locked Box
-      </Text>
+      <PageTitle boxTitle={boxTitle} />
       <TopLobbySection useStoreHook={useOpenLockedBoxStore} />
       <div className="flex flex-col gap-4 py-4">
         {shareableURL && (
