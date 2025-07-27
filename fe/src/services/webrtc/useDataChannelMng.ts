@@ -48,8 +48,9 @@ export const useDataChannelMng = <
   }, [onPeerDisconnected]);
 
   useEffect(() => {
+    const webSocketConnection = createWebsocketConnection();
     const dataChannelManager = new DataChannelManager({
-      signalingService: new SignalingService(createWebsocketConnection()),
+      signalingService: new SignalingService(webSocketConnection),
       callbacks: {
         onPeerConnected: (localId) => {
           console.log("Peer connected:", localId);
@@ -63,7 +64,9 @@ export const useDataChannelMng = <
           console.error("Failed to connect:", reason);
         },
         onConnected: () => {
-          console.log("Connected to signaling service");
+          console.log(
+            `Connected to signaling service at ${webSocketConnection.getUrl()}`,
+          );
         },
         onDataChannelMessage: router,
       },
