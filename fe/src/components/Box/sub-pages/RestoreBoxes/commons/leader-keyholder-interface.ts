@@ -4,6 +4,7 @@ export interface KeyholderHello {
   type: "keyholder:hello";
   userAgent: string;
   id: string;
+  hash: string;
 }
 
 export interface KeyholderKey {
@@ -57,7 +58,9 @@ export function isKeyholderHello(msg: object): msg is KeyholderHello {
     "id" in msg &&
     typeof msg.id === "string" &&
     "userAgent" in msg &&
-    typeof msg.userAgent === "string"
+    typeof msg.userAgent === "string" &&
+    "hash" in msg &&
+    typeof msg.hash === "string"
   );
 }
 

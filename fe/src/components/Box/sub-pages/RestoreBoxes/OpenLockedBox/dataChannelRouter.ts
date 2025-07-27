@@ -1,5 +1,6 @@
 import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
+import { createKeyholderHelloHash } from "@/utils/createKeyholderHelloHash";
 import type {
   LeaderError,
   LeaderWelcome,
@@ -14,22 +15,23 @@ import { relayKey } from "./dataChannelSendMessages";
 
 export const router = new DataChannelMessageRouter();
 
-router.addHandler(isKeyholderHello, (peerId, message, dataChannelMng) => {
+router.addHandler(isKeyholderHello, async (peerId, message, dataChannelMng) => {
   const store = useOpenLockedBoxStore.getState();
   const actions = useOpenLockedBoxStore.getState().actions;
 
   const offline = store.offLineKeyHolders.find((x) => x.id === message.id);
   const online = store.onlineKeyHolders.find((x) => x.id === message.id);
-  const encryptedMatch = true;
+
+  const encryptedMatch = await validateHash(message.hash);
 
   let errorReason: string | null = null;
 
-  if (!offline && !online) {
+  if (!encryptedMatch) {
+    errorReason = "Encrypted message does not match.";
+  } else if (!offline && !online) {
     errorReason = "Keyholder not found";
   } else if (online) {
     errorReason = "Keyholder not found or already online.";
-  } else if (!encryptedMatch) {
-    errorReason = "Encrypted message does not match.";
   }
 
   if (errorReason) {
@@ -128,3 +130,21 @@ router.addHandler(isKeyholderKey, (_, message, dataChannelMng) => {
     }
   }
 });
+
+const validateHash = async (hashToCompare: string) => {
+  const store = useOpenLockedBoxStore.getState();
+
+  const hash = await createKeyholderHelloHash({
+    encryptedMessage: store.encryptedMessage,
+    numberOfKeys:
+      store.offLineKeyHolders.length + store.onlineKeyHolders.length,
+    threshold: store.keyThreshold,
+    allKeyHoldersId: [
+      ...store.offLineKeyHolders.map((x) => x.id),
+      ...store.onlineKeyHolders.map((x) => x.id),
+      store.you.id,
+    ],
+  });
+
+  return hash === hashToCompare;
+};

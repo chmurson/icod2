@@ -1,6 +1,7 @@
 import { type RefObject, useCallback } from "react";
 import type { DataChannelManager } from "@/services/webrtc";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
+import { createKeyholderHelloHash } from "@/utils/createKeyholderHelloHash";
 import type { FollowerSendsPartialStateMessage } from "../commons";
 import type {
   KeyholderHello,
@@ -28,13 +29,31 @@ const useSendHelloToPeer = (
   dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
 ) =>
   useCallback(
-    (peerId: string) => {
-      const { you } = useJoinLockedBoxStore.getState();
+    async (peerId: string) => {
+      const {
+        you,
+        encryptedMessage,
+        keyThreshold,
+        offLineKeyHolders,
+        onlineKeyHolders,
+      } = useJoinLockedBoxStore.getState();
+
+      const hash = await createKeyholderHelloHash({
+        encryptedMessage: encryptedMessage,
+        numberOfKeys: offLineKeyHolders.length + onlineKeyHolders.length,
+        threshold: keyThreshold,
+        allKeyHoldersId: [
+          ...offLineKeyHolders.map((x) => x.id),
+          ...onlineKeyHolders.map((x) => x.id),
+          you.id,
+        ],
+      });
 
       const msg: KeyholderHello = {
         type: "keyholder:hello",
         userAgent: you.userAgent,
         id: you.id,
+        hash: hash,
       };
 
       dataChannelManagerRef.current?.sendMessageToSinglePeer(peerId, msg);
