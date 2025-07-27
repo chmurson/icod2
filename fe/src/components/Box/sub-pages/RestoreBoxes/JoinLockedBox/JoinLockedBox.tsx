@@ -4,7 +4,6 @@ import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box
 import { ContentCard } from "@/components/layout/MainLayout";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
-import { Text } from "@/ui/Typography";
 import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
