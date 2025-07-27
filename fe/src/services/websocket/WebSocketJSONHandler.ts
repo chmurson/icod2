@@ -43,6 +43,10 @@ export class WebsocketJSONHandler {
     this.loggingEnabled = enabled;
   }
 
+  getUrl() {
+    return this.webSocket.url;
+  }
+
   private warn(message: string, ...args: unknown[]) {
     if (this.loggingEnabled) {
       console.warn(message, ...args);
