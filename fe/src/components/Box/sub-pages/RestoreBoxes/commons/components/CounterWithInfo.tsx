@@ -2,7 +2,18 @@ import { type ReactNode, useEffect, useState } from "react";
 import { Text } from "@/components/ui";
 import { cn } from "@/utils/cn";
 
-const TWO_MINUTES_IN_MS = 10 * 1000;
+const localStorageCountdownOverride = Number.parseInt(
+  window.localStorage.getItem("ICOD2_COUNTDOWN_OVERRIDE_IN_MS") ?? "",
+);
+const devOverload =
+  !Number.isNaN(localStorageCountdownOverride) &&
+  localStorageCountdownOverride > 1000
+    ? localStorageCountdownOverride
+    : undefined;
+
+console.log("devOverload", devOverload);
+
+const TWO_MINUTES_IN_MS = !devOverload ? 2 * 60 * 1000 : devOverload;
 
 const formatTime = (ms: number) => {
   const clampedMs = Math.max(0, ms);
