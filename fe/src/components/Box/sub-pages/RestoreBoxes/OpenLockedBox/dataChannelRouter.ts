@@ -22,7 +22,7 @@ router.addHandler(isKeyholderHello, async (peerId, message, dataChannelMng) => {
   const offline = store.offLineKeyHolders.find((x) => x.id === message.id);
   const online = store.onlineKeyHolders.find((x) => x.id === message.id);
 
-  const encryptedMatch = validateHash(message.hash);
+  const encryptedMatch = await validateHash(message.hash);
 
   let errorReason: string | null = null;
 
@@ -132,23 +132,18 @@ router.addHandler(isKeyholderKey, (_, message, dataChannelMng) => {
 });
 
 const validateHash = async (hashToCompare: string) => {
-  const encryptedMessage = useOpenLockedBoxStore(
-    (state) => state.encryptedMessage,
-  );
-  const offLineKeyHolders = useOpenLockedBoxStore(
-    (state) => state.offLineKeyHolders,
-  );
-
-  const onlineKeyHolders = useOpenLockedBoxStore(
-    (state) => state.onlineKeyHolders,
-  );
-  const keyThreshold = useOpenLockedBoxStore((state) => state.keyThreshold);
+  const store = useOpenLockedBoxStore.getState();
 
   const hash = await createKeyholderHelloHash({
-    encryptedMessage: encryptedMessage,
-    numberOfKeys: offLineKeyHolders.length + onlineKeyHolders.length,
-    threshold: keyThreshold,
-    keyHolders: [...offLineKeyHolders, ...onlineKeyHolders],
+    encryptedMessage: store.encryptedMessage,
+    numberOfKeys:
+      store.offLineKeyHolders.length + store.onlineKeyHolders.length,
+    threshold: store.keyThreshold,
+    allKeyHoldersId: [
+      ...store.offLineKeyHolders.map((x) => x.id),
+      ...store.onlineKeyHolders.map((x) => x.id),
+      store.you.id,
+    ],
   });
 
   return hash === hashToCompare;

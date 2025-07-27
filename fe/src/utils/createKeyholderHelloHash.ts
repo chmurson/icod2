@@ -1,20 +1,16 @@
-import type { ParticipantType } from "@/stores/boxStore/common-types";
-
 export const createKeyholderHelloHash = async ({
   encryptedMessage,
   numberOfKeys,
   threshold,
-  keyHolders,
+  allKeyHoldersId,
 }: {
   encryptedMessage: string;
   numberOfKeys: number;
   threshold: number;
-  keyHolders: ParticipantType[];
+  allKeyHoldersId: string[];
 }) => {
-  const sortedKeyHolders = keyHolders
-    .map((kh) => kh.id)
-    .sort()
-    .join("");
+  const sortedKeyHolders = allKeyHoldersId.sort().join("");
+
   const hashableString =
     encryptedMessage + numberOfKeys + threshold + sortedKeyHolders;
 

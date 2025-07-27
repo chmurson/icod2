@@ -42,7 +42,11 @@ const useSendHelloToPeer = (
         encryptedMessage: encryptedMessage,
         numberOfKeys: offLineKeyHolders.length + onlineKeyHolders.length,
         threshold: keyThreshold,
-        keyHolders: [...offLineKeyHolders, ...onlineKeyHolders],
+        allKeyHoldersId: [
+          ...offLineKeyHolders.map((x) => x.id),
+          ...onlineKeyHolders.map((x) => x.id),
+          you.id,
+        ],
       });
 
       const msg: KeyholderHello = {
