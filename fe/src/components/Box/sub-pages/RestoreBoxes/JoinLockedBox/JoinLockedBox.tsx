@@ -4,7 +4,6 @@ import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box
 import { ContentCard } from "@/components/layout/MainLayout";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
-import { Text } from "@/ui/Typography";
 import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
@@ -12,6 +11,7 @@ import {
 } from "../commons/components";
 import { LeaveLobbyButton } from "../commons/components/LeaveLobbyButton";
 import { NavigationAwayBlocker } from "../commons/components/NavigationAwayBlocker";
+import { PageTitle } from "../commons/components/PageTitle";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useSendKeyToLeader } from "./hooks";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
@@ -40,6 +40,8 @@ export const JoinLockedBox: React.FC = () => {
     (state) => state.shareAccessKeyMapByKeyHolderId,
   );
 
+  const boxTitle = useJoinLockedBoxStore((state) => state.boxTitle);
+
   const loadingStates = [
     "connecting",
     "connected",
@@ -56,9 +58,7 @@ export const JoinLockedBox: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-8 py-4">
-      <Text variant="pageTitle" className="mt-4">
-        Join a Locked Box
-      </Text>
+      <PageTitle boxTitle={boxTitle} />
 
       <TopLobbySection useStoreHook={useJoinLockedBoxStore} />
       <LoobbyKeyHolders
