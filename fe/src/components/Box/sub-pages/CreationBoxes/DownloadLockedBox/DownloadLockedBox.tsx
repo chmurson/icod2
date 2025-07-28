@@ -42,8 +42,8 @@ export const DownloadLockedBox: React.FC = () => {
   };
 
   const resetAndNavigateAway = useCallback(() => {
-    reset();
     navigate("/");
+    reset();
   }, [reset, navigate]);
 
   const shouldNavigationBeBlocked = useCallback(

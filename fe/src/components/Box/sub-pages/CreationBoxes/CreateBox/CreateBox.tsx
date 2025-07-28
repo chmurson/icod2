@@ -5,12 +5,17 @@ import { SharePreviewButton } from "@/components/Box/components/SharePreviewButt
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button.tsx";
 import ErrorBoundary from "@/ui/ErrorBoundry";
+import {
+  NavigateAwayAlert,
+  useNavigateAwayBlocker,
+} from "@/ui/NavigateAwayAlert";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { InputNumber } from "../../../components/InputNumber";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { usePartOfCreateBoxStore } from "./hooks";
 import { useLockBox } from "./hooks/useHandleBoxCreation";
+import { useShareableURL } from "./hooks/useShareableURL";
 import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
 export const CreateBox = () => {
@@ -120,9 +125,18 @@ export const CreateBoxContent: React.FC = () => {
     });
   };
 
+  const shareableURL = useShareableURL();
+
+  const blocker = useNavigateAwayBlocker({
+    shouldNavigationBeBlocked: () => true,
+  });
+
   return (
     <>
       <div className="flex flex-col gap-4">
+        <FieldArea label="Invite URL">
+          <TextField.Root value={shareableURL} readOnly />
+        </FieldArea>
         <FieldArea label="Name of the box">
           <TextField.Root
             id="title"
@@ -207,6 +221,13 @@ export const CreateBoxContent: React.FC = () => {
           Create Box
         </Button>
       </div>
+      <NavigateAwayAlert
+        open={blocker.state === "blocked"}
+        textTitle="Critical action required as Leader"
+        textDescription="You are the Leader of this Box and your action is critical. Leaving now could affect other participants. Are you sure you want to navigate away?"
+        onGoBack={() => blocker.proceed?.()}
+        onClose={() => blocker.reset?.()}
+      />
     </>
   );
 };

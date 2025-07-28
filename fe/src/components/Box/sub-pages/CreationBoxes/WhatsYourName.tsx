@@ -1,12 +1,14 @@
 import { PersonIcon } from "@radix-ui/react-icons";
 import { TextField } from "@radix-ui/themes";
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 import { useCurrentUserAgent } from "@/hooks/useCurrentUserAgent";
 import { usePersistInLocalStorage } from "@/hooks/usePersistInLocalStorage";
 import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { UserAgent } from "../components/UserAgent";
+import { StartLeaderFollowerAlert } from "../../components/StartLeaderFollowerAlert";
+import { UserAgent } from "../../components/UserAgent";
 
 export function WhatsYourName(
   props:
@@ -25,14 +27,6 @@ export function WhatsYourName(
   const joinBoxStoreActions = useJoinBoxStore((x) => x.actions);
   const currentUserAgent = useCurrentUserAgent();
 
-  const handleBackClick = () => {
-    if (isCreate) {
-      createBoxStoreActions.reset();
-    } else {
-      joinBoxStoreActions.reset();
-    }
-  };
-
   const handleOkClick = () => {
     const name = refInput.current?.value.trim() ?? "";
 
@@ -50,6 +44,22 @@ export function WhatsYourName(
       <Text variant="pageTitle">
         {isCreate ? "Create a Box" : "Join a Box Creation"}
       </Text>
+      <StartLeaderFollowerAlert
+        className="w-full"
+        followerAlertContent={
+          <>
+            You are going to <b>join</b> process of locking a box.
+          </>
+        }
+        type={isCreate ? "leader" : "follower"}
+        followerNavigateButtonText="Start locking instead"
+        followerNavigateToLink="/lock-box"
+        leaderAlertContent={
+          <>
+            You are going to <b>start</b> process of unlocking a box.
+          </>
+        }
+      />
       <div className="flex gap-1 flex-col">
         <Text variant="label">Your name:</Text>
         <TextField.Root
@@ -79,9 +89,9 @@ export function WhatsYourName(
         <Button variant="primary" onClick={handleOkClick}>
           Ok, Continue
         </Button>
-        <Button variant="secondary" onClick={handleBackClick}>
-          Back
-        </Button>
+        <Link to="/" className="no-underline">
+          <Button variant="secondary">Back</Button>
+        </Link>
       </div>
     </div>
   );

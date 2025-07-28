@@ -1,16 +1,11 @@
 import type React from "react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { useJoinBoxStore } from "@/stores";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
-import { useCreateBoxStore } from "@/stores/boxStore/createBoxStore";
 import { Button } from "@/ui/Button";
 import { Typography } from "@/ui/Typography";
 
 const Welcome: React.FC = () => {
-  const startCreateBox = useCreateBoxStore((state) => state.actions.start);
-  const startJoinBox = useJoinBoxStore((state) => state.actions.start);
-
   return (
     <div className="flex flex-col gap-4 pb-12">
       <Typography variant="pageTitle" as="h1" className="mt-2">
@@ -42,36 +37,13 @@ const Welcome: React.FC = () => {
           </>
         }
         buttonSlot={
-          <Button onClick={startCreateBox} variant="prominent">
-            Create Box
-          </Button>
+          <Link to="/lock-box" style={{ textDecoration: "none" }}>
+            <Button variant="prominent" className="text-nowrap">
+              Create Box
+            </Button>
+          </Link>
         }
       />
-      <InfoBox
-        title="Join the Box Creation"
-        text={
-          <>
-            <p className="my-1">Start by joining a box creation. You’ll:</p>
-            <ul className="my-1">
-              <li>
-                - Join by clicking a link or entering a sessionToken they shared
-                with you.
-              </li>
-              <li>- Take part in the box setup process.</li>
-              <li>
-                - Wait for the leader to define the final message or content.
-              </li>
-              <li>- In the end you w</li>
-            </ul>
-          </>
-        }
-        buttonSlot={
-          <Button onClick={startJoinBox} variant="prominent">
-            Join the Box Creation
-          </Button>
-        }
-      />
-
       <InfoBox
         title="Open a Locked Box"
         text={
