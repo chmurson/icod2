@@ -15,6 +15,7 @@ import { FieldArea } from "../../../components/FieldArea";
 import { InputNumber } from "../../../components/InputNumber";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { LeaveLobbyButton } from "../commons/components";
+import { useDataChannelSendMessages } from "./dataChannelSendMessage";
 import { usePartOfCreateBoxStore } from "./hooks";
 import { useLockBox } from "./hooks/useHandleBoxCreation";
 import { useShareableURL } from "./hooks/useShareableURL";
@@ -57,8 +58,13 @@ export const CreateBoxContent: React.FC = () => {
     Record<string, boolean>
   >({});
 
-  const { sendBoxUpdate, sendBoxLocked, sendKeyholdersUpdate } =
-    useCreateBoxConnection();
+  const { dataChannelMngRef } = useCreateBoxConnection();
+
+  const { sendKeyholdersUpdate, sendBoxUpdate, sendBoxLocked } =
+    useDataChannelSendMessages({
+      dataChannelManagerRef: dataChannelMngRef,
+    });
+
   const { lockBox } = useLockBox();
 
   const keyHoldersRef = useRef(state.keyHolders);
@@ -186,7 +192,7 @@ export const CreateBoxContent: React.FC = () => {
         <FieldArea label="KeyHolders: ">
           <div className="flex flex-col gap-1.5 w-full">
             {state.keyHolders.length === 0 && (
-              <Text variant="secondaryText">
+              <Text variant="secondaryText" className="text-sm">
                 No key holders yet. Waiting for others to join...
               </Text>
             )}

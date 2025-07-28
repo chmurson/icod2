@@ -35,7 +35,11 @@ type CreateBoxState = {
     connectParticipant: (participant: ParticipantType) => void;
     disconnectParticipant: (participantId: string) => void;
     start: () => void;
-    connect: (args: { name: string; userAgent: string }) => void;
+    connect: (args: {
+      name: string;
+      userAgent: string;
+      idToken?: string;
+    }) => void;
     lock: (message: {
       title?: string;
       content?: string;
@@ -52,14 +56,13 @@ type CreateBoxState = {
 export const useCreateBoxStore = create<CreateBoxState>((set) => ({
   ...createBoxDefaultState,
   actions: {
-    connect: ({ name, userAgent }) =>
+    connect: ({ name, userAgent, idToken }) =>
       set({
         ...createBoxDefaultState,
         connecting: true,
         state: "connecting",
-        // TODO remove this id creation, it should be created in DataChannelManager and propagated here upon connection creation
         leader: {
-          id: `peer-${Math.random().toString(36).substring(2, 15)}`,
+          id: idToken ?? "",
           name,
           userAgent,
         },
