@@ -1,13 +1,19 @@
 import { TextArea } from "@radix-ui/themes";
 import type React from "react";
 import { FiEye } from "react-icons/fi";
+import { ContentCard } from "@/components/layout";
 import { useJoinBoxStore } from "@/stores";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
 import ErrorBoundary from "@/ui/ErrorBoundry";
+import {
+  NavigateAwayAlert,
+  useNavigateAwayBlocker,
+} from "@/ui/NavigateAwayAlert";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
+import { LeaveLobbyButton } from "../commons/components";
 import { useJoinBoxConnection } from "./useJoinBoxConnection";
 
 export const JoinBox: React.FC = () => {
@@ -85,6 +91,9 @@ const BoxJoinContentForOK = ({
   you: { name: string; userAgent: string };
   content?: string;
 }) => {
+  const blocker = useNavigateAwayBlocker({
+    shouldNavigationBeBlocked: () => true,
+  });
   return (
     <>
       <div className="flex flex-col gap-4">
@@ -133,6 +142,16 @@ const BoxJoinContentForOK = ({
           </FieldArea>
         )}
       </div>
+      <ContentCard.OutsideSlot asChild>
+        <LeaveLobbyButton>Leave lobby</LeaveLobbyButton>
+      </ContentCard.OutsideSlot>
+      <NavigateAwayAlert
+        open={blocker.state === "blocked"}
+        textTitle="Are you sure you want to leave?"
+        textDescription="You are currently connected as a follower in the box locking session, which is still ongoing. If you leave now, you will be disconnected and may lose your opportunity to participate in the process."
+        onGoBack={() => blocker.proceed?.()}
+        onClose={() => blocker.reset?.()}
+      />
       <Text variant="primaryText">
         Waiting for more keyholders, or leader to create finalize box creation.
       </Text>

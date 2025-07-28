@@ -1,3 +1,4 @@
+import { generateNiceRandomToken } from "@/utils/generateNiceRandomToken";
 import type {
   SignalingService,
   SignalingServiceConnectionInitiator,
@@ -179,6 +180,6 @@ export class DataChannelManager<
     this.callbacks.onPeerDisconnected?.(objectId.localID);
   }
   private createLocalID() {
-    return `peer-${Math.random().toString(36).substring(2, 15)}`;
+    return `peer-${generateNiceRandomToken()}`;
   }
 }

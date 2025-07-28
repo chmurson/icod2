@@ -2,6 +2,7 @@ import { ExclamationTriangleIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { Card, Flex, Separator } from "@radix-ui/themes";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
+import { generateNiceRandomToken } from "@/utils/generateNiceRandomToken";
 import { Button } from "./Button";
 import { Text } from "./Typography";
 
@@ -42,7 +43,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
-    const errorId = `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const errorId = `err_${Date.now()}_${generateNiceRandomToken()}`;
     return {
       hasError: true,
       error,

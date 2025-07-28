@@ -4,6 +4,7 @@ import { useCallback, useState } from "react"; // Added useEffect
 import { useNavigate } from "react-router-dom"; // Added useBlocker, useNavigate
 import { HiddenTextArea } from "@/components/Box/components/HiddenTextArea";
 import { ParticipantItem } from "@/components/Box/components/ParticipantItem";
+import { ContentCard } from "@/components/layout";
 import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import {
@@ -11,7 +12,7 @@ import {
   useNavigateAwayBlocker,
 } from "@/ui/NavigateAwayAlert";
 import { Text } from "@/ui/Typography";
-import { ClosePageButton } from "./components";
+import { LeaveLobbyButton } from "../commons/components";
 import { useDownloadLockedBox, useDownloadLockedBoxState } from "./hooks";
 import { useNaiveShowHiddenMessage } from "./hooks/useNaiveShowHiddenMessage";
 
@@ -42,8 +43,8 @@ export const DownloadLockedBox: React.FC = () => {
   };
 
   const resetAndNavigateAway = useCallback(() => {
-    reset();
     navigate("/");
+    reset();
   }, [reset, navigate]);
 
   const shouldNavigationBeBlocked = useCallback(
@@ -133,29 +134,23 @@ export const DownloadLockedBox: React.FC = () => {
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-1">
-        <div className="flex justify-between items-end">
+      <div className="flex flex-col gap-1 items-end mb-4">
+        <div className="inline-flex">
           <Button variant="prominent" onClick={handleClickDownloadButton}>
             <DownloadIcon /> Download the Locked Box
           </Button>
-          <ClosePageButton
-            onClose={() => {
-              if (shouldNavigationBeBlocked()) {
-                setManuallyShowAlert(true);
-                return;
-              }
-              resetAndNavigateAway();
-            }}
-          />
-        </div>
-        <div>
-          {downloadError && (
-            <Text variant="primaryError" color="crimson">
-              Failed to download: {downloadError}
-            </Text>
-          )}
+          <div>
+            {downloadError && (
+              <Text variant="primaryError" color="crimson">
+                Failed to download: {downloadError}
+              </Text>
+            )}
+          </div>
         </div>
       </div>
+      <ContentCard.OutsideSlot asChild>
+        <LeaveLobbyButton>Back to Homepage</LeaveLobbyButton>
+      </ContentCard.OutsideSlot>
       <NavigateAwayAlert
         textTitle="The Locked Box is not downloaded"
         textDescription="Are you sure? This application will no longer be accessible, and you

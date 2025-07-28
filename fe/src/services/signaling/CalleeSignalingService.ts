@@ -11,6 +11,7 @@ import {
   type OfferRequest,
 } from "@icod2/contracts/src/client-server";
 import type { WebsocketJSONHandler } from "@/services/websocket/WebSocketJSONHandler";
+import { generateNiceRandomToken } from "@/utils/generateNiceRandomToken";
 import type { SignalingService } from "./SignalingService";
 import { consumeOfferAndIceCandidates } from "./utils/consumeOfferAndIceCandidates";
 
@@ -127,7 +128,7 @@ export class CalleeSignalingService implements SignalingService {
   }
 
   private generateUniqueToken(): string {
-    return Math.random().toString(36).substring(2, 15); //todo: implement a proper token generation
+    return generateNiceRandomToken(); //todo: implement a proper token generation
   }
 
   private registerHandlers(): void {

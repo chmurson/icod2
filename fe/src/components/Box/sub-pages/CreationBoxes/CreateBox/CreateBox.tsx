@@ -2,15 +2,23 @@ import { TextArea, TextField } from "@radix-ui/themes";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { SharePreviewButton } from "@/components/Box/components/SharePreviewButton";
+import { ContentCard } from "@/components/layout";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button.tsx";
 import ErrorBoundary from "@/ui/ErrorBoundry";
+import {
+  NavigateAwayAlert,
+  useNavigateAwayBlocker,
+} from "@/ui/NavigateAwayAlert";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { InputNumber } from "../../../components/InputNumber";
 import { ParticipantItem } from "../../../components/ParticipantItem";
+import { LeaveLobbyButton } from "../commons/components";
+import { useDataChannelSendMessages } from "./dataChannelSendMessage";
 import { usePartOfCreateBoxStore } from "./hooks";
 import { useLockBox } from "./hooks/useHandleBoxCreation";
+import { useShareableURL } from "./hooks/useShareableURL";
 import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
 export const CreateBox = () => {
@@ -50,8 +58,13 @@ export const CreateBoxContent: React.FC = () => {
     Record<string, boolean>
   >({});
 
-  const { sendBoxUpdate, sendBoxLocked, sendKeyholdersUpdate } =
-    useCreateBoxConnection();
+  const { dataChannelMngRef } = useCreateBoxConnection();
+
+  const { sendKeyholdersUpdate, sendBoxUpdate, sendBoxLocked } =
+    useDataChannelSendMessages({
+      dataChannelManagerRef: dataChannelMngRef,
+    });
+
   const { lockBox } = useLockBox();
 
   const keyHoldersRef = useRef(state.keyHolders);
@@ -120,9 +133,18 @@ export const CreateBoxContent: React.FC = () => {
     });
   };
 
+  const shareableURL = useShareableURL();
+
+  const blocker = useNavigateAwayBlocker({
+    shouldNavigationBeBlocked: () => true,
+  });
+
   return (
     <>
       <div className="flex flex-col gap-4">
+        <FieldArea label="Invite URL">
+          <TextField.Root value={shareableURL} readOnly />
+        </FieldArea>
         <FieldArea label="Name of the box">
           <TextField.Root
             id="title"
@@ -170,7 +192,7 @@ export const CreateBoxContent: React.FC = () => {
         <FieldArea label="KeyHolders: ">
           <div className="flex flex-col gap-1.5 w-full">
             {state.keyHolders.length === 0 && (
-              <Text variant="secondaryText">
+              <Text variant="secondaryText" className="text-sm">
                 No key holders yet. Waiting for others to join...
               </Text>
             )}
@@ -198,15 +220,26 @@ export const CreateBoxContent: React.FC = () => {
           )}
         </FieldArea>
       </div>
-      <div>
+      <div className="flex justify-end mb-4">
         <Button
           variant="prominent"
+          className="px-20"
           onClick={handleBoxCreation}
           disabled={noParticipantConnected}
         >
           Create Box
         </Button>
       </div>
+      <ContentCard.OutsideSlot asChild>
+        <LeaveLobbyButton>Leave lobby</LeaveLobbyButton>
+      </ContentCard.OutsideSlot>
+      <NavigateAwayAlert
+        open={blocker.state === "blocked"}
+        textTitle="Critical action required as Leader"
+        textDescription="You are the Leader of this Box and your action is critical. Leaving now could affect other participants. Are you sure you want to navigate away?"
+        onGoBack={() => blocker.proceed?.()}
+        onClose={() => blocker.reset?.()}
+      />
     </>
   );
 };
