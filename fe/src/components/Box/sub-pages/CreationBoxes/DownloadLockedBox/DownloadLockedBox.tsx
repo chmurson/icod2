@@ -1,11 +1,12 @@
 import { DownloadIcon } from "@radix-ui/react-icons";
-import { TextArea } from "@radix-ui/themes";
-import { useCallback, useState } from "react"; // Added useEffect
-import { useNavigate } from "react-router-dom"; // Added useBlocker, useNavigate
-import { HiddenTextArea } from "@/components/Box/components/HiddenTextArea";
+import { useCallback, useEffect, useState } from "react"; // Added useEffect
 import { ParticipantItem } from "@/components/Box/components/ParticipantItem";
 import { ContentCard } from "@/components/layout";
-import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
+import {
+  useCreateBoxStore,
+  useDownloadBoxStore,
+  useJoinBoxStore,
+} from "@/stores";
 import { Button } from "@/ui/Button";
 import {
   NavigateAwayAlert,
@@ -14,38 +15,35 @@ import {
 import { Text } from "@/ui/Typography";
 import { LeaveLobbyButton } from "../commons/components";
 import { useDownloadLockedBox, useDownloadLockedBoxState } from "./hooks";
-import { useNaiveShowHiddenMessage } from "./hooks/useNaiveShowHiddenMessage";
 
 export const DownloadLockedBox: React.FC = () => {
   const downloadLockedBoxState = useDownloadLockedBoxState();
+  const clearKeyAndMessage = useDownloadBoxStore(
+    (state) => state.clearKeyAndMessage,
+  );
 
   const createBoxReset = useCreateBoxStore((state) => state.actions.reset);
   const joinBoxReset = useJoinBoxStore((state) => state.actions.reset);
 
-  const reset =
+  const resetPreviousStepStore =
     downloadLockedBoxState.type === "fromCreateBox"
       ? createBoxReset
       : joinBoxReset;
 
-  const { hideMessage, showMessage, visibleMessage } =
-    useNaiveShowHiddenMessage();
-
-  const navigate = useNavigate();
+  useEffect(() => {
+    resetPreviousStepStore();
+  }, [resetPreviousStepStore]);
 
   const [isLockedBoxDownloaded, setIsLockedBoxDownloaded] = useState(false);
 
   const { downloadLockedBox, error: downloadError } = useDownloadLockedBox({
     onSuccess: () => setIsLockedBoxDownloaded(true),
+    onPrepared: () => clearKeyAndMessage(),
   });
 
   const handleClickDownloadButton = () => {
     downloadLockedBox();
   };
-
-  const resetAndNavigateAway = useCallback(() => {
-    navigate("/");
-    reset();
-  }, [reset, navigate]);
 
   const shouldNavigationBeBlocked = useCallback(
     () => !isLockedBoxDownloaded,
@@ -55,8 +53,6 @@ export const DownloadLockedBox: React.FC = () => {
   const blocker = useNavigateAwayBlocker({
     shouldNavigationBeBlocked,
   });
-
-  const [manuallyShowAlert, setManuallyShowAlert] = useState(false);
 
   return (
     <div className="flex flex-col gap-8">
@@ -120,19 +116,6 @@ export const DownloadLockedBox: React.FC = () => {
               </div>
             </div>
           )}
-        {downloadLockedBoxState.type === "fromCreateBox" && (
-          <div className="flex flex-col gap-1">
-            <Text variant="label">Preview messae:</Text>
-            <HiddenTextArea
-              onShow={showMessage}
-              onHide={hideMessage}
-              value={visibleMessage}
-              onChange={(e) => console.log(e.target.value)} // Example onChange
-            >
-              <TextArea rows={8} disabled />
-            </HiddenTextArea>
-          </div>
-        )}
       </div>
       <div className="flex flex-col gap-1 items-end mb-4">
         <div className="inline-flex">
@@ -155,12 +138,12 @@ export const DownloadLockedBox: React.FC = () => {
         textTitle="The Locked Box is not downloaded"
         textDescription="Are you sure? This application will no longer be accessible, and you
         will lose your chance to download the Locked Box."
-        open={blocker.state === "blocked" || manuallyShowAlert}
+        open={blocker.state === "blocked"}
         onClose={() => {
-          setManuallyShowAlert(false);
+          blocker.reset?.();
         }}
         onGoBack={() => {
-          resetAndNavigateAway();
+          blocker.proceed?.();
         }}
       />
     </div>
