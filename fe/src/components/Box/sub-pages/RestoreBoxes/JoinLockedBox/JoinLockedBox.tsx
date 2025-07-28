@@ -57,7 +57,7 @@ export const JoinLockedBox: React.FC = () => {
   const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
 
   return (
-    <div className="flex flex-col gap-8 py-4">
+    <div className="flex flex-col gap-8">
       <PageTitle boxTitle={boxTitle} />
 
       <TopLobbySection useStoreHook={useJoinLockedBoxStore} />
