@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
+import {
+  useCreateBoxStore,
+  useDownloadBoxStore,
+  useJoinBoxStore,
+} from "@/stores";
 import { CreateBox } from "./CreateBox";
 import {
   clearPersistedStartedLockingInfo,
@@ -37,6 +41,7 @@ const useCurrentPage = () => {
   const { sessionId } = useParams();
   const createBoxState = useCreateBoxStore((state) => state.state);
   const joinBoxState = useJoinBoxStore((state) => state.state);
+  const downloadStateType = useDownloadBoxStore((state) => state.type);
 
   const isInitialized = useInitialization();
 
@@ -48,6 +53,13 @@ const useCurrentPage = () => {
 
   if (!isInitialized) {
     return null;
+  }
+
+  if (
+    downloadStateType === "fromCreateBox" ||
+    downloadStateType === "fromJoinBox"
+  ) {
+    return "download";
   }
 
   if (createBoxState === "initial" && joinBoxState === "initial") {
@@ -65,10 +77,6 @@ const useCurrentPage = () => {
     return "create";
   }
 
-  if (createBoxState === "created" || joinBoxState === "created") {
-    return "download";
-  }
-
   if (joinBoxState === "set-name") {
     return "joinBoxSetName";
   }
@@ -83,6 +91,7 @@ const useCurrentPage = () => {
 const useInitialization = () => {
   const createBoxActions = useCreateBoxStore((state) => state.actions);
   const joinBoxActions = useJoinBoxStore((state) => state.actions);
+  const resetDownloadStore = useDownloadBoxStore((state) => state.reset);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
@@ -90,11 +99,20 @@ const useInitialization = () => {
       if (!currentIsInitialized) {
         createBoxActions.reset();
         joinBoxActions.reset();
+        resetDownloadStore();
       }
 
       return true;
     });
-  }, [createBoxActions, joinBoxActions]);
+  }, [createBoxActions, joinBoxActions, resetDownloadStore]);
+
+  useEffect(() => {
+    return () => {
+      createBoxActions.reset();
+      joinBoxActions.reset();
+      resetDownloadStore();
+    };
+  }, [createBoxActions.reset, joinBoxActions.reset, resetDownloadStore]);
 
   return isInitialized;
 };

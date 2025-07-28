@@ -1,32 +1,61 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   LockedBox,
   ParticipantType,
 } from "@/stores/boxStore/common-types";
+import { toSafeFilename } from "@/utils/toSafeFilename";
+import { truncateString } from "@/utils/truncateString";
 import { useDownloadLockedBoxState } from "./useDownloadLockedBoxState";
 
 const defaultArgs = {};
 
 export const useDownloadLockedBox = ({
   onSuccess,
+  onPrepared,
 }: {
   onSuccess?: () => void;
+  onPrepared?: () => void;
 } = defaultArgs) => {
-  const state = useDownloadLockedBoxState();
+  const jsonToDownloadRef = useRef<string>(undefined);
 
+  const state = useDownloadLockedBoxState();
   const [error, setError] = useState<string | undefined>(undefined);
 
-  const downloadLockedBox = useCallback(() => {
+  useEffect(() => {
+    if (jsonToDownloadRef.current) {
+      return;
+    }
+
     const lockedBox = getLockedBox(state);
 
     if (!lockedBox) {
       setError("Failed to download box due to missing data");
       return;
     }
+    jsonToDownloadRef.current = JSON.stringify(lockedBox, null, 2);
+    onPrepared?.();
+  }, [state, onPrepared]);
 
-    downloadFile(JSON.stringify(lockedBox, null, 2), "locked-box.json");
+  const downloadLockedBox = useCallback(() => {
+    if (error !== undefined) {
+      return;
+    }
+
+    if (!jsonToDownloadRef.current) {
+      setError("The file is not yet ready for download");
+      return;
+    }
+
+    const filename = `${toSafeFilename(
+      [state?.title, state.you?.name ?? state.leader?.name, "locked-box"]
+        .filter((x) => typeof x === "string" && x.trim().length > 0)
+        .map((str) => truncateString(str, 12))
+        .join("_"),
+    )}.json`;
+
+    downloadFile(jsonToDownloadRef.current, filename);
     onSuccess?.();
-  }, [onSuccess, state]);
+  }, [error, onSuccess, state]);
 
   return {
     downloadLockedBox,

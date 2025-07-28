@@ -58,12 +58,7 @@ type JoinBoxState = {
     updateKeyHoldersList: (participant: ParticipantType[]) => void;
     connectParticipant: (participant: ParticipantType) => void;
     disconnectParticipant: (participantId: string) => void;
-    create: (message: {
-      title?: string;
-      content?: string;
-      encryptedMessage?: string;
-      generatedKey?: string;
-    }) => void;
+    markAsCreated: () => void;
     setInfoBox: (arg: {
       threshold: number;
       content?: string;
@@ -138,9 +133,8 @@ export const useJoinBoxStore = create<JoinBoxState>()(
           ),
         }));
       },
-      create: (message) =>
+      markAsCreated: () =>
         set({
-          ...message,
           created: true,
           state: "created",
         }),
