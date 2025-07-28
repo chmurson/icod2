@@ -2,6 +2,7 @@ export type KeyHolderWelcomesLeader = {
   type: "keyholder:welcome-leader";
   name: string;
   userAgent: string;
+  sessionId: string;
 };
 
 export function isKeyHolderWelcomesLeader(
@@ -11,7 +12,11 @@ export function isKeyHolderWelcomesLeader(
     "type" in payload &&
     payload.type === "keyholder:welcome-leader" &&
     "name" in payload &&
-    typeof payload.name === "string"
+    typeof payload.name === "string" &&
+    "userAgent" in payload &&
+    typeof payload.userAgent === "string" &&
+    "sessionId" in payload &&
+    typeof payload.sessionId === "string"
   );
 }
 
@@ -26,13 +31,26 @@ export type LeaderWelcomesKeyholder = {
     name: string;
     keyHolderThreshold: number;
   };
-  keyHolderID: string;
+  keyHolderId: string;
 };
+
+export type LeaderNotAuthorizedKeyholder = {
+  type: "leader:keyholder-not-athorized";
+  reason?: string;
+};
+
+export function isLeaderNotAuthorizedKeyholder(
+  payload: object,
+): payload is LeaderNotAuthorizedKeyholder {
+  return "type" in payload && payload.type === "leader:keyholder-not-athorized";
+}
 
 export function isLeaderWelcomesKeyholder(
   payload: object,
 ): payload is LeaderWelcomesKeyholder {
   return (
+    typeof payload === "object" &&
+    payload !== null &&
     "type" in payload &&
     payload.type === "leader:welcome-keyholder" &&
     "leaderInfo" in payload &&
@@ -51,8 +69,8 @@ export function isLeaderWelcomesKeyholder(
     typeof payload.boxInfo.name === "string" &&
     "keyHolderThreshold" in payload.boxInfo &&
     typeof payload.boxInfo.keyHolderThreshold === "number" &&
-    "keyHolderID" in payload &&
-    typeof payload.keyHolderID === "string"
+    "keyHolderId" in payload &&
+    typeof payload.keyHolderId === "string"
   );
 }
 

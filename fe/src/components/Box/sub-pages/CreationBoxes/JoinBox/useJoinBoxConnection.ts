@@ -8,12 +8,13 @@ export function useJoinBoxConnection() {
   const dataChannelManagerRef = useRef<DataChannelManager>(undefined);
 
   const onPeerConnected = useCallback((localPeerId: string) => {
-    const { you } = useJoinBoxStore.getState();
+    const { you, sessionId } = useJoinBoxStore.getState();
 
     dataChannelManagerRef.current?.sendMessageToSinglePeer(localPeerId, {
       type: "keyholder:welcome-leader",
       name: you.name,
       userAgent: you.userAgent,
+      sessionId,
     } satisfies KeyHolderWelcomesLeader);
   }, []);
 

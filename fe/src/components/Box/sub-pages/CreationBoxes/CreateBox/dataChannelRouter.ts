@@ -2,6 +2,7 @@ import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRo
 import { useCreateBoxStore } from "@/stores";
 import {
   isKeyHolderWelcomesLeader,
+  type LeaderNotAuthorizedKeyholder,
   type LeaderWelcomesKeyholder,
 } from "../commons";
 
@@ -10,9 +11,22 @@ export const router = new DataChannelMessageRouter();
 router.addHandler(
   isKeyHolderWelcomesLeader,
   (localId, message, dataChannelMng) => {
-    const storeActions = useCreateBoxStore.getState().actions;
+    const {
+      actions,
+      leader: { id: leaderId },
+    } = useCreateBoxStore.getState();
 
-    storeActions.connectParticipant({
+    if (leaderId.trim() !== message.sessionId.trim()) {
+      dataChannelMng?.sendMessageToSinglePeer(localId, {
+        type: "leader:keyholder-not-athorized",
+      } satisfies LeaderNotAuthorizedKeyholder);
+
+      dataChannelMng?.disconnectPeer(localId);
+
+      return;
+    }
+
+    actions.connectParticipant({
       id: localId,
       name: message.name,
       userAgent: message.userAgent,
@@ -30,7 +44,7 @@ router.addHandler(
         name: state.leader.name,
         userAgent: state.leader.userAgent,
       },
-      keyHolderID: localId,
+      keyHolderId: localId,
       type: "leader:welcome-keyholder",
     } satisfies LeaderWelcomesKeyholder);
   },

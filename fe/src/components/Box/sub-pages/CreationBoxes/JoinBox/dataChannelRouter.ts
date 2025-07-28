@@ -1,6 +1,7 @@
 import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
 import { useDownloadBoxStore, useJoinBoxStore } from "@/stores";
 import {
+  isLeaderNotAuthorizedKeyholder,
   isLeaderSendsBoxCreated,
   isLeaderSendsBoxUpdate,
   isLeaderSendsKeyHolderList,
@@ -19,7 +20,7 @@ router.addHandler(isLeaderWelcomesKeyholder, (_, message) => {
       userAgent: message.leaderInfo.userAgent,
     },
     you: {
-      id: message.keyHolderID,
+      id: message.keyHolderId,
     },
   });
 
@@ -53,4 +54,9 @@ router.addHandler(isLeaderSendsBoxCreated, (_, message) => {
 router.addHandler(isLeaderSendsKeyHolderList, (_, message) => {
   const storeActions = useJoinBoxStore.getState().actions;
   storeActions.updateKeyHoldersList(message.allKeyHolders);
+});
+
+router.addHandler(isLeaderNotAuthorizedKeyholder, () => {
+  const storeActions = useJoinBoxStore.getState().actions;
+  storeActions.cannotConnectLeader("not-authorized");
 });

@@ -46,7 +46,11 @@ export function WhatsYourName(
         idToken,
       });
     } else {
-      joinBoxStoreActions.connect({ name, userAgent: currentUserAgent });
+      joinBoxStoreActions.connect({
+        name,
+        userAgent: currentUserAgent,
+        sessionId: sessionId ?? "",
+      });
     }
   };
 

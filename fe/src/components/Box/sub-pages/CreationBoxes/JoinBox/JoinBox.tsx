@@ -14,6 +14,8 @@ import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { LeaveLobbyButton } from "../commons/components";
+import { BoxJoinContentForOKSkeleton } from "./BoxJoinContentForOKSkeleton";
+import { useConnectionTimeout } from "./useConnectionTimeout";
 import { useJoinBoxConnection } from "./useJoinBoxConnection";
 
 export const JoinBox: React.FC = () => {
@@ -44,34 +46,65 @@ export const JoinBox: React.FC = () => {
 };
 
 const JoinBoxContent = () => {
-  const { leader, otherKeyholders, threshold, title, you, content } =
-    useStoreSlice();
-  const actions = useJoinBoxStore((state) => state.actions);
-
+  const {
+    leader,
+    otherKeyholders,
+    threshold,
+    title,
+    you,
+    content,
+    connectionToLeaderFailReason,
+  } = useStoreSlice();
   useJoinBoxConnection();
+  useConnectionTimeout();
+
+  const blocker = useNavigateAwayBlocker({
+    shouldNavigationBeBlocked: () => !connectionToLeaderFailReason,
+  });
+
+  const getConnectionErrorMessage = (reason: string) => {
+    switch (reason) {
+      case "timeout":
+        return "Connection timed out. Please try again.";
+      case "not-authorized":
+        return "You are not authorized to join this session.";
+      default:
+        return "Cannot connect to a leader";
+    }
+  };
 
   return (
     <>
-      {!leader?.id && (
+      {!leader?.id && connectionToLeaderFailReason && (
         <div className="flex flex-col items-start gap-4">
           <Alert variant="warning" className="self-stretch">
-            No leader has connected
+            {getConnectionErrorMessage(connectionToLeaderFailReason)}
           </Alert>
-          <Button variant="primary" onClick={actions.reset}>
-            Go back
-          </Button>
         </div>
       )}
+      {!leader?.id && <BoxJoinContentForOKSkeleton />}
       {!!leader?.id && (
-        <BoxJoinContentForOK
-          leader={leader}
-          otherKeyholders={otherKeyholders}
-          threshold={threshold}
-          title={title}
-          you={you}
-          content={content}
-        />
+        <>
+          <BoxJoinContentForOK
+            leader={leader}
+            otherKeyholders={otherKeyholders}
+            threshold={threshold}
+            title={title}
+            you={you}
+            content={content}
+          />
+          <NavigateAwayAlert
+            open={blocker.state === "blocked"}
+            textTitle="Are you sure you want to leave?"
+            textDescription="You are currently connected as a follower in the box locking session, which is still ongoing. If you leave now, you will be disconnected and may lose your opportunity to participate in the process."
+            onGoBack={() => blocker.proceed?.()}
+            onClose={() => blocker.reset?.()}
+          />
+        </>
       )}
+      <ContentCard.OutsideSlot asChild>
+        <LeaveLobbyButton>Leave lobby</LeaveLobbyButton>
+      </ContentCard.OutsideSlot>
     </>
   );
 };
@@ -91,9 +124,6 @@ const BoxJoinContentForOK = ({
   you: { name: string; userAgent: string };
   content?: string;
 }) => {
-  const blocker = useNavigateAwayBlocker({
-    shouldNavigationBeBlocked: () => true,
-  });
   return (
     <>
       <div className="flex flex-col gap-4">
@@ -116,7 +146,7 @@ const BoxJoinContentForOK = ({
         <FieldArea label="Other keyholders: ">
           <div className="flex flex-col gap-1.5">
             {otherKeyholders.length === 0 && (
-              <Text variant="secondaryText">
+              <Text variant="secondaryText" className="text-sm">
                 No keyholders yet. Waiting for others to join...
               </Text>
             )}
@@ -142,17 +172,7 @@ const BoxJoinContentForOK = ({
           </FieldArea>
         )}
       </div>
-      <ContentCard.OutsideSlot asChild>
-        <LeaveLobbyButton>Leave lobby</LeaveLobbyButton>
-      </ContentCard.OutsideSlot>
-      <NavigateAwayAlert
-        open={blocker.state === "blocked"}
-        textTitle="Are you sure you want to leave?"
-        textDescription="You are currently connected as a follower in the box locking session, which is still ongoing. If you leave now, you will be disconnected and may lose your opportunity to participate in the process."
-        onGoBack={() => blocker.proceed?.()}
-        onClose={() => blocker.reset?.()}
-      />
-      <Text variant="primaryText">
+      <Text variant="primaryText" className="text-sm">
         Waiting for more keyholders, or leader to create finalize box creation.
       </Text>
     </>
@@ -166,6 +186,9 @@ const useStoreSlice = () => {
   const threshold = useJoinBoxStore((state) => state.threshold);
   const otherKeyholders = useJoinBoxStore((state) => state.otherKeyHolders);
   const content = useJoinBoxStore((state) => state.content);
+  const connectionToLeaderFailReason = useJoinBoxStore(
+    (state) => state.connectionToLeaderFailReason,
+  );
 
   return {
     title,
@@ -174,6 +197,7 @@ const useStoreSlice = () => {
     threshold,
     otherKeyholders,
     content,
+    connectionToLeaderFailReason,
   };
 };
 

@@ -127,6 +127,29 @@ export class DataChannelManager<
     });
   }
 
+  public disconnectPeer(peerId: string) {
+    const objectId = Object.values(this.objectIdSet).find(
+      (objectId) => objectId.localID === peerId,
+    );
+    if (!objectId) {
+      console.warn(
+        `Cannot disconnect peer with id:${peerId} because it seems it's not connected`,
+      );
+    }
+    const peer = this.peers.get(objectId);
+
+    if (!peer) {
+      console.warn(
+        `Cannot disconnect peer with id:${peerId} because, although an object ID was found, no corresponding peer connection data exists.`,
+      );
+    }
+
+    peer?.channel.close();
+    peer?.connection.close();
+    this.peers.delete(objectId);
+    this.objectIdSet.delete(objectId);
+  }
+
   public close() {
     this.signalingService.close();
     this.objectIdSet.clear();

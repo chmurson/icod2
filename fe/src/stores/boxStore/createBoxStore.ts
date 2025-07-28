@@ -11,7 +11,6 @@ const createBoxDefaultState = {
   title: "",
   connecting: false,
   connected: false,
-  created: false,
   error: null as string | null,
   leader: {
     id: "",
@@ -24,6 +23,7 @@ const createBoxDefaultState = {
   encryptedMessage: "",
   generatedKeys: [] as string[],
   generatedKey: "",
+  contentPreviewSharedWith: {} as Record<string, boolean>,
 };
 
 export type CreateBoxStateData = typeof createBoxDefaultState;
@@ -40,20 +40,17 @@ type CreateBoxState = {
       userAgent: string;
       idToken?: string;
     }) => void;
-    lock: (message: {
-      title?: string;
-      content?: string;
-      encryptedMessage?: string;
-      generatedKeys?: string[];
-      generatedKey?: string;
-    }) => void;
+    markAsLocked: () => void;
     setBoxInfo: (
-      args: Pick<CreateBoxStateData, "title" | "content" | "threshold">,
+      args: Partial<
+        Pick<CreateBoxStateData, "title" | "content" | "threshold">
+      >,
     ) => void;
+    setContentPreviewSharedWith: (keyHolderId: string, value: boolean) => void;
   };
 } & CreateBoxStateData;
 
-export const useCreateBoxStore = create<CreateBoxState>((set) => ({
+export const useCreateBoxStore = create<CreateBoxState>((set, get) => ({
   ...createBoxDefaultState,
   actions: {
     connect: ({ name, userAgent, idToken }) =>
@@ -95,10 +92,8 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
         ),
       }));
     },
-    lock: (message) => {
+    markAsLocked: () => {
       set({
-        ...message,
-        created: true,
         state: "created",
       });
     },
@@ -106,15 +101,17 @@ export const useCreateBoxStore = create<CreateBoxState>((set) => ({
       set({
         ...createBoxDefaultState,
       }),
-    setBoxInfo: ({
-      content,
-      title,
-      threshold,
-    }: Pick<CreateBoxStateData, "title" | "content" | "threshold">) =>
+    setBoxInfo: (
+      payload: Partial<
+        Pick<CreateBoxStateData, "title" | "content" | "threshold">
+      >,
+    ) => set(payload),
+    setContentPreviewSharedWith: (keyHolderId: string, value: boolean) =>
       set({
-        content,
-        title,
-        threshold,
+        contentPreviewSharedWith: {
+          ...get().contentPreviewSharedWith,
+          [keyHolderId]: value,
+        },
       }),
   },
 }));
