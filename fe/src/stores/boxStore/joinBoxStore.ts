@@ -24,11 +24,17 @@ const joinBoxDefaultState = {
     name: "",
     userAgent: "",
   } satisfies ParticipantType,
+  sessionId: "" as string,
   otherKeyHolders: [] as ParticipantType[],
   content: undefined as string | undefined,
   threshold: 1,
   encryptedMessage: "",
   generatedKey: "",
+  connectionToLeaderFailReason: undefined as
+    | "not-authorized"
+    | "timeout"
+    | "other"
+    | undefined,
 };
 
 export type JoinBoxStateData = typeof joinBoxDefaultState;
@@ -37,11 +43,18 @@ type JoinBoxState = {
   actions: {
     reset: () => void;
     start: () => void;
-    connect: (args: { name: string; userAgent: string }) => void;
+    connect: (args: {
+      name: string;
+      userAgent: string;
+      sessionId: string;
+    }) => void;
     connectYou: (args: {
       you: { id: string };
       leader: ParticipantType;
     }) => void;
+    cannotConnectLeader: (
+      reason: JoinBoxStateData["connectionToLeaderFailReason"],
+    ) => void;
     updateKeyHoldersList: (participant: ParticipantType[]) => void;
     connectParticipant: (participant: ParticipantType) => void;
     disconnectParticipant: (participantId: string) => void;
@@ -64,17 +77,24 @@ export const useJoinBoxStore = create<JoinBoxState>()(
     ...joinBoxDefaultState,
     actions: {
       start: () => set({ ...joinBoxDefaultState, state: "set-name" }),
-      connect: ({ name, userAgent }) =>
+      connect: ({ name, userAgent, sessionId }) =>
         set((state) => ({
           ...joinBoxDefaultState,
           connecting: true,
           state: "connecting",
+          sessionId,
           you: {
             ...state.you,
             name,
             userAgent,
           },
         })),
+      cannotConnectLeader: (
+        reason: JoinBoxStateData["connectionToLeaderFailReason"],
+      ) =>
+        set({
+          connectionToLeaderFailReason: reason,
+        }),
       updateKeyHoldersList: (keyHolderList: ParticipantType[]) => {
         set((state) => ({
           otherKeyHolders: keyHolderList.filter(
@@ -129,6 +149,6 @@ export const useJoinBoxStore = create<JoinBoxState>()(
           ...joinBoxDefaultState,
         }),
       setInfoBox: (newPartState) => set(newPartState),
-    },
+    } satisfies JoinBoxState["actions"],
   })),
 );
