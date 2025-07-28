@@ -92,7 +92,9 @@ const InfoBox = ({
   <div className="flex gap-2 flex-col">
     <Typography variant="sectionTitle">{title}</Typography>
     <div className="flex flex-row gap-6 justify-between max-md:flex-col">
-      <Typography variant="primaryText">{text}</Typography>
+      <Typography variant="primaryText" className="text-sm">
+        {text}
+      </Typography>
       <div className="flex justify-center items-end max-md:justify-start">
         {buttonSlot}
       </div>

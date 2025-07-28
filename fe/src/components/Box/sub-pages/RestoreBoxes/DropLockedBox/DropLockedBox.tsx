@@ -61,6 +61,12 @@ export const DropLockedBox: React.FC = () => {
     }
   }, [joinLockedBoxError]);
 
+  useEffect(() => {
+    if (!isPersistedStartedUnlocking(sessionId ?? "")) {
+      clearPersistedStartedUnlockingInfo();
+    }
+  }, [sessionId]);
+
   const consumeLockedBox = useCallback(
     (data: object) => {
       if (!isLockedBoxFile(data)) {

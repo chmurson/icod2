@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
 import { CreateBox } from "./CreateBox";
+import {
+  clearPersistedStartedLockingInfo,
+  isPersistedStartedLocking,
+} from "./commons";
 import { DownloadLockedBox } from "./DownloadLockedBox";
 import { JoinBox } from "./JoinBox";
 import { WhatsYourName } from "./WhatsYourName";
@@ -36,12 +40,19 @@ const useCurrentPage = () => {
 
   const isInitialized = useInitialization();
 
+  useEffect(() => {
+    if (!isPersistedStartedLocking(sessionId ?? "")) {
+      clearPersistedStartedLockingInfo();
+    }
+  }, [sessionId]);
+
   if (!isInitialized) {
     return null;
   }
 
   if (createBoxState === "initial" && joinBoxState === "initial") {
-    return (sessionId?.trim() ?? "") === ""
+    return (sessionId?.trim() ?? "") === "" ||
+      isPersistedStartedLocking(sessionId ?? "")
       ? "createBoxSetName"
       : "joinBoxSetName";
   }

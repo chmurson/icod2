@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCreateBoxStore } from "@/stores";
+import { persistStartedLocking } from "../../commons";
 
 export const useShareableURL = () => {
   const { sessionId } = useParams();
@@ -12,6 +13,7 @@ export const useShareableURL = () => {
     const newURL = `/lock-box/${leaderId}`;
     if (newURL !== window.location.pathname) {
       navigate(newURL, { replace: true });
+      persistStartedLocking(leaderId);
     }
   }, [leaderId, navigate]);
 

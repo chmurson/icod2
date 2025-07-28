@@ -2,6 +2,7 @@ import { TextArea, TextField } from "@radix-ui/themes";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { SharePreviewButton } from "@/components/Box/components/SharePreviewButton";
+import { ContentCard } from "@/components/layout";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button.tsx";
 import ErrorBoundary from "@/ui/ErrorBoundry";
@@ -13,6 +14,7 @@ import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { InputNumber } from "../../../components/InputNumber";
 import { ParticipantItem } from "../../../components/ParticipantItem";
+import { LeaveLobbyButton } from "../commons/components";
 import { usePartOfCreateBoxStore } from "./hooks";
 import { useLockBox } from "./hooks/useHandleBoxCreation";
 import { useShareableURL } from "./hooks/useShareableURL";
@@ -212,15 +214,19 @@ export const CreateBoxContent: React.FC = () => {
           )}
         </FieldArea>
       </div>
-      <div>
+      <div className="flex justify-end mb-4">
         <Button
           variant="prominent"
+          className="px-20"
           onClick={handleBoxCreation}
           disabled={noParticipantConnected}
         >
           Create Box
         </Button>
       </div>
+      <ContentCard.OutsideSlot asChild>
+        <LeaveLobbyButton>Leave lobby</LeaveLobbyButton>
+      </ContentCard.OutsideSlot>
       <NavigateAwayAlert
         open={blocker.state === "blocked"}
         textTitle="Critical action required as Leader"

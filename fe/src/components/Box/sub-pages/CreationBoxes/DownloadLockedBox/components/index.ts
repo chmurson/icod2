@@ -1,1 +1,0 @@
-export { ClosePageButton } from "./ClosePageButton";

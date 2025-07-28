@@ -1,6 +1,7 @@
 import { TextArea } from "@radix-ui/themes";
 import type React from "react";
 import { FiEye } from "react-icons/fi";
+import { ContentCard } from "@/components/layout";
 import { useJoinBoxStore } from "@/stores";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
@@ -12,6 +13,7 @@ import {
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
+import { LeaveLobbyButton } from "../commons/components";
 import { useJoinBoxConnection } from "./useJoinBoxConnection";
 
 export const JoinBox: React.FC = () => {
@@ -140,6 +142,9 @@ const BoxJoinContentForOK = ({
           </FieldArea>
         )}
       </div>
+      <ContentCard.OutsideSlot asChild>
+        <LeaveLobbyButton>Leave lobby</LeaveLobbyButton>
+      </ContentCard.OutsideSlot>
       <NavigateAwayAlert
         open={blocker.state === "blocked"}
         textTitle="Are you sure you want to leave?"
