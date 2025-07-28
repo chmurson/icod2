@@ -36,7 +36,7 @@ type DownloadBoxStoreStateType =
     };
 
 type Actions = {
-  fromCreateBox: () => void;
+  fromCreateBox: (payload: { encryptedMessage: string; key: string }) => void;
   fromJoinBox: () => void;
 };
 
@@ -44,14 +44,20 @@ const createStoreFn: StateCreator<DownloadBoxStoreStateType & Actions> = (
   set,
 ) => ({
   type: undefined,
-  fromCreateBox: () => {
+  fromCreateBox: ({
+    encryptedMessage,
+    key,
+  }: {
+    encryptedMessage: string;
+    key: string;
+  }) => {
     const createBoxState = useCreateBoxStore.getState();
     set({
       type: "fromCreateBox",
       state: {
         content: createBoxState.content,
-        encryptedMessage: createBoxState.encryptedMessage,
-        generatedKey: createBoxState.generatedKey,
+        encryptedMessage: encryptedMessage,
+        generatedKey: key,
         leader: createBoxState.leader,
         keyHolders: createBoxState.keyHolders,
         threshold: createBoxState.threshold,

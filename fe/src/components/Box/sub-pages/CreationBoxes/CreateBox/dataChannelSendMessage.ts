@@ -1,5 +1,6 @@
 import { type RefObject, useCallback } from "react";
 import type { DataChannelManager } from "@/services/webrtc";
+import { useCreateBoxStore } from "@/stores";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import type {
   LeaderSendsBoxCreated,
@@ -15,13 +16,13 @@ export const useDataChannelSendMessages = ({
   const sendBoxUpdate = useSendBoxUpdate(dataChannelManagerRef);
   const sendBoxCreated = useSendBoxCreated(dataChannelManagerRef);
   const sendKeyholdersUpdate = useSendKeyholdersUpdate(dataChannelManagerRef);
-  const sendBoxLocked = useSendBoxLocked(dataChannelManagerRef);
+  const sendLockedBoxes = useSendLockedBoxes(dataChannelManagerRef);
 
   return {
     sendBoxUpdate,
     sendBoxCreated,
     sendKeyholdersUpdate,
-    sendBoxLocked,
+    sendLockedBoxes,
   };
 };
 
@@ -88,22 +89,29 @@ const useSendKeyholdersUpdate = (
     [dataChannelMngRef],
   );
 
-const useSendBoxLocked = (
+const useSendLockedBoxes = (
   dataChannelMngRef: RefObject<DataChannelManager | undefined>,
 ) =>
   useCallback(
-    (params: {
-      localPeerID: string;
-      key: string;
-      encryptedMessage: string;
-    }) => {
-      const { encryptedMessage, key, localPeerID } = params;
+    (params: { keys: string[]; encryptedMessage: string }) => {
+      const { encryptedMessage, keys } = params;
 
-      dataChannelMngRef.current?.sendMessageToSinglePeer(localPeerID, {
-        type: "leader:box-created",
-        key,
-        encryptedMessage,
-      } satisfies LeaderSendsBoxCreated);
+      const { keyHolders } = useCreateBoxStore.getState();
+      const keysToSlice = [...keys];
+
+      keyHolders.forEach((kh) => {
+        const peerKey = keysToSlice.splice(0)[0];
+
+        if (!peerKey) {
+          console.error(`Missing key for keyholder with id: ${kh.id}`);
+        }
+
+        dataChannelMngRef.current?.sendMessageToSinglePeer(kh.id, {
+          type: "leader:box-created",
+          key: peerKey,
+          encryptedMessage,
+        } satisfies LeaderSendsBoxCreated);
+      });
     },
     [dataChannelMngRef],
   );

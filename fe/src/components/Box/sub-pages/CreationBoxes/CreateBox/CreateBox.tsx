@@ -1,8 +1,8 @@
 import { TextArea, TextField } from "@radix-ui/themes";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
 import { SharePreviewButton } from "@/components/Box/components/SharePreviewButton";
 import { ContentCard } from "@/components/layout";
+import { useDownloadBoxStore } from "@/stores";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button.tsx";
 import ErrorBoundary from "@/ui/ErrorBoundry";
@@ -16,8 +16,9 @@ import { InputNumber } from "../../../components/InputNumber";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { LeaveLobbyButton } from "../commons/components";
 import { useDataChannelSendMessages } from "./dataChannelSendMessage";
-import { usePartOfCreateBoxStore } from "./hooks";
-import { useLockBox } from "./hooks/useHandleBoxCreation";
+import { useBoxCreationValidation, usePartOfCreateBoxStore } from "./hooks";
+import { useCreateLockedBox } from "./hooks/useCreateLockedBox";
+import { useKeepKeyHoldersUpdated } from "./hooks/useKeepKeyHoldersUpdated";
 import { useShareableURL } from "./hooks/useShareableURL";
 import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
@@ -49,89 +50,32 @@ export const CreateBox = () => {
 };
 
 export const CreateBoxContent: React.FC = () => {
-  const { state, actions, getError, validate } = usePartOfCreateBoxStore();
-
-  const [localTitle, setLocalTitle] = useState(state.title);
-  const [localContent, setLocalContent] = useState(state.content);
-  const [localThreshold, setLocalThreshold] = useState(state.threshold);
-  const [isContentSharedToPeer, setIsContentSharedToPeer] = useState<
-    Record<string, boolean>
-  >({});
+  const { state, actions } = usePartOfCreateBoxStore();
+  const setDownloadStoreFromCreateBox = useDownloadBoxStore(
+    (state) => state.fromCreateBox,
+  );
 
   const { dataChannelMngRef } = useCreateBoxConnection();
 
-  const { sendKeyholdersUpdate, sendBoxUpdate, sendBoxLocked } =
-    useDataChannelSendMessages({
-      dataChannelManagerRef: dataChannelMngRef,
-    });
+  const { sendLockedBoxes } = useDataChannelSendMessages({
+    dataChannelManagerRef: dataChannelMngRef,
+  });
 
-  const { lockBox } = useLockBox();
+  const { createLockedBox } = useCreateLockedBox();
 
-  const keyHoldersRef = useRef(state.keyHolders);
+  const { getError, handleBoxCreationValidation } = useBoxCreationValidation({
+    onValid: async (payload) => {
+      const { encryptedMessage, keys } = await createLockedBox(payload);
+      const [leaderKey, ...restOfKeys] = keys;
+      actions.markAsLocked();
+      sendLockedBoxes({ encryptedMessage, keys: restOfKeys });
+      setDownloadStoreFromCreateBox({ encryptedMessage, key: leaderKey });
+    },
+  });
 
-  useEffect(() => {
-    keyHoldersRef.current = state.keyHolders;
-    sendKeyholdersUpdate(state.keyHolders);
-  }, [state.keyHolders, sendKeyholdersUpdate]);
-
-  useEffect(() => {
-    keyHoldersRef.current.forEach((keyHolder) => {
-      const isContentShared = isContentSharedToPeer[keyHolder.id] === true;
-      sendBoxUpdate({
-        id: keyHolder.id,
-        title: state.title,
-        keyHolderThreshold: state.threshold,
-        content: isContentShared ? state.content : undefined,
-        isContentShared,
-      });
-    });
-  }, [
-    state.content,
-    state.threshold,
-    state.title,
-    isContentSharedToPeer,
-    sendBoxUpdate,
-  ]);
-
-  useEffect(() => {
-    const timeoutHandler = setTimeout(() => {
-      actions.setBoxInfo({
-        title: localTitle,
-        content: localContent,
-        threshold: localThreshold,
-      });
-    }, 250);
-
-    return () => clearTimeout(timeoutHandler);
-  }, [localTitle, localContent, localThreshold, actions.setBoxInfo]);
+  useKeepKeyHoldersUpdated(dataChannelMngRef);
 
   const noParticipantConnected = state.keyHolders.length === 0;
-
-  const handleBoxCreation = async () => {
-    const isValid = validate();
-    if (!isValid) {
-      return;
-    }
-
-    const { encryptedMessage, key, keys } = lockBox();
-    const notLeaderKeys = keys.filter((k) => k !== key);
-    state.keyHolders.forEach((keyHolder) => {
-      const key = notLeaderKeys.shift();
-
-      if (!key) {
-        console.error("No key available for keyHolder:", keyHolder.id);
-        return;
-      }
-
-      if (key) {
-        sendBoxLocked({
-          localPeerID: keyHolder.id,
-          key,
-          encryptedMessage,
-        });
-      }
-    });
-  };
 
   const shareableURL = useShareableURL();
 
@@ -149,8 +93,8 @@ export const CreateBoxContent: React.FC = () => {
           <TextField.Root
             id="title"
             type="text"
-            value={localTitle}
-            onChange={(e) => setLocalTitle(e.target.value)}
+            value={state.title}
+            onChange={(e) => actions.setBoxInfo({ title: e.target.value })}
             className="max-w-md w-full"
           />
           {getError("title") && (
@@ -160,8 +104,8 @@ export const CreateBoxContent: React.FC = () => {
         <FieldArea label="Content: ">
           <TextArea
             id="content"
-            value={localContent}
-            onChange={(e) => setLocalContent(e.target.value)}
+            value={state.content}
+            onChange={(e) => actions.setBoxInfo({ content: e.target.value })}
             rows={10}
             className="w-full"
           />
@@ -174,8 +118,11 @@ export const CreateBoxContent: React.FC = () => {
             min={1}
             defaultValue={1}
             max={10}
+            value={state.threshold}
             onChange={(e) =>
-              setLocalThreshold(Number.parseInt(e.currentTarget.value))
+              actions.setBoxInfo({
+                threshold: Number.parseInt(e.currentTarget.value),
+              })
             }
             className="min-w-10"
           />
@@ -203,12 +150,9 @@ export const CreateBoxContent: React.FC = () => {
                 userAgent={p.userAgent}
                 buttonSlot={
                   <SharePreviewButton
-                    checked={!!isContentSharedToPeer[p.id]}
+                    checked={!!state.contentPreviewSharedWith[p.id]}
                     onToggle={(checked) =>
-                      setIsContentSharedToPeer((prev) => ({
-                        ...prev,
-                        [p.id]: checked,
-                      }))
+                      actions.setContentPreviewSharedWith(p.id, checked)
                     }
                   />
                 }
@@ -224,7 +168,14 @@ export const CreateBoxContent: React.FC = () => {
         <Button
           variant="prominent"
           className="px-20"
-          onClick={handleBoxCreation}
+          onClick={() =>
+            handleBoxCreationValidation({
+              content: state.content,
+              keyHolders: state.keyHolders,
+              threshold: state.threshold,
+              title: state.title,
+            })
+          }
           disabled={noParticipantConnected}
         >
           Create Box
