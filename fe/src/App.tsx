@@ -20,18 +20,15 @@ function useSystemTheme() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    // Check initial system preference
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     setTheme(mediaQuery.matches ? "dark" : "light");
 
-    // Listen for changes to system preference
     const handleChange = (e: MediaQueryListEvent) => {
       setTheme(e.matches ? "dark" : "light");
     };
 
     mediaQuery.addEventListener("change", handleChange);
 
-    // Cleanup listener on unmount
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 

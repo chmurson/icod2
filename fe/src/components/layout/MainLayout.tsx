@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import headerCropppedUrl from "../../../public/header-cropped.jpg";
+import headerSmallCropppedUrl from "../../../public/header-cropped-small.jpg";
 
 const mergeClassNames = (...classes: (string | undefined)[]) => {
   return classes.filter(Boolean).join(" ");
@@ -90,18 +91,15 @@ ContentCard.OutsideSlot = ({ children, asChild = false }) => {
 
 const HeaderImage: FC = () => {
   return (
-    <div
-      style={{
-        backgroundImage: `url(${headerCropppedUrl})`,
-      }}
-      className="
-				  b-image
-          w-full
-          h-64
-          shadow
-          bg-center
-          bg-[length:auto_256px]
-        "
-    />
+    <div className="relative w-full h-64 z-0">
+      <div
+        className="absolute inset-0 bg-center bg-cover filter blur-xl scale-110"
+        style={{ backgroundImage: `url(${headerSmallCropppedUrl})` }}
+      />
+      <div
+        className="absolute inset-0 bg-center bg-[length:auto_256px]"
+        style={{ backgroundImage: `url(${headerCropppedUrl})` }}
+      />
+    </div>
   );
 };
