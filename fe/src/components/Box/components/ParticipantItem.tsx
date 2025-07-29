@@ -42,12 +42,12 @@ export const ParticipantItemDescription: FC<{ name: string; ua: string }> = ({
   ua,
 }) => {
   return (
-    <div className="flex flex-col py-1">
+    <div className="flex flex-col py-1 min-w-0">
       <div className="flex items-center gap-2">
         {name.trim() && (
           <Text
             variant="primaryText"
-            className="font-semibold text-ellipsis truncate"
+            className="font-semibold text-ellipsis truncate min-w-0"
           >
             {name.trim() !== "" ? name : ""}
           </Text>

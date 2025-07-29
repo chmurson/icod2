@@ -1,7 +1,8 @@
-import { Avatar } from "@radix-ui/themes";
+import { Avatar, Badge } from "@radix-ui/themes";
 import type { FC } from "react";
 import { IoMdKey } from "react-icons/io";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
+import { useTailwindBreakpoints } from "@/utils/useTailwindBreakpoints";
 
 type Props = {
   isYou: boolean;
@@ -16,9 +17,15 @@ export const ShareAccessKeysAvatars: FC<Props> = ({
   keyholdersSharingTheirKeys,
   isYou,
 }) => {
+  const { isMaxSm } = useTailwindBreakpoints();
+  const maxSize = isMaxSm ? 4 : 5;
+  const wrappedAvatars = possibleKeyHolders.slice(maxSize);
+  const keysSharedFromWrappedAvatars = wrappedAvatars.filter((wa) =>
+    keyholdersSharingTheirKeys.includes(wa.id),
+  ).length;
   return (
-    <div className="flex flex-1 gap-1">
-      {possibleKeyHolders.map((kh) => (
+    <div className="inline-flex flex-1 gap-1 grow-0 items-center">
+      {possibleKeyHolders.slice(0, maxSize).map((kh) => (
         <div key={kh.id}>
           {kh.id === keyHolderId && isYou && <SimpleKeyAvatar type="accent" />}
           {((kh.id === keyHolderId && !isYou) ||
@@ -29,6 +36,15 @@ export const ShareAccessKeysAvatars: FC<Props> = ({
             !keyholdersSharingTheirKeys.includes(kh.id) && <SimpleKeyAvatar />}
         </div>
       ))}
+      {wrappedAvatars.length > 0 && (
+        <Badge
+          radius="full"
+          className="ml-1"
+          variant={keysSharedFromWrappedAvatars > 0 ? "solid" : "outline"}
+        >
+          +{keysSharedFromWrappedAvatars}/{wrappedAvatars.length}
+        </Badge>
+      )}
     </div>
   );
 };

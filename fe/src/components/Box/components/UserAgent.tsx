@@ -29,11 +29,11 @@ export const UserAgent = memo(
 
 const getDeviceIcon = (type: UAParser.IDevice["type"], os: UAParser.IOS) => {
   if (type !== "mobile") {
-    return <MdOutlineDesktopWindows />;
+    return <MdOutlineDesktopWindows className="shrink-0" />;
   }
   if (os.name?.match("ios")) {
-    return <MdOutlinePhoneIphone />;
+    return <MdOutlinePhoneIphone className="shrink-0" />;
   }
 
-  return <MdPhoneAndroid />;
+  return <MdPhoneAndroid className="shrink-0" />;
 };
