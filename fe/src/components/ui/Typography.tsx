@@ -38,7 +38,6 @@ export function Typography<C extends ElementType = "div">({
   const Comp = asChild ? Slot : (as as ElementType);
   const localProps = localPropsByVariant[variant] || {};
 
-  console.log(as, variant, className, props);
   return (
     <Comp
       className={twMerge(

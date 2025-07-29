@@ -25,7 +25,7 @@ import { useCreateBoxConnection } from "./useCreateBoxConnection";
 export const CreateBox = () => {
   return (
     <div className="flex flex-col gap-6">
-      <Text variant="pageTitle" className="mt-4 py-12 font-bold">
+      <Text variant="pageTitle" className="mt-4">
         Create a box
       </Text>
       <ErrorBoundary

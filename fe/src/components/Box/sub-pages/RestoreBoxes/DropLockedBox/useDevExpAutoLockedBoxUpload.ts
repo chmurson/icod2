@@ -12,37 +12,25 @@ export function useDevExpAutoLockedBoxUpload({
   onAutoUploadRef.current = onAutoUpload;
 
   useEffect(() => {
-    if (import.meta.env.DEV === true) {
-      if (skip) {
-        return () => {};
-      }
-      let timeoutHandler: number | undefined;
-      const key = "ICOD2_DEBUG_INSTANT_LOCKED_BOX";
-      const rawData = localStorage.getItem(key);
-
-      if (!rawData) {
-        return;
-      }
-
-      try {
-        const maybeJson = JSON.parse(rawData);
-
-        if (typeof maybeJson === "object") {
-          timeoutHandler = window.setTimeout(() => {
-            console.warn(
-              `Loading locked box data from localStorage key: ${key}`,
-            );
-            onAutoUploadRef.current(maybeJson);
-          }, 500);
-        }
-      } catch (_) {
-        console.warn(`Failed to parse json from ${key}`);
-      }
-
-      return () => {
-        window.clearTimeout(timeoutHandler);
-      };
+    if (import.meta.env.DEV !== true) {
+      return () => {};
     }
-    return () => {};
+
+    if (skip) {
+      return () => {};
+    }
+    let timeoutHandler: number;
+    const data = window.icod2Dev.lockedBoxAutoLoad.get();
+
+    if (typeof data === "object") {
+      timeoutHandler = window.setTimeout(() => {
+        console.warn("Loading locked box data from localStorage");
+        onAutoUploadRef.current(data);
+      }, 1000);
+    }
+
+    return () => {
+      window.clearTimeout(timeoutHandler);
+    };
   }, [skip]);
 }

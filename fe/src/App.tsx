@@ -14,6 +14,7 @@ import ComponentsDemo from "./components/ComponentsDemo";
 import CryptoPlayground from "./components/CryptoPlayground";
 import DecodePlayground from "./components/DecodePlayground";
 import { MainLayout } from "./components/layout/MainLayout";
+import "./utils/devExpSettings";
 
 function useSystemTheme() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -40,26 +41,28 @@ function useSystemTheme() {
 const Root: FC = () => {
   return (
     <>
-      <nav className="bg-[#ffffffAA] absolute w-full p-2 dark:text-gray-700">
-        <Link to="/" style={{ marginRight: 16, textDecoration: "none" }}>
-          Box
-        </Link>
-        <Link
-          to="/crypto-poc"
-          style={{ marginRight: 16, textDecoration: "none" }}
-        >
-          Crypto Playground
-        </Link>
-        <Link
-          to="/decode-poc"
-          style={{ marginRight: 16, textDecoration: "none" }}
-        >
-          Decode Playground
-        </Link>
-        <Link to="/components-demo" style={{ textDecoration: "none" }}>
-          Components Demo
-        </Link>
-      </nav>
+      {window.icod2Dev.topNavTools.get() === true && (
+        <nav className="bg-[#ffffffAA] absolute w-full p-2 dark:text-gray-700">
+          <Link to="/" style={{ marginRight: 16, textDecoration: "none" }}>
+            Box
+          </Link>
+          <Link
+            to="/crypto-poc"
+            style={{ marginRight: 16, textDecoration: "none" }}
+          >
+            Crypto Playground
+          </Link>
+          <Link
+            to="/decode-poc"
+            style={{ marginRight: 16, textDecoration: "none" }}
+          >
+            Decode Playground
+          </Link>
+          <Link to="/components-demo" style={{ textDecoration: "none" }}>
+            Components Demo
+          </Link>
+        </nav>
+      )}
       <MainLayout>
         <Routes>
           <Route path="crypto-poc" element={<CryptoPlayground />} />

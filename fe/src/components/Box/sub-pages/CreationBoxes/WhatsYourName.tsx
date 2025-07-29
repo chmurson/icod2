@@ -56,7 +56,7 @@ export function WhatsYourName(
 
   return (
     <div className="flex flex-col gap-6 items-start">
-      <Text variant="pageTitle">
+      <Text variant="pageTitle" className="mt-4">
         {isCreate ? "Create a Box" : "Join a Box Creation"}
       </Text>
       <StartLeaderFollowerAlert

@@ -2,18 +2,15 @@ import { type ReactNode, useEffect, useState } from "react";
 import { Text } from "@/components/ui";
 import { cn } from "@/utils/cn";
 
-const localStorageCountdownOverride = Number.parseInt(
-  window.localStorage.getItem("ICOD2_COUNTDOWN_OVERRIDE_IN_MS") ?? "",
-);
-const devOverload =
-  !Number.isNaN(localStorageCountdownOverride) &&
-  localStorageCountdownOverride > 1000
-    ? localStorageCountdownOverride
-    : undefined;
+const TWO_MINUTES_IN_MS = 2 * 60 * 1000;
 
-console.log("devOverload", devOverload);
-
-const TWO_MINUTES_IN_MS = !devOverload ? 2 * 60 * 1000 : devOverload;
+function getCountDownDuration() {
+  const countDownOverride = window.icod2Dev.countDownOverride.get();
+  if (countDownOverride) {
+    return countDownOverride;
+  }
+  return TWO_MINUTES_IN_MS;
+}
 
 const formatTime = (ms: number) => {
   const clampedMs = Math.max(0, ms);
@@ -39,7 +36,7 @@ export const CounterWithInfo = ({
   timeClassName?: string;
   textReplacement?: ReactNode;
 }) => {
-  const [remainingTime, setRemainingTime] = useState(TWO_MINUTES_IN_MS);
+  const [remainingTime, setRemainingTime] = useState(getCountDownDuration());
 
   useEffect(() => {
     if (!unlockingStartDate) {
