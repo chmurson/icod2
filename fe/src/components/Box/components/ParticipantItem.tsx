@@ -15,7 +15,7 @@ export const ParticipantItem = ({
   buttonSlot?: ReactNode;
 }) => {
   return (
-    <div className="flex gap-4 items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+    <div className="flex gap-4 items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 max-sm:flex-col max-sm:items-stretch">
       <div className="flex gap-3 items-center">
         <ParticipantItemAvatar name={name} />
         <ParticipantItemDescription name={name} ua={userAgent} />
@@ -42,12 +42,12 @@ export const ParticipantItemDescription: FC<{ name: string; ua: string }> = ({
   ua,
 }) => {
   return (
-    <div className="flex flex-col py-1">
+    <div className="flex flex-col py-1 min-w-0">
       <div className="flex items-center gap-2">
         {name.trim() && (
           <Text
             variant="primaryText"
-            className="font-semibold text-ellipsis truncate"
+            className="font-semibold text-ellipsis truncate min-w-0"
           >
             {name.trim() !== "" ? name : ""}
           </Text>

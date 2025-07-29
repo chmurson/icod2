@@ -140,7 +140,13 @@ const ShareAccesKeyAvatars: FC<{
   );
 };
 
-const ShareAccessButton = ({ keyHolderId }: { keyHolderId: string }) => {
+const ShareAccessButton = ({
+  keyHolderId,
+  shortText,
+}: {
+  keyHolderId: string;
+  shortText?: boolean;
+}) => {
   const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
     (state) => state.shareAccessKeyByKeyHolderId,
   );
@@ -149,6 +155,7 @@ const ShareAccessButton = ({ keyHolderId }: { keyHolderId: string }) => {
   );
   return (
     <ShareAccessButtonDumb
+      shortText={shortText}
       checked={shareAccessKeyByKeyHolderId[keyHolderId] === true}
       onToggle={(checked) => toggleShareAccessKey(keyHolderId, checked)}
     />
@@ -157,7 +164,8 @@ const ShareAccessButton = ({ keyHolderId }: { keyHolderId: string }) => {
 
 const ShareAccessDropdown: FC<{
   onlineKeyHolders: ParticipantType[];
-}> = ({ onlineKeyHolders }) => {
+  shortText?: boolean;
+}> = ({ onlineKeyHolders, shortText }) => {
   const shareAccessKeyByKeyHolderId = useOpenLockedBoxStore(
     (state) => state.shareAccessKeyByKeyHolderId,
   );
@@ -170,6 +178,7 @@ const ShareAccessDropdown: FC<{
 
   return (
     <ShareAccessDropdownDumb
+      shortText={shortText}
       value={idsOfKeyHoldersToShareWith}
       onChange={toggleSharesAccessKeys}
       options={onlineKeyHolders.map((kh) => ({

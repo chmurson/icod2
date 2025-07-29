@@ -15,6 +15,7 @@ type ShareAccessDropdownProps = {
   value: string[];
   onChange: (selectedIds: string[]) => void;
   disabled?: boolean;
+  shortText?: boolean;
 };
 
 const getDisplayText = (selectedCount: number, totalCount: number): string => {
@@ -32,6 +33,7 @@ export const ShareAccessDropdown = ({
   value,
   onChange,
   disabled: propDisabled = false,
+  shortText,
 }: ShareAccessDropdownProps) => {
   const [open, setOpen] = useState(false);
 
@@ -72,7 +74,7 @@ export const ShareAccessDropdown = ({
           aria-haspopup="menu"
           aria-label="Share access options"
         >
-          {displayText}
+          {shortText ? displayText.split(" ")[0] : displayText}
         </Button>
       </DropdownMenu.Trigger>
 

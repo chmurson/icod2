@@ -150,6 +150,7 @@ export const CreateBoxContent: React.FC = () => {
                 userAgent={p.userAgent}
                 buttonSlot={
                   <SharePreviewButton
+                    className="max-sm:text-xs max-sm:h-6"
                     checked={!!state.contentPreviewSharedWith[p.id]}
                     onToggle={(checked) =>
                       actions.setContentPreviewSharedWith(p.id, checked)
@@ -167,7 +168,7 @@ export const CreateBoxContent: React.FC = () => {
       <div className="flex justify-end mb-4">
         <Button
           variant="prominent"
-          className="px-20"
+          className="px-20 max-sm:w-full"
           onClick={() =>
             handleBoxCreationValidation({
               content: state.content,

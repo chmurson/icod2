@@ -30,7 +30,7 @@ export const NavigateAwayAlert = ({
         <AlertDialog.Description size="2">
           {textDescription}
         </AlertDialog.Description>
-        <div className="flex justify-between mt-4">
+        <div className="flex justify-between mt-4 max-sm:flex-col max-sm:items-stretch gap-2">
           <AlertDialog.Cancel>
             <Button variant="primary" onClick={onClose}>
               {textCancelButton}
