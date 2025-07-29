@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import headerCropppedUrl from "../../../public/header-cropped.jpg";
+import headerSmallCropppedUrl from "../../../public/header-cropped-small.jpg";
 
 const mergeClassNames = (...classes: (string | undefined)[]) => {
   return classes.filter(Boolean).join(" ");
@@ -40,7 +41,7 @@ export const ContentCard: ContentCardComponent = ({ children }) => {
   return (
     <ContentCardContext.Provider value={contextValue}>
       <div className="mx-auto max-w-5xl py-12">
-        <Card className="mx-4 px-4 -mt-20 mb-4 min-h-96 box-border max-sm:px-0">
+        <Card className="mx-4 px-4 -mt-32 mb-4 min-h-96 box-border max-sm:px-0">
           <div className="p-6 px-24 max-md:px-8">{children}</div>
         </Card>
         {outsideContent}
@@ -90,18 +91,15 @@ ContentCard.OutsideSlot = ({ children, asChild = false }) => {
 
 const HeaderImage: FC = () => {
   return (
-    <div
-      style={{
-        backgroundImage: `url(${headerCropppedUrl})`,
-      }}
-      className="
-				  b-image
-          w-full
-          h-64
-          shadow
-          bg-center
-          bg-[length:auto_256px]
-        "
-    />
+    <div className="relative w-full h-64 z-0">
+      <div
+        className="absolute inset-0 bg-center bg-cover filter blur-xl scale-110"
+        style={{ backgroundImage: `url(${headerSmallCropppedUrl})` }}
+      />
+      <div
+        className="absolute inset-0 bg-center bg-[length:auto_256px]"
+        style={{ backgroundImage: `url(${headerCropppedUrl})` }}
+      />
+    </div>
   );
 };
