@@ -15,7 +15,7 @@ export const ParticipantItem = ({
   buttonSlot?: ReactNode;
 }) => {
   return (
-    <div className="flex gap-4 items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+    <div className="flex gap-4 items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 max-sm:flex-col max-sm:items-stretch">
       <div className="flex gap-3 items-center">
         <ParticipantItemAvatar name={name} />
         <ParticipantItemDescription name={name} ua={userAgent} />

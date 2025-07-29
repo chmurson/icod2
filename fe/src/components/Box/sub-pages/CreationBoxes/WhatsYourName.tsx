@@ -71,7 +71,7 @@ export function WhatsYourName(
         followerNavigateToLink="/lock-box"
         leaderAlertContent={
           <>
-            You are going to <b>start</b> process of unlocking a box.
+            You are going to <b>start</b> process of locking a box.
           </>
         }
       />
@@ -100,7 +100,7 @@ export function WhatsYourName(
           <UserAgent ua={currentUserAgent} />
         </Text>
       </div>
-      <div className="flex gap-4">
+      <div className="flex gap-4 max-sm:justify-between max-sm:self-stretch">
         <Button variant="primary" onClick={handleOkClick}>
           Ok, Continue
         </Button>

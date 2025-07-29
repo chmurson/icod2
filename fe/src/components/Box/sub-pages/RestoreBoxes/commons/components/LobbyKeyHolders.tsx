@@ -1,5 +1,4 @@
-import type { ComponentType, FC } from "react";
-import { Fragment } from "react/jsx-runtime";
+import type { ComponentType, FC, ReactNode } from "react";
 import {
   ParticipantItemAvatar,
   ParticipantItemDescription,
@@ -59,31 +58,30 @@ export const LoobbyKeyHolders: FC<{
         <div className="col-span-full py-1">
           <Text variant="label">Your access key</Text>
         </div>
-        <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
-          <ParticipantItemAvatar name={you.name} />
-        </div>
-        <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
-          <ParticipantItemDescription name={you.name} ua={you.userAgent} />
-        </div>
-        <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
-          {isMissingOne && <MissingOneKeyLabel />}
-          {isReadyToUnlock && <ReadyToUnlockLabel />}
-        </div>
-        <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
-          <ShareAccesKeyAvatars
-            isYou
-            keyHolderId={you.id}
-            possibleKeyHolders={possibleKeyHolders}
-          />
-        </div>
-        <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700 ">
-          {!isReadyToUnLockStatus && (
-            <ShareAccessDropdown onlineKeyHolders={onlineKeyHolders} />
-          )}
-          {isReadyToUnLockStatus && isReadyToUnlock && (
-            <BoxUnlockedBadgeButton />
-          )}
-        </div>
+        <ParticipantRow
+          isMissingOne={isMissingOne}
+          isReadyToUnlock={isReadyToUnlock}
+          name={you.name}
+          userAgent={you.userAgent}
+          shareAcceessKeyAvatarsSlot={
+            <ShareAccesKeyAvatars
+              isYou
+              keyHolderId={you.id}
+              possibleKeyHolders={possibleKeyHolders}
+            />
+          }
+          shareButtonSlot={
+            <>
+              {!isReadyToUnLockStatus && (
+                <ShareAccessDropdown onlineKeyHolders={onlineKeyHolders} />
+              )}
+              {isReadyToUnLockStatus && isReadyToUnlock && (
+                <BoxUnlockedBadgeButton />
+              )}
+            </>
+          }
+        />
+
         {onlineKeyHolders.length > 0 && (
           <div className="col-span-full py-1 mb-1 mt-12">
             <Text variant="label">Online keyholders:</Text>
@@ -99,35 +97,29 @@ export const LoobbyKeyHolders: FC<{
               );
 
             return (
-              <Fragment key={kh.id}>
-                <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
-                  <ParticipantItemAvatar name={kh.name} />
-                </div>
-                <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
-                  <ParticipantItemDescription
-                    name={kh.name}
-                    ua={kh.userAgent}
-                  />
-                </div>
-                <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
-                  {isMissingOne && <MissingOneKeyLabel />}
-                  {isReadyToUnlock && <ReadyToUnlockLabel />}
-                </div>
-                <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
+              <ParticipantRow
+                key={kh.id}
+                isMissingOne={isMissingOne}
+                isReadyToUnlock={isReadyToUnlock}
+                name={kh.name}
+                userAgent={kh.userAgent}
+                shareAcceessKeyAvatarsSlot={
                   <ShareAccesKeyAvatars
                     keyHolderId={kh.id}
                     possibleKeyHolders={possibleKeyHolders}
                   />
-                </div>
-                <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700">
-                  {!isReadyToUnLockStatus && (
-                    <ShareAccessButton keyHolderId={kh.id} />
-                  )}
-                  {isReadyToUnLockStatus && isReadyToUnlock && (
-                    <BoxUnlockedBadgeButton />
-                  )}
-                </div>
-              </Fragment>
+                }
+                shareButtonSlot={
+                  <>
+                    {!isReadyToUnLockStatus && (
+                      <ShareAccessButton keyHolderId={kh.id} />
+                    )}
+                    {isReadyToUnLockStatus && isReadyToUnlock && (
+                      <BoxUnlockedBadgeButton />
+                    )}
+                  </>
+                }
+              />
             );
           })}
         <div className="col-span-full py-1 mt-12">
@@ -141,31 +133,60 @@ export const LoobbyKeyHolders: FC<{
           </div>
         )}
         {offLineKeyHolders.map((kh) => (
-          <Fragment key={kh.id}>
-            <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
-              <ParticipantItemAvatar name={kh.name} />
-            </div>
-            <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
-              <ParticipantItemDescription name={kh.name} ua={kh.userAgent} />
-            </div>
-            <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
-              <Text variant="secondaryText" className="text-sm" />
-            </div>
-            <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
+          <ParticipantRow
+            key={kh.id}
+            name={kh.name}
+            userAgent={kh.userAgent}
+            shareAcceessKeyAvatarsSlot={
               <ShareAccesKeyAvatars
                 keyHolderId={kh.id}
                 possibleKeyHolders={possibleKeyHolders}
               />
-            </div>
-            <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700">
-              {!isReadyToUnLockStatus && (
-                <ShareAccessButtonDumb checked={false} disabled />
-              )}
-            </div>
-          </Fragment>
+            }
+            shareButtonSlot={<ShareAccessButtonDumb checked={false} disabled />}
+          />
         ))}
       </div>
     </div>
+  );
+};
+
+const ParticipantRow = (props: {
+  name: string;
+  userAgent: string;
+  isMissingOne?: boolean;
+  isReadyToUnlock?: boolean;
+  shareButtonSlot: ReactNode;
+  shareAcceessKeyAvatarsSlot: ReactNode;
+}) => {
+  const {
+    isMissingOne,
+    isReadyToUnlock,
+    name,
+    shareButtonSlot,
+    userAgent,
+    shareAcceessKeyAvatarsSlot,
+  } = props;
+
+  return (
+    <>
+      <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
+        <ParticipantItemAvatar name={name} />
+      </div>
+      <div className="py-3 border-b  border-gray-200 dark:border-gray-700">
+        <ParticipantItemDescription name={name} ua={userAgent} />
+      </div>
+      <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
+        {isMissingOne && <MissingOneKeyLabel />}
+        {isReadyToUnlock && <ReadyToUnlockLabel />}
+      </div>
+      <div className="py-3 border-b  border-gray-200 dark:border-gray-700 flex items-center">
+        {shareAcceessKeyAvatarsSlot}
+      </div>
+      <div className="flex justify-end items-center py-3 border-b  border-gray-200 dark:border-gray-700">
+        {shareButtonSlot}
+      </div>
+    </>
   );
 };
 

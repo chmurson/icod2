@@ -167,7 +167,6 @@ export const DropLockedBox: React.FC = () => {
       ? joinLockedBoxState.actions.reset
       : openLockedBoxState.actions.reset)();
 
-    // Prevent default drag and drop behavior on the entire page
     const handleGlobalDragOver = (e: DragEvent) => {
       e.preventDefault();
     };
@@ -200,13 +199,13 @@ export const DropLockedBox: React.FC = () => {
         {isFollower && (
           <div className="flex flex-col gap-4">
             <Alert variant="info">
-              <div className="flex justify-between">
+              <div className="flex justify-between max-sm:flex-col gap-2">
                 <span>
                   You are going to <b>join</b> process of unlocking a box.
                 </span>
                 <Button
                   variant="secondary"
-                  className="self-end text-sm"
+                  className="self-end text-sm max-sm:w-full"
                   size="1"
                   onClick={() => {
                     navigate("/unlock-box");

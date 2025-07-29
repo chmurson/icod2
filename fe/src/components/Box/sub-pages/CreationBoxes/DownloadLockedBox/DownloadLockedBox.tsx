@@ -118,8 +118,12 @@ export const DownloadLockedBox: React.FC = () => {
           )}
       </div>
       <div className="flex flex-col gap-1 items-end mb-4">
-        <div className="inline-flex">
-          <Button variant="prominent" onClick={handleClickDownloadButton}>
+        <div className="inline-flex max-sm:w-full">
+          <Button
+            variant="prominent"
+            onClick={handleClickDownloadButton}
+            className="max-sm:w-full"
+          >
             <DownloadIcon /> Download the Locked Box
           </Button>
           <div>

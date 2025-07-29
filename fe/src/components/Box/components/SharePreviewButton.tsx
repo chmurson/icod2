@@ -14,6 +14,7 @@ export const SharePreviewButton: FC<Props> = (props) => {
       iconOff={<FiEye />}
       textOff="Show content preview"
       textOn="Hide content preview"
+      className=""
       {...props}
     />
   );

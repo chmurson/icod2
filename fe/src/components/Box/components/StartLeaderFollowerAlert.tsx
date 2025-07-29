@@ -26,7 +26,7 @@ export const StartLeaderFollowerAlert: FC<Props> = ({
       {type === "follower" && (
         <div className={cn("flex flex-col gap-4", className)}>
           <Alert variant="info">
-            <div className="flex justify-between">
+            <div className="flex justify-between max-sm:flex-col gap-2">
               <span>{followerAlertContent}</span>
               <Link to={followerNavigateToLink} className="no-underline">
                 <Button
