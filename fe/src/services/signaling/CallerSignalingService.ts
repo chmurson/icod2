@@ -119,10 +119,23 @@ export class CallerSignalingService
     };
 
     this.dataChannel.onmessage = (event) => {
-      event.data === calleeIntroduction;
+      if (event.data !== calleeIntroduction) {
+        return;
+      }
       if (this.peerConnection && !this.peerConnected && this.dataChannel) {
         this.peerConnected = true;
         this.onPeerConnected?.(this.peerConnection, this.dataChannel);
+      } else {
+        console.warn(
+          "Received ",
+          calleeIntroduction,
+          "but connection not accepted",
+          {
+            peerConnection: this.peerConnection,
+            peerConnected: this.peerConnected,
+            dataChannel: this.dataChannel,
+          },
+        );
       }
     };
 

@@ -108,16 +108,29 @@ export class CalleeSignalingService implements SignalingService {
         peerConnection.onconnectionstatechange = () => {
           if (peerConnection.connectionState === "disconnected") {
             this.onPeerDisconnected?.(peerConnection);
+            this.peerConnections.delete(peerConnectionId);
+            peerConnection.close();
+            dataChannel.close();
           }
-          this.peerConnections.delete(peerConnectionId);
-          peerConnection.close();
-          dataChannel.close();
         };
       };
 
       dataChannel.onmessage = (event) => {
-        if (event.data === callerIntroduction) {
+        if (event.data !== callerIntroduction) {
+          return;
+        }
+        if (peerConnection && dataChannel) {
           this.onPeerConnected?.(peerConnection, dataChannel);
+        } else {
+          console.warn(
+            "Received ",
+            calleeIntroduction,
+            "but connection not accepted",
+            {
+              peerConnection: peerConnection,
+              dataChannel: dataChannel,
+            },
+          );
         }
       };
 
@@ -161,7 +174,10 @@ export class CalleeSignalingService implements SignalingService {
   }
 
   private handleAcceptsOffersResponse(data: AcceptsOffersResponse) {
-    console.log("priting sessionToken for now", data.sessionToken);
+    console.log(
+      "priting sessionToken from Signaling Server",
+      data.sessionToken,
+    );
     this.onConnected?.();
   }
 
