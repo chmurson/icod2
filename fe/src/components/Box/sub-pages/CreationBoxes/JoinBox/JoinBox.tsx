@@ -82,26 +82,24 @@ const JoinBoxContent = () => {
           </Alert>
         </div>
       )}
-      {!leader?.id && <BoxJoinContentForOKSkeleton />}
+      {!leader?.id && <BoxJoinContentForOKSkeleton you={you} />}
       {!!leader?.id && (
-        <>
-          <BoxJoinContentForOK
-            leader={leader}
-            otherKeyholders={otherKeyholders}
-            threshold={threshold}
-            title={title}
-            you={you}
-            content={content}
-          />
-          <NavigateAwayAlert
-            open={blocker.state === "blocked"}
-            textTitle="Are you sure you want to leave?"
-            textDescription="You are currently connected as a follower in the box locking session, which is still ongoing. If you leave now, you will be disconnected and may lose your opportunity to participate in the process."
-            onGoBack={() => blocker.proceed?.()}
-            onClose={() => blocker.reset?.()}
-          />
-        </>
+        <BoxJoinContentForOK
+          leader={leader}
+          otherKeyholders={otherKeyholders}
+          threshold={threshold}
+          title={title}
+          you={you}
+          content={content}
+        />
       )}
+      <NavigateAwayAlert
+        open={blocker.state === "blocked"}
+        textTitle="Are you sure you want to leave?"
+        textDescription="You are currently connected as a follower in the box locking session, which is still ongoing. If you leave now, you will be disconnected and may lose your opportunity to participate in the process."
+        onGoBack={() => blocker.proceed?.()}
+        onClose={() => blocker.reset?.()}
+      />
       <ContentCard.OutsideSlot asChild>
         <LeaveLobbyButton>Leave lobby</LeaveLobbyButton>
       </ContentCard.OutsideSlot>

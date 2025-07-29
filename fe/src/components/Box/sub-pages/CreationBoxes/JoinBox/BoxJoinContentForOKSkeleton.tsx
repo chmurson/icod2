@@ -1,11 +1,12 @@
 import { Skeleton } from "@radix-ui/themes";
+import { ParticipantItem } from "@/components/Box/components/ParticipantItem";
 import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 
 const ParticipantItemSkeleton = () => (
   <div className="flex items-center gap-3">
     <Skeleton loading>
-      <div className="w-8 h-8 rounded-full bg-gray-200" />
+      <div className="w-12 h-12 rounded-full bg-gray-200" />
     </Skeleton>
     <div className="flex flex-col gap-1">
       <Skeleton loading>
@@ -20,7 +21,14 @@ const ParticipantItemSkeleton = () => (
   </div>
 );
 
-export const BoxJoinContentForOKSkeleton = () => {
+export const BoxJoinContentForOKSkeleton = ({
+  you,
+}: {
+  you: {
+    userAgent: string;
+    name: string;
+  };
+}) => {
   return (
     <>
       <div className="flex flex-col gap-4">
@@ -40,7 +48,7 @@ export const BoxJoinContentForOKSkeleton = () => {
           <ParticipantItemSkeleton />
         </FieldArea>
         <FieldArea label="You:">
-          <ParticipantItemSkeleton />
+          <ParticipantItem name={you.name} userAgent={you.userAgent} />
         </FieldArea>
         <FieldArea label="Other keyholders: ">
           <div className="flex flex-col gap-1.5">
