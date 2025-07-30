@@ -21,6 +21,7 @@ export const lockedBoxStoreStateCommonPart = {
     | "drop-box"
     | "connecting"
     | "connected"
+    | "disconnected"
     | "ready-to-unlock",
   you: {
     id: "",

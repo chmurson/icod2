@@ -11,6 +11,8 @@ type UnlockingPageState = ReturnType<
 
 const lobbyStates = [
   "connecting",
+  "connected",
+  "disconnected",
   "ready-to-unlock",
 ] satisfies UnlockingPageState[] as string[];
 

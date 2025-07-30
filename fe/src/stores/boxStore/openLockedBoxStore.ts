@@ -45,6 +45,8 @@ export type OpenLockedBoxState = {
     addReceivedKey: (message: { fromKeyHolderId: string; key: string }) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     hasEnoughKeysToUnlock: () => boolean;
+    markAsConnected: () => void;
+    markAsDisconnected: () => void;
   } & LockedBoxStoreCommonPart["actions"];
 } & OpenLockedBoxStateData;
 
@@ -171,6 +173,18 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
       reset: () =>
         set({
           ...openLockedBoxState,
+        }),
+      markAsConnected: () =>
+        set({
+          state: "connected",
+          connected: true,
+          connecting: false,
+        }),
+      markAsDisconnected: () =>
+        set({
+          state: "disconnected",
+          connected: false,
+          connecting: false,
         }),
       setUnlockingStartDate: (unlockingStartDate: Date | null) =>
         set({ unlockingStartDate }),

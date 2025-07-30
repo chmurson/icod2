@@ -1,7 +1,8 @@
 import { useMemo } from "react";
+import type { LockedBoxStoreCommonPart } from "@/stores/boxStore/common-types";
 
 export function getTopLobbyMetaStatus(params: {
-  state: string;
+  state: LockedBoxStoreCommonPart["state"];
   hasKeyHimself: boolean;
   keyThreshold: number;
   currentKeyHolderId: string;
@@ -38,6 +39,10 @@ export function getTopLobbyMetaStatus(params: {
     hasKeyHimself,
     keyThreshold,
   });
+
+  if (state === "connecting") {
+    return "connecting";
+  }
 
   if (state !== "ready-to-unlock") {
     return "not-ready-to-unlock";
