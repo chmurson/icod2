@@ -1,5 +1,6 @@
 import { TextArea, TextField } from "@radix-ui/themes";
 import type React from "react";
+import { useEffect } from "react";
 import { SharePreviewButton } from "@/components/Box/components/SharePreviewButton";
 import { ContentCard } from "@/components/layout";
 import { useDownloadBoxStore } from "@/stores";
@@ -14,13 +15,17 @@ import { Text } from "@/ui/Typography";
 import { FieldArea } from "../../../components/FieldArea";
 import { InputNumber } from "../../../components/InputNumber";
 import { ParticipantItem } from "../../../components/ParticipantItem";
+import { useCreateBoxConnectionContext } from "../CreateBoxConnectionProvider/CreateBoxConnectionProvider";
 import { LeaveLobbyButton } from "../commons/components";
+import { router } from "./dataChannelRouter";
 import { useDataChannelSendMessages } from "./dataChannelSendMessage";
-import { useBoxCreationValidation, usePartOfCreateBoxStore } from "./hooks";
-import { useCreateLockedBox } from "./hooks/useCreateLockedBox";
-import { useKeepKeyHoldersUpdated } from "./hooks/useKeepKeyHoldersUpdated";
-import { useShareableURL } from "./hooks/useShareableURL";
-import { useCreateBoxConnection } from "./useCreateBoxConnection";
+import {
+  useBoxCreationValidation,
+  useCreateLockedBox,
+  useKeepKeyHoldersUpdated,
+  usePartOfCreateBoxStore,
+  useShareableURL,
+} from "./hooks";
 
 export const CreateBox = () => {
   return (
@@ -50,15 +55,23 @@ export const CreateBox = () => {
 };
 
 export const CreateBoxContent: React.FC = () => {
+  const context = useCreateBoxConnectionContext();
+
+  useEffect(() => {
+    context.addRouter("create-box-router", router);
+
+    return () => {
+      context.removeRouter("create-box-router");
+    };
+  }, [context.addRouter, context.removeRouter]);
+
   const { state, actions } = usePartOfCreateBoxStore();
   const setDownloadStoreFromCreateBox = useDownloadBoxStore(
     (state) => state.fromCreateBox,
   );
 
-  const { dataChannelMngRef } = useCreateBoxConnection();
-
   const { sendLockedBoxes } = useDataChannelSendMessages({
-    dataChannelManagerRef: dataChannelMngRef,
+    dataChannelManagerRef: context.dataChannelMngRef,
   });
 
   const { createLockedBox } = useCreateLockedBox();
@@ -67,13 +80,12 @@ export const CreateBoxContent: React.FC = () => {
     onValid: async (payload) => {
       const { encryptedMessage, keys } = await createLockedBox(payload);
       const [leaderKey, ...restOfKeys] = keys;
-      actions.markAsLocked();
       sendLockedBoxes({ encryptedMessage, keys: restOfKeys });
       setDownloadStoreFromCreateBox({ encryptedMessage, key: leaderKey });
     },
   });
 
-  useKeepKeyHoldersUpdated(dataChannelMngRef);
+  useKeepKeyHoldersUpdated(context.dataChannelMngRef);
 
   const noParticipantConnected = state.keyHolders.length === 0;
 
@@ -96,6 +108,7 @@ export const CreateBoxContent: React.FC = () => {
             value={state.title}
             onChange={(e) => actions.setBoxInfo({ title: e.target.value })}
             className="max-w-md w-full"
+            disabled={state.status === "creating"}
           />
           {getError("title") && (
             <Text variant="primaryError">{getError("title")}</Text>
@@ -108,6 +121,7 @@ export const CreateBoxContent: React.FC = () => {
             onChange={(e) => actions.setBoxInfo({ content: e.target.value })}
             rows={10}
             className="w-full"
+            disabled={state.status === "creating"}
           />
           {getError("content") && (
             <Text variant="primaryError">{getError("content")}</Text>
@@ -124,6 +138,7 @@ export const CreateBoxContent: React.FC = () => {
                 threshold: Number.parseInt(e.currentTarget.value),
               })
             }
+            disabled={state.status === "creating"}
             className="min-w-10"
           />
           {getError("threshold") && (
@@ -155,6 +170,7 @@ export const CreateBoxContent: React.FC = () => {
                     onToggle={(checked) =>
                       actions.setContentPreviewSharedWith(p.id, checked)
                     }
+                    disabled={state.status === "creating"}
                   />
                 }
               />
@@ -178,6 +194,7 @@ export const CreateBoxContent: React.FC = () => {
             })
           }
           disabled={noParticipantConnected}
+          loading={state.status === "creating"}
         >
           Create Box
         </Button>

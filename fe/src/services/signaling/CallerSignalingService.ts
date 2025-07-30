@@ -145,7 +145,6 @@ export class CallerSignalingService
     };
 
     this.dataChannel.onmessage = (event) => {
-      console.log("message recevied");
       if (event.data !== calleeIntroduction) {
         return;
       }

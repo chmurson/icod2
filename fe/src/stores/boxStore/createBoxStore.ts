@@ -7,6 +7,7 @@ const createBoxDefaultState = {
     | "set-name"
     | "connecting"
     | "connected"
+    | "creating"
     | "created",
   title: "",
   connecting: false,
@@ -41,6 +42,7 @@ type CreateBoxState = {
       idToken?: string;
     }) => void;
     markAsLocked: () => void;
+    markAsLocking: () => void;
     setBoxInfo: (
       args: Partial<
         Pick<CreateBoxStateData, "title" | "content" | "threshold">
@@ -92,11 +94,14 @@ export const useCreateBoxStore = create<CreateBoxState>((set, get) => ({
         ),
       }));
     },
-    markAsLocked: () => {
+    markAsLocked: () =>
       set({
         state: "created",
-      });
-    },
+      }),
+    markAsLocking: () =>
+      set({
+        state: "creating",
+      }),
     reset: () =>
       set({
         ...createBoxDefaultState,
@@ -106,6 +111,7 @@ export const useCreateBoxStore = create<CreateBoxState>((set, get) => ({
         Pick<CreateBoxStateData, "title" | "content" | "threshold">
       >,
     ) => set(payload),
+
     setContentPreviewSharedWith: (keyHolderId: string, value: boolean) =>
       set({
         contentPreviewSharedWith: {

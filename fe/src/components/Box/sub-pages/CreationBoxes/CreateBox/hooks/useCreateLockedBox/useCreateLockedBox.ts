@@ -1,11 +1,11 @@
-import type { CreateBoxSchema } from "./useValidateBoxForm";
+import type { CreateBoxSchema } from "./../useValidateBoxForm";
 
 async function lazySecureMessage(
   content: string,
   totalKeysNumber: number,
   keysThreshold: number,
 ) {
-  const module = await import("./encryptMessage");
+  const module = await import("./secureMessage");
   return module.secureMessage(content, totalKeysNumber, keysThreshold);
 }
 
