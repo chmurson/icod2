@@ -3,9 +3,9 @@ export function getPeerConnectionConfiguration() {
     iceServers: [
       { urls: "stun:stun.l.google.com:19302" },
       {
-        urls: "turn:openrelay.metered.ca:80",
-        username: "openrelayproject",
-        credential: "openrelayproject",
+        urls: ["turn:relay1.expressturn.com:3480"],
+        username: "000000002069235043",
+        credential: "JfpJZDnXwAcMM/1MWleRFh32PNo=",
       },
     ],
   };
