@@ -8,6 +8,6 @@ export function getPeerConnectionConfiguration() {
         credential: "JfpJZDnXwAcMM/1MWleRFh32PNo=",
       },
     ],
-    iceTransportPolicy: "all",
+    iceTransportPolicy: "relay",
   } satisfies RTCConfiguration;
 }
