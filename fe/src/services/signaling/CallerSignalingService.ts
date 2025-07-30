@@ -153,8 +153,9 @@ export class CallerSignalingService
         this.peerConnected = true;
         this.stopPeerConnectingTimeout();
         this.onPeerConnected?.(this.peerConnection, this.dataChannel);
-        const stats = this.peerConnection?.getStats();
-        console.log(stats);
+        this.peerConnection?.getStats().then((stats) => {
+          console.log(stats);
+        });
       } else {
         console.warn(
           "Received ",
