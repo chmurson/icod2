@@ -11,7 +11,7 @@ export const PageTitle: FC<{ boxTitle: string }> = ({
       <Text variant="pageTitle" className="mt-4">
         {boxTitle}
       </Text>
-      <Text variant="label">
+      <Text variant="label" className="dark:text-gray-400">
         Prepare to unlock what's been securely shared with you
       </Text>
     </div>
