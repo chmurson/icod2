@@ -28,6 +28,8 @@ export type CallerConnectionFailureReason =
   | "timeout-on-getting-answer-from-callee"
   | "unknown-error";
 
+const TIMETOUT_IN_MS = 120 * 1000;
+
 export class CallerSignalingService
   implements
     SignalingService,
@@ -123,7 +125,7 @@ export class CallerSignalingService
   private startPeerConnectingTimeout() {
     this._peerConnectingTimeout = window.setTimeout(() => {
       this.onFailedToConnect?.("timeout-on-getting-answer-from-callee");
-    }, 60 * 1000 /* 60 secs */);
+    }, TIMETOUT_IN_MS);
   }
 
   private stopPeerConnectingTimeout() {
@@ -243,7 +245,7 @@ export class CallerSignalingService
 
     try {
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("Timeout")), 1000 * 60 /* 60 secs */);
+        setTimeout(() => reject(new Error("Timeout")), TIMETOUT_IN_MS);
       });
 
       const { offer, iceCandidates } = await Promise.race([

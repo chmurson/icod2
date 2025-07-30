@@ -26,6 +26,10 @@ export function useOpenLockedBoxConnection() {
     router,
     onPeerConnected: (peerId: string) => {
       sendWelcome(peerId);
+      useOpenLockedBoxStore.getState().actions.markAsConnected();
+    },
+    onFailedToConnect: () => {
+      useOpenLockedBoxStore.getState().actions.markAsDisconnected();
     },
     onPeerDisconnected: (peerId: string) => {
       const keyHolderId = usePeerToHolderMapRef

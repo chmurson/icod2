@@ -4,6 +4,7 @@ import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box
 import { ContentCard } from "@/components/layout/MainLayout";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
+import { Alert } from "@/ui/Alert";
 import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
@@ -18,6 +19,9 @@ import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: React.FC = () => {
   const state = useJoinLockedBoxStore((state) => state.state);
+  const connectionToLeaderFailReason = useJoinLockedBoxStore(
+    (state) => state.connectionToLeaderFailReason,
+  );
   const { dataChannelManagerRef } = useJoinLockedBoxConnection();
 
   const { sendKey } = useDataChannelSendMessages({
@@ -56,10 +60,30 @@ export const JoinLockedBox: React.FC = () => {
 
   const possibleKeyHolders = [you, ...onlineKeyHolders, ...offLineKeyHolders];
 
+  const getConnectionErrorMessage = (
+    reason: typeof connectionToLeaderFailReason,
+  ) => {
+    switch (reason) {
+      case "timeout":
+        return "Connection timed out. Please try again.";
+      case "not-authorized":
+        return "You are not authorized to join this session.";
+      case "peer-connection-failed":
+        return "Connection between you and peer has failed, sorry.";
+      default:
+        return "Cannot connect to a leader";
+    }
+  };
   return (
     <div className="flex flex-col gap-8">
       <PageTitle boxTitle={boxTitle} />
-
+      {connectionToLeaderFailReason && (
+        <div className="flex flex-col items-start gap-4">
+          <Alert variant="warning" className="self-stretch">
+            {getConnectionErrorMessage(connectionToLeaderFailReason)}
+          </Alert>
+        </div>
+      )}
       <TopLobbySection useStoreHook={useJoinLockedBoxStore} />
       <LoobbyKeyHolders
         status={state}

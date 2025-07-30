@@ -28,6 +28,7 @@ export const CounterWithInfo = ({
   onFinish,
   timeClassName,
   textReplacement,
+  hideText,
 }: {
   unlockingStartDate: Date | null;
   keyThreshold: number;
@@ -35,6 +36,7 @@ export const CounterWithInfo = ({
   onFinish: () => void;
   timeClassName?: string;
   textReplacement?: ReactNode;
+  hideText?: boolean;
 }) => {
   const [remainingTime, setRemainingTime] = useState(getCountDownDuration());
 
@@ -81,7 +83,7 @@ export const CounterWithInfo = ({
       </Text>
       {textReplacement}
       {!textReplacement && (
-        <Text variant="label">
+        <Text variant="label" className={hideText ? "invisible" : ""}>
           {remainingTime <= 10000 ? (
             "Final call to exchange keys before unlocking"
           ) : unlockingStartDate ? (
