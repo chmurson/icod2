@@ -1,5 +1,5 @@
 import { DownloadIcon } from "@radix-ui/react-icons";
-import { useCallback, useContext, useEffect, useState } from "react"; // Added useEffect
+import { useCallback, useEffect, useState } from "react"; // Added useEffect
 import { ParticipantItem } from "@/components/Box/components/ParticipantItem";
 import { ContentCard } from "@/components/layout";
 import {
