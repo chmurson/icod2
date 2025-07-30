@@ -1,3 +1,5 @@
+import { getPeerConnectionConfiguration } from "./getPeerConnectionConfiguration";
+
 export async function createOfferAndAllIceCandidate(
   peerConnection: RTCPeerConnection,
 ): Promise<{
@@ -7,9 +9,7 @@ export async function createOfferAndAllIceCandidate(
   const iceCandidates: RTCIceCandidate[] = [];
   let allIceCandidatesSet = false;
 
-  peerConnection.setConfiguration({
-    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-  });
+  peerConnection.setConfiguration(getPeerConnectionConfiguration());
 
   return new Promise((resolve) => {
     let offer: RTCSessionDescriptionInit | undefined;

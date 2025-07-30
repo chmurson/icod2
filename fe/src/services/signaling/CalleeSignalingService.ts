@@ -132,6 +132,8 @@ export class CalleeSignalingService implements SignalingService {
 
         if (peerConnection && dataChannel) {
           this.onPeerConnected?.(peerConnection, dataChannel);
+          const stats = peerConnection?.getStats();
+          console.log(stats);
         } else {
           console.warn(
             "Received ",
