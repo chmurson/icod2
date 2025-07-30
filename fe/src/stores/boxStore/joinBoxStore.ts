@@ -32,6 +32,7 @@ const joinBoxDefaultState = {
   generatedKey: "",
   connectionToLeaderFailReason: undefined as
     | "not-authorized"
+    | "peer-connection-failed"
     | "timeout"
     | "other"
     | undefined,

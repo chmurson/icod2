@@ -6,16 +6,21 @@ import { router } from "./dataChannelRouter";
 
 export const useCallerDataChannelMng = ({
   onPeerConnected,
+  onFailedToConnect,
   ref,
 }: {
   onPeerConnected: (localID: string) => void;
   onFailedToConnect: (reason: CallerConnectionFailureReason) => void;
-  ref: RefObject<DataChannelManager<CallerSignalingService> | undefined>;
+  ref: RefObject<
+    | DataChannelManager<CallerSignalingService, CallerConnectionFailureReason>
+    | undefined
+  >;
 }) => {
   useDataChannelMng({
     SignalingService: CallerSignalingService,
     ref,
     onPeerConnected,
+    onFailedToConnect,
     router: router,
   });
 };

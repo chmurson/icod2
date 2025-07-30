@@ -1,3 +1,7 @@
+import type {
+  CallerConnectionFailureReason,
+  CallerSignalingService,
+} from "@/services/signaling";
 import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
 import { useDownloadBoxStore, useJoinBoxStore } from "@/stores";
 import {
@@ -8,7 +12,10 @@ import {
   isLeaderWelcomesKeyholder,
 } from "../commons";
 
-export const router = new DataChannelMessageRouter();
+export const router = new DataChannelMessageRouter<
+  CallerSignalingService,
+  CallerConnectionFailureReason
+>();
 
 router.addHandler(isLeaderWelcomesKeyholder, (_, message) => {
   const storeActions = useJoinBoxStore.getState().actions;

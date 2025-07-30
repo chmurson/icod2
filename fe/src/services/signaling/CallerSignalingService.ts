@@ -23,6 +23,7 @@ import {
 export type CallerConnectionFailureReason =
   | "no-callee-available"
   | "fail-to-initialize-rtc-connection"
+  | "peer-connection-state-failed"
   | "timeout-on-creating-offer-and-ice-candidates"
   | "timeout-on-getting-answer-from-callee"
   | "unknown-error";
@@ -168,6 +169,11 @@ export class CallerSignalingService
 
     this.peerConnection.onconnectionstatechange = () => {
       console.log("connetion state", this.peerConnection?.connectionState);
+
+      if (this.peerConnection?.connectionState === "failed") {
+        this.stopPeerConnectingTimeout();
+        this.onFailedToConnect?.("peer-connection-state-failed");
+      }
 
       if (this.peerConnection?.connectionState === "disconnected") {
         if (this.peerConnected && this.peerConnection) {
