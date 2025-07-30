@@ -2,6 +2,7 @@ import { AlertDialog } from "@radix-ui/themes";
 import { type ReactNode, useEffect } from "react";
 import { useBlocker } from "react-router-dom";
 import { Button } from "@/ui/Button";
+import { useTailwindBreakpoints } from "@/utils/useTailwindBreakpoints";
 
 export const NavigateAwayAlert = ({
   triggerSlot,
@@ -22,10 +23,11 @@ export const NavigateAwayAlert = ({
   textCancelButton?: string;
   textProceedButton?: string;
 }) => {
+  const { isMaxSm } = useTailwindBreakpoints();
   return (
     <AlertDialog.Root open={open}>
       {triggerSlot && <AlertDialog.Trigger>{triggerSlot}</AlertDialog.Trigger>}
-      <AlertDialog.Content maxWidth="450px">
+      <AlertDialog.Content maxWidth={isMaxSm ? "390px" : "500px"}>
         <AlertDialog.Title as="h2">{textTitle}</AlertDialog.Title>
         <AlertDialog.Description size="2">
           {textDescription}
