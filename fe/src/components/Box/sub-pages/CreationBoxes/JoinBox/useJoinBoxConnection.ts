@@ -25,6 +25,11 @@ export function useJoinBoxConnection() {
         useJoinBoxStore.getState().actions.cannotConnectLeader("timeout");
         return;
       }
+      if (reason === "timeout-on-getting-answer-from-callee") {
+        useJoinBoxStore.getState().actions.cannotConnectLeader("timeout");
+        return;
+      }
+
       useJoinBoxStore.getState().actions.cannotConnectLeader("other");
     },
     [],

@@ -24,6 +24,7 @@ export type CallerConnectionFailureReason =
   | "no-callee-available"
   | "fail-to-initialize-rtc-connection"
   | "timeout-on-creating-offer-and-ice-candidates"
+  | "timeout-on-getting-answer-from-callee"
   | "unknown-error";
 
 export class CallerSignalingService
@@ -43,6 +44,7 @@ export class CallerSignalingService
   private _onPeerDisconnected?: (peerConnection: RTCPeerConnection) => void;
   private _failedToConnect?: (reason: CallerConnectionFailureReason) => void;
   private _onSignalingServerConnected?: () => void;
+  private _peerConnectingTimeout?: number;
 
   constructor(websocketJSONHandler: WebsocketJSONHandler) {
     this.websocketJSONHandler = websocketJSONHandler;
@@ -56,6 +58,12 @@ export class CallerSignalingService
 
   getToken(): string {
     return "";
+  }
+
+  close(): void {
+    this.dataChannel?.close();
+    this.peerConnection?.close();
+    this.websocketJSONHandler.close();
   }
 
   get onSignalingServerConnected(): (() => void) | undefined {
@@ -111,10 +119,14 @@ export class CallerSignalingService
     this._failedToConnect = callback;
   }
 
-  close(): void {
-    this.dataChannel?.close();
-    this.peerConnection?.close();
-    this.websocketJSONHandler.close();
+  private startPeerConnectingTimeout() {
+    this._peerConnectingTimeout = window.setTimeout(() => {
+      this.onFailedToConnect?.("timeout-on-getting-answer-from-callee");
+    }, 60 * 1000 /* 60 secs */);
+  }
+
+  private stopPeerConnectingTimeout() {
+    window.clearTimeout(this._peerConnectingTimeout);
   }
 
   private initRTCConnection() {
@@ -127,15 +139,18 @@ export class CallerSignalingService
     this.dataChannel = this.peerConnection.createDataChannel("chat");
 
     this.dataChannel.onopen = () => {
+      console.log("data channel open");
       this.dataChannel?.send(callerIntroduction);
     };
 
     this.dataChannel.onmessage = (event) => {
+      console.log("message recevied");
       if (event.data !== calleeIntroduction) {
         return;
       }
       if (this.peerConnection && !this.peerConnected && this.dataChannel) {
         this.peerConnected = true;
+        this.stopPeerConnectingTimeout();
         this.onPeerConnected?.(this.peerConnection, this.dataChannel);
       } else {
         console.warn(
@@ -152,6 +167,8 @@ export class CallerSignalingService
     };
 
     this.peerConnection.onconnectionstatechange = () => {
+      console.log("connetion state", this.peerConnection?.connectionState);
+
       if (this.peerConnection?.connectionState === "disconnected") {
         if (this.peerConnected && this.peerConnection) {
           this.onPeerDisconnected?.(this.peerConnection);
@@ -227,6 +244,8 @@ export class CallerSignalingService
       ]);
 
       this.sendOfferRequest({ offer, iceCandidates });
+
+      this.startPeerConnectingTimeout();
     } catch (error) {
       if (error instanceof Error && error.message === "Timeout") {
         this.onFailedToConnect?.(
