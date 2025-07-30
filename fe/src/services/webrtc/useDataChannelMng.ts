@@ -11,12 +11,14 @@ export const useDataChannelMng = <
 >({
   onPeerConnected,
   onPeerDisconnected,
+  onFailedToConnect,
   ref,
   SignalingService,
   router,
 }: {
   onPeerConnected?: (peerId: string) => void;
   onPeerDisconnected?: (peerId: string) => void;
+  onFailedToConnect?: (reason: TConnectionFailReason) => void;
   ref?: RefObject<
     DataChannelManager<TSignalingService, TConnectionFailReason> | undefined
   >;
@@ -38,14 +40,11 @@ export const useDataChannelMng = <
 
   const onPeerConnectedRef = useRef(onPeerConnected);
   const onPeerDisconnectedRef = useRef(onPeerDisconnected);
+  const onFailedToConnectRef = useRef(onFailedToConnect);
 
-  useEffect(() => {
-    onPeerConnectedRef.current = onPeerConnected;
-  }, [onPeerConnected]);
-
-  useEffect(() => {
-    onPeerDisconnectedRef.current = onPeerDisconnected;
-  }, [onPeerDisconnected]);
+  onPeerConnectedRef.current = onPeerConnected;
+  onPeerDisconnectedRef.current = onPeerDisconnected;
+  onFailedToConnectRef.current = onFailedToConnect;
 
   useEffect(() => {
     const webSocketConnection = createWebsocketConnection();
@@ -61,9 +60,13 @@ export const useDataChannelMng = <
           console.log("Peer disconnected:", localId);
         },
         onFailedToConnect: (reason) => {
+          onFailedToConnectRef.current?.(reason);
           console.error("Failed to connect:", reason);
         },
-        onConnected: () => {
+        onPeerConnecting: () => {
+          console.log("New peer connecting...");
+        },
+        onSignalingServerConnected: () => {
           console.log(
             `Connected to signaling service at ${webSocketConnection.getUrl()}`,
           );

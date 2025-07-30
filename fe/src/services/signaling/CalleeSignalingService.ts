@@ -26,8 +26,9 @@ export class CalleeSignalingService implements SignalingService {
     peerConnection: RTCPeerConnection,
     dataChannel: RTCDataChannel,
   ) => void;
+  private _onPeerConnecting?: () => void;
   private _onPeerDisconnected?: (peerConnection: RTCPeerConnection) => void;
-  private _onConnected?: () => void;
+  private _onSignalingServerConnected?: () => void;
 
   constructor(websocketJSONHandler: WebsocketJSONHandler) {
     this.websocketJSONHandler = websocketJSONHandler;
@@ -41,16 +42,24 @@ export class CalleeSignalingService implements SignalingService {
     this.initRTCConnection();
   }
 
-  get onConnected(): (() => void) | undefined {
-    return this._onConnected;
+  get onSignalingServerConnected(): (() => void) | undefined {
+    return this._onSignalingServerConnected;
   }
 
-  set onConnected(callback: () => void) {
-    this._onConnected = callback;
+  set onSignalingServerConnected(callback: () => void) {
+    this._onSignalingServerConnected = callback;
   }
 
   getToken(): string {
     return this.token;
+  }
+
+  set onPeerConnecting(clb: () => void) {
+    this._onPeerConnecting = clb;
+  }
+
+  get onPeerConnecting(): (() => void) | undefined {
+    return this._onPeerConnecting;
   }
 
   get onPeerConnected():
@@ -83,6 +92,7 @@ export class CalleeSignalingService implements SignalingService {
       peerConnection.dataChannel?.close();
       peerConnection.peer.close();
     });
+
     this.peerConnections.clear();
     this.websocketJSONHandler.close();
   }
@@ -119,6 +129,7 @@ export class CalleeSignalingService implements SignalingService {
         if (event.data !== callerIntroduction) {
           return;
         }
+
         if (peerConnection && dataChannel) {
           this.onPeerConnected?.(peerConnection, dataChannel);
         } else {
@@ -178,7 +189,7 @@ export class CalleeSignalingService implements SignalingService {
       "priting sessionToken from Signaling Server",
       data.sessionToken,
     );
-    this.onConnected?.();
+    this.onSignalingServerConnected?.();
   }
 
   private async handleOfferRequest(data: OfferRequest) {

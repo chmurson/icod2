@@ -1,4 +1,5 @@
 import { useCallback, useRef } from "react";
+import type { CallerConnectionFailureReason } from "@/services/signaling";
 import type { DataChannelManager } from "@/services/webrtc";
 import { useJoinBoxStore } from "@/stores";
 import type { KeyHolderWelcomesLeader } from "../commons";
@@ -18,8 +19,20 @@ export function useJoinBoxConnection() {
     } satisfies KeyHolderWelcomesLeader);
   }, []);
 
+  const onFailedToConnect = useCallback(
+    (reason: CallerConnectionFailureReason) => {
+      if (reason === "timeout-on-creating-offer-and-ice-candidates") {
+        useJoinBoxStore.getState().actions.cannotConnectLeader("timeout");
+        return;
+      }
+      useJoinBoxStore.getState().actions.cannotConnectLeader("other");
+    },
+    [],
+  );
+
   useCallerDataChannelMng({
     onPeerConnected,
     ref: dataChannelManagerRef,
+    onFailedToConnect,
   });
 }

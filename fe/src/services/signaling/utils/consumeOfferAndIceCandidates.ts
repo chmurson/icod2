@@ -11,13 +11,20 @@ export function consumeOfferAndIceCandidates(
   const iceCandidates: RTCIceCandidate[] = [];
   let allIceCandidatesSet = false;
 
+  peerConnection.setConfiguration({
+    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  });
+
   return new Promise((resolve) => {
     let answer: RTCSessionDescriptionInit | undefined;
 
     peerConnection.onicecandidate = (event) => {
+      console.log("ice candidate", event.candidate);
+
       if (event.candidate !== null) {
         iceCandidates.push(event.candidate);
       }
+
       if (event.candidate === null) {
         if (answer) {
           resolve({ answer, iceCandidates });

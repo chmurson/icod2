@@ -15,7 +15,6 @@ import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { LeaveLobbyButton } from "../commons/components";
 import { BoxJoinContentForOKSkeleton } from "./BoxJoinContentForOKSkeleton";
-import { useConnectionTimeout } from "./useConnectionTimeout";
 import { useJoinBoxConnection } from "./useJoinBoxConnection";
 
 export const JoinBox: React.FC = () => {
@@ -56,7 +55,6 @@ const JoinBoxContent = () => {
     connectionToLeaderFailReason,
   } = useStoreSlice();
   useJoinBoxConnection();
-  useConnectionTimeout();
 
   const blocker = useNavigateAwayBlocker({
     shouldNavigationBeBlocked: () => !connectionToLeaderFailReason,

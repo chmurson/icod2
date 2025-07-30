@@ -20,15 +20,16 @@ import {
   createOfferAndAllIceCandidate,
 } from "./utils/callerPeerConnectionUtils";
 
-export type ConnectionFailureReason =
+export type CallerConnectionFailureReason =
   | "no-callee-available"
   | "fail-to-initialize-rtc-connection"
+  | "timeout-on-creating-offer-and-ice-candidates"
   | "unknown-error";
 
 export class CallerSignalingService
   implements
     SignalingService,
-    SignalingServiceConnectionInitiator<ConnectionFailureReason>
+    SignalingServiceConnectionInitiator<CallerConnectionFailureReason>
 {
   private websocketJSONHandler: WebsocketJSONHandler;
   private peerConnection?: RTCPeerConnection;
@@ -38,9 +39,10 @@ export class CallerSignalingService
     peerConnection: RTCPeerConnection,
     dataChannel: RTCDataChannel,
   ) => void;
+  private _onPeerConnecting?: () => void;
   private _onPeerDisconnected?: (peerConnection: RTCPeerConnection) => void;
-  private _failedToConnect?: (reason: ConnectionFailureReason) => void;
-  private _onConnected?: () => void;
+  private _failedToConnect?: (reason: CallerConnectionFailureReason) => void;
+  private _onSignalingServerConnected?: () => void;
 
   constructor(websocketJSONHandler: WebsocketJSONHandler) {
     this.websocketJSONHandler = websocketJSONHandler;
@@ -56,12 +58,20 @@ export class CallerSignalingService
     return "";
   }
 
-  get onConnected(): (() => void) | undefined {
-    return this._onConnected;
+  get onSignalingServerConnected(): (() => void) | undefined {
+    return this._onSignalingServerConnected;
   }
 
-  set onConnected(callback: () => void) {
-    this._onConnected = callback;
+  set onSignalingServerConnected(callback: () => void) {
+    this._onSignalingServerConnected = callback;
+  }
+
+  set onPeerConnecting(clb: () => void) {
+    this._onPeerConnecting = clb;
+  }
+
+  get onPeerConnecting(): (() => void) | undefined {
+    return this._onPeerConnecting;
   }
 
   get onPeerConnected():
@@ -90,12 +100,14 @@ export class CallerSignalingService
   }
 
   get onFailedToConnect():
-    | ((reason: ConnectionFailureReason) => void)
+    | ((reason: CallerConnectionFailureReason) => void)
     | undefined {
     return this._failedToConnect;
   }
 
-  set onFailedToConnect(callback: (reason: ConnectionFailureReason) => void) {
+  set onFailedToConnect(callback: (
+    reason: CallerConnectionFailureReason,
+  ) => void) {
     this._failedToConnect = callback;
   }
 
@@ -192,6 +204,8 @@ export class CallerSignalingService
       return;
     }
 
+    this.onSignalingServerConnected?.();
+
     this.initRTCConnection();
 
     if (!this.peerConnection) {
@@ -200,13 +214,28 @@ export class CallerSignalingService
       return;
     }
 
-    this.onConnected?.();
+    this.onPeerConnecting?.();
 
-    const { offer, iceCandidates } = await createOfferAndAllIceCandidate(
-      this.peerConnection,
-    );
+    try {
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("Timeout")), 1000 * 60 /* 60 secs */);
+      });
 
-    this.sendOfferRequest({ offer, iceCandidates });
+      const { offer, iceCandidates } = await Promise.race([
+        createOfferAndAllIceCandidate(this.peerConnection),
+        timeoutPromise,
+      ]);
+
+      this.sendOfferRequest({ offer, iceCandidates });
+    } catch (error) {
+      if (error instanceof Error && error.message === "Timeout") {
+        this.onFailedToConnect?.(
+          "timeout-on-creating-offer-and-ice-candidates",
+        );
+        return;
+      }
+      throw error;
+    }
   }
 
   private async handleAnswerRequest(data: AnswerRequest) {
@@ -224,8 +253,3 @@ export class CallerSignalingService
     );
   }
 }
-
-// take ws api -> request that accepts offers
-// accept response -> that requests are being accepted
-// accept offer; consume it; create answer and send it back
-// test connection
