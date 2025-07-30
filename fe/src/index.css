@@ -5,7 +5,10 @@
 }
 
 @layer radix {
-  @import "@radix-ui/themes/styles.css";
+  /* Import only essential Radix styles to minimize bundle size */
+  @import "@radix-ui/themes/tokens.css";
+  /* Only import specific component styles we actually use */
+  @import "@radix-ui/themes/components.css";
 }
 
 @layer tailwind {
@@ -44,7 +47,7 @@
 	--alt-accent-9: #1F6F3F
 }
 
-/* Base styles that complement Tailwind */
+/* Base styles that complement Tailwind - optimized for smaller bundle */
 html {
 	@apply antialiased;
 	-webkit-font-smoothing: antialiased;
@@ -53,35 +56,45 @@ html {
 
 body {
 	@apply m-0 flex min-h-screen min-w-[320px] place-items-start;
-	@apply text-[var(--color-text-dark)] bg-[var(--color-background-dark)];
-	@apply dark:text-[var(--color-text-light)] dark:bg-[var(--color-background-light)];
-}
-
-#root {
-  @apply w-full
-}
-
-h1 {
-	@apply text-[3.2em] leading-[1.1];
-}
-
-a {
-	@apply font-medium text-[--color-primary] no-underline;
-}
-
-a:hover {
-	@apply text-[--color-primary-hover];
-	@apply dark:text-[--color-primary-light];
+	color: var(--color-text-dark);
+	background-color: var(--color-background-dark);
 }
 
 @media (prefers-color-scheme: light) {
 	body {
-		@apply text-[var(--color-text-light)] bg-[var(--color-background-light)];
+		color: var(--color-text-light);
+		background-color: var(--color-background-light);
 	}
 }
 
 @media (prefers-color-scheme: dark) {
 	body {
-		@apply text-[var(--color-text-dark)] bg-[var(--color-background-dark)];
+		color: var(--color-text-dark);
+		background-color: var(--color-background-dark);
+	}
+}
+
+#root {
+  @apply w-full;
+}
+
+h1 {
+	font-size: 3.2em;
+	line-height: 1.1;
+}
+
+a {
+	font-weight: 500;
+	color: var(--color-primary);
+	text-decoration: none;
+}
+
+a:hover {
+	color: var(--color-primary-hover);
+}
+
+@media (prefers-color-scheme: dark) {
+	a:hover {
+		color: var(--color-primary-light);
 	}
 }
