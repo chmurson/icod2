@@ -91,7 +91,7 @@ ContentCard.OutsideSlot = ({ children, asChild = false }) => {
 
 const HeaderImage: FC = () => {
   return (
-    <div className="relative w-full h-64 z-0">
+    <div className="relative w-full h-64 z-0 overflow-hidden">
       <div
         className="absolute inset-0 bg-center bg-cover filter blur-xl scale-110"
         style={{ backgroundImage: `url(${headerSmallCropppedUrl})` }}
