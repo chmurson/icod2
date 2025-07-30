@@ -3,8 +3,11 @@ export interface SignalingService {
   getToken(): string;
   close(): void;
 
-  get onConnected(): (() => void) | undefined;
-  set onConnected(callback: () => void);
+  get onSignalingServerConnected(): (() => void) | undefined;
+  set onSignalingServerConnected(callback: () => void);
+
+  get onPeerConnecting(): (() => void) | undefined;
+  set onPeerConnecting(callback: () => void);
 
   get onPeerConnected():
     | ((peerConnection: RTCPeerConnection, dataChannel: RTCDataChannel) => void)

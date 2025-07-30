@@ -6,6 +6,7 @@ import {
   useJoinBoxStore,
 } from "@/stores";
 import { CreateBox } from "./CreateBox";
+import { CreateBoxConnectionProvider } from "./CreateBoxConnectionProvider";
 import {
   clearPersistedStartedLockingInfo,
   isPersistedStartedLocking,
@@ -24,10 +25,16 @@ export const RootLockBox = () => {
       case "joinBoxSetName":
         return <WhatsYourName join />;
       case "create":
-        return <CreateBox />;
+      case "download-create":
+        return (
+          <CreateBoxConnectionProvider>
+            {currentPage === "create" && <CreateBox />}
+            {currentPage === "download-create" && <DownloadLockedBox />}
+          </CreateBoxConnectionProvider>
+        );
       case "join":
         return <JoinBox />;
-      case "download":
+      case "download-join":
         return <DownloadLockedBox />;
       default:
         return null;
@@ -55,11 +62,11 @@ const useCurrentPage = () => {
     return null;
   }
 
-  if (
-    downloadStateType === "fromCreateBox" ||
-    downloadStateType === "fromJoinBox"
-  ) {
-    return "download";
+  if (downloadStateType === "fromJoinBox") {
+    return "download-join";
+  }
+  if (downloadStateType === "fromCreateBox") {
+    return "download-create";
   }
 
   if (createBoxState === "initial" && joinBoxState === "initial") {
@@ -73,7 +80,12 @@ const useCurrentPage = () => {
     return "createBoxSetName";
   }
 
-  if (createBoxState === "connected" || createBoxState === "connecting") {
+  if (
+    createBoxState === "connected" ||
+    createBoxState === "connecting" ||
+    createBoxState === "creating" ||
+    createBoxState === "created"
+  ) {
     return "create";
   }
 

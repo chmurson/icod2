@@ -114,6 +114,21 @@ export function isLeaderSendsBoxCreated(
   );
 }
 
+export type KeyHolderSendsCreatedBoxReceived = {
+  type: "keyholder:created-box-received";
+};
+
+export const isKeyHolderSendsCreatedBoxReceived = (
+  message: unknown,
+): message is KeyHolderSendsCreatedBoxReceived => {
+  return (
+    typeof message === "object" &&
+    message !== null &&
+    "type" in message &&
+    message.type === "keyholder:created-box-received"
+  );
+};
+
 export type LeaderSendsKeyHolderList = {
   type: "leader:keyholder-list";
   allKeyHolders: {

@@ -20,15 +20,18 @@ import {
   createOfferAndAllIceCandidate,
 } from "./utils/callerPeerConnectionUtils";
 
-export type ConnectionFailureReason =
+export type CallerConnectionFailureReason =
   | "no-callee-available"
   | "fail-to-initialize-rtc-connection"
+  | "peer-connection-state-failed"
+  | "timeout-on-creating-offer-and-ice-candidates"
+  | "timeout-on-getting-answer-from-callee"
   | "unknown-error";
 
 export class CallerSignalingService
   implements
     SignalingService,
-    SignalingServiceConnectionInitiator<ConnectionFailureReason>
+    SignalingServiceConnectionInitiator<CallerConnectionFailureReason>
 {
   private websocketJSONHandler: WebsocketJSONHandler;
   private peerConnection?: RTCPeerConnection;
@@ -38,9 +41,11 @@ export class CallerSignalingService
     peerConnection: RTCPeerConnection,
     dataChannel: RTCDataChannel,
   ) => void;
+  private _onPeerConnecting?: () => void;
   private _onPeerDisconnected?: (peerConnection: RTCPeerConnection) => void;
-  private _failedToConnect?: (reason: ConnectionFailureReason) => void;
-  private _onConnected?: () => void;
+  private _failedToConnect?: (reason: CallerConnectionFailureReason) => void;
+  private _onSignalingServerConnected?: () => void;
+  private _peerConnectingTimeout?: number;
 
   constructor(websocketJSONHandler: WebsocketJSONHandler) {
     this.websocketJSONHandler = websocketJSONHandler;
@@ -56,12 +61,26 @@ export class CallerSignalingService
     return "";
   }
 
-  get onConnected(): (() => void) | undefined {
-    return this._onConnected;
+  close(): void {
+    this.dataChannel?.close();
+    this.peerConnection?.close();
+    this.websocketJSONHandler.close();
   }
 
-  set onConnected(callback: () => void) {
-    this._onConnected = callback;
+  get onSignalingServerConnected(): (() => void) | undefined {
+    return this._onSignalingServerConnected;
+  }
+
+  set onSignalingServerConnected(callback: () => void) {
+    this._onSignalingServerConnected = callback;
+  }
+
+  set onPeerConnecting(clb: () => void) {
+    this._onPeerConnecting = clb;
+  }
+
+  get onPeerConnecting(): (() => void) | undefined {
+    return this._onPeerConnecting;
   }
 
   get onPeerConnected():
@@ -90,19 +109,25 @@ export class CallerSignalingService
   }
 
   get onFailedToConnect():
-    | ((reason: ConnectionFailureReason) => void)
+    | ((reason: CallerConnectionFailureReason) => void)
     | undefined {
     return this._failedToConnect;
   }
 
-  set onFailedToConnect(callback: (reason: ConnectionFailureReason) => void) {
+  set onFailedToConnect(callback: (
+    reason: CallerConnectionFailureReason,
+  ) => void) {
     this._failedToConnect = callback;
   }
 
-  close(): void {
-    this.dataChannel?.close();
-    this.peerConnection?.close();
-    this.websocketJSONHandler.close();
+  private startPeerConnectingTimeout() {
+    this._peerConnectingTimeout = window.setTimeout(() => {
+      this.onFailedToConnect?.("timeout-on-getting-answer-from-callee");
+    }, 60 * 1000 /* 60 secs */);
+  }
+
+  private stopPeerConnectingTimeout() {
+    window.clearTimeout(this._peerConnectingTimeout);
   }
 
   private initRTCConnection() {
@@ -115,6 +140,7 @@ export class CallerSignalingService
     this.dataChannel = this.peerConnection.createDataChannel("chat");
 
     this.dataChannel.onopen = () => {
+      console.log("data channel open");
       this.dataChannel?.send(callerIntroduction);
     };
 
@@ -124,7 +150,11 @@ export class CallerSignalingService
       }
       if (this.peerConnection && !this.peerConnected && this.dataChannel) {
         this.peerConnected = true;
+        this.stopPeerConnectingTimeout();
         this.onPeerConnected?.(this.peerConnection, this.dataChannel);
+        this.peerConnection?.getStats().then((stats) => {
+          console.log(stats);
+        });
       } else {
         console.warn(
           "Received ",
@@ -140,6 +170,13 @@ export class CallerSignalingService
     };
 
     this.peerConnection.onconnectionstatechange = () => {
+      console.log("connetion state", this.peerConnection?.connectionState);
+
+      if (this.peerConnection?.connectionState === "failed") {
+        this.stopPeerConnectingTimeout();
+        this.onFailedToConnect?.("peer-connection-state-failed");
+      }
+
       if (this.peerConnection?.connectionState === "disconnected") {
         if (this.peerConnected && this.peerConnection) {
           this.onPeerDisconnected?.(this.peerConnection);
@@ -192,6 +229,8 @@ export class CallerSignalingService
       return;
     }
 
+    this.onSignalingServerConnected?.();
+
     this.initRTCConnection();
 
     if (!this.peerConnection) {
@@ -200,13 +239,30 @@ export class CallerSignalingService
       return;
     }
 
-    this.onConnected?.();
+    this.onPeerConnecting?.();
 
-    const { offer, iceCandidates } = await createOfferAndAllIceCandidate(
-      this.peerConnection,
-    );
+    try {
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("Timeout")), 1000 * 60 /* 60 secs */);
+      });
 
-    this.sendOfferRequest({ offer, iceCandidates });
+      const { offer, iceCandidates } = await Promise.race([
+        createOfferAndAllIceCandidate(this.peerConnection),
+        timeoutPromise,
+      ]);
+
+      this.sendOfferRequest({ offer, iceCandidates });
+
+      this.startPeerConnectingTimeout();
+    } catch (error) {
+      if (error instanceof Error && error.message === "Timeout") {
+        this.onFailedToConnect?.(
+          "timeout-on-creating-offer-and-ice-candidates",
+        );
+        return;
+      }
+      throw error;
+    }
   }
 
   private async handleAnswerRequest(data: AnswerRequest) {
@@ -224,8 +280,3 @@ export class CallerSignalingService
     );
   }
 }
-
-// take ws api -> request that accepts offers
-// accept response -> that requests are being accepted
-// accept offer; consume it; create answer and send it back
-// test connection

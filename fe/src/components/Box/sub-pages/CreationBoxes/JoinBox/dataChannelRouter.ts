@@ -1,3 +1,7 @@
+import type {
+  CallerConnectionFailureReason,
+  CallerSignalingService,
+} from "@/services/signaling";
 import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
 import { useDownloadBoxStore, useJoinBoxStore } from "@/stores";
 import {
@@ -6,9 +10,13 @@ import {
   isLeaderSendsBoxUpdate,
   isLeaderSendsKeyHolderList,
   isLeaderWelcomesKeyholder,
+  type KeyHolderSendsCreatedBoxReceived,
 } from "../commons";
 
-export const router = new DataChannelMessageRouter();
+export const router = new DataChannelMessageRouter<
+  CallerSignalingService,
+  CallerConnectionFailureReason
+>();
 
 router.addHandler(isLeaderWelcomesKeyholder, (_, message) => {
   const storeActions = useJoinBoxStore.getState().actions;
@@ -40,8 +48,16 @@ router.addHandler(isLeaderSendsBoxUpdate, (_, message) => {
   });
 });
 
-router.addHandler(isLeaderSendsBoxCreated, (_, message) => {
+router.addHandler(isLeaderSendsBoxCreated, (_, message, dataChannelMng) => {
   const storeActions = useJoinBoxStore.getState().actions;
+
+  dataChannelMng?.sendMessageToSinglePeer(
+    useJoinBoxStore.getState().leader.id,
+    {
+      type: "keyholder:created-box-received",
+    } satisfies KeyHolderSendsCreatedBoxReceived,
+  );
+
   storeActions.markAsCreated();
 
   const { fromJoinBox } = useDownloadBoxStore.getState();

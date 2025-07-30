@@ -2,6 +2,7 @@ import { useCreateBoxStore } from "@/stores";
 
 export const usePartOfCreateBoxStore = () => {
   const title = useCreateBoxStore((state) => state.title);
+  const status = useCreateBoxStore((state) => state.state);
   const content = useCreateBoxStore((state) => state.content);
   const leader = useCreateBoxStore((state) => state.leader);
   const threshold = useCreateBoxStore((state) => state.threshold);
@@ -13,6 +14,7 @@ export const usePartOfCreateBoxStore = () => {
 
   return {
     state: {
+      status,
       title,
       content,
       leader,

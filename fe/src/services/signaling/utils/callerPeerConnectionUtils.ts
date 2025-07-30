@@ -1,3 +1,5 @@
+import { getPeerConnectionConfiguration } from "./getPeerConnectionConfiguration";
+
 export async function createOfferAndAllIceCandidate(
   peerConnection: RTCPeerConnection,
 ): Promise<{
@@ -7,10 +9,14 @@ export async function createOfferAndAllIceCandidate(
   const iceCandidates: RTCIceCandidate[] = [];
   let allIceCandidatesSet = false;
 
+  peerConnection.setConfiguration(getPeerConnectionConfiguration());
+
   return new Promise((resolve) => {
     let offer: RTCSessionDescriptionInit | undefined;
 
     peerConnection.onicecandidate = (event) => {
+      console.log("ice candidate", event.candidate);
+
       if (event.candidate !== null) {
         iceCandidates.push(event.candidate);
       }
@@ -23,7 +29,7 @@ export async function createOfferAndAllIceCandidate(
     };
 
     peerConnection
-      .createOffer()
+      .createOffer({ iceRestart: true })
       .then((value) => {
         offer = value;
         return peerConnection.setLocalDescription(offer);

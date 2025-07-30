@@ -17,6 +17,13 @@ Run frontend and backend
 yarn dev
 ```
 
+## Manually deploy in Netlify Preview context
+
+```bash
+cd fe
+yarn workspace @icod2/fe build && netlify deploy --no-build --site c77e7e89-f17e-4593-9579-47bc6b863b8d
+```
+
 ## Developer Features
 
 The `icod2Dev` object is exposed on the `window` object in development mode. It provides the following features:

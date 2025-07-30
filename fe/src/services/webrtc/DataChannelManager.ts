@@ -19,9 +19,10 @@ export class DataChannelManager<
   private objectIdSet = new Set<{ localID: string }>();
 
   private callbacks: {
-    onConnected?: () => void;
+    onSignalingServerConnected?: () => void;
     onFailedToConnect?: (reason: TConnectionFailReason) => void;
     onPeerConnected?: (localID: string) => void;
+    onPeerConnecting?: () => void;
     onPeerDisconnected?: (localID: string) => void;
     onDataChannelMessage?:
       | ((
@@ -43,8 +44,9 @@ export class DataChannelManager<
   constructor(args: {
     signalingService: TSignalingService;
     callbacks?: {
-      onConnected?: () => void;
+      onSignalingServerConnected?: () => void;
       onFailedToConnect?: (reason: TConnectionFailReason) => void;
+      onPeerConnecting?: () => void;
       onPeerConnected?: (localID: string) => void;
       onPeerDisconnected?: (localID: string) => void;
       onDataChannelMessage?:
@@ -65,10 +67,15 @@ export class DataChannelManager<
 
     this.signalingService.onPeerConnected = this.handlePeerConnected.bind(this);
 
+    if (this.callbacks.onPeerConnecting) {
+      this.signalingService.onPeerConnecting = this.callbacks.onPeerConnecting;
+    }
+
     this.signalingService.onPeerDisconnected =
       this.handlePeerDisconnected.bind(this);
 
-    this.signalingService.onConnected = () => this.callbacks.onConnected?.();
+    this.signalingService.onSignalingServerConnected = () =>
+      this.callbacks.onSignalingServerConnected?.();
 
     if ("onFailedToConnect" in this.signalingService) {
       this.signalingService.onFailedToConnect = (

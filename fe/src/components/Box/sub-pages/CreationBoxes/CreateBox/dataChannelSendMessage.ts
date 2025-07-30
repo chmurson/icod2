@@ -100,10 +100,11 @@ const useSendLockedBoxes = (
       const keysToSlice = [...keys];
 
       keyHolders.forEach((kh) => {
-        const peerKey = keysToSlice.splice(0)[0];
+        const peerKey = keysToSlice.pop();
 
         if (!peerKey) {
           console.error(`Missing key for keyholder with id: ${kh.id}`);
+          return;
         }
 
         dataChannelMngRef.current?.sendMessageToSinglePeer(kh.id, {
