@@ -3,9 +3,8 @@ import { type FC, useEffect, useState } from "react";
 import {
   createBrowserRouter,
   Link,
-  Route,
+  Outlet,
   RouterProvider,
-  Routes,
 } from "react-router-dom";
 import { RootLockBox } from "./components/Box/sub-pages/CreationBoxes";
 import LockedBox from "./components/Box/sub-pages/RestoreBoxes/LockedBox";
@@ -61,15 +60,7 @@ const Root: FC = () => {
         </nav>
       )}
       <MainLayout>
-        <Routes>
-          <Route path="crypto-poc" element={<CryptoPlayground />} />
-          <Route path="decode-poc" element={<DecodePlayground />} />
-          <Route path="/components-demo" element={<ComponentsDemo />} />
-          <Route path="/unlock-box/:sessionId?" element={<LockedBox />} />
-          <Route path="/lock-box/:sessionId?" element={<RootLockBox />} />
-          <Route path="/" element={<Welcome />} />
-          <Route path="*" element={<Welcome />} />
-        </Routes>
+        <Outlet />
       </MainLayout>
     </>
   );
@@ -85,6 +76,10 @@ const router = createBrowserRouter([
         Component: CryptoPlayground,
       },
       {
+        path: "/components-demo",
+        Component: ComponentsDemo,
+      },
+      {
         path: "/decode-poc",
         Component: DecodePlayground,
       },
@@ -95,6 +90,11 @@ const router = createBrowserRouter([
       {
         path: "/lock-box/:sessionId?",
         Component: RootLockBox,
+      },
+      {
+        path: "/",
+        index: true,
+        Component: Welcome,
       },
       {
         path: "*",
