@@ -91,7 +91,7 @@ export const InputNumber: React.FC<InputNumberProps> = ({
     <Flex align="center" gap="1">
       <Button
         type="button"
-        variant="soft"
+        variant="surface"
         size="2"
         onClick={handleDecrement}
         disabled={currentValue <= min}
@@ -111,7 +111,7 @@ export const InputNumber: React.FC<InputNumberProps> = ({
       />
       <Button
         type="button"
-        variant="soft"
+        variant="surface"
         size="2"
         onClick={handleIncrement}
         disabled={currentValue >= max}

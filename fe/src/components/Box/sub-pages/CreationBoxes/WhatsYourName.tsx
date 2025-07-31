@@ -60,7 +60,7 @@ export function WhatsYourName(
         {isCreate ? "Create a Box" : "Join a Box Creation"}
       </Text>
       <StartLeaderFollowerAlert
-        className="w-full"
+        className="self-stretch"
         followerAlertContent={
           <>
             You are going to <b>join</b> process of locking a box.

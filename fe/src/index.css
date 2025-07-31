@@ -1,4 +1,4 @@
-@layer reset, radix, tailwind;
+@layer reset, radix, tailwind, customTheme
 
 @layer reset {
   @import "tailwindcss/preflight.css";
@@ -11,6 +11,10 @@
 @layer tailwind {
   @import "tailwindcss/theme.css";
   @import "tailwindcss/utilities.css";
+}
+
+@layer customTheme {
+  @import "./custom-theme.css"
 }
 
 @theme {

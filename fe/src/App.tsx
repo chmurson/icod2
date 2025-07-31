@@ -109,7 +109,7 @@ function App() {
 
   return (
     <Theme
-      accentColor="plum"
+      accentColor="violet"
       appearance={theme}
       grayColor="gray"
       panelBackground="translucent"
