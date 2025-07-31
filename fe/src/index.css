@@ -13,6 +13,10 @@
   @import "tailwindcss/utilities.css";
 }
 
+@layer customTheme {
+  @import "./custom-theme.css"
+}
+
 @theme {
 	--font-family-sans: system-ui, Avenir, Helvetica, Arial, sans-serif;
 	--font-synthesis: none;

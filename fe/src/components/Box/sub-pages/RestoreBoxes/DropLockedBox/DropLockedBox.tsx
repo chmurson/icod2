@@ -190,7 +190,7 @@ export const DropLockedBox: React.FC = () => {
   ]);
 
   return (
-    <div className="max-w-2xl mx-auto p-6 flex flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-8">
         <Text variant="pageTitle" className="mt-4">
           {!isFollower && "Start Unlocking a Box"}
@@ -205,7 +205,7 @@ export const DropLockedBox: React.FC = () => {
                 </span>
                 <Button
                   variant="secondary"
-                  className="self-end text-sm max-sm:w-full"
+                  className="self-end text-sm max-sm:w-full whitespace-nowrap"
                   size="1"
                   onClick={() => {
                     navigate("/unlock-box");
