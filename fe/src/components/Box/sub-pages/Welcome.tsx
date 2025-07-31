@@ -9,7 +9,7 @@ const Welcome: React.FC = () => {
   return (
     <div className="flex flex-col gap-4 pb-12">
       <Typography variant="pageTitle" as="h1" className="mt-2">
-        Decentralised Box
+        Stashcrate
       </Typography>
       <InfoBox
         title="Create a Box"
