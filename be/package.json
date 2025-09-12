@@ -17,11 +17,11 @@
   "license": "ISC",
   "dependencies": {
     "@icod2/contracts": "workspace:*",
-    "@types/node": "^24.0.7",
+    "@types/node": "^24.3.1",
     "@types/uuid": "^10.0.0",
-    "dotenv": "^17.1.0",
+    "dotenv": "^17.2.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "uuid": "^11.1.0",
     "ws": "^8.18.3"
   },
