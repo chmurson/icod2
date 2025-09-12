@@ -1,9 +1,9 @@
-import { config } from "dotenv";
-import { SignalingServer } from "./signaling";
+import { loadConfig } from "./config/load-config.js";
+import { startLibp2pRelay } from "./start-libp2p-relay.js";
 
-config({ path: [".env.local", ".env"] });
+const { libp2p } = loadConfig();
 
-const port = Number.parseInt(process.env.PORT ?? "8080", 10);
-const hostname = process.env.VITE_SIGNALING_HOSTNAME ?? "0.0.0.0";
-
-new SignalingServer(port, hostname);
+startLibp2pRelay({
+  announceMultiaddrs: libp2p.announceMultiaddrs,
+  listenMultiaddrs: libp2p.listenMultiaddrs,
+});

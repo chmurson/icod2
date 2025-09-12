@@ -1,13 +1,18 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "target": "es2016",
-    "module": "commonjs",
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
     "baseUrl": "."
   },
-  "references": [{ "path": "../libs/contracts" }]
+  "references": [
+    { "path": "../libs/contracts" },
+    { "path": "../libs/protocols" }
+  ]
 }
