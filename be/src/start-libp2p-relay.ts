@@ -1,15 +1,15 @@
-// @ts-check
-
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
 import { initRoomRegistrationProtocol } from "@icod2/protocols";
+import type { Responses } from "@icod2/protocols/src/room-registration-protocol/messages-and-responses";
 import { autoNAT } from "@libp2p/autonat";
 import { circuitRelayServer } from "@libp2p/circuit-relay-v2";
 import { identify } from "@libp2p/identify";
 import { tcp } from "@libp2p/tcp";
 import { webSockets } from "@libp2p/websockets";
 import { createLibp2p } from "libp2p";
+import { starRoomRegistrationServiceStart } from "./services/room-registration";
 import { getPeerIdFromEnv } from "./utils/get-or-create-peer-id";
 
 export type Args = {
@@ -40,21 +40,37 @@ export async function startLibp2pRelay({
     },
   });
 
+  const roomRegistration = starRoomRegistrationServiceStart(libp2p);
+
   const peerId = libp2p.peerId.toString();
   const multiaddrs = libp2p.getMultiaddrs();
 
-  const registeredRooms = new Set();
-
   const roomRegistrationProt = initRoomRegistrationProtocol(libp2p, {
-    onRegisterRoom: (roomName) => {
+    onRegisterRoom: async (roomName, peerId) => {
       console.log(`Room registered: ${roomName}`);
-      libp2p.services.pubsub.subscribe(roomName);
-      registeredRooms.add(roomName);
+      try {
+        roomRegistration.registerRoom(roomName);
+      } catch (error) {
+        console.error(`Error registering room ${roomName}: ${error}`);
+      }
+      const { createPeerConnection } = roomRegistrationProt;
+      const { sendResponse, close } = await createPeerConnection(peerId);
+      await sendResponse({
+        roomName,
+        type: "register-room-response-success",
+      } satisfies Responses["registerRoomSuccess"]);
+      close();
     },
-    onUnregisterRoom: (roomName) => {
+    onUnregisterRoom: async (roomName) => {
       console.log(`Room registered: ${roomName}`);
-      libp2p.services.pubsub.unsubscribe(roomName);
-      registeredRooms.delete(roomName);
+      roomRegistration.unregisterRoom(roomName);
+      const { createPeerConnection } = roomRegistrationProt;
+      const { sendResponse, close } = await createPeerConnection(peerId);
+      await sendResponse({
+        roomName,
+        type: "unregister-room-response-success",
+      } satisfies Responses["unregisterRoomSuccess"]);
+      close();
     },
   });
   await roomRegistrationProt.start();

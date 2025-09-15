@@ -1,6 +1,9 @@
 import type { Libp2p } from "@libp2p/interface";
-import { useEffect, useRef } from "react";
-import { ConnectedPeerStorage } from "../libp2p/connected-peer-storage";
+import { useCallback, useEffect, useRef } from "react";
+import {
+  ConnectedPeerStorage,
+  type IConnectedPeersStorage,
+} from "../libp2p/connected-peer-storage";
 import { getBootstrapMultiaddrs } from "../libp2p/get-bootstrap-multiaddrs";
 import { createPeerConnectionHandler } from "../libp2p/peer-connection-handler";
 import { PersistingDialer } from "../libp2p/persiting-dialer";
@@ -9,11 +12,15 @@ import { startLibp2pService } from "../libp2p/webrtc-libp2p-service";
 
 type LocalConnectionFailReasons = "RoomTokenProviderError";
 
+const defaultConnectedPeersStorage = new ConnectedPeerStorage();
+
 export const useDataChannelMng2 = <TConnectionFailReason = unknown>({
   onPeerConnected,
   onPeerDisconnected,
   onFailedToConnect,
   roomTokenProvider,
+  onLibp2pStarted,
+  connectedPeersStorage = defaultConnectedPeersStorage,
 }: {
   roomTokenProvider: RoomTokenProvider;
   onPeerConnected?: (peerId: string) => void;
@@ -21,21 +28,29 @@ export const useDataChannelMng2 = <TConnectionFailReason = unknown>({
   onFailedToConnect?: (
     reason: TConnectionFailReason | LocalConnectionFailReasons,
   ) => void;
+  onLibp2pStarted?: (libp2pService: Libp2p) => void;
+  connectedPeersStorage?: IConnectedPeersStorage;
 }) => {
   const libp2pServiceRef = useRef<Libp2p>(undefined);
 
   const onPeerConnectedRef = useRef(onPeerConnected);
   const onPeerDisconnectedRef = useRef(onPeerDisconnected);
   const onFailedToConnectRef = useRef(onFailedToConnect);
+  const onLibp2pStartedRef = useRef(onLibp2pStarted);
 
   onPeerConnectedRef.current = onPeerConnected;
   onPeerDisconnectedRef.current = onPeerDisconnected;
   onFailedToConnectRef.current = onFailedToConnect;
+  onLibp2pStartedRef.current = onLibp2pStarted;
+
+  const handleLibp2pStarted = useCallback((event: CustomEvent<Libp2p>) => {
+    onLibp2pStartedRef.current?.(event.detail);
+  }, []);
 
   useEffect(() => {
+    connectedPeersStorage.clear();
     let libp2pService: Libp2p;
     let unmounted = false;
-    let intervalTimeout: NodeJS.Timeout | undefined;
 
     (async () => {
       console.log("Starting libp2p service - stopped:", unmounted);
@@ -62,6 +77,8 @@ export const useDataChannelMng2 = <TConnectionFailReason = unknown>({
         return;
       }
 
+      onLibp2pStartedRef.current?.(libp2pService);
+
       // @ts-expect-error
       window.debugPrintConnections = () => {
         const peers = libp2pService.getPeers();
@@ -82,7 +99,7 @@ export const useDataChannelMng2 = <TConnectionFailReason = unknown>({
         handShake: () => new Promise((resolve) => resolve()),
         relayPeerIds,
         persistingDialer,
-        connectedPeersStorage: new ConnectedPeerStorage(),
+        connectedPeersStorage,
       });
 
       peerConnectionHandler(libp2pService);
@@ -94,18 +111,16 @@ export const useDataChannelMng2 = <TConnectionFailReason = unknown>({
       // @ts-expect-error
       window.debugPrintConnections = undefined;
 
-      if (intervalTimeout) {
-        clearInterval(intervalTimeout);
-      }
-
       console.log(
         "Closing connections for peer id:",
         libp2pService?.peerId.toString(),
       );
 
+      libp2pService?.removeEventListener("start", handleLibp2pStarted);
+
       libp2pService?.stop();
     };
-  }, [roomTokenProvider]);
+  }, [roomTokenProvider, handleLibp2pStarted, connectedPeersStorage]);
 
   useRaiseErrorIfChanges(null, "null");
 };

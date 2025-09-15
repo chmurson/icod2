@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "tsx src/index.ts --force",
     "dev": "yarn copy-configs && tsx watch src/index.ts",
     "copy-configs": "copyfiles 'config.*.{json,yaml,yml}' 'config.{json,yaml,yml}' dist/",
     "type-check": "tsc --noEmit",

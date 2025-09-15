@@ -17,6 +17,7 @@ import { InputNumber } from "../../../components/InputNumber";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { useCreateBoxConnectionContext } from "../CreateBoxConnectionProvider/CreateBoxConnectionProvider";
 import { LeaveLobbyButton } from "../commons/components";
+import { CreateBoxError } from "./CreateBoxError";
 import { router } from "./dataChannelRouter";
 import {
   useBoxCreationValidation,
@@ -99,6 +100,7 @@ export const CreateBoxContent: React.FC = () => {
   return (
     <>
       <div className="flex flex-col gap-4">
+        <CreateBoxError />
         <FieldArea label="Invite URL">
           <TextField.Root value={shareableURL} readOnly />
         </FieldArea>

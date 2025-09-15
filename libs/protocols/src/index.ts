@@ -1,1 +1,1 @@
-export { initRoomRegistrationProtocol } from "./room-registration-protocol.js";
+export { initRoomRegistrationProtocol } from "./room-registration-protocol/index.js";

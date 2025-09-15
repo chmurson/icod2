@@ -1,6 +1,6 @@
 import type { Libp2p } from "@libp2p/interface";
 import { isEnabled } from "@/utils/featureFlags";
-import type { ConnectedPeersStorage } from "./connected-peer-storage";
+import type { IConnectedPeersStorage } from "./connected-peer-storage";
 import type { PersistingDialer } from "./persiting-dialer";
 import { shortenPeerId } from "./utils/shorten-peer-id";
 
@@ -13,7 +13,7 @@ export const createPeerConnectionHandler = ({
   persistingDialer: persitingDialer,
 }: {
   relayPeerIds: string[];
-  connectedPeersStorage: ConnectedPeersStorage;
+  connectedPeersStorage: IConnectedPeersStorage;
   handShake: HandShake;
   persistingDialer: PersistingDialer;
 }) => {
@@ -72,6 +72,9 @@ export const createPeerConnectionHandler = ({
         } else {
           console.log("Non-relay peer connected:", discoveredPeerIdStr);
         }
+        connectedPeersStorage.addPeer(discoveredPeerIdStr, {
+          isRelay: isRelayPeerDiscovered,
+        });
       } catch (err) {
         if (isRelayPeerDiscovered) {
           console.error(
