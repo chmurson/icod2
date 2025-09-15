@@ -18,11 +18,9 @@ import { ParticipantItem } from "../../../components/ParticipantItem";
 import { useCreateBoxConnectionContext } from "../CreateBoxConnectionProvider/CreateBoxConnectionProvider";
 import { LeaveLobbyButton } from "../commons/components";
 import { router } from "./dataChannelRouter";
-import { useDataChannelSendMessages } from "./dataChannelSendMessage";
 import {
   useBoxCreationValidation,
   useCreateLockedBox,
-  useKeepKeyHoldersUpdated,
   usePartOfCreateBoxStore,
   useShareableURL,
 } from "./hooks";
@@ -58,21 +56,23 @@ export const CreateBoxContent: React.FC = () => {
   const context = useCreateBoxConnectionContext();
 
   useEffect(() => {
-    context.addRouter("create-box-router", router);
+    context.routerMng.addRouter("create-box-router", router.router);
 
     return () => {
-      context.removeRouter("create-box-router");
+      context.routerMng.removeRouter("create-box-router");
     };
-  }, [context.addRouter, context.removeRouter]);
+  }, [context.routerMng]);
 
   const { state, actions } = usePartOfCreateBoxStore();
   const setDownloadStoreFromCreateBox = useDownloadBoxStore(
     (state) => state.fromCreateBox,
   );
 
-  const { sendLockedBoxes } = useDataChannelSendMessages({
-    dataChannelManagerRef: context.dataChannelMngRef,
-  });
+  // TODO: FIX ME
+  const sendLockedBoxes = (_obj: object) => {};
+  // const { sendLockedBoxes } = useDataChannelSendMessages({
+  //   dataChannelManagerRef: context.dataChannelMng2,
+  // });
 
   const { createLockedBox } = useCreateLockedBox();
 
@@ -85,7 +85,8 @@ export const CreateBoxContent: React.FC = () => {
     },
   });
 
-  useKeepKeyHoldersUpdated(context.dataChannelMngRef);
+  // TODO: FIX ME
+  // useKeepKeyHoldersUpdated(context.dataChannelMngRef);
 
   const noParticipantConnected = state.keyHolders.length === 0;
 
@@ -103,7 +104,6 @@ export const CreateBoxContent: React.FC = () => {
         </FieldArea>
         <FieldArea label="Name of the box">
           <TextField.Root
-            id="title"
             type="text"
             value={state.title}
             onChange={(e) => actions.setBoxInfo({ title: e.target.value })}
@@ -116,7 +116,6 @@ export const CreateBoxContent: React.FC = () => {
         </FieldArea>
         <FieldArea label="Content: ">
           <TextArea
-            id="content"
             value={state.content}
             onChange={(e) => actions.setBoxInfo({ content: e.target.value })}
             rows={10}
@@ -135,7 +134,7 @@ export const CreateBoxContent: React.FC = () => {
             value={state.threshold}
             onChange={(e) =>
               actions.setBoxInfo({
-                threshold: Number.parseInt(e.currentTarget.value),
+                threshold: Number.parseInt(e.currentTarget.value, 10),
               })
             }
             disabled={state.status === "creating"}

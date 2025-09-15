@@ -112,11 +112,15 @@ export class WebsocketJSONHandler {
   }
 
   private handleClose(code: number, reason: string) {
-    this.listeners.onClose.forEach((fn) => fn(code, reason));
+    this.listeners.onClose.forEach((fn) => {
+      fn(code, reason);
+    });
   }
 
   private handleError(error: Event) {
-    this.listeners.onError.forEach((fn) => fn(error));
+    this.listeners.onError.forEach((fn) => {
+      fn(error);
+    });
   }
 
   private tryCallSpecificMessageListeners(payload: object) {
@@ -124,7 +128,9 @@ export class WebsocketJSONHandler {
       (listener) => listener.condition(payload),
     );
 
-    listenersToExecute.forEach((listener) => listener.fn(payload));
+    listenersToExecute.forEach((listener) => {
+      listener.fn(payload);
+    });
 
     if (
       listenersToExecute.length === 0 &&
@@ -136,7 +142,9 @@ export class WebsocketJSONHandler {
   private handleMessage(event: MessageEvent) {
     try {
       const json = JSON.parse(event.data);
-      this.listeners.onMessage.forEach((fn) => fn(json));
+      this.listeners.onMessage.forEach((fn) => {
+        fn(json);
+      });
       this.tryCallSpecificMessageListeners(json);
     } catch (e) {
       this.error("Failed to parse JSON message:", e);

@@ -1,6 +1,6 @@
 import init, { restore_message } from "icod-crypto-js";
 import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 const DecodePlayground = () => {
   const [encryptedMessageInput, setEncryptedMessageInput] = useState("");
@@ -50,19 +50,22 @@ const DecodePlayground = () => {
     setDecryptionKeys(newKeys);
   };
 
+  const encryptedMessageId = useId();
+  const thresholdId = useId();
+
   return (
     <div className="p-4 border rounded-lg shadow-sm bg-gray-800 text-white">
       <h2 className="text-xl font-bold mb-4">Decode Playground</h2>
       <div className="space-y-4">
         <div>
           <label
-            htmlFor="encryptedMessage"
+            htmlFor={encryptedMessageId}
             className="block text-sm font-medium text-gray-300"
           >
             Encrypted Message
           </label>
           <textarea
-            id="encryptedMessage"
+            id={encryptedMessageId}
             value={encryptedMessageInput}
             onChange={(e) => setEncryptedMessageInput(e.target.value)}
             className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -71,14 +74,14 @@ const DecodePlayground = () => {
         </div>
         <div>
           <label
-            htmlFor="threshold"
+            htmlFor={thresholdId}
             className="block text-sm font-medium text-gray-300"
           >
             Threshold
           </label>
           <input
             type="number"
-            id="threshold"
+            id={thresholdId}
             value={threshold}
             onChange={(e) => setThreshold(Number.parseInt(e.target.value, 10))}
             className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"

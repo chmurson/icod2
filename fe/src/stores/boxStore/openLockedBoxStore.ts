@@ -203,7 +203,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
 );
 
 if (import.meta.env.DEV === true) {
-  //@ts-ignore
+  //@ts-expect-error
   window.useOpenLockedBoxStore = {
     connectAllOffLineKeyholders: () => {
       const {

@@ -7,10 +7,7 @@ import {
 } from "@/stores";
 import { CreateBox } from "./CreateBox";
 import { CreateBoxConnectionProvider } from "./CreateBoxConnectionProvider";
-import {
-  clearPersistedStartedLockingInfo,
-  isPersistedStartedLocking,
-} from "./commons";
+import { clearPersistedRoomToken, isPersistedRoomToken } from "./commons";
 import { DownloadLockedBox } from "./DownloadLockedBox";
 import { JoinBox } from "./JoinBox";
 import { WhatsYourName } from "./WhatsYourName";
@@ -45,7 +42,7 @@ export const RootLockBox = () => {
 };
 
 const useCurrentPage = () => {
-  const { sessionId } = useParams();
+  const { sessionId: roomToken } = useParams();
   const createBoxState = useCreateBoxStore((state) => state.state);
   const joinBoxState = useJoinBoxStore((state) => state.state);
   const downloadStateType = useDownloadBoxStore((state) => state.type);
@@ -53,10 +50,10 @@ const useCurrentPage = () => {
   const isInitialized = useInitialization();
 
   useEffect(() => {
-    if (!isPersistedStartedLocking(sessionId ?? "")) {
-      clearPersistedStartedLockingInfo();
+    if (!isPersistedRoomToken(roomToken ?? "")) {
+      clearPersistedRoomToken();
     }
-  }, [sessionId]);
+  }, [roomToken]);
 
   if (!isInitialized) {
     return null;
@@ -70,8 +67,8 @@ const useCurrentPage = () => {
   }
 
   if (createBoxState === "initial" && joinBoxState === "initial") {
-    return (sessionId?.trim() ?? "") === "" ||
-      isPersistedStartedLocking(sessionId ?? "")
+    const emptyRoomToken = (roomToken?.trim() ?? "") === "";
+    return emptyRoomToken || isPersistedRoomToken(roomToken ?? "")
       ? "createBoxSetName"
       : "joinBoxSetName";
   }

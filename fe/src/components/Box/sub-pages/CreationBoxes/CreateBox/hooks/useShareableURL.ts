@@ -1,23 +1,27 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCreateBoxStore } from "@/stores";
-import { persistStartedLocking } from "../../commons";
+import { isPersistedRoomToken } from "../../commons";
 
 export const useShareableURL = () => {
-  const { sessionId } = useParams();
+  const { sessionId: roomToken } = useParams();
   const navigate = useNavigate();
 
-  const leaderId = useCreateBoxStore((state) => state.leader.id);
+  const roomTokenFromStore = useCreateBoxStore((state) => state.leader.id);
+
+  console.log("roomTokenFromStore", roomTokenFromStore);
 
   useEffect(() => {
-    const newURL = `/lock-box/${leaderId}`;
+    const newURL = `/lock-box/${roomTokenFromStore}`;
     if (newURL !== window.location.pathname) {
       navigate(newURL, { replace: true });
-      persistStartedLocking(leaderId);
+      isPersistedRoomToken(roomTokenFromStore);
     }
-  }, [leaderId, navigate]);
+  }, [roomTokenFromStore, navigate]);
 
-  return (sessionId?.trim() ?? "") === ""
-    ? undefined
-    : `${window.location.origin}/lock-box/${sessionId}`;
+  const isEmptyRoomToken = (roomToken?.trim() ?? "") === "";
+
+  return isEmptyRoomToken
+    ? ""
+    : `${window.location.origin}/lock-box/${roomToken}`;
 };

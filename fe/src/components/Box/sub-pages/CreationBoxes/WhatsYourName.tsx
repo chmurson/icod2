@@ -7,9 +7,9 @@ import { usePersistInLocalStorage } from "@/hooks/usePersistInLocalStorage";
 import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { generateNiceRandomToken } from "@/utils/generateNiceRandomToken";
 import { StartLeaderFollowerAlert } from "../../components/StartLeaderFollowerAlert";
 import { UserAgent } from "../../components/UserAgent";
+import { useRoomToken } from "./commons/useRoomToken";
 
 export function WhatsYourName(
   props:
@@ -21,13 +21,14 @@ export function WhatsYourName(
   const { getValue, setValue } = usePersistInLocalStorage<string>({
     keyName: "userName",
   });
-  const { sessionId } = useParams();
+  const { sessionId: roomToken } = useParams();
   const refDefaultName = useRef<string | undefined>(getValue() ?? undefined);
   const refInput = useRef<HTMLInputElement>(null);
   const isCreate = "create" in props;
   const createBoxStoreActions = useCreateBoxStore((x) => x.actions);
   const joinBoxStoreActions = useJoinBoxStore((x) => x.actions);
   const currentUserAgent = useCurrentUserAgent();
+  const { generateAndPersistRoomToken } = useRoomToken();
 
   const handleOkClick = () => {
     const name = refInput.current?.value.trim() ?? "";
@@ -35,21 +36,22 @@ export function WhatsYourName(
     setValue(name);
 
     if (isCreate) {
-      const idToken =
-        (sessionId?.trim() ?? "") !== ""
-          ? sessionId
-          : generateNiceRandomToken();
+      const isEmptyToken = (roomToken?.trim() ?? "") === "";
+
+      const newOrPrevRoomToken = isEmptyToken
+        ? generateAndPersistRoomToken()
+        : roomToken;
 
       createBoxStoreActions.connect({
         name,
         userAgent: currentUserAgent,
-        idToken,
+        idToken: newOrPrevRoomToken,
       });
     } else {
       joinBoxStoreActions.connect({
         name,
         userAgent: currentUserAgent,
-        sessionId: sessionId ?? "",
+        sessionId: roomToken ?? "",
       });
     }
   };

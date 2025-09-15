@@ -29,32 +29,14 @@ export const useCreateBoxConnectionContext =
 export const CreateBoxConnectionProvider: FC<PropsWithChildren> = ({
   children,
 }) => {
-  const {
-    addRouter,
-    clearRouters,
-    dataChannelMngRef,
-    getRouterIds,
-    hasRouter,
-    removeRouter,
-  } = useCreateBoxConnection();
+  const { dataChannelMng2, routerMng } = useCreateBoxConnection() ?? {};
 
   const value = useMemo(() => {
     return {
-      addRouter,
-      clearRouters,
-      dataChannelMngRef,
-      getRouterIds,
-      hasRouter,
-      removeRouter,
+      dataChannelMng2,
+      routerMng,
     };
-  }, [
-    addRouter,
-    clearRouters,
-    dataChannelMngRef,
-    getRouterIds,
-    hasRouter,
-    removeRouter,
-  ]);
+  }, [dataChannelMng2, routerMng]);
 
   return <Provider value={value}>{children}</Provider>;
 };

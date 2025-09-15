@@ -1,5 +1,4 @@
 import { type RefObject, useCallback } from "react";
-import type { DataChannelManager } from "@/services/webrtc";
 import { useCreateBoxStore } from "@/stores";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import type {
@@ -11,7 +10,7 @@ import type {
 export const useDataChannelSendMessages = ({
   dataChannelManagerRef,
 }: {
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>;
+  dataChannelManagerRef: RefObject<DataChanM | undefined>;
 }) => {
   const sendBoxUpdate = useSendBoxUpdate(dataChannelManagerRef);
   const sendBoxCreated = useSendBoxCreated(dataChannelManagerRef);

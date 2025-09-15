@@ -1,3 +1,4 @@
+import type { Stream } from "@libp2p/interface";
 import { peerIdFromString } from "@libp2p/peer-id";
 import { byteStream } from "it-byte-stream";
 import type { Libp2p } from "libp2p";
@@ -23,10 +24,16 @@ export function initRoomRegistrationProtocol(
     : undefined;
 
   const localAttachOngoingStream = async (peerIdStr: string) => {
-    const { sendJson } = await attachOngoingStream(libp2p, peerIdStr, () => {});
+    const { sendJson, getStream } = await attachOngoingStream(
+      libp2p,
+      peerIdStr,
+      () => {},
+    );
 
     return {
-      close,
+      close: () => {
+        getStream().close();
+      },
       registerRoom: async (roomName: string) => {
         sendJson({
           type: "register-room",
@@ -85,14 +92,12 @@ async function attachOngoingStream(
   peerIdStr: string,
   onResponseMessage: (msg: ChatMessage) => void,
 ) {
+  let stream: Stream;
   let chatStream: ReturnType<typeof byteStream>;
 
   try {
     const peerId = peerIdFromString(peerIdStr);
-    const stream = await libp2p.dialProtocol(
-      peerId,
-      ROOM_REGISTRATION_PROTOCOL,
-    );
+    stream = await libp2p.dialProtocol(peerId, ROOM_REGISTRATION_PROTOCOL);
     let keepListening = true;
     chatStream = byteStream(stream);
 
@@ -122,6 +127,9 @@ async function attachOngoingStream(
   return {
     sendText,
     sendJson,
+    getStream() {
+      return stream;
+    },
   };
 }
 

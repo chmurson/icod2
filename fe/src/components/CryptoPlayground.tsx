@@ -4,7 +4,7 @@ import init, {
   secure_message,
 } from "icod-crypto-js";
 import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 const CryptoPlayground = () => {
   const [message, setMessage] = useState("hello world");
@@ -65,20 +65,24 @@ const CryptoPlayground = () => {
     setDecryptionKeys(newKeys);
   };
 
+  const numKeysId = useId();
+  const thresholdId = useId();
+  const messageId = useId();
+
   return (
     <div className="p-4 border rounded-lg shadow-sm bg-gray-800 text-white">
       <h2 className="text-xl font-bold mb-4">Crypto Playground</h2>
       <div className="space-y-4">
         <div>
           <label
-            htmlFor="numKeys"
+            htmlFor={numKeysId}
             className="block text-sm font-medium text-gray-300"
           >
             Number of Keys
           </label>
           <input
             type="number"
-            id="numKeys"
+            id={numKeysId}
             value={numKeys}
             onChange={(e) => {
               const newNumKeys = Number.parseInt(e.target.value, 10);
@@ -94,14 +98,14 @@ const CryptoPlayground = () => {
         </div>
         <div>
           <label
-            htmlFor="threshold"
+            htmlFor={thresholdId}
             className="block text-sm font-medium text-gray-300"
           >
             Threshold
           </label>
           <input
             type="number"
-            id="threshold"
+            id={thresholdId}
             value={threshold}
             onChange={(e) => setThreshold(Number.parseInt(e.target.value, 10))}
             className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -111,13 +115,13 @@ const CryptoPlayground = () => {
         </div>
         <div>
           <label
-            htmlFor="message"
+            htmlFor={messageId}
             className="block text-sm font-medium text-gray-300"
           >
             Message
           </label>
           <textarea
-            id="message"
+            id={messageId}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"

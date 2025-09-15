@@ -1,2 +1,2 @@
 export * from "./leader-keyholder-interface";
-export * from "./persistStartedLocking";
+export * from "./useRoomToken";

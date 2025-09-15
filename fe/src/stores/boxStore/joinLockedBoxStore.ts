@@ -273,7 +273,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
   })),
 );
 if (import.meta.env.DEV === true) {
-  //@ts-ignore
+  //@ts-expect-error
   window.useJoinLockedBoxStore = {
     connectAllOffLineKeyholders: () => {
       const {
@@ -292,7 +292,7 @@ if (import.meta.env.DEV === true) {
     },
     addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) => {
       useJoinLockedBoxStore.getState().actions.addReceivedKey(arg);
-      //@ts-ignore
+      //@ts-expect-error
       window.useJoinLockedBoxStore.setReadyToUnlock();
     },
   };

@@ -1,27 +1,23 @@
-import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
+import { PeersMessageRouter } from "@/services/libp2p/peers-message-router";
 import { useCreateBoxStore } from "@/stores";
-import {
-  isKeyHolderWelcomesLeader,
-  type LeaderNotAuthorizedKeyholder,
-  type LeaderWelcomesKeyholder,
-} from "../commons";
+import { isKeyHolderWelcomesLeader } from "../commons";
 
-export const router = new DataChannelMessageRouter();
+export const router = new PeersMessageRouter();
 
 router.addHandler(
   isKeyHolderWelcomesLeader,
-  (localId, message, dataChannelMng) => {
+  (localId, message, _dataChannelMng) => {
     const {
       actions,
       leader: { id: leaderId },
     } = useCreateBoxStore.getState();
 
     if (leaderId.trim() !== message.sessionId.trim()) {
-      dataChannelMng?.sendMessageToSinglePeer(localId, {
-        type: "leader:keyholder-not-athorized",
-      } satisfies LeaderNotAuthorizedKeyholder);
+      // dataChannelMng?.sendMessageToSinglePeer(localId, {
+      //   type: "leader:keyholder-not-athorized",
+      // } satisfies LeaderNotAuthorizedKeyholder);
 
-      dataChannelMng?.disconnectPeer(localId);
+      // dataChannelMng?.disconnectPeer(localId);
 
       return;
     }
@@ -32,20 +28,20 @@ router.addHandler(
       userAgent: message.userAgent,
     });
 
-    const state = useCreateBoxStore.getState();
+    const _state = useCreateBoxStore.getState();
 
-    dataChannelMng?.sendMessageToSinglePeer(localId, {
-      boxInfo: {
-        keyHolderThreshold: state.threshold,
-        name: state.title,
-      },
-      leaderInfo: {
-        id: state.leader.id,
-        name: state.leader.name,
-        userAgent: state.leader.userAgent,
-      },
-      keyHolderId: localId,
-      type: "leader:welcome-keyholder",
-    } satisfies LeaderWelcomesKeyholder);
+    // dataChannelMng?.sendMessageToSinglePeer(localId, {
+    //   boxInfo: {
+    //     keyHolderThreshold: state.threshold,
+    //     name: state.title,
+    //   },
+    //   leaderInfo: {
+    //     id: state.leader.id,
+    //     name: state.leader.name,
+    //     userAgent: state.leader.userAgent,
+    //   },
+    //   keyHolderId: localId,
+    //   type: "leader:welcome-keyholder",
+    // } satisfies LeaderWelcomesKeyholder);
   },
 );
