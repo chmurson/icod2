@@ -5,16 +5,24 @@ import {
   type IConnectedPeersStorage,
 } from "../libp2p/connected-peer-storage";
 import { getBootstrapMultiaddrs } from "../libp2p/get-bootstrap-multiaddrs";
-import { createPeerConnectionHandler } from "../libp2p/peer-connection-handler";
+import {
+  type ConnectionErrors,
+  createPeerConnectionHandler,
+} from "../libp2p/peer-connection-handler";
 import { PersistingDialer } from "../libp2p/persiting-dialer";
 import type { RoomTokenProvider } from "../libp2p/room-token-provider";
 import { startLibp2pService } from "../libp2p/webrtc-libp2p-service";
 
-type LocalConnectionFailReasons = "RoomTokenProviderError";
+export type Libp2pServiceErrors =
+  | "RoomTokenProviderError"
+  | "EmptyBootstrapMultiaddrsError"
+  | "Libp2pServiceError";
 
 const defaultConnectedPeersStorage = new ConnectedPeerStorage();
 
-export const useDataChannelMng2 = <TConnectionFailReason = unknown>({
+export const useDataChannelMng2 = <
+  TConnectionFailReason = Libp2pServiceErrors,
+>({
   onPeerConnected,
   onPeerDisconnected,
   onFailedToConnect,
@@ -26,7 +34,7 @@ export const useDataChannelMng2 = <TConnectionFailReason = unknown>({
   onPeerConnected?: (peerId: string) => void;
   onPeerDisconnected?: (peerId: string) => void;
   onFailedToConnect?: (
-    reason: TConnectionFailReason | LocalConnectionFailReasons,
+    reason: TConnectionFailReason | Libp2pServiceErrors | ConnectionErrors,
   ) => void;
   onLibp2pStarted?: (libp2pService: Libp2p) => void;
   connectedPeersStorage?: IConnectedPeersStorage;
@@ -63,13 +71,24 @@ export const useDataChannelMng2 = <TConnectionFailReason = unknown>({
         return;
       }
 
+      if (!(bootstrapMultiaddrs?.length > 0)) {
+        onFailedToConnectRef.current?.("EmptyBootstrapMultiaddrsError");
+        return;
+      }
+
       if (unmounted) return;
 
       console.log("start new libp2p service");
-      libp2pService = await startLibp2pService({
-        roomToken,
-        bootstrapMultiaddrs,
-      });
+      try {
+        libp2pService = await startLibp2pService({
+          roomToken,
+          bootstrapMultiaddrs,
+        });
+      } catch (error) {
+        console.error("Error starting libp2p service:", error);
+        onFailedToConnectRef.current?.("Libp2pServiceError");
+        return;
+      }
 
       if (unmounted) {
         console.log("Unmointing!");
@@ -100,6 +119,9 @@ export const useDataChannelMng2 = <TConnectionFailReason = unknown>({
         relayPeerIds,
         persistingDialer,
         connectedPeersStorage,
+        onError: (error) => {
+          onFailedToConnectRef.current?.(error);
+        },
       });
 
       peerConnectionHandler(libp2pService);

@@ -6,16 +6,20 @@ import { shortenPeerId } from "./utils/shorten-peer-id";
 
 type HandShake = () => Promise<void>;
 
+export type ConnectionErrors = "CannotConnectToRelayPeer";
+
 export const createPeerConnectionHandler = ({
   relayPeerIds,
   connectedPeersStorage,
   handShake,
   persistingDialer: persitingDialer,
+  onError,
 }: {
   relayPeerIds: string[];
   connectedPeersStorage: IConnectedPeersStorage;
   handShake: HandShake;
   persistingDialer: PersistingDialer;
+  onError: (error: ConnectionErrors) => void;
 }) => {
   const onDialSuccesfully = async (peerIdStr: string) => {
     console.log(`Successfully dialed peer ${peerIdStr}`);
@@ -81,6 +85,7 @@ export const createPeerConnectionHandler = ({
             `Failed to dial relay peer (${evt.detail.id.toString()}):`,
             err,
           );
+          onError("CannotConnectToRelayPeer");
         } else {
           persitingDialer.add(discoveredPeerIdStr);
           console.error(
