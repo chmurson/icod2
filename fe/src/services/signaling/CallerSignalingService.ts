@@ -10,6 +10,7 @@ import {
   type SendsOfferRequest,
   type SendsOfferResponse,
 } from "@icod2/contracts/src/client-server";
+import { logger } from "@icod2/protocols";
 import type { WebsocketJSONHandler } from "@/services/websocket/WebSocketJSONHandler";
 import type {
   SignalingService,
@@ -142,7 +143,7 @@ export class CallerSignalingService
     this.dataChannel = this.peerConnection.createDataChannel("chat");
 
     this.dataChannel.onopen = () => {
-      console.log("data channel open");
+      logger.log("data channel open");
       this.dataChannel?.send(callerIntroduction);
     };
 
@@ -155,10 +156,10 @@ export class CallerSignalingService
         this.stopPeerConnectingTimeout();
         this.onPeerConnected?.(this.peerConnection, this.dataChannel);
         this.peerConnection?.getStats().then((stats) => {
-          console.log(stats);
+          logger.log(stats);
         });
       } else {
-        console.warn(
+        logger.warn(
           "Received ",
           calleeIntroduction,
           "but connection not accepted",
@@ -172,7 +173,7 @@ export class CallerSignalingService
     };
 
     this.peerConnection.onconnectionstatechange = () => {
-      console.log("connetion state", this.peerConnection?.connectionState);
+      logger.log("connetion state", this.peerConnection?.connectionState);
 
       if (this.peerConnection?.connectionState === "failed") {
         this.stopPeerConnectingTimeout();
@@ -237,7 +238,7 @@ export class CallerSignalingService
 
     if (!this.peerConnection) {
       this.onFailedToConnect?.("fail-to-initialize-rtc-connection");
-      console.error("Peer connection is not initialized");
+      logger.error("Peer connection is not initialized");
       return;
     }
 
@@ -269,7 +270,7 @@ export class CallerSignalingService
 
   private async handleAnswerRequest(data: AnswerRequest) {
     if (!this.peerConnection) {
-      console.error("Peer connection is not initialized");
+      logger.error("Peer connection is not initialized");
       return;
     }
 

@@ -1,3 +1,5 @@
+import { logger } from "@icod2/protocols";
+
 export class WebsocketJSONHandler {
   private webSocket: WebSocket;
   private sendingQueue: object[] = [];
@@ -49,12 +51,12 @@ export class WebsocketJSONHandler {
 
   private warn(message: string, ...args: unknown[]) {
     if (this.loggingEnabled) {
-      console.warn(message, ...args);
+      logger.warn(message, ...args);
     }
   }
 
   private error(message: string, ...args: unknown[]) {
-    console.error(message, ...args);
+    logger.error(message, ...args);
   }
 
   public onClose(fn: (code?: number, reason?: string) => void) {

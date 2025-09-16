@@ -1,3 +1,4 @@
+import { logger } from "@icod2/protocols";
 import type { Libp2p } from "@libp2p/interface";
 import { useCallback, useEffect, useRef } from "react";
 import {
@@ -74,8 +75,6 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
     let unmounted = false;
 
     (async () => {
-      console.log("Starting libp2p service - stopped:", unmounted);
-
       const { bootstrapMultiaddrs, relayPeerIds } = getBootstrapMultiaddrs();
       const roomToken = await roomTokenProvider.getRoomToken();
 
@@ -91,20 +90,20 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
 
       if (unmounted) return;
 
-      console.log("start new libp2p service");
+      logger.log("start new libp2p service");
       try {
         libp2pService = await startLibp2pService({
           roomToken,
           bootstrapMultiaddrs,
         });
       } catch (error) {
-        console.error("Error starting libp2p service:", error);
+        logger.error("Error starting libp2p service:", error);
         onFailedToConnectRef.current?.("Libp2pServiceError");
         return;
       }
 
       if (unmounted) {
-        console.log("Unmointing!");
+        logger.log("Unmointing!");
         libp2pService.stop();
         return;
       }
@@ -114,12 +113,12 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
       // @ts-expect-error
       window.debugPrintConnections = () => {
         const peers = libp2pService.getPeers();
-        console.log("Peers:", peers);
+        logger.log("Peers:", peers);
         const x = libp2pService.getConnections();
-        console.log("Connections:", x);
+        logger.log("Connections:", x);
       };
 
-      console.log(
+      logger.log(
         "libp2p service started with peer Id:",
         libp2pService.peerId.toString(),
       );
@@ -168,11 +167,6 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
 
       // @ts-expect-error
       window.debugPrintConnections = undefined;
-
-      console.log(
-        "Closing connections for peer id:",
-        libp2pService?.peerId.toString(),
-      );
 
       libp2pService?.removeEventListener("start", handleLibp2pStarted);
 

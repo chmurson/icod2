@@ -1,3 +1,4 @@
+import { logger } from "@icod2/protocols";
 import type { BasicProtoInterface } from "./types";
 
 export class PeersMessageRouter<
@@ -26,7 +27,7 @@ export class PeersMessageRouter<
   router = (peerId: string, msg: object, proto: TProto) => {
     for (const route of this.routes) {
       if (route.condition(msg)) {
-        console.log(
+        logger.log(
           `Found route for ${"type" in msg ? msg.type : JSON.stringify(msg)}; peerId: ${peerId}`,
         );
         route.handler(peerId, msg, proto);
@@ -34,7 +35,7 @@ export class PeersMessageRouter<
       }
     }
 
-    console.warn(
+    logger.warn(
       "No route found for message:",
       "type" in msg ? msg.type : JSON.stringify(msg),
     );

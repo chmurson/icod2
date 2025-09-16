@@ -1,3 +1,4 @@
+import { logger } from "@icod2/protocols";
 import init, {
   ChunksConfiguration as RustChunksConfiguration,
   restore_message,
@@ -52,7 +53,7 @@ const CryptoPlayground = () => {
       setDecryptedMessage(restored);
       setDecryptionError(null);
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       setDecryptionError(
         "Decryption failed. Please ensure the keys are correct and you have provided enough of them.",
       );

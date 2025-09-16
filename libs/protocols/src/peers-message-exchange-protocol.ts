@@ -1,5 +1,6 @@
 import type { Libp2p } from "libp2p";
 import { attachOngoingStream } from "./commons/attach-ongoing-stream.js";
+import logger from "./commons/customLogger";
 import { parseJsonSafely } from "./commons/parse-json-safely.js";
 import { registerProtoHandle } from "./commons/register-proto-handle.js";
 
@@ -50,7 +51,7 @@ export class PeerMessageExchangeProtocol<
     registerProtoHandle(this.protocolId, libp2p, (message, peerId) => {
       const jsonMessage = parseJsonSafely(message);
       if (!jsonMessage) return;
-      console.log(
+      logger.log(
         "Received message from peer:",
         peerId,
         "message:",
@@ -68,9 +69,9 @@ export class PeerMessageExchangeProtocol<
 
   async sendMessageToPeer(peerId: string, payload: TPeerMessagePayload) {
     const channel = await this.getOrCreateChannel(peerId);
-    console.log("Sending message to peer:", peerId, "message:", payload);
+    logger.log("Sending message to peer:", peerId, "message:", payload);
     await channel.send(payload);
-    console.log("Message sent to peer:", peerId);
+    logger.log("Message sent to peer:", peerId);
   }
 
   async sendMessageToAllPeers(payload: TPeerMessagePayload) {
@@ -119,7 +120,7 @@ export class PeerMessageExchangeProtocol<
       (message) => {
         const jsonMessage = parseJsonSafely(message);
         if (!jsonMessage) return;
-        console.log(
+        logger.log(
           "Received message from peer:",
           peerId,
           "message:",

@@ -1,3 +1,4 @@
+import { logger } from "@icod2/protocols";
 import { type RefObject, useCallback, useEffect, useRef } from "react";
 import { DataChannelManager } from "@/services/webrtc";
 import type { PossibleSignalingServie } from "@/services/webrtc/DataChannelManager";
@@ -86,7 +87,7 @@ export const useDataChannelMng = <
             routerItem.router.router(localID, data, dataChannelManager);
           }
         } catch (error) {
-          console.error(`Error in router ${routerItem.id}:`, error);
+          logger.error(`Error in router ${routerItem.id}:`, error);
         }
       }
     },
@@ -115,22 +116,22 @@ export const useDataChannelMng = <
       signalingService: new SignalingService(webSocketConnection),
       callbacks: {
         onPeerConnected: (localId) => {
-          console.log("Peer connected:", localId);
+          logger.log("Peer connected:", localId);
           onPeerConnectedRef.current?.(localId);
         },
         onPeerDisconnected: (localId) => {
           onPeerDisconnectedRef.current?.(localId);
-          console.log("Peer disconnected:", localId);
+          logger.log("Peer disconnected:", localId);
         },
         onFailedToConnect: (reason) => {
           onFailedToConnectRef.current?.(reason);
-          console.error("Failed to connect:", reason);
+          logger.error("Failed to connect:", reason);
         },
         onPeerConnecting: () => {
-          console.log("New peer connecting...");
+          logger.log("New peer connecting...");
         },
         onSignalingServerConnected: () => {
-          console.log(
+          logger.log(
             `Connected to signaling service at ${webSocketConnection.getUrl()}`,
           );
         },
@@ -160,7 +161,7 @@ export const useDataChannelMng = <
         | DataChannelMessageRouter<TSignalingService, TConnectionFailReason>,
     ) => {
       if (routersRef.current.has(id)) {
-        console.warn(`Router with id "${id}" already exists. Replacing it.`);
+        logger.warn(`Router with id "${id}" already exists. Replacing it.`);
       }
 
       routersRef.current.set(id, {
@@ -174,7 +175,7 @@ export const useDataChannelMng = <
   const removeRouter = useCallback((id: string) => {
     const deleted = routersRef.current.delete(id);
     if (!deleted) {
-      console.warn(`Router with id "${id}" not found.`);
+      logger.warn(`Router with id "${id}" not found.`);
     }
     return deleted;
   }, []);

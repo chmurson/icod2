@@ -1,3 +1,4 @@
+import { logger } from "@icod2/protocols";
 import { getPeerConnectionConfiguration } from "./getPeerConnectionConfiguration";
 
 export async function createOfferAndAllIceCandidate(
@@ -15,7 +16,7 @@ export async function createOfferAndAllIceCandidate(
     let offer: RTCSessionDescriptionInit | undefined;
 
     peerConnection.onicecandidate = (event) => {
-      console.log("ice candidate", event.candidate);
+      logger.log("ice candidate", event.candidate);
 
       if (event.candidate !== null) {
         iceCandidates.push(event.candidate);

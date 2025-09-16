@@ -9,8 +9,6 @@ export const useShareableURL = () => {
 
   const roomTokenFromStore = useCreateBoxStore((state) => state.leader.id);
 
-  console.log("roomTokenFromStore", roomTokenFromStore);
-
   useEffect(() => {
     const newURL = `/lock-box/${roomTokenFromStore}`;
     if (newURL !== window.location.pathname) {

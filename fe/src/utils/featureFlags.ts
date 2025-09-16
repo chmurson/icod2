@@ -1,3 +1,5 @@
+import { logger } from "@icod2/protocols";
+
 export const FEATURE_FLAGS = {
   CLOSE_INITITIAL_PEER_CONNECTION_ASAP: "CLOSE_INITITIAL_PEER_CONNECTION_ASAP",
 } as const;
@@ -53,7 +55,7 @@ class FeatureFlagsManager {
         });
       }
     } catch (error) {
-      console.warn("Failed to parse stored feature flags:", error);
+      logger.warn("Failed to parse stored feature flags:", error);
     }
 
     this.applyUrlParams();
@@ -91,7 +93,7 @@ class FeatureFlagsManager {
         });
       }
     } catch (error) {
-      console.warn("Failed to parse URL params for feature flags:", error);
+      logger.warn("Failed to parse URL params for feature flags:", error);
     }
   }
 
@@ -103,7 +105,7 @@ class FeatureFlagsManager {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.flags));
     } catch (error) {
-      console.warn("Failed to persist feature flags:", error);
+      logger.warn("Failed to persist feature flags:", error);
     }
   }
 
@@ -121,7 +123,7 @@ class FeatureFlagsManager {
 
   isEnabled(flagName: FeatureFlagName): boolean {
     if (!this.isValidFlag(flagName)) {
-      console.warn(`Invalid feature flag: ${flagName}`);
+      logger.warn(`Invalid feature flag: ${flagName}`);
       return false;
     }
 
@@ -139,7 +141,7 @@ class FeatureFlagsManager {
     flagName: FeatureFlagName,
   ): T | undefined {
     if (!this.isValidFlag(flagName)) {
-      console.warn(`Invalid feature flag: ${flagName}`);
+      logger.warn(`Invalid feature flag: ${flagName}`);
       return undefined;
     }
     return this.flags[flagName] as T;
@@ -147,7 +149,7 @@ class FeatureFlagsManager {
 
   enable(flagName: FeatureFlagName): void {
     if (!this.isValidFlag(flagName)) {
-      console.warn(`Invalid feature flag: ${flagName}`);
+      logger.warn(`Invalid feature flag: ${flagName}`);
       return;
     }
 
@@ -162,7 +164,7 @@ class FeatureFlagsManager {
 
   disable(flagName: FeatureFlagName): void {
     if (!this.isValidFlag(flagName)) {
-      console.warn(`Invalid feature flag: ${flagName}`);
+      logger.warn(`Invalid feature flag: ${flagName}`);
       return;
     }
 
@@ -177,7 +179,7 @@ class FeatureFlagsManager {
 
   toggle(flagName: FeatureFlagName): boolean {
     if (!this.isValidFlag(flagName)) {
-      console.warn(`Invalid feature flag: ${flagName}`);
+      logger.warn(`Invalid feature flag: ${flagName}`);
       return false;
     }
 
@@ -192,7 +194,7 @@ class FeatureFlagsManager {
 
   set(flagName: FeatureFlagName, value: FeatureFlagValue): void {
     if (!this.isValidFlag(flagName)) {
-      console.warn(`Invalid feature flag: ${flagName}`);
+      logger.warn(`Invalid feature flag: ${flagName}`);
       return;
     }
 
@@ -215,7 +217,7 @@ class FeatureFlagsManager {
 
   reset(flagName: FeatureFlagName): void {
     if (!this.isValidFlag(flagName)) {
-      console.warn(`Invalid feature flag: ${flagName}`);
+      logger.warn(`Invalid feature flag: ${flagName}`);
       return;
     }
 
@@ -245,7 +247,7 @@ class FeatureFlagsManager {
       localStorage.removeItem(STORAGE_KEY);
       this.resetAll();
     } catch (error) {
-      console.warn("Failed to clear feature flags:", error);
+      logger.warn("Failed to clear feature flags:", error);
     }
   }
 
@@ -262,7 +264,7 @@ class FeatureFlagsManager {
     callback: (value: FeatureFlagValue) => void,
   ): () => void {
     if (!this.isValidFlag(flagName)) {
-      console.warn(`Invalid feature flag: ${flagName}`);
+      logger.warn(`Invalid feature flag: ${flagName}`);
       return () => {};
     }
 
@@ -287,8 +289,8 @@ class FeatureFlagsManager {
     const flags = this.getAll();
     const defaults = getDefaultFlags();
 
-    console.group("🚩 Feature Flags Debug");
-    console.table(
+    logger.log("🚩 Feature Flags Debug");
+    logger.log(
       Object.entries(flags).map(([key, value]) => ({
         Flag: key,
         Current: value,
@@ -296,10 +298,9 @@ class FeatureFlagsManager {
         Type: typeof value,
       })),
     );
-    console.log("Available flags:", this.getAllFlagNames());
-    console.log("URL param format: ?ff=flag1:true,flag2:false");
-    console.log("Access via: window.__featureFlagsDebug()");
-    console.groupEnd();
+    logger.log("Available flags:", this.getAllFlagNames());
+    logger.log("URL param format: ?ff=flag1:true,flag2:false");
+    logger.log("Access via: window.__featureFlagsDebug()");
   }
 
   generateUrl(baseUrl?: string): string {
@@ -373,7 +374,7 @@ export const useFeatureFlag = (flagName: FeatureFlagName): boolean => {
 };
 
 if (process.env.NODE_ENV === "development") {
-  console.log(
+  logger.log(
     "🚩 Feature Flags initialized. Run window.__featureFlagsDebug() for details.",
   );
 }

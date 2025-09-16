@@ -1,3 +1,4 @@
+import { logger } from "@icod2/protocols";
 import { ExclamationTriangleIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { Card, Flex, Separator } from "@radix-ui/themes";
 import { Component, type ErrorInfo, type ReactNode } from "react";
@@ -61,11 +62,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
     // Log error to console in development
     if (process.env.NODE_ENV === "development") {
-      console.group(`🔴 Error Boundary Caught Error [${errorId}]`);
-      console.error("Error:", error);
-      console.error("Error Info:", errorInfo);
-      console.error("Component Stack:", errorInfo.componentStack);
-      console.groupEnd();
+      logger.log(`🔴 Error Boundary Caught Error [${errorId}]`);
+      logger.error("Error:", error);
+      logger.error("Error Info:", errorInfo);
+      logger.error("Component Stack:", errorInfo.componentStack);
     }
 
     // Call custom error handler
@@ -100,11 +100,11 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify(errorReport),
-      // }).catch(console.error);
+      // }).catch(error);
 
-      console.log("Error reported:", errorReport);
+      logger.log("Error reported:", errorReport);
     } catch (reportingError) {
-      console.error("Failed to report error:", reportingError);
+      logger.error("Failed to report error:", reportingError);
     }
   };
 
@@ -147,9 +147,9 @@ URL: ${window.location.href}`;
 
     try {
       await navigator.clipboard.writeText(errorText);
-      console.log("Error details copied to clipboard");
+      logger.log("Error details copied to clipboard");
     } catch (err) {
-      console.error("Failed to copy error details:", err);
+      logger.error("Failed to copy error details:", err);
     }
   };
 

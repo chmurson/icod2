@@ -1,3 +1,4 @@
+export { default as logger } from "./commons/customLogger.js";
 export {
   PeerMessageExchangeProtocol,
   type PeerMessageListener,

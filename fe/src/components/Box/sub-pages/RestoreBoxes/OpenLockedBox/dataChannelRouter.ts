@@ -1,3 +1,4 @@
+import { logger } from "@icod2/protocols";
 import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
 import { createKeyholderHelloHash } from "@/utils/createKeyholderHelloHash";
@@ -75,7 +76,7 @@ router.addHandler(isFollowerSendsPartialStateMessage, (peerId, message) => {
 
   const keyHolderId = usePeerToHolderMapRef.getValue().getKeyholerId(peerId);
   if (!keyHolderId) {
-    console.warn(`Keyholder id not found for peer: ${peerId}`);
+    logger.warn(`Keyholder id not found for peer: ${peerId}`);
     return;
   }
 

@@ -1,3 +1,4 @@
+import { logger } from "@icod2/protocols";
 import init, { restore_message } from "icod-crypto-js";
 import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
 import { useEffect, useId, useState } from "react";
@@ -37,7 +38,7 @@ const DecodePlayground = () => {
       setDecryptedMessage(restored);
       setDecryptionError(null);
     } catch (_e) {
-      console.error(_e);
+      logger.error(_e);
       setDecryptionError(
         "Decryption failed. Please ensure the keys are correct and you have provided enough of them.",
       );

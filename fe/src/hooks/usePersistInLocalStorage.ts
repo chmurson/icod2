@@ -1,3 +1,4 @@
+import { logger } from "@icod2/protocols";
 import { useCallback } from "react";
 
 interface UsePersistInLocalStorageProps {
@@ -12,7 +13,7 @@ export const usePersistInLocalStorage = <T>({
       try {
         window.localStorage.setItem(keyName, JSON.stringify(value));
       } catch (e) {
-        console.error(e);
+        logger.error(e);
       }
     },
     [keyName],
@@ -23,7 +24,7 @@ export const usePersistInLocalStorage = <T>({
       const item = window.localStorage.getItem(keyName);
       return item ? (JSON.parse(item) as T) : null;
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       return null;
     }
   }, [keyName]);

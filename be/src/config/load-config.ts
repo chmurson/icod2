@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { logger } from "@icod2/protocols";
 import yaml from "js-yaml";
 import { defaultConfig } from "./default-config.js";
 import type { AppConfig } from "./types.js";
@@ -37,7 +38,7 @@ export function loadConfig(): AppConfig {
 
   for (const configPath of configPaths) {
     if (existsSync(configPath)) {
-      console.log(`Loading config from: ${configPath}`);
+      logger.log(`Loading config from: ${configPath}`);
       fileConfig = loadFileConfig(configPath);
       break;
     }

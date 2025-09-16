@@ -1,3 +1,4 @@
+import { logger } from "@icod2/protocols";
 import type { PeerId } from "@libp2p/interface";
 import { peerIdFromString } from "@libp2p/peer-id";
 import { multiaddr } from "@multiformats/multiaddr";
@@ -102,7 +103,7 @@ export class RelayReconnectDialer {
       return;
     }
 
-    console.log(`Relay peer connected: ${peerIdStr}`);
+    logger.log(`Relay peer connected: ${peerIdStr}`);
 
     const state = this.reconnectStates.get(peerIdStr);
     if (state?.retryTimeoutId) {
@@ -120,7 +121,7 @@ export class RelayReconnectDialer {
       return;
     }
 
-    console.log(`Relay peer disconnected: ${peerIdStr}`);
+    logger.log(`Relay peer disconnected: ${peerIdStr}`);
 
     this.notifyRelayDisconnected(peerIdStr);
     this.attemptReconnect(peerIdStr);
@@ -129,9 +130,7 @@ export class RelayReconnectDialer {
   private async attemptReconnect(peerIdStr: string) {
     let state = this.reconnectStates.get(peerIdStr);
     if (state?.isReconnecting) {
-      console.log(
-        `Already attempting to reconnect to relay peer: ${peerIdStr}`,
-      );
+      logger.log(`Already attempting to reconnect to relay peer: ${peerIdStr}`);
       return;
     }
 
@@ -143,7 +142,7 @@ export class RelayReconnectDialer {
     state.isReconnecting = true;
 
     try {
-      console.log(
+      logger.log(
         `Attempting to reconnect to relay peer: ${peerIdStr} (attempt ${state.retryCount + 1}/${this.maxRetries})`,
       );
 
@@ -153,32 +152,32 @@ export class RelayReconnectDialer {
       );
 
       if (peerMultiaddrs.length > 0) {
-        console.log(
+        logger.log(
           `Dialing relay peer ${peerIdStr} with multiaddrs:`,
           peerMultiaddrs,
         );
         const multiaddrs = peerMultiaddrs.map((addr) => multiaddr(addr));
         await this.libp2p.dial(multiaddrs);
       } else {
-        console.log(`Dialing relay peer ${peerIdStr} by ID`);
+        logger.log(`Dialing relay peer ${peerIdStr} by ID`);
         const peerId = peerIdFromString(peerIdStr);
         await this.libp2p.dial(peerId);
       }
 
-      console.log(`Successfully reconnected to relay peer: ${peerIdStr}`);
+      logger.log(`Successfully reconnected to relay peer: ${peerIdStr}`);
 
       state.isReconnecting = false;
       state.retryCount = 0;
       this.reconnectStates.delete(peerIdStr);
     } catch (error) {
-      console.error(`Failed to reconnect to relay peer ${peerIdStr}:`, error);
+      logger.error(`Failed to reconnect to relay peer ${peerIdStr}:`, error);
 
       state.isReconnecting = false;
       state.retryCount++;
 
       if (state.retryCount < this.maxRetries) {
         const delay = this.calculateRetryDelay(state.retryCount);
-        console.log(
+        logger.log(
           `Scheduling retry for relay peer ${peerIdStr} in ${delay}ms`,
         );
 
@@ -186,7 +185,7 @@ export class RelayReconnectDialer {
           this.attemptReconnect(peerIdStr);
         }, delay);
       } else {
-        console.error(
+        logger.error(
           `Max retries reached for relay peer ${peerIdStr}. Giving up.`,
         );
         this.reconnectStates.delete(peerIdStr);
@@ -208,7 +207,7 @@ export class RelayReconnectDialer {
       try {
         listener(peerIdStr);
       } catch (error) {
-        console.error("Error in onRelayConnected listener:", error);
+        logger.error("Error in onRelayConnected listener:", error);
       }
     }
   }
@@ -218,7 +217,7 @@ export class RelayReconnectDialer {
       try {
         listener(peerIdStr);
       } catch (error) {
-        console.error("Error in onRelayDisconnected listener:", error);
+        logger.error("Error in onRelayDisconnected listener:", error);
       }
     }
   }

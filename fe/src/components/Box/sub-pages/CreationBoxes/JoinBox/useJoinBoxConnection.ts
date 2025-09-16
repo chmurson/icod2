@@ -78,8 +78,12 @@ export function useJoinBoxConnection() {
   }, [onPeerConnected]);
 
   useEffect(() => {
-    routerMng.addRouter("join-createobox", router.router);
-  }, [routerMng.addRouter]);
+    routerMng.addRouter("join-create-box", router.router);
+
+    return () => {
+      routerMng.removeRouter("join-create-box");
+    };
+  }, [routerMng]);
 
   return {
     routerMng,

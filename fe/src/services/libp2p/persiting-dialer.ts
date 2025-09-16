@@ -1,3 +1,4 @@
+import { logger } from "@icod2/protocols";
 import type { PeerId, PeerUpdate } from "@libp2p/interface";
 import { peerIdFromString } from "@libp2p/peer-id";
 import type { Multiaddr } from "@multiformats/multiaddr";
@@ -126,7 +127,7 @@ export class PersistingDialer {
     }
 
     if (peerToDial.isCurrentlyDialing) {
-      console.log(`Peer ${peerIdStr} is already being dialed`);
+      logger.log(`Peer ${peerIdStr} is already being dialed`);
       return;
     }
 
@@ -137,13 +138,13 @@ export class PersistingDialer {
 
       if (!multiAddrs) {
         const peerId = peerIdFromString(peerIdStr);
-        console.log(`Trying to dial peer by id ${peerIdStr}`);
+        logger.log(`Trying to dial peer by id ${peerIdStr}`);
         connection = await this.libp2p.dial(peerId);
       } else {
         const encodedMultiAddrs = multiAddrs.map((multiaddr) =>
           multiaddr.encapsulate(`/p2p/${peerIdStr}`),
         );
-        console.log(
+        logger.log(
           "Trying to dial peer by address",
           encodedMultiAddrs.map((multiaddr) => multiaddr.toString()),
         );
@@ -152,7 +153,7 @@ export class PersistingDialer {
       if (isEnabled("CLOSE_INITITIAL_PEER_CONNECTION_ASAP")) {
         connection.close();
       }
-      console.log(`Successfully dialed peer ${peerIdStr}`);
+      logger.log(`Successfully dialed peer ${peerIdStr}`);
       this.callAllListeners(peerIdStr);
       this.peersToDial.delete(peerIdStr);
     } catch (error) {
@@ -160,7 +161,7 @@ export class PersistingDialer {
       if (this.queuedPeersToDialByIds.includes(peerIdStr)) {
         await this.triggerDialFromQueue(peerIdStr);
       }
-      console.error(`Failed to dial peer ${peerIdStr}: ${error}`);
+      logger.error(`Failed to dial peer ${peerIdStr}: ${error}`);
     }
   }
 }
