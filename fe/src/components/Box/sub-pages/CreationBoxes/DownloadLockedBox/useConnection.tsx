@@ -1,6 +1,9 @@
+import customLogger from "@icod2/protocols/src/commons/customLogger";
 import { useContext, useEffect, useRef } from "react";
 import { createBoxConnectionContext } from "../CreateBoxConnectionProvider";
 import { router } from "./dataChannelRouter";
+
+const TIMEOUT_MS = 20 * 1000; // 20 secs
 
 export function useConnection() {
   const context = useContext(createBoxConnectionContext);
@@ -8,20 +11,21 @@ export function useConnection() {
   const timeoutRef = useRef<number>(undefined);
 
   useEffect(() => {
-    if (!!context?.addRouter && !!context?.removeRouter) {
-      context.addRouter("download-box-router", router);
+    if (context?.routerMng) {
+      context.routerMng.addRouter("download-box-router", router.router);
 
       timeoutRef.current = window.setTimeout(() => {
-        context.dataChannelMngRef.current?.close();
-        context.dataChannelMngRef.current = undefined;
-      }, 20 * 1000 /* 20 secs */);
+        customLogger.warn(
+          "Download locked box connection timed out - but the timeout is not really implemented",
+        );
+      }, TIMEOUT_MS);
 
       return () => {
         window.clearTimeout(timeoutRef.current);
-        context.removeRouter("download-box-router");
+        context.routerMng.removeRouter("download-box-router");
       };
     }
 
     return () => {};
-  }, [context?.addRouter, context?.removeRouter, context?.dataChannelMngRef]);
+  }, [context?.routerMng]);
 }
