@@ -12,7 +12,7 @@ export const createPeerConnectionHandler = ({
   relayPeerIds,
   connectedPeersStorage,
   handShake,
-  persistingDialer: persitingDialer,
+  persistingDialer,
   onError,
 }: {
   relayPeerIds: string[];
@@ -34,7 +34,7 @@ export const createPeerConnectionHandler = ({
     }
   };
 
-  persitingDialer.addOnPeerDialedListener((peerIdStr: string) => {
+  persistingDialer.addOnPeerDialedListener((peerIdStr: string) => {
     onDialSuccesfully(peerIdStr);
   });
 
@@ -43,6 +43,10 @@ export const createPeerConnectionHandler = ({
       const peerIdStr = evt.detail.toString();
       console.log("Peer connected:", peerIdStr);
       connectedPeersStorage.removePeer(peerIdStr);
+
+      if (relayPeerIds.includes(peerIdStr)) {
+        persistingDialer.add(peerIdStr);
+      }
     });
 
     // 👇 Dial peers discovered via pubsub
@@ -63,7 +67,7 @@ export const createPeerConnectionHandler = ({
       }
       if (maddrs.length === 0) {
         console.log("No multiaddrs to dial");
-        persitingDialer.add(discoveredPeerIdStr);
+        persistingDialer.add(discoveredPeerIdStr);
         return;
       }
       try {
@@ -87,7 +91,7 @@ export const createPeerConnectionHandler = ({
           );
           onError("CannotConnectToRelayPeer");
         } else {
-          persitingDialer.add(discoveredPeerIdStr);
+          persistingDialer.add(discoveredPeerIdStr);
           console.error(
             `Failed to dial non-relay peer (${evt.detail.id.toString()}):`,
             err,

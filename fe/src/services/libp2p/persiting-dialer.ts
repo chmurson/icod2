@@ -1,4 +1,4 @@
-import type { PeerUpdate } from "@libp2p/interface";
+import type { PeerId, PeerUpdate } from "@libp2p/interface";
 import { peerIdFromString } from "@libp2p/peer-id";
 import type { Multiaddr } from "@multiformats/multiaddr";
 import type { Libp2p } from "libp2p";
@@ -24,6 +24,7 @@ export class PersistingDialer {
     this.libp2p = libp2p;
 
     libp2p.addEventListener("peer:update", this.peerUpdateHandler);
+    libp2p.addEventListener("peer:disconnect", (_arg) => {});
 
     if (options.onSuccessfullyDialedPeer) {
       this.listeners.push(options.onSuccessfullyDialedPeer);
@@ -41,12 +42,6 @@ export class PersistingDialer {
     }
   }
 
-  callAllListeners(peerIdStr: string) {
-    for (const listener of this.listeners) {
-      listener(peerIdStr);
-    }
-  }
-
   add(peerId: string) {
     if (this.peersToDial.has(peerId)) {
       return;
@@ -58,9 +53,38 @@ export class PersistingDialer {
   [Symbol.dispose]() {
     if (this.libp2p && typeof this.libp2p.removeEventListener === "function") {
       this.libp2p.removeEventListener("peer:update", this.peerUpdateHandler);
+      this.libp2p.removeEventListener(
+        "peer:disconnect",
+        this.peerDisconnectedHandler,
+      );
       this.peersToDial.clear();
     }
   }
+
+  private callAllListeners(peerIdStr: string) {
+    for (const listener of this.listeners) {
+      listener(peerIdStr);
+    }
+  }
+
+  private peerDisconnectedHandler = async (evt: CustomEvent<PeerId>) => {
+    const peerIdStr = evt.detail.toString();
+    const peerToDial = this.peersToDial.get(peerIdStr);
+
+    if (!peerToDial) {
+      return;
+    }
+
+    if (!peerToDial.isCurrentlyDialing) {
+      this.peersToDial.delete(peerIdStr);
+    }
+
+    const index = this.queuedPeersToDialByIds.indexOf(peerIdStr);
+
+    if (index !== -1) {
+      this.queuedPeersToDialByIds.splice(index, 1);
+    }
+  };
 
   private peerUpdateHandler = async (evt: CustomEvent<PeerUpdate>) => {
     const peerIdStr = evt.detail.peer.id.toString();

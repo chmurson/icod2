@@ -43,6 +43,10 @@ export function useCreateBoxConnection() {
         }
       },
     );
+
+    connectedPeersStorage.current.addListener("peer-removed", (peerId) => {
+      console.log("Peer removed:", peerId);
+    });
   }, [tryToRegisterNewRoom]);
 
   useDataChannelMng2({
