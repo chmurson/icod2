@@ -13,7 +13,8 @@
       "**/*.json",
       "!node_modules",
       "!dist",
-      "!libs/icod-crypto-js"
+      "!libs/icod-crypto-js",
+      "!libs/protocols/dist"
     ]
   },
   "formatter": {

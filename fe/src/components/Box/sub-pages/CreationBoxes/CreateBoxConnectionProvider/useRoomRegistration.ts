@@ -59,11 +59,6 @@ export function useStartNewRegistrationProtocol({
 
         onRoomRegisteredRef.current?.();
         clearTimeout(timeoutRef.current);
-
-        unregisterRoomAndCloseConnectionRef.current = async () => {
-          await result.operations.unregisterRoom(roomToken);
-          result.close();
-        };
       } catch (error) {
         if (cancelled) return;
         console.error("Error registering room:", error);

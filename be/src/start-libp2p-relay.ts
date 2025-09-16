@@ -45,11 +45,21 @@ export async function startLibp2pRelay({
   const peerId = libp2p.peerId.toString();
   const multiaddrs = libp2p.getMultiaddrs();
 
+  libp2p.addEventListener("connection:open", (event) => {
+    const { id, remotePeer } = event.detail;
+    console.log("Connection open:", { id, remotePeer });
+  });
+
+  libp2p.addEventListener("connection:close", (event) => {
+    const { id, remotePeer } = event.detail;
+    console.log("Connection closed:", { id, remotePeer });
+  });
+
   const roomRegistrationProt = initRoomRegistrationProtocol(libp2p, {
     onRegisterRoom: async (roomName, peerId) => {
       console.log(`Room registered: ${roomName}`);
       try {
-        roomRegistration.registerRoom(roomName);
+        roomRegistration.registerRoom(roomName, peerId);
       } catch (error) {
         console.error(`Error registering room ${roomName}: ${error}`);
       }
@@ -60,10 +70,11 @@ export async function startLibp2pRelay({
         type: "register-room-response-success",
       } satisfies Responses["registerRoomSuccess"]);
       close();
+      console.log("Registered rooms:", roomRegistration.registeredRooms);
     },
-    onUnregisterRoom: async (roomName) => {
-      console.log(`Room registered: ${roomName}`);
-      roomRegistration.unregisterRoom(roomName);
+    onUnregisterRoom: async (roomName, peerId) => {
+      console.log(`Room unregistered: ${roomName}`);
+      roomRegistration.removePeerAndUnregisterRoomInNeeded(peerId);
       const { createPeerConnection } = roomRegistrationProt;
       const { sendResponse, close } = await createPeerConnection(peerId);
       await sendResponse({
@@ -71,6 +82,7 @@ export async function startLibp2pRelay({
         type: "unregister-room-response-success",
       } satisfies Responses["unregisterRoomSuccess"]);
       close();
+      console.log("Registered rooms:", roomRegistration.registeredRooms);
     },
   });
   await roomRegistrationProt.start();
@@ -84,9 +96,12 @@ export async function startLibp2pRelay({
   });
 
   libp2p.addEventListener("peer:disconnect", (event) => {
-    console.log("Disconnected peer:", event.detail.toString());
-    connectedPeers.delete(event.detail.toString());
+    const peerIdStr = event.detail.toString();
+    console.log("Disconnected peer:", peerIdStr);
+    connectedPeers.delete(peerIdStr);
     console.log("Connected peers:", connectedPeers);
+    roomRegistration.removePeerAndUnregisterRoomInNeeded(peerIdStr);
+    console.log("Registered rooms:", roomRegistration.registeredRooms);
   });
 
   console.log("PeerID: ", peerId.toString());

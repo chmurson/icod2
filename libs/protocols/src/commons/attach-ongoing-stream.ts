@@ -25,7 +25,6 @@ export async function attachOngoingStream(
       while (keepListening) {
         const buf = await byteStreamInstance.read();
         if (!buf) {
-          console.log("❌ No buffer received, ending read loop");
           keepListening = false;
           break;
         }

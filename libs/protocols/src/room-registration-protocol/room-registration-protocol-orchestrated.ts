@@ -1,12 +1,12 @@
 import type { Libp2p } from "libp2p";
 import type { z } from "zod";
 import { attachOngoingStream } from "../commons/attach-ongoing-stream.js";
+import { parseJsonSafely } from "../commons/parse-json-safely.js";
+import { registerProtoHandle } from "../commons/register-proto-handle.js";
 import {
   RequestResponseBuilder,
   RequestResponseManager,
-} from "./../commons/message-orchestrator.js";
-import { parseJsonSafely } from "../commons/parse-json-safely.js";
-import { registerProtoHandle } from "../commons/register-proto-handle.js";
+} from "./../commons/request-response-manager.js";
 import {
   type Messages,
   messagesSchemas,
@@ -16,7 +16,7 @@ import {
 
 export type ChatMessage = string | Record<string, unknown>;
 
-export const ROOM_REGISTRATION_PROTOCOL = "/myapp/room-registration/1.0.0";
+export const ROOM_REGISTRATION_PROTOCOL = "/icod2/room-registration/1.0.0";
 
 type Callbacks = {
   onRegisterRoom: (roomName: string, peerId: string) => void;
@@ -60,33 +60,14 @@ export function initRoomRegistrationProtocol(
   libp2p: Libp2p,
   callbacks?: Callbacks,
 ) {
-  const manager = new RequestResponseManager<Record<string, unknown>>();
-
-  if (callbacks) {
-    manager.registerMessageHandler(
-      (message): message is Messages["registerRoom"] => {
-        const result = messagesSchemas.registerRoom.safeParse(message);
-        return result.success;
-      },
-      (message, peerId) => {
-        console.log("Registering room:", message.roomName);
-        callbacks.onRegisterRoom(message.roomName, peerId);
-      },
-    );
-
-    manager.registerMessageHandler(
-      (msg): msg is Messages["unregisterRoom"] => {
-        const result = messagesSchemas.unregisterRoom.safeParse(msg);
-        return result.success;
-      },
-      (message, peerId) => {
-        console.log("Unregistering room:", message.roomName);
-        callbacks.onUnregisterRoom(message.roomName, peerId);
-      },
-    );
-  }
+  const peerManagers = new Map<
+    string,
+    RequestResponseManager<Record<string, unknown>>
+  >();
 
   const createPeerConnection = async (peerIdStr: string) => {
+    const peerManager = new RequestResponseManager<Record<string, unknown>>();
+
     const { sendJson, getStream } = await attachOngoingStream(
       ROOM_REGISTRATION_PROTOCOL,
       libp2p,
@@ -94,17 +75,20 @@ export function initRoomRegistrationProtocol(
       (message) => {
         const json = parseJsonSafely(message);
         if (json) {
-          manager.processIncomingMessage(json, peerIdStr);
+          peerManager.processIncomingMessage(json, peerIdStr);
         }
       },
     );
 
-    manager.configureSendFunction(sendJson);
+    peerManager.configureSendFunction(sendJson);
+
+    peerManagers.set(peerIdStr, peerManager);
 
     return {
-      manager,
+      manager: peerManager,
       close: () => {
-        manager.clearPendingRequests();
+        peerManager.clearPendingRequests();
+        peerManagers.delete(peerIdStr);
         getStream().close();
       },
       sendResponse: (message: Responses[keyof Responses]) => {
@@ -113,7 +97,7 @@ export function initRoomRegistrationProtocol(
       operations: {
         registerRoom: async (roomToken: string) => {
           try {
-            const response = await manager.executeRequestResponse(
+            const response = await peerManager.executeRequestResponse(
               requestResponsePairs.registerRoom(roomToken),
               "register-room",
             );
@@ -124,7 +108,7 @@ export function initRoomRegistrationProtocol(
         },
         unregisterRoom: async (roomToken: string) => {
           try {
-            const response = await manager.executeRequestResponse(
+            const response = await peerManager.executeRequestResponse(
               requestResponsePairs.unregisterRoom(roomToken),
               "unregister-room",
             );
@@ -146,7 +130,26 @@ export function initRoomRegistrationProtocol(
         const json = parseJsonSafely(message);
         if (!json) return;
 
-        if (!manager.processIncomingMessage(json, peerId)) {
+        const peerManager = peerManagers.get(peerId);
+        let handled = false;
+
+        if (peerManager) {
+          handled = peerManager.processIncomingMessage(json, peerId);
+        }
+
+        if (!handled && callbacks) {
+          if (messagesSchemas.registerRoom.safeParse(json).success) {
+            const msg = json as Messages["registerRoom"];
+            callbacks.onRegisterRoom(msg.roomName, peerId);
+            handled = true;
+          } else if (messagesSchemas.unregisterRoom.safeParse(json).success) {
+            const msg = json as Messages["unregisterRoom"];
+            callbacks.onUnregisterRoom(msg.roomName, peerId);
+            handled = true;
+          }
+        }
+
+        if (!handled) {
           console.warn("Unhandled message:", json);
         }
       },
@@ -154,6 +157,11 @@ export function initRoomRegistrationProtocol(
   };
 
   const close = () => {
+    for (const manager of peerManagers.values()) {
+      manager.clearPendingRequests();
+    }
+    peerManagers.clear();
+
     libp2p.unhandle(ROOM_REGISTRATION_PROTOCOL);
   };
 
