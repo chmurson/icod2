@@ -1,16 +1,21 @@
 import { useCallback, useRef } from "react";
 import type { RouterItem } from "./types";
 
-export function useRouterManager() {
-  const routersRef = useRef<Map<string, RouterItem>>(new Map());
+export function useRouterManager<BasicMessagePayload extends object, TProto>() {
+  const routersRef = useRef<
+    Map<string, RouterItem<BasicMessagePayload, TProto>>
+  >(new Map());
 
-  const addRouter = useCallback((id: string, routerToAdd: RouterItem) => {
-    if (routersRef.current.has(id)) {
-      console.warn(`Router with id "${id}" already exists. Replacing it.`);
-    }
+  const addRouter = useCallback(
+    (id: string, routerToAdd: RouterItem<BasicMessagePayload, TProto>) => {
+      if (routersRef.current.has(id)) {
+        console.warn(`Router with id "${id}" already exists. Replacing it.`);
+      }
 
-    routersRef.current.set(id, routerToAdd);
-  }, []);
+      routersRef.current.set(id, routerToAdd);
+    },
+    [],
+  );
 
   const removeRouter = useCallback((id: string) => {
     const deleted = routersRef.current.delete(id);
@@ -32,24 +37,22 @@ export function useRouterManager() {
     routersRef.current.clear();
   }, []);
 
-  // @ts-expect-error
-  // biome-ignore lint/correctness/noUnusedVariables: FOR NOW
-  const combinedRouter = useCallback(
-    (localID: string, data: object, dataChannelManager: unknown) => {
+  const combinedRouter = useRef(
+    (localID: string, data: BasicMessagePayload, proto: TProto) => {
       const routers = Array.from(routersRef.current.values());
 
       for (const [id, routerItem] of routers.entries()) {
         try {
-          routerItem(localID, data, dataChannelManager);
+          routerItem(localID, data, proto);
         } catch (error) {
           console.error(`Error in router ${id}:`, error);
         }
       }
     },
-    [],
   );
 
   return {
+    currentCombinedRouter: combinedRouter.current,
     addRouter,
     removeRouter,
     getRouterIds,

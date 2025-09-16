@@ -35,6 +35,7 @@ export const CreateBoxConnectionProvider: FC<PropsWithChildren> = ({
     roomRegistered,
     routerMng,
     isRelayReconnecting,
+    messageProto,
   } = useCreateBoxConnection() ?? {};
 
   const value = useMemo(() => {
@@ -44,6 +45,7 @@ export const CreateBoxConnectionProvider: FC<PropsWithChildren> = ({
       roomRegistered,
       routerMng,
       isRelayReconnecting,
+      messageProto,
     };
   }, [
     error,
@@ -51,6 +53,7 @@ export const CreateBoxConnectionProvider: FC<PropsWithChildren> = ({
     roomRegistered,
     routerMng,
     isRelayReconnecting,
+    messageProto,
   ]);
 
   return <Provider value={value}>{children}</Provider>;

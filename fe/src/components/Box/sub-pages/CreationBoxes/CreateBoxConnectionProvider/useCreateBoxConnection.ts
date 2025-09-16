@@ -1,12 +1,14 @@
+import type { PeerMessageExchangeProtocol } from "@icod2/protocols";
 import type { Libp2p } from "@libp2p/interface";
 import { useRef, useState } from "react";
 import { ConnectedPeerStorage } from "@/services/libp2p/connected-peer-storage";
 import type { ConnectionErrors } from "@/services/libp2p/peer-connection-handler";
-import { useRouterManager } from "@/services/libp2p/router-manager";
+import { useRouterManager } from "@/services/libp2p/use-router-manager";
 import {
   type Libp2pServiceErrors,
   useLibp2p,
 } from "@/services/libp2p/useLibp2p/useLibp2p";
+import { usePeerMessageProto } from "../commons/usePeerMessageProto";
 import { useRoomToken } from "../commons/useRoomToken";
 import {
   type RoomRegistrationErrors,
@@ -34,6 +36,15 @@ export function useCreateBoxConnection() {
     },
   });
 
+  const routerMng = useRouterManager<
+    Record<string, unknown>,
+    PeerMessageExchangeProtocol
+  >();
+
+  const messageProto = usePeerMessageProto({
+    onMessageListener: routerMng.currentCombinedRouter,
+  });
+
   const { isRelayReconnecting } = useLibp2p({
     roomTokenProvider: roomTokenProvider,
     connectedPeersStorage: connectedPeersStorage.current,
@@ -43,10 +54,8 @@ export function useCreateBoxConnection() {
     onFailedToConnect: (error) => {
       setError(error);
     },
-    protos: [roomRegistrationObject],
+    protos: [roomRegistrationObject, messageProto],
   });
-
-  const routerMng = useRouterManager();
 
   return {
     roomRegistered,
@@ -54,5 +63,6 @@ export function useCreateBoxConnection() {
     error,
     retyRoomRegistartion: roomRegistrationObject.retry,
     isRelayReconnecting,
+    messageProto,
   };
 }

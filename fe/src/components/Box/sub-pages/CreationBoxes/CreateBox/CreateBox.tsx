@@ -20,9 +20,11 @@ import { useCreateBoxConnectionContext } from "../CreateBoxConnectionProvider/Cr
 import { LeaveLobbyButton } from "../commons/components";
 import { CreateBoxError } from "./CreateBoxError";
 import { router } from "./dataChannelRouter";
+import { useDataChannelSendMessages } from "./dataChannelSendMessage";
 import {
   useBoxCreationValidation,
   useCreateLockedBox,
+  useKeepKeyHoldersUpdated,
   usePartOfCreateBoxStore,
   useShareableURL,
 } from "./hooks";
@@ -70,11 +72,9 @@ export const CreateBoxContent: React.FC = () => {
     (state) => state.fromCreateBox,
   );
 
-  // TODO: FIX ME
-  const sendLockedBoxes = (_obj: object) => {};
-  // const { sendLockedBoxes } = useDataChannelSendMessages({
-  //   dataChannelManagerRef: context.dataChannelMng2,
-  // });
+  const { sendLockedBoxes } = useDataChannelSendMessages({
+    peerProtoExchangeRef: context.messageProto.peerMessageProtoRef,
+  });
 
   const { createLockedBox } = useCreateLockedBox();
 
@@ -87,8 +87,7 @@ export const CreateBoxContent: React.FC = () => {
     },
   });
 
-  // TODO: FIX ME
-  // useKeepKeyHoldersUpdated(context.dataChannelMngRef);
+  useKeepKeyHoldersUpdated(context.messageProto.peerMessageProtoRef);
 
   const noParticipantConnected = state.keyHolders.length === 0;
 

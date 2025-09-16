@@ -1,3 +1,4 @@
+import type { PeerMessageExchangeProtocol } from "@icod2/protocols";
 import { type RefObject, useCallback } from "react";
 import { useCreateBoxStore } from "@/stores";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
@@ -8,14 +9,14 @@ import type {
 } from "../commons";
 
 export const useDataChannelSendMessages = ({
-  dataChannelManagerRef,
+  peerProtoExchangeRef,
 }: {
-  dataChannelManagerRef: RefObject<DataChanM | undefined>;
+  peerProtoExchangeRef: RefObject<PeerMessageExchangeProtocol | undefined>;
 }) => {
-  const sendBoxUpdate = useSendBoxUpdate(dataChannelManagerRef);
-  const sendBoxCreated = useSendBoxCreated(dataChannelManagerRef);
-  const sendKeyholdersUpdate = useSendKeyholdersUpdate(dataChannelManagerRef);
-  const sendLockedBoxes = useSendLockedBoxes(dataChannelManagerRef);
+  const sendBoxUpdate = useSendBoxUpdate(peerProtoExchangeRef);
+  const sendBoxCreated = useSendBoxCreated(peerProtoExchangeRef);
+  const sendKeyholdersUpdate = useSendKeyholdersUpdate(peerProtoExchangeRef);
+  const sendLockedBoxes = useSendLockedBoxes(peerProtoExchangeRef);
 
   return {
     sendBoxUpdate,
@@ -26,7 +27,7 @@ export const useDataChannelSendMessages = ({
 };
 
 const useSendBoxUpdate = (
-  dataChannelMngRef: RefObject<DataChannelManager | undefined>,
+  dataChannelMngRef: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) =>
   useCallback(
     (params: {
@@ -47,7 +48,7 @@ const useSendBoxUpdate = (
           }
         : { name: title, keyHolderThreshold };
 
-      dataChannelMngRef.current?.sendMessageToSinglePeer(id, {
+      dataChannelMngRef.current?.sendMessageToPeer(id, {
         type: "leader:sends-box-update",
         ...payload,
       } satisfies LeaderSendsBoxUpdate);
@@ -56,7 +57,7 @@ const useSendBoxUpdate = (
   );
 
 const useSendBoxCreated = (
-  dataChannelMngRef: RefObject<DataChannelManager | undefined>,
+  dataChannelMngRef: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) =>
   useCallback(
     (params: {
@@ -66,7 +67,7 @@ const useSendBoxCreated = (
     }) => {
       const { encryptedMessage, key, localPeerID } = params;
 
-      dataChannelMngRef.current?.sendMessageToSinglePeer(localPeerID, {
+      dataChannelMngRef.current?.sendMessageToPeer(localPeerID, {
         type: "leader:box-created",
         key,
         encryptedMessage,
@@ -76,20 +77,22 @@ const useSendBoxCreated = (
   );
 
 const useSendKeyholdersUpdate = (
-  dataChannelMngRef: RefObject<DataChannelManager | undefined>,
+  dataChannelMngRef: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) =>
   useCallback(
     (keyHolders: ParticipantType[]) => {
-      dataChannelMngRef.current?.sendMessageToAllPeers({
-        type: "leader:keyholder-list",
-        allKeyHolders: keyHolders,
-      } satisfies LeaderSendsKeyHolderList);
+      for (const keyHolder of keyHolders) {
+        dataChannelMngRef.current?.sendMessageToPeer(keyHolder.id, {
+          type: "leader:keyholder-list",
+          allKeyHolders: keyHolders,
+        } satisfies LeaderSendsKeyHolderList);
+      }
     },
     [dataChannelMngRef],
   );
 
 const useSendLockedBoxes = (
-  dataChannelMngRef: RefObject<DataChannelManager | undefined>,
+  dataChannelMngRef: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) =>
   useCallback(
     (params: { keys: string[]; encryptedMessage: string }) => {
@@ -106,7 +109,7 @@ const useSendLockedBoxes = (
           return;
         }
 
-        dataChannelMngRef.current?.sendMessageToSinglePeer(kh.id, {
+        dataChannelMngRef.current?.sendMessageToPeer(kh.id, {
           type: "leader:box-created",
           key: peerKey,
           encryptedMessage,

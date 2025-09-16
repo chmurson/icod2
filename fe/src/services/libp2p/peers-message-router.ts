@@ -1,20 +1,21 @@
-export class PeersMessageRouter {
+import type { BasicProtoInterface } from "./types";
+
+export class PeersMessageRouter<
+  TPayload extends object,
+  TProto extends BasicProtoInterface<TPayload>,
+> {
   private routes: {
     condition: (arg: object) => boolean;
-    handler: (peerId: string, arg: object, dataChannelManager: unknown) => void;
+    handler: (peerId: string, arg: object, proto: TProto) => void;
   }[] = [];
 
-  addHandler<T extends object>(
+  addHandler<T extends TPayload>(
     condition: (arg: object) => arg is T,
-    handler: (peerId: string, msg: T, dataChannelManager?: unknown) => void,
+    handler: (peerId: string, msg: T, proto: TProto) => void,
   ) {
     this.routes.push({
       condition,
-      handler: handler as (
-        peerId: string,
-        arg: object,
-        dataChannelManager?: unknown,
-      ) => void,
+      handler: handler as (peerId: string, arg: object, proto: TProto) => void,
     });
   }
 
@@ -22,13 +23,13 @@ export class PeersMessageRouter {
     this.routes = [];
   }
 
-  router = (peerId: string, msg: object, dataChannelManager: unknown) => {
+  router = (peerId: string, msg: object, proto: TProto) => {
     for (const route of this.routes) {
       if (route.condition(msg)) {
         console.log(
           `Found route for ${"type" in msg ? msg.type : JSON.stringify(msg)}; peerId: ${peerId}`,
         );
-        route.handler(peerId, msg, dataChannelManager);
+        route.handler(peerId, msg, proto);
         return;
       }
     }
