@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 import { Card } from "@radix-ui/themes";
 import type { FC, PropsWithChildren, ReactNode } from "react";
 import {
@@ -81,9 +81,10 @@ ContentCard.OutsideSlot = ({ children, asChild = false }) => {
   }, [children, context, asChild]);
 
   if (!context) {
-    logger.warn(
-      "ContentCard.OutsideSlot must be used within a ContentCard component",
-    );
+    loggerGate.canWarn &&
+      console.warn(
+        "ContentCard.OutsideSlot must be used within a ContentCard component",
+      );
     return null;
   }
 

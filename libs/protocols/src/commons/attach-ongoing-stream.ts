@@ -5,7 +5,7 @@ import {
   fromString as u8FromString,
   toString as u8ToString,
 } from "uint8arrays";
-import logger from "./customLogger";
+import { loggerGate } from "./loggerGate";
 
 export async function attachOngoingStream(
   protocol: string,
@@ -34,7 +34,7 @@ export async function attachOngoingStream(
       }
     });
   } catch (err) {
-    logger.error(err);
+    loggerGate.canError && console.error(err);
     throw err;
   }
 

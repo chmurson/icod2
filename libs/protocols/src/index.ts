@@ -1,4 +1,4 @@
-export { default as logger } from "./commons/customLogger.js";
+export { loggerGate } from "./commons/loggerGate.js";
 export {
   PeerMessageExchangeProtocol,
   type PeerMessageListener,

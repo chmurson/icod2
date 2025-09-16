@@ -1,4 +1,4 @@
-import { initRoomRegistrationProtocol, logger } from "@icod2/protocols";
+import { initRoomRegistrationProtocol, loggerGate } from "@icod2/protocols";
 import type { Libp2p } from "@libp2p/interface";
 import type { ConnectedPeerStorage } from "@/services/libp2p/connected-peer-storage";
 import type { RoomTokenProvider } from "@/services/libp2p/room-token-provider";
@@ -74,7 +74,7 @@ export class RoomRegistrationService {
     const onPeerRemoved = this.connectedPeersStorage.addListener(
       "peer-removed",
       (peerId) => {
-        logger.log("Peer removed:", peerId);
+        loggerGate.canLog && console.log("Peer removed:", peerId);
         if (peerId === this.relayPeerId) {
           this.cleanup();
         }
@@ -102,7 +102,7 @@ export class RoomRegistrationService {
       await this.performRegistration(peerId);
     } catch (e) {
       if (!this.registrationAbortController?.signal.aborted) {
-        logger.error("Error registering room:", e);
+        loggerGate.canError && console.error("Error registering room:", e);
         this.callbacks.onError?.("room-registration-unknown-error");
       }
     }
@@ -130,7 +130,7 @@ export class RoomRegistrationService {
   private startTimeout(): void {
     this.clearTimeout();
     this.timeoutHandle = setTimeout(() => {
-      logger.log("Timeout reached");
+      loggerGate.canLog && console.log("Timeout reached");
       this.callbacks.onError?.("room-registration-timeout");
       this.cleanup();
     }, this.timeoutMs);

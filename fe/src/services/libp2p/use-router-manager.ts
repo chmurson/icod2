@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 import { useCallback, useRef } from "react";
 import type { RouterItem } from "./types";
 
@@ -10,7 +10,8 @@ export function useRouterManager<BasicMessagePayload extends object, TProto>() {
   const addRouter = useCallback(
     (id: string, routerToAdd: RouterItem<BasicMessagePayload, TProto>) => {
       if (routersRef.current.has(id)) {
-        logger.warn(`Router with id "${id}" already exists. Replacing it.`);
+        loggerGate.canWarn &&
+          console.warn(`Router with id "${id}" already exists. Replacing it.`);
       }
 
       routersRef.current.set(id, routerToAdd);
@@ -21,7 +22,7 @@ export function useRouterManager<BasicMessagePayload extends object, TProto>() {
   const removeRouter = useCallback((id: string) => {
     const deleted = routersRef.current.delete(id);
     if (!deleted) {
-      logger.warn(`Router with id "${id}" not found.`);
+      loggerGate.canWarn && console.warn(`Router with id "${id}" not found.`);
     }
     return deleted;
   }, []);
@@ -46,7 +47,7 @@ export function useRouterManager<BasicMessagePayload extends object, TProto>() {
         try {
           routerItem(localID, data, proto);
         } catch (error) {
-          logger.error(`Error in router ${id}:`, error);
+          loggerGate.canError && console.error(`Error in router ${id}:`, error);
         }
       }
     },

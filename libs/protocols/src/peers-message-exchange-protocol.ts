@@ -1,6 +1,6 @@
 import type { Libp2p } from "libp2p";
 import { attachOngoingStream } from "./commons/attach-ongoing-stream.js";
-import logger from "./commons/customLogger";
+import { loggerGate } from "./commons/loggerGate.js";
 import { parseJsonSafely } from "./commons/parse-json-safely.js";
 import { registerProtoHandle } from "./commons/register-proto-handle.js";
 
@@ -51,12 +51,13 @@ export class PeerMessageExchangeProtocol<
     registerProtoHandle(this.protocolId, libp2p, (message, peerId) => {
       const jsonMessage = parseJsonSafely(message);
       if (!jsonMessage) return;
-      logger.log(
-        "Received message from peer:",
-        peerId,
-        "message:",
-        jsonMessage,
-      );
+      loggerGate.canLog &&
+        console.log(
+          "Received message from peer:",
+          peerId,
+          "message:",
+          jsonMessage,
+        );
       this.listener?.(peerId, jsonMessage as TPeerMessagePayload, this);
     });
 
@@ -69,9 +70,10 @@ export class PeerMessageExchangeProtocol<
 
   async sendMessageToPeer(peerId: string, payload: TPeerMessagePayload) {
     const channel = await this.getOrCreateChannel(peerId);
-    logger.log("Sending message to peer:", peerId, "message:", payload);
+    loggerGate.canLog &&
+      console.log("Sending message to peer:", peerId, "message:", payload);
     await channel.send(payload);
-    logger.log("Message sent to peer:", peerId);
+    loggerGate.canLog && console.log("Message sent to peer:", peerId);
   }
 
   async sendMessageToAllPeers(payload: TPeerMessagePayload) {
@@ -120,12 +122,13 @@ export class PeerMessageExchangeProtocol<
       (message) => {
         const jsonMessage = parseJsonSafely(message);
         if (!jsonMessage) return;
-        logger.log(
-          "Received message from peer:",
-          peerId,
-          "message:",
-          jsonMessage,
-        );
+        loggerGate.canLog &&
+          console.log(
+            "Received message from peer:",
+            peerId,
+            "message:",
+            jsonMessage,
+          );
         this.listener?.(peerId, jsonMessage as TPeerMessagePayload, this);
       },
     );

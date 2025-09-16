@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 import type {
   DataChannelManager,
   PossibleSignalingServie,
@@ -58,17 +58,19 @@ export class DataChannelMessageRouter<
   ) => {
     for (const route of this.routes) {
       if (route.condition(msg)) {
-        logger.log(
-          `Found route for ${"type" in msg ? msg.type : JSON.stringify(msg)}; peerId: ${peerId}`,
-        );
+        loggerGate.canLog &&
+          console.log(
+            `Found route for ${"type" in msg ? msg.type : JSON.stringify(msg)}; peerId: ${peerId}`,
+          );
         route.handler(peerId, msg, dataChannelManager);
         return;
       }
     }
 
-    logger.warn(
-      "No route found for message:",
-      "type" in msg ? msg.type : JSON.stringify(msg),
-    );
+    loggerGate.canWarn &&
+      console.warn(
+        "No route found for message:",
+        "type" in msg ? msg.type : JSON.stringify(msg),
+      );
   };
 }

@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 import { type RefObject, useCallback } from "react";
 import type { DataChannelManager } from "@/services/webrtc";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
@@ -77,10 +77,11 @@ const useSendPartialState = (
       const peerId = peerToKeyHolderMapRef.current.getPeerId(connectedLeaderId);
 
       if (!peerId) {
-        logger.warn(
-          "No peer ID found for the connected leader ID:",
-          connectedLeaderId,
-        );
+        loggerGate.canWarn &&
+          console.warn(
+            "No peer ID found for the connected leader ID:",
+            connectedLeaderId,
+          );
         return;
       }
 
@@ -108,10 +109,11 @@ const useSendKey = (
     const peerId = peerToKeyHolderMapRef.current.getPeerId(connectedLeaderId);
 
     if (!peerId) {
-      logger.warn(
-        "No peer ID found for the connected leader ID:",
-        connectedLeaderId,
-      );
+      loggerGate.canWarn &&
+        console.warn(
+          "No peer ID found for the connected leader ID:",
+          connectedLeaderId,
+        );
       return;
     }
 

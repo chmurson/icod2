@@ -1,7 +1,7 @@
 import type { Libp2p } from "libp2p";
 import type { z } from "zod";
 import { attachOngoingStream } from "../commons/attach-ongoing-stream.js";
-import logger from "../commons/customLogger.js";
+import { loggerGate } from "../commons/loggerGate";
 import { parseJsonSafely } from "../commons/parse-json-safely.js";
 import { registerProtoHandle } from "../commons/register-proto-handle.js";
 import {
@@ -127,7 +127,8 @@ export function initRoomRegistrationProtocol(
       ROOM_REGISTRATION_PROTOCOL,
       libp2p,
       (message, peerId) => {
-        logger.log("Received message:", message, "from peer", peerId);
+        loggerGate.canLog &&
+          console.log("Received message:", message, "from peer", peerId);
         const json = parseJsonSafely(message);
         if (!json) return;
 
@@ -151,7 +152,7 @@ export function initRoomRegistrationProtocol(
         }
 
         if (!handled) {
-          logger.warn("Unhandled message:", json);
+          loggerGate.canWarn && console.warn("Unhandled message:", json);
         }
       },
     );

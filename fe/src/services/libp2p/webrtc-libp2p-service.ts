@@ -1,7 +1,7 @@
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 import { bootstrap } from "@libp2p/bootstrap";
 import { circuitRelayTransport } from "@libp2p/circuit-relay-v2";
 import { identify } from "@libp2p/identify";
@@ -20,12 +20,13 @@ export async function startLibp2pService({
 }) {
   const libp2p = await createLibp2pService({ roomToken, bootstrapMultiaddrs });
   await libp2p.start();
-  logger.log(
-    "Libp2p service started. Room token: ",
-    roomToken,
-    "Local peer ID: ",
-    libp2p.peerId.toString(),
-  );
+  loggerGate.canLog &&
+    console.log(
+      "Libp2p service started. Room token: ",
+      roomToken,
+      "Local peer ID: ",
+      libp2p.peerId.toString(),
+    );
   return libp2p;
 }
 

@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 import type { Libp2p } from "@libp2p/interface";
 import { isEnabled } from "@/utils/featureFlags";
 import type { IConnectedPeersStorage } from "./connected-peer-storage";
@@ -22,14 +22,15 @@ export const createPeerConnectionHandler = ({
   onError: (error: ConnectionErrors) => void;
 }) => {
   const onDialSuccesfully = async (peerIdStr: string) => {
-    logger.log(`Successfully dialed peer ${peerIdStr}`);
+    loggerGate.canLog && console.log(`Successfully dialed peer ${peerIdStr}`);
     const isRelay = relayPeerIds.includes(peerIdStr);
 
     try {
       await handShake();
       connectedPeersStorage.addPeer(peerIdStr, { isRelay });
     } catch (error) {
-      logger.error(`Handshake failed for peer ${peerIdStr}: ${error}`);
+      loggerGate.canError &&
+        console.error(`Handshake failed for peer ${peerIdStr}: ${error}`);
     }
   };
 
@@ -40,7 +41,7 @@ export const createPeerConnectionHandler = ({
   return function peerConnectionHandler(libp2p: Libp2p) {
     libp2p.addEventListener("peer:disconnect", (evt) => {
       const peerIdStr = evt.detail.toString();
-      logger.log("Peer connected:", peerIdStr);
+      loggerGate.canLog && console.log("Peer connected:", peerIdStr);
       connectedPeersStorage.removePeer(peerIdStr);
 
       if (relayPeerIds.includes(peerIdStr)) {
@@ -60,7 +61,7 @@ export const createPeerConnectionHandler = ({
       const isRelayPeerDiscovered = relayPeerIds.includes(discoveredPeerIdStr);
 
       if (maddrs.length === 0) {
-        logger.log("No multiaddrs to dial");
+        loggerGate.canLog && console.log("No multiaddrs to dial");
         persistingDialer.add(discoveredPeerIdStr);
         return;
       }
@@ -74,17 +75,19 @@ export const createPeerConnectionHandler = ({
         });
       } catch (err) {
         if (isRelayPeerDiscovered) {
-          logger.error(
-            `Failed to dial relay peer (${evt.detail.id.toString()}):`,
-            err,
-          );
+          loggerGate.canError &&
+            console.error(
+              `Failed to dial relay peer (${evt.detail.id.toString()}):`,
+              err,
+            );
           onError("CannotConnectToRelayPeer");
         } else {
           persistingDialer.add(discoveredPeerIdStr);
-          logger.error(
-            `Failed to dial non-relay peer (${evt.detail.id.toString()}):`,
-            err,
-          );
+          loggerGate.canError &&
+            console.error(
+              `Failed to dial non-relay peer (${evt.detail.id.toString()}):`,
+              err,
+            );
         }
       }
     });

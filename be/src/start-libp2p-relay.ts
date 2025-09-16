@@ -1,7 +1,7 @@
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
-import { initRoomRegistrationProtocol, logger } from "@icod2/protocols";
+import { initRoomRegistrationProtocol } from "@icod2/protocols";
 import type { Responses } from "@icod2/protocols/src/room-registration-protocol/messages-and-responses";
 import { autoNAT } from "@libp2p/autonat";
 import { circuitRelayServer } from "@libp2p/circuit-relay-v2";
@@ -61,7 +61,7 @@ export async function startLibp2pRelay({
       try {
         roomRegistration.registerRoom(roomName, peerId);
       } catch (error) {
-        logger.error(`Error registering room ${roomName}: ${error}`);
+        console.error(`Error registering room ${roomName}: ${error}`);
       }
       const { createPeerConnection } = roomRegistrationProt;
       const { sendResponse, close } = await createPeerConnection(peerId);

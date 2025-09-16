@@ -11,7 +11,7 @@ interface LoggerConfig {
   timestamp?: boolean;
 }
 
-class CustomLogger {
+class LoggerGate {
   private static STORAGE_KEY = "custom_logger_config";
   private config: LoggerConfig = {
     enabled: true,
@@ -34,9 +34,8 @@ class CustomLogger {
   }
 
   private loadConfig(): void {
-    if (this.isNode) return;
     try {
-      const stored = localStorage.getItem(CustomLogger.STORAGE_KEY);
+      const stored = localStorage.getItem(LoggerGate.STORAGE_KEY);
       if (stored) {
         this.config = { ...this.config, ...JSON.parse(stored) };
       }
@@ -48,113 +47,58 @@ class CustomLogger {
   private saveConfig(): void {
     if (this.isNode) return;
     try {
-      localStorage.setItem(
-        CustomLogger.STORAGE_KEY,
-        JSON.stringify(this.config),
-      );
+      localStorage.setItem(LoggerGate.STORAGE_KEY, JSON.stringify(this.config));
     } catch (error) {
       console.error("Failed to save logger config:", error);
     }
   }
 
-  private formatMessage(...args: unknown[]): unknown[] {
-    if (this.isNode) return args;
-
-    const formatted: unknown[] = [];
-
-    if (this.config.timestamp) {
-      const now = new Date();
-      const time = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}.${now.getMilliseconds().toString().padStart(3, "0")}`;
-      formatted.push(`[${time}]`);
-    }
-
-    if (this.config.prefix) {
-      formatted.push(this.config.prefix);
-    }
-
-    formatted.push(...args);
-    return formatted;
-  }
-
   private shouldLog(level: LogLevel): boolean {
-    if (this.isNode) return true;
     return this.config.enabled && this.config.levels[level];
   }
 
-  log(...args: unknown[]): void {
-    if (this.shouldLog("log")) {
-      console.log(...this.formatMessage(...args));
-    }
+  get canLog(): boolean {
+    return this.shouldLog("log");
   }
 
-  info(...args: unknown[]): void {
-    this.log(...args);
+  get canWarn(): boolean {
+    return this.shouldLog("warn");
   }
 
-  warn(...args: unknown[]): void {
-    if (this.shouldLog("warn")) {
-      console.warn(...this.formatMessage(...args));
-    }
-  }
-
-  error(...args: unknown[]): void {
-    if (this.shouldLog("error")) {
-      console.error(...this.formatMessage(...args));
-    }
-  }
-
-  debug(...args: unknown[]): void {
-    this.log(...args);
+  get canError(): boolean {
+    return this.shouldLog("error");
   }
 
   enable(): void {
-    if (this.isNode) return;
     this.config.enabled = true;
     this.saveConfig();
   }
 
   disable(): void {
-    if (this.isNode) return;
     this.config.enabled = false;
     this.saveConfig();
   }
 
   toggle(): boolean {
-    if (this.isNode) return true;
     this.config.enabled = !this.config.enabled;
     this.saveConfig();
     return this.config.enabled;
   }
 
   enableLevel(level: LogLevel): void {
-    if (this.isNode) return;
     this.config.levels[level] = true;
     this.saveConfig();
   }
 
   disableLevel(level: LogLevel): void {
-    if (this.isNode) return;
     this.config.levels[level] = false;
     this.saveConfig();
   }
 
   toggleLevel(level: LogLevel): boolean {
-    if (this.isNode) return true;
     this.config.levels[level] = !this.config.levels[level];
     this.saveConfig();
     return this.config.levels[level];
-  }
-
-  setPrefix(prefix: string): void {
-    if (this.isNode) return;
-    this.config.prefix = prefix;
-    this.saveConfig();
-  }
-
-  setTimestamp(enabled: boolean): void {
-    if (this.isNode) return;
-    this.config.timestamp = enabled;
-    this.saveConfig();
   }
 
   getConfig(): LoggerConfig {
@@ -192,8 +136,6 @@ class CustomLogger {
         enableLevel: (level: LogLevel) => this.enableLevel(level),
         disableLevel: (level: LogLevel) => this.disableLevel(level),
         toggleLevel: (level: LogLevel) => this.toggleLevel(level),
-        setPrefix: (prefix: string) => this.setPrefix(prefix),
-        setTimestamp: (enabled: boolean) => this.setTimestamp(enabled),
         getConfig: () => this.getConfig(),
         setConfig: (config: Partial<LoggerConfig>) => this.setConfig(config),
         reset: () => this.reset(),
@@ -219,46 +161,58 @@ class CustomLogger {
         },
         help: () => {
           console.log(
-            "%cCustom Logger Help",
+            "%cLogger Gate Help",
             "color: #4a90e2; font-size: 16px; font-weight: bold",
           );
           console.log(
             "%cAvailable commands:",
             "color: #7cb342; font-weight: bold",
           );
-          console.log("  window.logger.enable()         - Enable all logging");
-          console.log("  window.logger.disable()        - Disable all logging");
           console.log(
-            "  window.logger.toggle()         - Toggle logging on/off",
+            "  window.logger.enable()            - Enable all logging",
           );
           console.log(
-            "  window.logger.enableLevel(level)  - Enable specific level (log, warn, error)",
+            "  window.logger.disable()           - Disable all logging",
+          );
+          console.log(
+            "  window.logger.toggle()            - Toggle logging on/off (returns new state)",
+          );
+          console.log(
+            "  window.logger.enableLevel(level)  - Enable specific level ('log', 'warn', 'error')",
           );
           console.log(
             "  window.logger.disableLevel(level) - Disable specific level",
           );
           console.log(
-            "  window.logger.toggleLevel(level)  - Toggle specific level",
+            "  window.logger.toggleLevel(level)  - Toggle specific level (returns new state)",
           );
           console.log(
-            "  window.logger.setPrefix(str)   - Set prefix for all messages",
+            "  window.logger.getConfig()         - Get current configuration object",
           );
           console.log(
-            "  window.logger.setTimestamp(bool) - Enable/disable timestamps",
+            "  window.logger.setConfig(config)   - Set partial configuration",
           );
           console.log(
-            "  window.logger.getConfig()      - Get current configuration",
-          );
-          console.log("  window.logger.setConfig(obj)   - Set configuration");
-          console.log(
-            "  window.logger.reset()          - Reset to default settings",
+            "                                       { enabled, levels, prefix, timestamp }",
           );
           console.log(
-            "  window.logger.enableAll()      - Enable logger and all levels",
+            "  window.logger.reset()             - Reset to default settings",
           );
-          console.log("  window.logger.disableAll()     - Disable everything");
-          console.log("  window.logger.status()         - Show current status");
-          console.log("  window.logger.help()           - Show this help");
+          console.log(
+            "  window.logger.enableAll()         - Enable logger and all levels",
+          );
+          console.log(
+            "  window.logger.disableAll()        - Disable everything",
+          );
+          console.log(
+            "  window.logger.status()            - Show current status table",
+          );
+          console.log("  window.logger.help()              - Show this help");
+          console.log("");
+          console.log(
+            "%cConfiguration is persisted in localStorage",
+            "color: #888; font-style: italic",
+          );
         },
       };
 
@@ -269,7 +223,7 @@ class CustomLogger {
         (window as any).location?.hostname === "127.0.0.1"
       ) {
         console.log(
-          "%cCustom Logger initialized!",
+          "%cLogger Gate initialized!",
           "color: #4a90e2; font-weight: bold",
         );
         console.log("Use window.logger.help() to see available commands");
@@ -278,6 +232,4 @@ class CustomLogger {
   }
 }
 
-const logger = new CustomLogger();
-
-export default logger;
+export const loggerGate = new LoggerGate();

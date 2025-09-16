@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 
 const LOCKED_BOX_AUTO_LOAD_LOCAL_STORAGAE_KEY = "ICOD2_DEV_AUTO_LOAD_BOX";
 const ICOD2_DEV_COUNT_DOWN_OVERRIDE_STORAGAE_KEY =
@@ -30,7 +30,7 @@ window.icod2Dev = {
 
         return JSON.parse(value);
       } catch (e) {
-        logger.warn(e);
+        loggerGate.canWarn && console.warn(e);
         return undefined;
       }
     },

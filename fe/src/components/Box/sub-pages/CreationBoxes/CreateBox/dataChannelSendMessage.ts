@@ -1,4 +1,4 @@
-import { logger, type PeerMessageExchangeProtocol } from "@icod2/protocols";
+import { loggerGate, type PeerMessageExchangeProtocol } from "@icod2/protocols";
 import { type RefObject, useCallback } from "react";
 import { useCreateBoxStore } from "@/stores";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
@@ -105,7 +105,8 @@ const useSendLockedBoxes = (
         const peerKey = keysToSlice.pop();
 
         if (!peerKey) {
-          logger.error(`Missing key for keyholder with id: ${kh.id}`);
+          loggerGate.canError &&
+            console.error(`Missing key for keyholder with id: ${kh.id}`);
           return;
         }
 

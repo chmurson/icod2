@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 import type { PeerId, PeerUpdate } from "@libp2p/interface";
 import { peerIdFromString } from "@libp2p/peer-id";
 import type { Multiaddr } from "@multiformats/multiaddr";
@@ -127,7 +127,8 @@ export class PersistingDialer {
     }
 
     if (peerToDial.isCurrentlyDialing) {
-      logger.log(`Peer ${peerIdStr} is already being dialed`);
+      loggerGate.canLog &&
+        console.log(`Peer ${peerIdStr} is already being dialed`);
       return;
     }
 
@@ -138,22 +139,24 @@ export class PersistingDialer {
 
       if (!multiAddrs) {
         const peerId = peerIdFromString(peerIdStr);
-        logger.log(`Trying to dial peer by id ${peerIdStr}`);
+        loggerGate.canLog &&
+          console.log(`Trying to dial peer by id ${peerIdStr}`);
         connection = await this.libp2p.dial(peerId);
       } else {
         const encodedMultiAddrs = multiAddrs.map((multiaddr) =>
           multiaddr.encapsulate(`/p2p/${peerIdStr}`),
         );
-        logger.log(
-          "Trying to dial peer by address",
-          encodedMultiAddrs.map((multiaddr) => multiaddr.toString()),
-        );
+        loggerGate.canLog &&
+          console.log(
+            "Trying to dial peer by address",
+            encodedMultiAddrs.map((multiaddr) => multiaddr.toString()),
+          );
         connection = await this.libp2p.dial(encodedMultiAddrs);
       }
       if (isEnabled("CLOSE_INITITIAL_PEER_CONNECTION_ASAP")) {
         connection.close();
       }
-      logger.log(`Successfully dialed peer ${peerIdStr}`);
+      loggerGate.canLog && console.log(`Successfully dialed peer ${peerIdStr}`);
       this.callAllListeners(peerIdStr);
       this.peersToDial.delete(peerIdStr);
     } catch (error) {
@@ -161,7 +164,8 @@ export class PersistingDialer {
       if (this.queuedPeersToDialByIds.includes(peerIdStr)) {
         await this.triggerDialFromQueue(peerIdStr);
       }
-      logger.error(`Failed to dial peer ${peerIdStr}: ${error}`);
+      loggerGate.canError &&
+        console.error(`Failed to dial peer ${peerIdStr}: ${error}`);
     }
   }
 }

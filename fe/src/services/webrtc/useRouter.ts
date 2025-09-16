@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 import { useRef } from "react";
 import type { DataChannelMessageRouter } from "./DataChannelMessageRouter";
 
@@ -36,7 +36,8 @@ export function useRouter() {
             routerItem.router.router(localID, data, dataChannelManager);
           }
         } catch (error) {
-          logger.error(`Error in router ${routerItem.id}:`, error);
+          loggerGate.canError &&
+            console.error(`Error in router ${routerItem.id}:`, error);
         }
       }
     },

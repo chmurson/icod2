@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 import type { Libp2p } from "@libp2p/interface";
 import { useCallback, useEffect, useRef } from "react";
 import {
@@ -90,20 +90,21 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
 
       if (unmounted) return;
 
-      logger.log("start new libp2p service");
+      loggerGate.canLog && console.log("start new libp2p service");
       try {
         libp2pService = await startLibp2pService({
           roomToken,
           bootstrapMultiaddrs,
         });
       } catch (error) {
-        logger.error("Error starting libp2p service:", error);
+        loggerGate.canError &&
+          console.error("Error starting libp2p service:", error);
         onFailedToConnectRef.current?.("Libp2pServiceError");
         return;
       }
 
       if (unmounted) {
-        logger.log("Unmointing!");
+        loggerGate.canLog && console.log("Unmointing!");
         libp2pService.stop();
         return;
       }
@@ -113,15 +114,16 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
       // @ts-expect-error
       window.debugPrintConnections = () => {
         const peers = libp2pService.getPeers();
-        logger.log("Peers:", peers);
+        loggerGate.canLog && console.log("Peers:", peers);
         const x = libp2pService.getConnections();
-        logger.log("Connections:", x);
+        loggerGate.canLog && console.log("Connections:", x);
       };
 
-      logger.log(
-        "libp2p service started with peer Id:",
-        libp2pService.peerId.toString(),
-      );
+      loggerGate.canLog &&
+        console.log(
+          "libp2p service started with peer Id:",
+          libp2pService.peerId.toString(),
+        );
 
       libp2pServiceRef.current = libp2pService;
       const persistingDialer = new PersistingDialer(libp2pService);

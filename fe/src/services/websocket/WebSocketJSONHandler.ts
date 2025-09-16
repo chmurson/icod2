@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 
 export class WebsocketJSONHandler {
   private webSocket: WebSocket;
@@ -51,12 +51,12 @@ export class WebsocketJSONHandler {
 
   private warn(message: string, ...args: unknown[]) {
     if (this.loggingEnabled) {
-      logger.warn(message, ...args);
+      loggerGate.canWarn && console.warn(message, ...args);
     }
   }
 
   private error(message: string, ...args: unknown[]) {
-    logger.error(message, ...args);
+    loggerGate.canError && console.error(message, ...args);
   }
 
   public onClose(fn: (code?: number, reason?: string) => void) {

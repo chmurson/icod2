@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 import { type RefObject, useCallback } from "react";
 import type { DataChannelManager } from "@/services/webrtc";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
@@ -44,7 +44,8 @@ export const relayKey = (
   const peerId = usePeerToHolderMapRef.getValue().getPeerId(keyReceiverId);
 
   if (!peerId) {
-    logger.warn("No peer ID found for the keyReceiver ID:", keyReceiverId);
+    loggerGate.canWarn &&
+      console.warn("No peer ID found for the keyReceiver ID:", keyReceiverId);
     return;
   }
 
@@ -113,7 +114,8 @@ const useSendKey = (
         const peerId = usePeerToHolderMapRef.getValue().getPeerId(id);
 
         if (!peerId) {
-          logger.warn("No peer ID found for the receiver ID:", id);
+          loggerGate.canWarn &&
+            console.warn("No peer ID found for the receiver ID:", id);
           return;
         }
 

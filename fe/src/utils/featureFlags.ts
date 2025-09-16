@@ -1,4 +1,4 @@
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 
 export const FEATURE_FLAGS = {
   CLOSE_INITITIAL_PEER_CONNECTION_ASAP: "CLOSE_INITITIAL_PEER_CONNECTION_ASAP",
@@ -55,7 +55,8 @@ class FeatureFlagsManager {
         });
       }
     } catch (error) {
-      logger.warn("Failed to parse stored feature flags:", error);
+      loggerGate.canWarn &&
+        console.warn("Failed to parse stored feature flags:", error);
     }
 
     this.applyUrlParams();
@@ -93,7 +94,8 @@ class FeatureFlagsManager {
         });
       }
     } catch (error) {
-      logger.warn("Failed to parse URL params for feature flags:", error);
+      loggerGate.canWarn &&
+        console.warn("Failed to parse URL params for feature flags:", error);
     }
   }
 
@@ -105,7 +107,8 @@ class FeatureFlagsManager {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.flags));
     } catch (error) {
-      logger.warn("Failed to persist feature flags:", error);
+      loggerGate.canWarn &&
+        console.warn("Failed to persist feature flags:", error);
     }
   }
 
@@ -123,7 +126,7 @@ class FeatureFlagsManager {
 
   isEnabled(flagName: FeatureFlagName): boolean {
     if (!this.isValidFlag(flagName)) {
-      logger.warn(`Invalid feature flag: ${flagName}`);
+      loggerGate.canWarn && console.warn(`Invalid feature flag: ${flagName}`);
       return false;
     }
 
@@ -141,7 +144,7 @@ class FeatureFlagsManager {
     flagName: FeatureFlagName,
   ): T | undefined {
     if (!this.isValidFlag(flagName)) {
-      logger.warn(`Invalid feature flag: ${flagName}`);
+      loggerGate.canWarn && console.warn(`Invalid feature flag: ${flagName}`);
       return undefined;
     }
     return this.flags[flagName] as T;
@@ -149,7 +152,7 @@ class FeatureFlagsManager {
 
   enable(flagName: FeatureFlagName): void {
     if (!this.isValidFlag(flagName)) {
-      logger.warn(`Invalid feature flag: ${flagName}`);
+      loggerGate.canWarn && console.warn(`Invalid feature flag: ${flagName}`);
       return;
     }
 
@@ -164,7 +167,7 @@ class FeatureFlagsManager {
 
   disable(flagName: FeatureFlagName): void {
     if (!this.isValidFlag(flagName)) {
-      logger.warn(`Invalid feature flag: ${flagName}`);
+      loggerGate.canWarn && console.warn(`Invalid feature flag: ${flagName}`);
       return;
     }
 
@@ -179,7 +182,7 @@ class FeatureFlagsManager {
 
   toggle(flagName: FeatureFlagName): boolean {
     if (!this.isValidFlag(flagName)) {
-      logger.warn(`Invalid feature flag: ${flagName}`);
+      loggerGate.canWarn && console.warn(`Invalid feature flag: ${flagName}`);
       return false;
     }
 
@@ -194,7 +197,7 @@ class FeatureFlagsManager {
 
   set(flagName: FeatureFlagName, value: FeatureFlagValue): void {
     if (!this.isValidFlag(flagName)) {
-      logger.warn(`Invalid feature flag: ${flagName}`);
+      loggerGate.canWarn && console.warn(`Invalid feature flag: ${flagName}`);
       return;
     }
 
@@ -217,7 +220,7 @@ class FeatureFlagsManager {
 
   reset(flagName: FeatureFlagName): void {
     if (!this.isValidFlag(flagName)) {
-      logger.warn(`Invalid feature flag: ${flagName}`);
+      loggerGate.canWarn && console.warn(`Invalid feature flag: ${flagName}`);
       return;
     }
 
@@ -247,7 +250,8 @@ class FeatureFlagsManager {
       localStorage.removeItem(STORAGE_KEY);
       this.resetAll();
     } catch (error) {
-      logger.warn("Failed to clear feature flags:", error);
+      loggerGate.canWarn &&
+        console.warn("Failed to clear feature flags:", error);
     }
   }
 
@@ -264,7 +268,7 @@ class FeatureFlagsManager {
     callback: (value: FeatureFlagValue) => void,
   ): () => void {
     if (!this.isValidFlag(flagName)) {
-      logger.warn(`Invalid feature flag: ${flagName}`);
+      loggerGate.canWarn && console.warn(`Invalid feature flag: ${flagName}`);
       return () => {};
     }
 
@@ -289,18 +293,22 @@ class FeatureFlagsManager {
     const flags = this.getAll();
     const defaults = getDefaultFlags();
 
-    logger.log("🚩 Feature Flags Debug");
-    logger.log(
-      Object.entries(flags).map(([key, value]) => ({
-        Flag: key,
-        Current: value,
-        Default: defaults[key as FeatureFlagName],
-        Type: typeof value,
-      })),
-    );
-    logger.log("Available flags:", this.getAllFlagNames());
-    logger.log("URL param format: ?ff=flag1:true,flag2:false");
-    logger.log("Access via: window.__featureFlagsDebug()");
+    loggerGate.canLog && console.log("🚩 Feature Flags Debug");
+    loggerGate.canLog &&
+      console.log(
+        Object.entries(flags).map(([key, value]) => ({
+          Flag: key,
+          Current: value,
+          Default: defaults[key as FeatureFlagName],
+          Type: typeof value,
+        })),
+      );
+    loggerGate.canLog &&
+      console.log("Available flags:", this.getAllFlagNames());
+    loggerGate.canLog &&
+      console.log("URL param format: ?ff=flag1:true,flag2:false");
+    loggerGate.canLog &&
+      console.log("Access via: window.__featureFlagsDebug()");
   }
 
   generateUrl(baseUrl?: string): string {
@@ -374,9 +382,10 @@ export const useFeatureFlag = (flagName: FeatureFlagName): boolean => {
 };
 
 if (process.env.NODE_ENV === "development") {
-  logger.log(
-    "🚩 Feature Flags initialized. Run window.__featureFlagsDebug() for details.",
-  );
+  loggerGate.canLog &&
+    console.log(
+      "🚩 Feature Flags initialized. Run window.__featureFlagsDebug() for details.",
+    );
 }
 
 export const featureFlagsManager = manager;

@@ -1,4 +1,4 @@
-import customLogger from "@icod2/protocols/src/commons/customLogger";
+import { loggerGate } from "@icod2/protocols";
 import { useContext, useEffect, useRef } from "react";
 import { createBoxConnectionContext } from "../CreateBoxConnectionProvider";
 import { router } from "./dataChannelRouter";
@@ -15,9 +15,10 @@ export function useConnection() {
       context.routerMng.addRouter("download-box-router", router.router);
 
       timeoutRef.current = window.setTimeout(() => {
-        customLogger.warn(
-          "Download locked box connection timed out - but the timeout is not really implemented",
-        );
+        loggerGate.canWarn &&
+          console.warn(
+            "Download locked box connection timed out - but the timeout is not really implemented",
+          );
       }, TIMEOUT_MS);
 
       return () => {

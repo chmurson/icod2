@@ -10,7 +10,7 @@ import {
   isOfferRequest,
   type OfferRequest,
 } from "@icod2/contracts/src/client-server";
-import { logger } from "@icod2/protocols";
+import { loggerGate } from "@icod2/protocols";
 import type { WebsocketJSONHandler } from "@/services/websocket/WebSocketJSONHandler";
 import { generateNiceRandomToken } from "@/utils/generateNiceRandomToken";
 import type { SignalingService } from "./SignalingService";
@@ -134,18 +134,19 @@ export class CalleeSignalingService implements SignalingService {
         if (peerConnection && dataChannel) {
           this.onPeerConnected?.(peerConnection, dataChannel);
           peerConnection?.getStats().then((stats) => {
-            logger.log(stats);
+            loggerGate.canLog && console.log(stats);
           });
         } else {
-          logger.warn(
-            "Received ",
-            calleeIntroduction,
-            "but connection not accepted",
-            {
-              peerConnection: peerConnection,
-              dataChannel: dataChannel,
-            },
-          );
+          loggerGate.canWarn &&
+            console.warn(
+              "Received ",
+              calleeIntroduction,
+              "but connection not accepted",
+              {
+                peerConnection: peerConnection,
+                dataChannel: dataChannel,
+              },
+            );
         }
       };
 
@@ -189,7 +190,11 @@ export class CalleeSignalingService implements SignalingService {
   }
 
   private handleAcceptsOffersResponse(data: AcceptsOffersResponse) {
-    logger.log("priting sessionToken from Signaling Server", data.sessionToken);
+    loggerGate.canLog &&
+      console.log(
+        "priting sessionToken from Signaling Server",
+        data.sessionToken,
+      );
     this.onSignalingServerConnected?.();
   }
 
