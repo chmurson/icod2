@@ -5,8 +5,8 @@ import type { ConnectionErrors } from "@/services/libp2p/peer-connection-handler
 import { useRouterManager } from "@/services/libp2p/router-manager";
 import {
   type Libp2pServiceErrors,
-  useDataChannelMng2,
-} from "@/services/libp2p/useDataChannelMng2";
+  useLibp2p,
+} from "@/services/libp2p/useLibp2p/useLibp2p";
 import { useRoomToken } from "../commons/useRoomToken";
 import {
   type RoomRegistrationErrors,
@@ -49,7 +49,7 @@ export function useCreateBoxConnection() {
     });
   }, [tryToRegisterNewRoom]);
 
-  useDataChannelMng2({
+  const { isRelayReconnecting } = useLibp2p({
     roomTokenProvider: roomTokenProvider,
     connectedPeersStorage: connectedPeersStorage.current,
     onLibp2pStarted: (libp2pInstance) => {
@@ -68,5 +68,6 @@ export function useCreateBoxConnection() {
     routerMng,
     error,
     retyRoomRegistartion: retry,
+    isRelayReconnecting,
   };
 }

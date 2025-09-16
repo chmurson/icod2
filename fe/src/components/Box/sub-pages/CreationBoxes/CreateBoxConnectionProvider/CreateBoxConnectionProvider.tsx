@@ -29,8 +29,13 @@ export const useCreateBoxConnectionContext =
 export const CreateBoxConnectionProvider: FC<PropsWithChildren> = ({
   children,
 }) => {
-  const { error, retyRoomRegistartion, roomRegistered, routerMng } =
-    useCreateBoxConnection() ?? {};
+  const {
+    error,
+    retyRoomRegistartion,
+    roomRegistered,
+    routerMng,
+    isRelayReconnecting,
+  } = useCreateBoxConnection() ?? {};
 
   const value = useMemo(() => {
     return {
@@ -38,8 +43,15 @@ export const CreateBoxConnectionProvider: FC<PropsWithChildren> = ({
       retyRoomRegistartion,
       roomRegistered,
       routerMng,
+      isRelayReconnecting,
     };
-  }, [error, retyRoomRegistartion, roomRegistered, routerMng]);
+  }, [
+    error,
+    retyRoomRegistartion,
+    roomRegistered,
+    routerMng,
+    isRelayReconnecting,
+  ]);
 
   return <Provider value={value}>{children}</Provider>;
 };

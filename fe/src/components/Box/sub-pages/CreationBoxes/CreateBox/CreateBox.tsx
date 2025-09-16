@@ -1,6 +1,7 @@
 import { TextArea, TextField } from "@radix-ui/themes";
 import type React from "react";
 import { useEffect } from "react";
+import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { SharePreviewButton } from "@/components/Box/components/SharePreviewButton";
 import { ContentCard } from "@/components/layout";
 import { useDownloadBoxStore } from "@/stores";
@@ -100,6 +101,7 @@ export const CreateBoxContent: React.FC = () => {
   return (
     <>
       <div className="flex flex-col gap-4">
+        {context.isRelayReconnecting && <RelayReconnectingAlert />}
         <CreateBoxError />
         <FieldArea label="Invite URL">
           <TextField.Root value={shareableURL} readOnly />

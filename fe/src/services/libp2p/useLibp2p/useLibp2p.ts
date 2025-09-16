@@ -3,15 +3,17 @@ import { useCallback, useEffect, useRef } from "react";
 import {
   ConnectedPeerStorage,
   type IConnectedPeersStorage,
-} from "../libp2p/connected-peer-storage";
-import { getBootstrapMultiaddrs } from "../libp2p/get-bootstrap-multiaddrs";
+} from "../../libp2p/connected-peer-storage";
+import { getBootstrapMultiaddrs } from "../../libp2p/get-bootstrap-multiaddrs";
 import {
   type ConnectionErrors,
   createPeerConnectionHandler,
-} from "../libp2p/peer-connection-handler";
-import { PersistingDialer } from "../libp2p/persiting-dialer";
-import type { RoomTokenProvider } from "../libp2p/room-token-provider";
-import { startLibp2pService } from "../libp2p/webrtc-libp2p-service";
+} from "../../libp2p/peer-connection-handler";
+import { PersistingDialer } from "../../libp2p/persiting-dialer";
+import type { RoomTokenProvider } from "../../libp2p/room-token-provider";
+import { startLibp2pService } from "../../libp2p/webrtc-libp2p-service";
+import { RelayReconnectDialer } from "../relay-reconnect-dialer";
+import { useConnectedRelayState } from "./useConnectedRelayState";
 
 export type Libp2pServiceErrors =
   | "RoomTokenProviderError"
@@ -20,9 +22,7 @@ export type Libp2pServiceErrors =
 
 const defaultConnectedPeersStorage = new ConnectedPeerStorage();
 
-export const useDataChannelMng2 = <
-  TConnectionFailReason = Libp2pServiceErrors,
->({
+export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
   onPeerConnected,
   onPeerDisconnected,
   onFailedToConnect,
@@ -39,6 +39,8 @@ export const useDataChannelMng2 = <
   onLibp2pStarted?: (libp2pService: Libp2p) => void;
   connectedPeersStorage?: IConnectedPeersStorage;
 }) => {
+  const { relaysConnected, isRelayReconnecting, setRelaysConnected } =
+    useConnectedRelayState();
   const libp2pServiceRef = useRef<Libp2p>(undefined);
 
   const onPeerConnectedRef = useRef(onPeerConnected);
@@ -113,6 +115,23 @@ export const useDataChannelMng2 = <
 
       libp2pServiceRef.current = libp2pService;
       const persistingDialer = new PersistingDialer(libp2pService);
+      const relayReconnectDialer = new RelayReconnectDialer(libp2pService, {
+        maxRetries: Number.POSITIVE_INFINITY,
+      });
+
+      relayReconnectDialer.addOnRelayConnectedListener(() => {
+        setRelaysConnected((prev) => ({
+          ...prev,
+          connected: prev.connected + 1,
+        }));
+      });
+
+      relayReconnectDialer.addOnRelayDisconnectedListener(() => {
+        setRelaysConnected((prev) => ({
+          ...prev,
+          connected: prev.connected - 1,
+        }));
+      });
 
       const peerConnectionHandler = createPeerConnectionHandler({
         handShake: () => new Promise((resolve) => resolve()),
@@ -142,9 +161,19 @@ export const useDataChannelMng2 = <
 
       libp2pService?.stop();
     };
-  }, [roomTokenProvider, handleLibp2pStarted, connectedPeersStorage]);
+  }, [
+    roomTokenProvider,
+    handleLibp2pStarted,
+    connectedPeersStorage,
+    setRelaysConnected,
+  ]);
 
   useRaiseErrorIfChanges(null, "null");
+
+  return {
+    relaysConnected,
+    isRelayReconnecting,
+  };
 };
 
 const useRaiseErrorIfChanges = (value: unknown, valueName: string) => {
