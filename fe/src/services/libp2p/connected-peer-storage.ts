@@ -37,8 +37,17 @@ export class ConnectedPeerStorage implements IConnectedPeersStorage {
     this.peers.clear();
   }
 
-  addListener<T extends keyof EventMap>(event: T, callback: EventMap[T]): void {
+  addListener<T extends keyof EventMap>(
+    event: T,
+    callback: EventMap[T],
+  ): () => void {
     this.callbacks[event].push(callback);
+
+    return () => {
+      (this.callbacks[event] as EventMap[T][]) = this.callbacks[event].filter(
+        (cb) => cb !== callback,
+      );
+    };
   }
 
   removeListener<T extends keyof EventMap>(

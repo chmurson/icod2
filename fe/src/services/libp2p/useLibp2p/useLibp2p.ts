@@ -23,21 +23,27 @@ export type Libp2pServiceErrors =
 const defaultConnectedPeersStorage = new ConnectedPeerStorage();
 
 export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
+  connectedPeersStorage = defaultConnectedPeersStorage,
+  roomTokenProvider,
   onPeerConnected,
   onPeerDisconnected,
   onFailedToConnect,
-  roomTokenProvider,
   onLibp2pStarted,
-  connectedPeersStorage = defaultConnectedPeersStorage,
+  onRelayPeerConnected,
+  onRelayPeerDisconnected,
+  protos,
 }: {
   roomTokenProvider: RoomTokenProvider;
+  connectedPeersStorage?: IConnectedPeersStorage;
+  protos?: { initialize: (libp2p: Libp2p) => void }[];
   onPeerConnected?: (peerId: string) => void;
   onPeerDisconnected?: (peerId: string) => void;
   onFailedToConnect?: (
     reason: TConnectionFailReason | Libp2pServiceErrors | ConnectionErrors,
   ) => void;
   onLibp2pStarted?: (libp2pService: Libp2p) => void;
-  connectedPeersStorage?: IConnectedPeersStorage;
+  onRelayPeerConnected?: (relayPeerId: string) => void;
+  onRelayPeerDisconnected?: (relayPeerId: string) => void;
 }) => {
   const { relaysConnected, isRelayReconnecting, setRelaysConnected } =
     useConnectedRelayState();
@@ -47,11 +53,16 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
   const onPeerDisconnectedRef = useRef(onPeerDisconnected);
   const onFailedToConnectRef = useRef(onFailedToConnect);
   const onLibp2pStartedRef = useRef(onLibp2pStarted);
+  const onRelayPeerConnectedRef = useRef(onRelayPeerConnected);
+  const onRelayPeerDisconnectedRef = useRef(onRelayPeerDisconnected);
+  const protosRef = useRef(protos ?? []);
 
   onPeerConnectedRef.current = onPeerConnected;
   onPeerDisconnectedRef.current = onPeerDisconnected;
   onFailedToConnectRef.current = onFailedToConnect;
   onLibp2pStartedRef.current = onLibp2pStarted;
+  onRelayPeerConnectedRef.current = onRelayPeerConnected;
+  onRelayPeerDisconnectedRef.current = onRelayPeerDisconnected;
 
   const handleLibp2pStarted = useCallback((event: CustomEvent<Libp2p>) => {
     onLibp2pStartedRef.current?.(event.detail);
@@ -119,18 +130,20 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
         maxRetries: Number.POSITIVE_INFINITY,
       });
 
-      relayReconnectDialer.addOnRelayConnectedListener(() => {
+      relayReconnectDialer.addOnRelayConnectedListener((peerId) => {
         setRelaysConnected((prev) => ({
           ...prev,
           connected: prev.connected + 1,
         }));
+        onRelayPeerConnectedRef.current?.(peerId);
       });
 
-      relayReconnectDialer.addOnRelayDisconnectedListener(() => {
+      relayReconnectDialer.addOnRelayDisconnectedListener((peerId) => {
         setRelaysConnected((prev) => ({
           ...prev,
           connected: prev.connected - 1,
         }));
+        onRelayPeerConnectedRef.current?.(peerId);
       });
 
       const peerConnectionHandler = createPeerConnectionHandler({
@@ -142,6 +155,10 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
           onFailedToConnectRef.current?.(error);
         },
       });
+
+      for (const proto of protosRef.current) {
+        proto.initialize(libp2pService);
+      }
 
       peerConnectionHandler(libp2pService);
     })();

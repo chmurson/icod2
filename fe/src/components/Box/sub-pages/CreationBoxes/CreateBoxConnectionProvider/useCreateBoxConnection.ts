@@ -1,5 +1,5 @@
 import type { Libp2p } from "@libp2p/interface";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ConnectedPeerStorage } from "@/services/libp2p/connected-peer-storage";
 import type { ConnectionErrors } from "@/services/libp2p/peer-connection-handler";
 import { useRouterManager } from "@/services/libp2p/router-manager";
@@ -10,7 +10,7 @@ import {
 import { useRoomToken } from "../commons/useRoomToken";
 import {
   type RoomRegistrationErrors,
-  useStartNewRegistrationProtocol,
+  useRoomRegistration,
 } from "./useRoomRegistration";
 
 export function useCreateBoxConnection() {
@@ -23,42 +23,27 @@ export function useCreateBoxConnection() {
   const connectedPeersStorage = useRef(new ConnectedPeerStorage());
   const libp2p = useRef<Libp2p>(undefined);
 
-  const { tryToRegisterNewRoom, timeoutStart, retry } =
-    useStartNewRegistrationProtocol({
-      roomTokenProvider: roomTokenProvider,
-      onRoomRegistered: () => {
-        setRoomRegistered(true);
-      },
-      onError: (error) => {
-        setError(error);
-      },
-    });
-
-  useEffect(() => {
-    connectedPeersStorage.current.addListener(
-      "peer-added",
-      (peerId, peerInfo) => {
-        if (peerInfo.isRelay && libp2p.current) {
-          tryToRegisterNewRoom(libp2p.current, peerId);
-        }
-      },
-    );
-
-    connectedPeersStorage.current.addListener("peer-removed", (peerId) => {
-      console.log("Peer removed:", peerId);
-    });
-  }, [tryToRegisterNewRoom]);
+  const roomRegistrationObject = useRoomRegistration({
+    connectedPeersStorage: connectedPeersStorage.current,
+    roomTokenProvider: roomTokenProvider,
+    onRoomRegistered: () => {
+      setRoomRegistered(true);
+    },
+    onError: (error) => {
+      setError(error);
+    },
+  });
 
   const { isRelayReconnecting } = useLibp2p({
     roomTokenProvider: roomTokenProvider,
     connectedPeersStorage: connectedPeersStorage.current,
     onLibp2pStarted: (libp2pInstance) => {
       libp2p.current = libp2pInstance;
-      timeoutStart();
     },
     onFailedToConnect: (error) => {
       setError(error);
     },
+    protos: [roomRegistrationObject],
   });
 
   const routerMng = useRouterManager();
@@ -67,7 +52,7 @@ export function useCreateBoxConnection() {
     roomRegistered,
     routerMng,
     error,
-    retyRoomRegistartion: retry,
+    retyRoomRegistartion: roomRegistrationObject.retry,
     isRelayReconnecting,
   };
 }
