@@ -1,6 +1,7 @@
 import { TextArea } from "@radix-ui/themes";
 import type React from "react";
 import { FiEye } from "react-icons/fi";
+import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { ContentCard } from "@/components/layout";
 import { useJoinBoxStore } from "@/stores";
 import { Alert } from "@/ui/Alert";
@@ -15,6 +16,7 @@ import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { LeaveLobbyButton } from "../commons/components";
 import { BoxJoinContentForOKSkeleton } from "./BoxJoinContentForOKSkeleton";
+import { JoinBoxError } from "./JoinBoxError";
 import { useJoinBoxConnection } from "./useJoinBoxConnection";
 
 export const JoinBox: React.FC = () => {
@@ -54,7 +56,8 @@ const JoinBoxContent = () => {
     content,
     connectionToLeaderFailReason,
   } = useStoreSlice();
-  useJoinBoxConnection();
+
+  const { error, isRelayReconnecting } = useJoinBoxConnection();
 
   const blocker = useNavigateAwayBlocker({
     shouldNavigationBeBlocked: () => !connectionToLeaderFailReason,
@@ -77,6 +80,8 @@ const JoinBoxContent = () => {
 
   return (
     <>
+      {isRelayReconnecting && <RelayReconnectingAlert />}
+      <JoinBoxError error={error} />
       {!leader?.id && connectionToLeaderFailReason && (
         <div className="flex flex-col items-start gap-4">
           <Alert variant="warning" className="self-stretch">

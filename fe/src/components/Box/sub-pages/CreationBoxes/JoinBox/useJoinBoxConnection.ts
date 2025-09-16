@@ -1,55 +1,55 @@
-import { useCallback, useRef } from "react";
-import type {
-  CallerConnectionFailureReason,
-  CallerSignalingService,
-} from "@/services/signaling";
-import type { DataChannelManager } from "@/services/webrtc";
-import { useJoinBoxStore } from "@/stores";
-import type { KeyHolderWelcomesLeader } from "../commons";
-import { useCallerDataChannelMng } from "./useCallerDataChannelMng";
+import type { Libp2p } from "@libp2p/interface";
+import { useRef, useState } from "react";
+import { ConnectedPeerStorage } from "@/services/libp2p/connected-peer-storage";
+import type { ConnectionErrors } from "@/services/libp2p/peer-connection-handler";
+import { useRouterManager } from "@/services/libp2p/router-manager";
+import {
+  type Libp2pServiceErrors,
+  useLibp2p,
+} from "@/services/libp2p/useLibp2p/useLibp2p";
+import { useRoomToken } from "../commons";
+
+export type JoinBoxConnectionError = ReturnType<
+  typeof useJoinBoxConnection
+>["error"];
 
 export function useJoinBoxConnection() {
-  const dataChannelManagerRef =
-    useRef<
-      DataChannelManager<CallerSignalingService, CallerConnectionFailureReason>
-    >(undefined);
+  // const onPeerConnected = useCallback((localPeerId: string) => {
+  //   const { you, sessionId } = useJoinBoxStore.getState();
 
-  const onPeerConnected = useCallback((localPeerId: string) => {
-    const { you, sessionId } = useJoinBoxStore.getState();
+  //   dataChannelManagerRef.current?.sendMessageToSinglePeer(localPeerId, {
+  //     type: "keyholder:welcome-leader",
+  //     name: you.name,
+  //     userAgent: you.userAgent,
+  //     sessionId,
+  //   } satisfies KeyHolderWelcomesLeader);
+  // }, []);
 
-    dataChannelManagerRef.current?.sendMessageToSinglePeer(localPeerId, {
-      type: "keyholder:welcome-leader",
-      name: you.name,
-      userAgent: you.userAgent,
-      sessionId,
-    } satisfies KeyHolderWelcomesLeader);
-  }, []);
+  const [error, setError] = useState<
+    Libp2pServiceErrors | ConnectionErrors | undefined
+  >(undefined);
 
-  const onFailedToConnect = useCallback(
-    (reason: CallerConnectionFailureReason) => {
-      if (reason === "timeout-on-creating-offer-and-ice-candidates") {
-        useJoinBoxStore.getState().actions.cannotConnectLeader("timeout");
-        return;
-      }
-      if (reason === "timeout-on-getting-answer-from-callee") {
-        useJoinBoxStore.getState().actions.cannotConnectLeader("timeout");
-        return;
-      }
-      if (reason === "peer-connection-state-failed") {
-        useJoinBoxStore
-          .getState()
-          .actions.cannotConnectLeader("peer-connection-failed");
-        return;
-      }
+  const { roomTokenProvider } = useRoomToken();
 
-      useJoinBoxStore.getState().actions.cannotConnectLeader("other");
+  const connectedPeersStorage = useRef(new ConnectedPeerStorage());
+  const libp2p = useRef<Libp2p>(undefined);
+
+  const { isRelayReconnecting } = useLibp2p({
+    roomTokenProvider: roomTokenProvider,
+    connectedPeersStorage: connectedPeersStorage.current,
+    onLibp2pStarted: (libp2pInstance) => {
+      libp2p.current = libp2pInstance;
     },
-    [],
-  );
-
-  useCallerDataChannelMng({
-    onPeerConnected,
-    ref: dataChannelManagerRef,
-    onFailedToConnect,
+    onFailedToConnect: (error) => {
+      setError(error);
+    },
   });
+
+  const routerMng = useRouterManager();
+
+  return {
+    routerMng,
+    error,
+    isRelayReconnecting,
+  };
 }
