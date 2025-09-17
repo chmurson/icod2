@@ -21,7 +21,7 @@ export function WhatsYourName(
   const { getValue, setValue } = usePersistInLocalStorage<string>({
     keyName: "userName",
   });
-  const { sessionId: roomToken } = useParams();
+  const { roomToken } = useParams();
   const refDefaultName = useRef<string | undefined>(getValue() ?? undefined);
   const refInput = useRef<HTMLInputElement>(null);
   const isCreate = "create" in props;
@@ -36,22 +36,21 @@ export function WhatsYourName(
     setValue(name);
 
     if (isCreate) {
-      const isEmptyToken = (roomToken?.trim() ?? "") === "";
-
-      const newOrPrevRoomToken = isEmptyToken
-        ? generateAndPersistRoomToken()
-        : roomToken;
+      const newOrPrevRoomToken =
+        (roomToken?.trim() ?? "") === ""
+          ? generateAndPersistRoomToken()
+          : roomToken;
 
       createBoxStoreActions.connect({
         name,
         userAgent: currentUserAgent,
-        idToken: newOrPrevRoomToken,
+        roomToken: newOrPrevRoomToken ?? "",
       });
     } else {
       joinBoxStoreActions.connect({
         name,
         userAgent: currentUserAgent,
-        sessionId: roomToken ?? "",
+        roomToken: roomToken ?? "",
       });
     }
   };

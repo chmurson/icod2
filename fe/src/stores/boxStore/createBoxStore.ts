@@ -13,6 +13,7 @@ const createBoxDefaultState = {
   connecting: false,
   connected: false,
   error: null as string | null,
+  roomToken: "",
   leader: {
     id: "",
     name: "",
@@ -32,15 +33,15 @@ export type CreateBoxStateData = typeof createBoxDefaultState;
 type CreateBoxState = {
   actions: {
     reset: () => void;
-    connectLeader: (leader: { id: string }) => void;
     connectParticipant: (participant: ParticipantType) => void;
     disconnectParticipant: (participantId: string) => void;
     start: () => void;
     connect: (args: {
       name: string;
       userAgent: string;
-      idToken?: string;
+      roomToken: string;
     }) => void;
+    setLeaderPeerId: (peerId: string) => void;
     markAsLocked: () => void;
     markAsLocking: () => void;
     setBoxInfo: (
@@ -55,29 +56,27 @@ type CreateBoxState = {
 export const useCreateBoxStore = create<CreateBoxState>((set, get) => ({
   ...createBoxDefaultState,
   actions: {
-    connect: ({ name, userAgent, idToken }) =>
+    connect: ({ name, userAgent, roomToken }) =>
       set({
         ...createBoxDefaultState,
         connecting: true,
         state: "connecting",
         leader: {
-          id: idToken ?? "",
+          id: "",
           name,
           userAgent,
         },
+        roomToken,
+      }),
+    setLeaderPeerId: (peerId: string) =>
+      set({
+        ...get(),
+        leader: {
+          ...get().leader,
+          id: peerId,
+        },
       }),
     start: () => set({ ...createBoxDefaultState, state: "set-name" }),
-    connectLeader: (leader) =>
-      set((state) => ({
-        leader: {
-          ...state.leader,
-          id: leader.id,
-        },
-        connecting: false,
-        connected: true,
-        error: null,
-        state: "connected",
-      })),
     connectParticipant: (participant) =>
       set((state) => ({
         keyHolders: [

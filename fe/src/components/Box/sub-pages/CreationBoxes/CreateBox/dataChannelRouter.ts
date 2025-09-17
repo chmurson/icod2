@@ -13,12 +13,9 @@ export const router = new PeersMessageRouter<
 >();
 
 router.addHandler(isKeyHolderWelcomesLeader, (localId, message, proto) => {
-  const {
-    actions,
-    leader: { id: leaderId },
-  } = useCreateBoxStore.getState();
+  const { actions, roomToken } = useCreateBoxStore.getState();
 
-  if (leaderId.trim() !== message.sessionId.trim()) {
+  if (roomToken !== message.roomToken.trim()) {
     proto.sendMessageToPeer(localId, {
       type: "leader:keyholder-not-athorized",
     } satisfies LeaderNotAuthorizedKeyholder);

@@ -68,6 +68,13 @@ export const CreateBoxContent: React.FC = () => {
   }, [context.routerMng]);
 
   const { state, actions } = usePartOfCreateBoxStore();
+
+  useEffect(() => {
+    if (context.peerId) {
+      actions.setLeaderPeerId(context.peerId);
+    }
+  }, [context.peerId, actions.setLeaderPeerId]);
+
   const setDownloadStoreFromCreateBox = useDownloadBoxStore(
     (state) => state.fromCreateBox,
   );

@@ -50,13 +50,13 @@ export function useJoinBoxConnection() {
 
   const onPeerConnected = useCallback(
     (localPeerId: string) => {
-      const { you, sessionId } = useJoinBoxStore.getState();
+      const { you, roomToken } = useJoinBoxStore.getState();
 
       messageProto.peerMessageProtoRef.current?.sendMessageToPeer(localPeerId, {
         type: "keyholder:welcome-leader",
         name: you.name,
         userAgent: you.userAgent,
-        sessionId,
+        roomToken: roomToken,
       } satisfies KeyHolderWelcomesLeader);
     },
     [messageProto.peerMessageProtoRef],

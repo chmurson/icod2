@@ -59,6 +59,11 @@ export const createPeerConnectionHandler = ({
       );
 
       const isRelayPeerDiscovered = relayPeerIds.includes(discoveredPeerIdStr);
+      loggerGate.canLog &&
+        console.log(
+          `${isRelayPeerDiscovered ? "Relay" : "Regular"} Peer discovered:`,
+          evt.detail.id.toString(),
+        );
 
       if (maddrs.length === 0) {
         loggerGate.canLog && console.log("No multiaddrs to dial");

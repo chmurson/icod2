@@ -80,17 +80,19 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
 
       if (!roomToken) {
         onFailedToConnectRef.current?.("RoomTokenProviderError");
+        loggerGate.canError && console.error("Room token is not available");
         return;
       }
 
       if (!(bootstrapMultiaddrs?.length > 0)) {
         onFailedToConnectRef.current?.("EmptyBootstrapMultiaddrsError");
+        loggerGate.canError &&
+          console.error("Bootstrap multiaddrs are not available");
         return;
       }
 
       if (unmounted) return;
 
-      loggerGate.canLog && console.log("start new libp2p service");
       try {
         libp2pService = await startLibp2pService({
           roomToken,
@@ -118,12 +120,6 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
         const x = libp2pService.getConnections();
         loggerGate.canLog && console.log("Connections:", x);
       };
-
-      loggerGate.canLog &&
-        console.log(
-          "libp2p service started with peer Id:",
-          libp2pService.peerId.toString(),
-        );
 
       libp2pServiceRef.current = libp2pService;
       const persistingDialer = new PersistingDialer(libp2pService);
@@ -186,6 +182,7 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
   return {
     relaysConnected,
     isRelayReconnecting,
+    peerId: libp2pServiceRef.current?.peerId.toString(),
   };
 };
 

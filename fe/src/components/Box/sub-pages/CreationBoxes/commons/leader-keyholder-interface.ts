@@ -2,7 +2,7 @@ export type KeyHolderWelcomesLeader = {
   type: "keyholder:welcome-leader";
   name: string;
   userAgent: string;
-  sessionId: string;
+  roomToken: string;
 };
 
 export function isKeyHolderWelcomesLeader(
@@ -15,8 +15,8 @@ export function isKeyHolderWelcomesLeader(
     typeof payload.name === "string" &&
     "userAgent" in payload &&
     typeof payload.userAgent === "string" &&
-    "sessionId" in payload &&
-    typeof payload.sessionId === "string"
+    "roomToken" in payload &&
+    typeof payload.roomToken === "string"
   );
 }
 

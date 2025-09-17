@@ -64,5 +64,6 @@ export function useCreateBoxConnection() {
     retyRoomRegistartion: roomRegistrationObject.retry,
     isRelayReconnecting,
     messageProto,
+    peerId: libp2p.current?.peerId.toString(),
   };
 }

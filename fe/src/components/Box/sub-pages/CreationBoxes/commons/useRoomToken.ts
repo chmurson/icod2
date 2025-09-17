@@ -3,14 +3,16 @@ import { useParams } from "react-router-dom";
 import type { RoomTokenProvider } from "@/services/libp2p/room-token-provider";
 import { generateNiceRandomToken } from "@/utils/generateNiceRandomToken";
 
-const keyNameForSessionId = "icod2-last-started-locking-box-session-id";
+const keyNameForRoomToken = "icod2-last-started-locking-box-room-token";
 
 export const useRoomToken = () => {
-  const { sessionId: token } = useParams();
+  const { roomToken: token } = useParams();
 
   const roomTokenProvider: RoomTokenProvider = useMemo(
     () => ({
-      getRoomToken: async () => token,
+      getRoomToken: async () => {
+        return token;
+      },
     }),
     [token],
   );
@@ -28,14 +30,14 @@ export const useRoomToken = () => {
 export const isPersistedRoomToken = (roomToken: string) => {
   return (
     roomToken.trim() !== "" &&
-    sessionStorage.getItem(keyNameForSessionId) === roomToken
+    sessionStorage.getItem(keyNameForRoomToken) === roomToken
   );
 };
 
 export const clearPersistedRoomToken = () => {
-  sessionStorage.removeItem(keyNameForSessionId);
+  sessionStorage.removeItem(keyNameForRoomToken);
 };
 
 const persistRoomToken = (roomToken: string) => {
-  sessionStorage.setItem(keyNameForSessionId, roomToken);
+  sessionStorage.setItem(keyNameForRoomToken, roomToken);
 };

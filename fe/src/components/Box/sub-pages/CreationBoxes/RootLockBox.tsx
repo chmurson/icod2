@@ -42,7 +42,7 @@ export const RootLockBox = () => {
 };
 
 const useCurrentPage = () => {
-  const { sessionId: roomToken } = useParams();
+  const { roomToken } = useParams();
   const createBoxState = useCreateBoxStore((state) => state.state);
   const joinBoxState = useJoinBoxStore((state) => state.state);
   const downloadStateType = useDownloadBoxStore((state) => state.type);

@@ -4,10 +4,10 @@ import { useCreateBoxStore } from "@/stores";
 import { isPersistedRoomToken } from "../../commons";
 
 export const useShareableURL = () => {
-  const { sessionId: roomToken } = useParams();
+  const { roomToken } = useParams();
   const navigate = useNavigate();
 
-  const roomTokenFromStore = useCreateBoxStore((state) => state.leader.id);
+  const roomTokenFromStore = useCreateBoxStore((state) => state.roomToken);
 
   useEffect(() => {
     const newURL = `/lock-box/${roomTokenFromStore}`;
