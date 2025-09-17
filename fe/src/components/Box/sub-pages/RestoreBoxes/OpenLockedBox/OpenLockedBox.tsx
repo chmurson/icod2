@@ -5,6 +5,8 @@ import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box
 import { ContentCard } from "@/components/layout/MainLayout";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
+import ErrorBoundary from "@/ui/ErrorBoundry";
+import { Alert, Button } from "@/ui/index";
 import { FieldArea } from "../../../components/FieldArea";
 import {
   LoobbyKeyHolders,
@@ -23,7 +25,34 @@ import {
 import { useInitiateCounter } from "./hooks/useInitiateCounter";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 
-export const OpenLockedBox: React.FC = () => {
+export const OpenLockedBox: FC = () => {
+  const boxTitle = useOpenLockedBoxStore((state) => state.boxTitle);
+
+  return (
+    <>
+      <PageTitle boxTitle={boxTitle} />
+      <ErrorBoundary
+        fallback={({ handleRetry, isRetrying }) => (
+          <div className="flex flex-col gap-4">
+            <Alert variant="error">Something went wrong</Alert>
+            <Button
+              variant="primary"
+              onClick={handleRetry}
+              className="self-start"
+              loading={isRetrying}
+            >
+              Try to connect again
+            </Button>
+          </div>
+        )}
+      >
+        <OpenLockedBoxContent />
+      </ErrorBoundary>
+    </>
+  );
+};
+
+export const OpenLockedBoxContent: React.FC = () => {
   const { dataChannelManagerRef } = useOpenLockedBoxConnection();
 
   const { sendKey } = useDataChannelSendMessages({
@@ -49,7 +78,6 @@ export const OpenLockedBox: React.FC = () => {
 
   const you = useOpenLockedBoxStore((state) => state.you);
   const actions = useOpenLockedBoxStore((state) => state.actions);
-  const boxTitle = useOpenLockedBoxStore((state) => state.boxTitle);
 
   useEffect(() => {
     if (sessionId) {
@@ -82,7 +110,6 @@ export const OpenLockedBox: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <PageTitle boxTitle={boxTitle} />
       <TopLobbySection useStoreHook={useOpenLockedBoxStore} />
       <div className="flex flex-col gap-4 py-4">
         {shareableURL && (
