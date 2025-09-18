@@ -49,7 +49,7 @@ export const CounterWithInfo = ({
       const now = Date.now();
       const startTime = unlockingStartDate?.getTime() ?? now;
       const diff = now - startTime;
-      return TWO_MINUTES_IN_MS - diff;
+      return getCountDownDuration() - diff;
     }
 
     setRemainingTime(calculateRemainingTime());
