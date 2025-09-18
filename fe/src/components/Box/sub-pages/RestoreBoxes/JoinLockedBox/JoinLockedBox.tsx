@@ -22,7 +22,7 @@ import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 export const JoinLockedBox: FC = () => {
   const boxTitle = useJoinLockedBoxStore((state) => state.boxTitle);
   return (
-    <>
+    <div className="flex flex-col gap-8">
       <PageTitle boxTitle={boxTitle} />
       <ErrorBoundary
         fallback={({ handleRetry, isRetrying }) => (
@@ -41,7 +41,7 @@ export const JoinLockedBox: FC = () => {
       >
         <JoinLockedBoxContent />
       </ErrorBoundary>
-    </>
+    </div>
   );
 };
 

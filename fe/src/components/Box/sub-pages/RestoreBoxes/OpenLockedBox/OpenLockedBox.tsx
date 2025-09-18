@@ -33,7 +33,7 @@ export const OpenLockedBox: FC = () => {
   const { shareableURL, roomToken } = useNavigateToShareableLink();
 
   return (
-    <>
+    <div className="flex flex-col gap-8">
       <PageTitle boxTitle={boxTitle} />
       <ErrorBoundary
         fallback={({ handleRetry, isRetrying }) => (
@@ -57,7 +57,7 @@ export const OpenLockedBox: FC = () => {
           />
         )}
       </ErrorBoundary>
-    </>
+    </div>
   );
 };
 
