@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { isPersistedRoomToken } from "@/services/libp2p/useRoomRegistration/useRoomToken";
 import { useCreateBoxStore } from "@/stores";
-import { isPersistedRoomToken } from "../../commons";
 
 export const useShareableURL = () => {
   const { roomToken } = useParams();

@@ -1,23 +1,38 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useOpenLockedBoxStore } from "@/stores/boxStore";
+import { useRoomToken } from "@/services/libp2p/useRoomRegistration";
 
 export const useNavigateToShareableLink = () => {
-  const params = useParams();
+  const { roomToken } = useParams();
   const navigate = useNavigate();
-
-  const keyHolderId = useOpenLockedBoxStore((state) => state.keyHolderId);
+  const { generateAndPersistRoomToken, roomTokenProvider } = useRoomToken();
 
   useEffect(() => {
-    if (params.sessionId !== keyHolderId) {
-      navigate(`/unlock-box/${keyHolderId}`, { replace: true });
-    }
-  }, [params.sessionId, navigate, keyHolderId]);
+    let cancelled = false;
 
-  const shareableURL = `${window.location.origin}/unlock-box/${keyHolderId}`;
+    (async () => {
+      const token = await roomTokenProvider.getRoomToken();
+
+      if (cancelled) {
+        console.log("Cancelled");
+        return;
+      }
+
+      if (!token) {
+        const newToken = generateAndPersistRoomToken();
+        navigate(`/unlock-box/${newToken}`, { replace: true });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate, generateAndPersistRoomToken, roomTokenProvider]);
+
+  const shareableURL = `${window.location.origin}/unlock-box/${roomToken}`;
 
   return {
     shareableURL,
-    sessionId: params.sessionId,
+    roomToken,
   };
 };

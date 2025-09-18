@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
+  clearPersistedRoomToken,
+  isPersistedRoomToken,
+} from "@/services/libp2p/useRoomRegistration";
+import {
   useCreateBoxStore,
   useDownloadBoxStore,
   useJoinBoxStore,
 } from "@/stores";
 import { CreateBox } from "./CreateBox";
 import { CreateBoxConnectionProvider } from "./CreateBoxConnectionProvider";
-import { clearPersistedRoomToken, isPersistedRoomToken } from "./commons";
 import { DownloadLockedBox } from "./DownloadLockedBox";
 import { JoinBox } from "./JoinBox";
 import { WhatsYourName } from "./WhatsYourName";

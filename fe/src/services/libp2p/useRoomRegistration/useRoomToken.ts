@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import type { RoomTokenProvider } from "@/services/libp2p/room-token-provider";
 import { generateNiceRandomToken } from "@/utils/generateNiceRandomToken";
@@ -17,13 +17,15 @@ export const useRoomToken = () => {
     [token],
   );
 
+  const generateAndPersistRoomToken = useCallback(() => {
+    const roomToken = generateNiceRandomToken(12);
+    persistRoomToken(roomToken);
+    return roomToken;
+  }, []);
+
   return {
     roomTokenProvider,
-    generateAndPersistRoomToken: () => {
-      const roomToken = generateNiceRandomToken();
-      persistRoomToken(roomToken);
-      return roomToken;
-    },
+    generateAndPersistRoomToken,
   };
 };
 

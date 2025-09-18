@@ -1,6 +1,6 @@
 import { loggerGate } from "@icod2/protocols";
 import { type RefObject, useCallback } from "react";
-import type { DataChannelManager } from "@/services/webrtc";
+import type { BasicProtoInterface } from "@/services/libp2p/types";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type {
   LeaderError,
@@ -11,15 +11,17 @@ import type {
 } from "../commons/leader-keyholder-interface";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 
-export const useDataChannelSendMessages = ({
-  dataChannelManagerRef,
+export const useSendMessageProto = ({
+  peerMessageProtoRef,
 }: {
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>;
+  peerMessageProtoRef: RefObject<
+    BasicProtoInterface<Record<string, unknown>> | undefined
+  >;
 }) => {
-  const sendError = useSendError(dataChannelManagerRef);
-  const sendWelcome = useSendWelcome(dataChannelManagerRef);
-  const sendPartialUpdate = useSendPartialStateUpdate(dataChannelManagerRef);
-  const sendKey = useSendKey(dataChannelManagerRef);
+  const sendError = useSendError(peerMessageProtoRef);
+  const sendWelcome = useSendWelcome(peerMessageProtoRef);
+  const sendPartialUpdate = useSendPartialStateUpdate(peerMessageProtoRef);
+  const sendKey = useSendKey(peerMessageProtoRef);
 
   return {
     sendError,
@@ -30,7 +32,7 @@ export const useDataChannelSendMessages = ({
 };
 
 export const relayKey = (
-  dataChannelManager: DataChannelManager,
+  peerMessageProto: BasicProtoInterface<Record<string, unknown>>,
   {
     keyHolderId,
     keyReceiverId,
@@ -49,37 +51,41 @@ export const relayKey = (
     return;
   }
 
-  const msg: LeaderRelayKey = {
+  const msg = {
     type: "leader:relay-key",
     keyToRelay,
     keyHolderId,
-  };
+  } satisfies LeaderRelayKey;
 
-  dataChannelManager.sendMessageToSinglePeer(peerId, msg);
+  peerMessageProto.sendMessageToPeer(peerId, msg);
 };
 
 const useSendError = (
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+  peerMessageProtoRef: RefObject<
+    BasicProtoInterface<Record<string, unknown>> | undefined
+  >,
 ) =>
   useCallback(
     (peerId: string, reason: string) => {
-      const errorMsg: LeaderError = {
+      const errorMsg = {
         type: "leader:error",
         reason,
-      };
-      dataChannelManagerRef.current?.sendMessageToSinglePeer(peerId, errorMsg);
+      } satisfies LeaderError;
+      peerMessageProtoRef.current?.sendMessageToPeer(peerId, errorMsg);
     },
-    [dataChannelManagerRef],
+    [peerMessageProtoRef],
   );
 
 const useSendWelcome = (
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+  peerMessageProtoRef: RefObject<
+    BasicProtoInterface<Record<string, unknown>> | undefined
+  >,
 ) =>
   useCallback(
     (peerId: string) => {
       const { you, onlineKeyHolders } = useOpenLockedBoxStore.getState();
 
-      dataChannelManagerRef.current?.sendMessageToSinglePeer(peerId, {
+      peerMessageProtoRef.current?.sendMessageToPeer(peerId, {
         type: "leader:welcome",
         name: you.name,
         userAgent: you.userAgent,
@@ -87,24 +93,37 @@ const useSendWelcome = (
         onlineKeyHolders,
       } satisfies LeaderWelcome);
     },
-    [dataChannelManagerRef],
+    [peerMessageProtoRef],
   );
 
 const useSendPartialStateUpdate = (
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+  peerMessageProtoRef: RefObject<
+    BasicProtoInterface<Record<string, unknown>> | undefined
+  >,
 ) =>
   useCallback(
     (payload: Omit<LeaderSendsPartialStateMessage, "type">) => {
-      dataChannelManagerRef.current?.sendMessageToAllPeers({
-        type: "leader:send-partial-state",
-        ...payload,
-      });
+      const { onlineKeyHolders } = useOpenLockedBoxStore.getState();
+      for (const onlineKeyHolder of onlineKeyHolders) {
+        const peerId = usePeerToHolderMapRef
+          .getValue()
+          .getPeerId(onlineKeyHolder.id);
+
+        if (!peerId) continue;
+
+        peerMessageProtoRef.current?.sendMessageToPeer(peerId, {
+          type: "leader:send-partial-state",
+          ...payload,
+        });
+      }
     },
-    [dataChannelManagerRef],
+    [peerMessageProtoRef],
   );
 
 const useSendKey = (
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+  peerMessageProtoRef: RefObject<
+    BasicProtoInterface<Record<string, unknown>> | undefined
+  >,
 ) => {
   return useCallback(
     (receiverIds: string[]) => {
@@ -119,14 +138,14 @@ const useSendKey = (
           return;
         }
 
-        const msg: LeaderKey = {
+        const msg = {
           type: "leader:key",
           key: key,
           keyHolderId: you.id,
-        };
-        dataChannelManagerRef.current?.sendMessageToSinglePeer(peerId, msg);
+        } satisfies LeaderKey;
+        peerMessageProtoRef.current?.sendMessageToPeer(peerId, msg);
       }
     },
-    [dataChannelManagerRef],
+    [peerMessageProtoRef],
   );
 };

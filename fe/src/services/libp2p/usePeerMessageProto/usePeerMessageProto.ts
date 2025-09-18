@@ -19,7 +19,6 @@ export const usePeerMessageProto = <
   useEffect(() => {
     const peerMessageProto =
       new PeerMessageExchangeProtocol<BasicMessagePayload>({
-        protocolId: "create-box",
         onMessage: onMessageListener,
       });
 

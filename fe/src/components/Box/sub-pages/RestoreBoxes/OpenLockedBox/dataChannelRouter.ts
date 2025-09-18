@@ -1,5 +1,5 @@
-import { loggerGate } from "@icod2/protocols";
-import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
+import { loggerGate, type PeerMessageExchangeProtocol } from "@icod2/protocols";
+import { PeersMessageRouter } from "@/services/libp2p/peers-message-router";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
 import { createKeyholderHelloHash } from "@/utils/createKeyholderHelloHash";
 import type {
@@ -12,11 +12,14 @@ import {
   isKeyholderKey,
 } from "../commons/leader-keyholder-interface";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
-import { relayKey } from "./dataChannelSendMessages";
+import { relayKey } from "./useSendMessageProto";
 
-export const router = new DataChannelMessageRouter();
+export const router = new PeersMessageRouter<
+  Record<string, unknown>,
+  PeerMessageExchangeProtocol
+>();
 
-router.addHandler(isKeyholderHello, async (peerId, message, dataChannelMng) => {
+router.addHandler(isKeyholderHello, async (peerId, message, proto) => {
   const store = useOpenLockedBoxStore.getState();
   const actions = useOpenLockedBoxStore.getState().actions;
 
@@ -36,11 +39,11 @@ router.addHandler(isKeyholderHello, async (peerId, message, dataChannelMng) => {
   }
 
   if (errorReason) {
-    const errorMsg: LeaderError = {
+    const errorMsg = {
       type: "leader:error",
       reason: errorReason,
-    };
-    dataChannelMng?.sendMessageToSinglePeer(peerId, errorMsg);
+    } satisfies LeaderError;
+    proto?.sendMessageToPeer(peerId, errorMsg);
     return;
   }
 
@@ -68,13 +71,13 @@ router.addHandler(isKeyholderHello, async (peerId, message, dataChannelMng) => {
     ],
   };
   usePeerToHolderMapRef.getValue().setPair({ peerId, keyHolderId });
-  dataChannelMng?.sendMessageToSinglePeer(peerId, welcomeMsg);
+  proto?.sendMessageToPeer(peerId, welcomeMsg);
 });
 
 router.addHandler(isFollowerSendsPartialStateMessage, (peerId, message) => {
   const { actions } = useOpenLockedBoxStore.getState();
 
-  const keyHolderId = usePeerToHolderMapRef.getValue().getKeyholerId(peerId);
+  const keyHolderId = usePeerToHolderMapRef.getValue().getKeyholderId(peerId);
   if (!keyHolderId) {
     loggerGate.canWarn &&
       console.warn(`Keyholder id not found for peer: ${peerId}`);
@@ -94,7 +97,7 @@ router.addHandler(isFollowerSendsPartialStateMessage, (peerId, message) => {
   );
 });
 
-router.addHandler(isKeyholderKey, (_, message, dataChannelMng) => {
+router.addHandler(isKeyholderKey, (_, message, proto) => {
   const { keyHolderId, key } = message;
   const { actions, shareAccessKeyMapByKeyHolderId, you } =
     useOpenLockedBoxStore.getState();
@@ -119,12 +122,12 @@ router.addHandler(isKeyholderKey, (_, message, dataChannelMng) => {
   );
 
   if (toSharePeersToShareKey) {
-    if (!dataChannelMng) {
+    if (!proto) {
       return;
     }
 
     for (const keyReceiverId of Object.keys(toSharePeersToShareKey)) {
-      relayKey(dataChannelMng, {
+      relayKey(proto, {
         keyHolderId,
         keyReceiverId,
         keyToRelay: key,

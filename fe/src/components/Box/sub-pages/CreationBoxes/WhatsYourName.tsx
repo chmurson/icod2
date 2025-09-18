@@ -4,12 +4,12 @@ import { useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCurrentUserAgent } from "@/hooks/useCurrentUserAgent";
 import { usePersistInLocalStorage } from "@/hooks/usePersistInLocalStorage";
+import { useRoomToken } from "@/services/libp2p/useRoomRegistration";
 import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
 import { StartLeaderFollowerAlert } from "../../components/StartLeaderFollowerAlert";
 import { UserAgent } from "../../components/UserAgent";
-import { useRoomToken } from "./commons/useRoomToken";
 
 export function WhatsYourName(
   props:

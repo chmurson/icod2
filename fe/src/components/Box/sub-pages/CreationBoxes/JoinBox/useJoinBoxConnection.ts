@@ -8,9 +8,10 @@ import {
   type Libp2pServiceErrors,
   useLibp2p,
 } from "@/services/libp2p/useLibp2p/useLibp2p";
+import { usePeerMessageProto } from "@/services/libp2p/usePeerMessageProto";
+import { useRoomToken } from "@/services/libp2p/useRoomRegistration";
 import { useJoinBoxStore } from "@/stores";
-import { type KeyHolderWelcomesLeader, useRoomToken } from "../commons";
-import { usePeerMessageProto } from "../commons/usePeerMessageProto";
+import type { KeyHolderWelcomesLeader } from "../commons";
 import { router } from "./joinPeerMessageRouter";
 
 export type JoinBoxConnectionError = ReturnType<

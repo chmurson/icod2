@@ -1,5 +1,7 @@
 import { TextField } from "@radix-ui/themes";
 import { type FC, useEffect, useMemo } from "react";
+import { BoxErrorAlert } from "@/components/Box/components/BoxErrorAlert";
+import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
 import { ContentCard } from "@/components/layout/MainLayout";
@@ -17,16 +19,18 @@ import { LeaveLobbyButton } from "../commons/components/LeaveLobbyButton";
 import { NavigationAwayBlocker } from "../commons/components/NavigationAwayBlocker";
 import { PageTitle } from "../commons/components/PageTitle";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
-import { useDataChannelSendMessages } from "./dataChannelSendMessages";
+import { router } from "./dataChannelRouter";
 import {
   useNavigateToShareableLink,
   useShareKeyWithParticipants,
 } from "./hooks";
 import { useInitiateCounter } from "./hooks/useInitiateCounter";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
+import { useSendMessageProto } from "./useSendMessageProto";
 
 export const OpenLockedBox: FC = () => {
   const boxTitle = useOpenLockedBoxStore((state) => state.boxTitle);
+  const { shareableURL, roomToken } = useNavigateToShareableLink();
 
   return (
     <>
@@ -46,20 +50,41 @@ export const OpenLockedBox: FC = () => {
           </div>
         )}
       >
-        <OpenLockedBoxContent />
+        {roomToken && (
+          <OpenLockedBoxContent
+            shareableURL={shareableURL}
+            roomToken={roomToken}
+          />
+        )}
       </ErrorBoundary>
     </>
   );
 };
 
-export const OpenLockedBoxContent: React.FC = () => {
-  const { dataChannelManagerRef } = useOpenLockedBoxConnection();
+export const OpenLockedBoxContent: FC<{
+  shareableURL: string;
+  roomToken: string;
+}> = ({ shareableURL, roomToken }) => {
+  const {
+    messageProto,
+    routerMng,
+    error,
+    isRelayReconnecting,
+    retryRoomRegistration,
+  } = useOpenLockedBoxConnection();
 
-  const { sendKey } = useDataChannelSendMessages({
-    dataChannelManagerRef,
+  useEffect(() => {
+    routerMng.addRouter("open-locked-box", router.router);
+
+    return () => {
+      routerMng.removeRouter("open-locked-box");
+    };
+  }, [routerMng]);
+
+  const { sendKey } = useSendMessageProto({
+    peerMessageProtoRef: messageProto.peerMessageProtoRef,
   });
 
-  const { shareableURL, sessionId } = useNavigateToShareableLink();
   const state = useOpenLockedBoxStore((state) => state.state);
 
   const offLineKeyHolders = useOpenLockedBoxStore(
@@ -80,10 +105,10 @@ export const OpenLockedBoxContent: React.FC = () => {
   const actions = useOpenLockedBoxStore((state) => state.actions);
 
   useEffect(() => {
-    if (sessionId) {
-      persistStartedUnlocking(sessionId);
+    if (roomToken) {
+      persistStartedUnlocking(roomToken);
     }
-  }, [sessionId]);
+  }, [roomToken]);
 
   useShareKeyWithParticipants(sendKey);
 
@@ -110,6 +135,13 @@ export const OpenLockedBoxContent: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-8">
+      {isRelayReconnecting && <RelayReconnectingAlert />}
+      {error && (
+        <BoxErrorAlert
+          error={error}
+          onRetryRoomRegistration={retryRoomRegistration}
+        />
+      )}
       <TopLobbySection useStoreHook={useOpenLockedBoxStore} />
       <div className="flex flex-col gap-4 py-4">
         {shareableURL && (

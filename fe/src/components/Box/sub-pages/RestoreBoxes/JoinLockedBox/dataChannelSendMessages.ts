@@ -1,6 +1,5 @@
-import { loggerGate } from "@icod2/protocols";
+import { loggerGate, type PeerMessageExchangeProtocol } from "@icod2/protocols";
 import { type RefObject, useCallback } from "react";
-import type { DataChannelManager } from "@/services/webrtc";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { createKeyholderHelloHash } from "@/utils/createKeyholderHelloHash";
 import type { FollowerSendsPartialStateMessage } from "../commons";
@@ -11,13 +10,13 @@ import type {
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 
 export const useDataChannelSendMessages = ({
-  dataChannelManagerRef,
+  peerMessageProtoRef,
 }: {
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>;
+  peerMessageProtoRef: RefObject<PeerMessageExchangeProtocol | undefined>;
 }) => {
-  const sendPartialState = useSendPartialState(dataChannelManagerRef);
-  const sendHelloToPeer = useSendHelloToPeer(dataChannelManagerRef);
-  const sendKey = useSendKey(dataChannelManagerRef);
+  const sendPartialState = useSendPartialState(peerMessageProtoRef);
+  const sendHelloToPeer = useSendHelloToPeer(peerMessageProtoRef);
+  const sendKey = useSendKey(peerMessageProtoRef);
 
   return {
     sendPartialState,
@@ -27,7 +26,7 @@ export const useDataChannelSendMessages = ({
 };
 
 const useSendHelloToPeer = (
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+  dataChannelManagerRef: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) =>
   useCallback(
     async (peerId: string) => {
@@ -57,13 +56,13 @@ const useSendHelloToPeer = (
         hash: hash,
       };
 
-      dataChannelManagerRef.current?.sendMessageToSinglePeer(peerId, msg);
+      dataChannelManagerRef.current?.sendMessageToPeer(peerId, msg);
     },
     [dataChannelManagerRef],
   );
 
 const useSendPartialState = (
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+  dataChannelManagerRef: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) => {
   const { peerToKeyHolderMapRef } = usePeerToHolderMapRef();
   return useCallback(
@@ -85,7 +84,7 @@ const useSendPartialState = (
         return;
       }
 
-      dataChannelManagerRef.current?.sendMessageToSinglePeer(peerId, {
+      dataChannelManagerRef.current?.sendMessageToPeer(peerId, {
         type: "follower:send-partial-state",
         ...partialState,
       } satisfies FollowerSendsPartialStateMessage);
@@ -95,7 +94,7 @@ const useSendPartialState = (
 };
 
 const useSendKey = (
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+  dataChannelManagerRef: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) => {
   const { peerToKeyHolderMapRef } = usePeerToHolderMapRef();
 
@@ -123,6 +122,6 @@ const useSendKey = (
       keyHolderId: you.id,
     };
 
-    dataChannelManagerRef.current?.sendMessageToSinglePeer(peerId, msg);
+    dataChannelManagerRef.current?.sendMessageToPeer(peerId, msg);
   }, [dataChannelManagerRef, peerToKeyHolderMapRef.current.getPeerId]);
 };

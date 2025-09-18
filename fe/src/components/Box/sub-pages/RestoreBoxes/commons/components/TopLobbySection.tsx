@@ -99,6 +99,7 @@ export const TopLobbySection = ({
     </>
   );
 };
+
 const OpenBoxButton = ({
   disabled = false,
   useStoreHook,

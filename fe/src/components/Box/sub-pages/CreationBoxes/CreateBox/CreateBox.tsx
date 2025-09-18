@@ -1,6 +1,7 @@
 import { TextArea, TextField } from "@radix-ui/themes";
 import type React from "react";
 import { useEffect } from "react";
+import { BoxErrorAlert } from "@/components/Box/components/BoxErrorAlert";
 import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { SharePreviewButton } from "@/components/Box/components/SharePreviewButton";
 import { ContentCard } from "@/components/layout";
@@ -18,7 +19,6 @@ import { InputNumber } from "../../../components/InputNumber";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { useCreateBoxConnectionContext } from "../CreateBoxConnectionProvider/CreateBoxConnectionProvider";
 import { LeaveLobbyButton } from "../commons/components";
-import { CreateBoxError } from "./CreateBoxError";
 import { router } from "./dataChannelRouter";
 import { useDataChannelSendMessages } from "./dataChannelSendMessage";
 import {
@@ -108,7 +108,10 @@ export const CreateBoxContent: React.FC = () => {
     <>
       <div className="flex flex-col gap-4">
         {context.isRelayReconnecting && <RelayReconnectingAlert />}
-        <CreateBoxError />
+        <BoxErrorAlert
+          error={context.error}
+          onRetryRoomRegistration={context.retyRoomRegistartion}
+        />
         <FieldArea label="Invite URL">
           <TextField.Root value={shareableURL} readOnly />
         </FieldArea>

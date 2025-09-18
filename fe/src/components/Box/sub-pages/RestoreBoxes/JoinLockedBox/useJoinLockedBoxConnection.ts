@@ -1,55 +1,113 @@
-import { useRef } from "react";
-import { CallerSignalingService } from "@/services/signaling";
-import { type DataChannelManager, useDataChannelMng } from "@/services/webrtc";
+import type { Libp2p } from "@libp2p/interface";
+import { useEffect, useRef, useState } from "react";
+import { ConnectedPeerStorage } from "@/services/libp2p/connected-peer-storage";
+import type { ConnectionErrors } from "@/services/libp2p/peer-connection-handler";
+import { useRouterManager } from "@/services/libp2p/use-router-manager";
+import {
+  type Libp2pServiceErrors,
+  useLibp2p,
+} from "@/services/libp2p/useLibp2p/useLibp2p";
+import {
+  type PeerMessageExchangeProtocol,
+  usePeerMessageProto,
+} from "@/services/libp2p/usePeerMessageProto";
+import { useRoomToken } from "@/services/libp2p/useRoomRegistration";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 import { router } from "./dataChannelRouter";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useOnChangeShareablePartOfState } from "./useSelectiveStatePusher";
 
+export type JoinBoxConnectionError = ReturnType<
+  typeof useJoinLockedBoxConnection
+>["error"];
+
 export function useJoinLockedBoxConnection() {
-  const dataChannelManagerRef = useRef<
-    DataChannelManager<CallerSignalingService> | undefined
+  const routerMng = useRouterManager<
+    Record<string, unknown>,
+    PeerMessageExchangeProtocol
+  >();
+
+  const messageProto = usePeerMessageProto({
+    onMessageListener: routerMng.currentCombinedRouter,
+  });
+
+  const [error, setError] = useState<
+    Libp2pServiceErrors | ConnectionErrors | undefined
   >(undefined);
+
+  const { roomTokenProvider } = useRoomToken();
+
+  const connectedPeersStorage = useRef(new ConnectedPeerStorage());
+  const libp2p = useRef<Libp2p>(undefined);
+
+  const { isRelayReconnecting } = useLibp2p({
+    roomTokenProvider: roomTokenProvider,
+    connectedPeersStorage: connectedPeersStorage.current,
+    onLibp2pStarted: (libp2pInstance) => {
+      libp2p.current = libp2pInstance;
+    },
+    onFailedToConnect: (error) => {
+      setError(error);
+    },
+    protos: [messageProto],
+  });
+
+  useEffect(() => {
+    routerMng.addRouter("join-unlock-box", router.router);
+
+    return () => {
+      routerMng.removeRouter("join-unlock-box");
+    };
+  }, [routerMng]);
+
+  // specific to this use case below 👇
+  useEffect(() => {
+    useJoinLockedBoxStore
+      .getState()
+      .actions.cannotConnectLeader(error ? "other" : undefined);
+  }, [error]);
 
   const { peerToKeyHolderMapRef } = usePeerToHolderMapRef();
 
   const { sendPartialState, sendHelloToPeer } = useDataChannelSendMessages({
-    dataChannelManagerRef,
+    peerMessageProtoRef: messageProto.peerMessageProtoRef,
   });
 
   useOnChangeShareablePartOfState({ onChange: sendPartialState });
 
-  useDataChannelMng({
-    SignalingService: CallerSignalingService,
-    ref: dataChannelManagerRef,
-    onFailedToConnect: (reason) => {
-      if (reason === "timeout-on-creating-offer-and-ice-candidates") {
-        useJoinLockedBoxStore.getState().actions.cannotConnectLeader("timeout");
-        return;
-      }
-      if (reason === "timeout-on-getting-answer-from-callee") {
-        useJoinLockedBoxStore.getState().actions.cannotConnectLeader("timeout");
-        return;
-      }
-      if (reason === "peer-connection-state-failed") {
-        useJoinLockedBoxStore
-          .getState()
-          .actions.cannotConnectLeader("peer-connection-failed");
-        return;
-      }
+  useEffect(() => {
+    const listenersToRemove = [
+      connectedPeersStorage.current.addListener(
+        "peer-added",
+        (peerId, info) => {
+          if (!info.isRelay) {
+            sendHelloToPeer(peerId);
+          }
+        },
+      ),
+      connectedPeersStorage.current.addListener("peer-removed", (peerId) => {
+        peerToKeyHolderMapRef.current.removeByPeerId(peerId);
+        const khId = peerToKeyHolderMapRef.current.getKeyholderId(peerId);
+        const leaderKhId = useJoinLockedBoxStore.getState().connectedLeaderId;
 
-      useJoinLockedBoxStore.getState().actions.cannotConnectLeader("other");
-    },
-    onPeerConnected: (peerId) => {
-      sendHelloToPeer(peerId);
-    },
-    onPeerDisconnected: (peerId) => {
-      peerToKeyHolderMapRef.current.removeByPeerId(peerId);
-      useJoinLockedBoxStore.getState().actions.markAsDisconnected();
-    },
-    router: router,
-  });
+        if (khId === leaderKhId) {
+          useJoinLockedBoxStore.getState().actions.markAsDisconnected();
+        }
+      }),
+    ];
 
-  return { dataChannelManagerRef };
+    return () => {
+      for (const removeListener of listenersToRemove) {
+        removeListener();
+      }
+    };
+  }, [sendHelloToPeer, peerToKeyHolderMapRef]);
+
+  return {
+    routerMng,
+    error,
+    isRelayReconnecting,
+    peerMessageProtoRef: messageProto.peerMessageProtoRef,
+  };
 }

@@ -41,7 +41,7 @@ function isLockedBoxFile(data: object): data is LockedBox {
 
 export const DropLockedBox: React.FC = () => {
   const navigate = useNavigate();
-  const { sessionId } = useParams();
+  const { roomToken } = useParams();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<LockedBox | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -49,10 +49,11 @@ export const DropLockedBox: React.FC = () => {
   const openLockedBoxState = useOpenLockedBoxStore();
   const joinLockedBoxState = useJoinLockedBoxStore();
 
-  const isForcingLeader = sessionId
-    ? isPersistedStartedUnlocking(sessionId)
+  const isForcingLeader = roomToken
+    ? isPersistedStartedUnlocking(roomToken)
     : false;
-  const isFollower = !isForcingLeader && (sessionId?.trim().length ?? 0) > 0;
+
+  const isFollower = !isForcingLeader && (roomToken?.trim().length ?? 0) > 0;
   const joinLockedBoxError = useJoinLockedBoxStore((state) => state.error);
 
   useEffect(() => {
@@ -62,10 +63,10 @@ export const DropLockedBox: React.FC = () => {
   }, [joinLockedBoxError]);
 
   useEffect(() => {
-    if (!isPersistedStartedUnlocking(sessionId ?? "")) {
+    if (!isPersistedStartedUnlocking(roomToken ?? "")) {
       clearPersistedStartedUnlockingInfo();
     }
-  }, [sessionId]);
+  }, [roomToken]);
 
   const consumeLockedBox = useCallback(
     (data: object) => {

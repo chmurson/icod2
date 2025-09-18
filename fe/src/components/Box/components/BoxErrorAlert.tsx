@@ -1,18 +1,27 @@
+import type { ConnectionErrors } from "@/services/libp2p/peer-connection-handler";
+import type { Libp2pServiceErrors } from "@/services/libp2p/useLibp2p/useLibp2p";
+import type { RoomRegistrationErrors } from "@/services/libp2p/useRoomRegistration";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
-import { useCreateBoxConnectionContext } from "../CreateBoxConnectionProvider";
 
-export function CreateBoxError() {
-  const context = useCreateBoxConnectionContext();
+type PossibleErrors =
+  | RoomRegistrationErrors
+  | Libp2pServiceErrors
+  | ConnectionErrors;
 
-  if (!context.error) {
+type Props = {
+  error?: PossibleErrors;
+  onRetryRoomRegistration?: () => void;
+};
+
+export function BoxErrorAlert(props: Props) {
+  const { error, onRetryRoomRegistration } = props;
+
+  if (!error) {
     return null;
   }
 
-  const errorMessages: Record<
-    Exclude<(typeof context)["error"], undefined>,
-    string
-  > = {
+  const errorMessages: Record<Exclude<PossibleErrors, undefined>, string> = {
     "room-registration-invalid-state": "Invalid state for room registration",
     "room-registration-timeout": "Timeout occurred while registering room",
     "room-registration-unknown-error":
@@ -27,10 +36,10 @@ export function CreateBoxError() {
     <div className="flex flex-col items-center gap-4">
       <Alert variant="warning" className="self-stretch items-center">
         <div className="flex justify-between items-center">
-          <span>{errorMessages[context.error] ?? "Unexpeted error"}</span>
-          {context.error === "room-registration-timeout" && (
+          <span>{errorMessages[error] ?? "Unexpeted error"}</span>
+          {error === "room-registration-timeout" && (
             <Button
-              onClick={() => context.retyRoomRegistartion()}
+              onClick={onRetryRoomRegistration}
               variant="primary"
               size="1"
             >

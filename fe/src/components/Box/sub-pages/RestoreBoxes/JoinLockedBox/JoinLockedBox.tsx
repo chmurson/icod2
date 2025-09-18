@@ -50,10 +50,10 @@ const JoinLockedBoxContent: React.FC = () => {
   const connectionToLeaderFailReason = useJoinLockedBoxStore(
     (state) => state.connectionToLeaderFailReason,
   );
-  const { dataChannelManagerRef } = useJoinLockedBoxConnection();
+  const { peerMessageProtoRef } = useJoinLockedBoxConnection();
 
   const { sendKey } = useDataChannelSendMessages({
-    dataChannelManagerRef,
+    peerMessageProtoRef,
   });
 
   const onlineKeyHolders = useJoinLockedBoxStore(

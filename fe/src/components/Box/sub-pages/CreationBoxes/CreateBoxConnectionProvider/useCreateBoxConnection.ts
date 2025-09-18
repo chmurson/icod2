@@ -1,4 +1,3 @@
-import type { PeerMessageExchangeProtocol } from "@icod2/protocols";
 import type { Libp2p } from "@libp2p/interface";
 import { useRef, useState } from "react";
 import { ConnectedPeerStorage } from "@/services/libp2p/connected-peer-storage";
@@ -8,12 +7,15 @@ import {
   type Libp2pServiceErrors,
   useLibp2p,
 } from "@/services/libp2p/useLibp2p/useLibp2p";
-import { usePeerMessageProto } from "../commons/usePeerMessageProto";
-import { useRoomToken } from "../commons/useRoomToken";
+import {
+  type PeerMessageExchangeProtocol,
+  usePeerMessageProto,
+} from "@/services/libp2p/usePeerMessageProto";
 import {
   type RoomRegistrationErrors,
   useRoomRegistration,
-} from "./useRoomRegistration";
+  useRoomToken,
+} from "@/services/libp2p/useRoomRegistration";
 
 export function useCreateBoxConnection() {
   const [error, setError] = useState<
