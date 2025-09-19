@@ -1,5 +1,9 @@
+# default values are taken from: be/src/config/default-config.ts
+
 libp2p:
   listenMultiaddrs:
-    - /ip4/127.0.0.1/tcp/8000/ws
+    - /ip4/127.0.0.1/tcp/8080/ws
   announceMultiaddrs:
-    - /ip4/127.0.0.1/tcp/8000/ws
+    - /ip4/127.0.0.1/tcp/8080/ws
+logging:
+  level: info

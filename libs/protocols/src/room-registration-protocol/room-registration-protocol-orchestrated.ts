@@ -1,7 +1,7 @@
 import type { Libp2p } from "libp2p";
 import type { z } from "zod";
 import { attachOngoingStream } from "../commons/attach-ongoing-stream.js";
-import { loggerGate } from "../commons/loggerGate";
+import { loggerGate } from "../commons/loggerGate.js";
 import { parseJsonSafely } from "../commons/parse-json-safely.js";
 import { registerProtoHandle } from "../commons/register-proto-handle.js";
 import {

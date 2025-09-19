@@ -1,7 +1,7 @@
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
-import { initRoomRegistrationProtocol } from "@icod2/protocols";
+import { initRoomRegistrationProtocol, loggerGate } from "@icod2/protocols";
 import type { Responses } from "@icod2/protocols/src/room-registration-protocol/messages-and-responses";
 import { autoNAT } from "@libp2p/autonat";
 import { circuitRelayServer } from "@libp2p/circuit-relay-v2";
@@ -9,8 +9,8 @@ import { identify } from "@libp2p/identify";
 import { tcp } from "@libp2p/tcp";
 import { webSockets } from "@libp2p/websockets";
 import { createLibp2p } from "libp2p";
-import { starRoomRegistrationServiceStart } from "./services/room-registration";
-import { getPeerIdFromEnv } from "./utils/get-or-create-peer-id";
+import { starRoomRegistrationServiceStart } from "./services/room-registration.js";
+import { getPeerIdFromEnv } from "./utils/get-or-create-peer-id.js";
 
 export type Args = {
   listenMultiaddrs: string[];
@@ -47,21 +47,22 @@ export async function startLibp2pRelay({
 
   libp2p.addEventListener("connection:open", (event) => {
     const { id, remotePeer } = event.detail;
-    console.log("Connection open:", { id, remotePeer });
+    loggerGate.canLog && console.log("Connection open:", { id, remotePeer });
   });
 
   libp2p.addEventListener("connection:close", (event) => {
     const { id, remotePeer } = event.detail;
-    console.log("Connection closed:", { id, remotePeer });
+    loggerGate.canLog && console.log("Connection closed:", { id, remotePeer });
   });
 
   const roomRegistrationProt = initRoomRegistrationProtocol(libp2p, {
     onRegisterRoom: async (roomName, peerId) => {
-      console.log(`Room registered: ${roomName}`);
+      loggerGate.canLog && console.log(`Room registered: ${roomName}`);
       try {
         roomRegistration.registerRoom(roomName, peerId);
       } catch (error) {
-        console.error(`Error registering room ${roomName}: ${error}`);
+        loggerGate.canError &&
+          console.error(`Error registering room ${roomName}: ${error}`);
       }
       const { createPeerConnection } = roomRegistrationProt;
       const { sendResponse, close } = await createPeerConnection(peerId);
@@ -70,10 +71,11 @@ export async function startLibp2pRelay({
         type: "register-room-response-success",
       } satisfies Responses["registerRoomSuccess"]);
       close();
-      console.log("Registered rooms:", roomRegistration.registeredRooms);
+      loggerGate.canLog &&
+        console.log("Registered rooms:", roomRegistration.registeredRooms);
     },
     onUnregisterRoom: async (roomName, peerId) => {
-      console.log(`Room unregistered: ${roomName}`);
+      loggerGate.canLog && console.log(`Room unregistered: ${roomName}`);
       roomRegistration.removePeerAndUnregisterRoomInNeeded(peerId);
       const { createPeerConnection } = roomRegistrationProt;
       const { sendResponse, close } = await createPeerConnection(peerId);
@@ -82,7 +84,8 @@ export async function startLibp2pRelay({
         type: "unregister-room-response-success",
       } satisfies Responses["unregisterRoomSuccess"]);
       close();
-      console.log("Registered rooms:", roomRegistration.registeredRooms);
+      loggerGate.canLog &&
+        console.log("Registered rooms:", roomRegistration.registeredRooms);
     },
   });
   await roomRegistrationProt.start();
@@ -90,23 +93,25 @@ export async function startLibp2pRelay({
   const connectedPeers = new Set();
 
   libp2p.addEventListener("peer:connect", (event) => {
-    console.log("Peer connected:", event.detail);
+    loggerGate.canLog && console.log("Peer connected:", event.detail);
     connectedPeers.add(event.detail.toString());
-    console.log("Connected peers:", connectedPeers);
+    loggerGate.canLog && console.log("Connected peers:", connectedPeers);
   });
 
   libp2p.addEventListener("peer:disconnect", (event) => {
     const peerIdStr = event.detail.toString();
-    console.log("Disconnected peer:", peerIdStr);
+    loggerGate.canLog && console.log("Disconnected peer:", peerIdStr);
     connectedPeers.delete(peerIdStr);
-    console.log("Connected peers:", connectedPeers);
+    loggerGate.canLog && console.log("Connected peers:", connectedPeers);
     roomRegistration.removePeerAndUnregisterRoomInNeeded(peerIdStr);
-    console.log("Registered rooms:", roomRegistration.registeredRooms);
+    loggerGate.canLog &&
+      console.log("Registered rooms:", roomRegistration.registeredRooms);
   });
 
-  console.log("PeerID: ", peerId.toString());
-  console.log(
-    "Multiaddrs: ",
-    multiaddrs.map((ma) => ma.toString()),
-  );
+  loggerGate.canLog && console.log("PeerID: ", peerId.toString());
+  loggerGate.canLog &&
+    console.log(
+      "Multiaddrs: ",
+      multiaddrs.map((ma) => ma.toString()),
+    );
 }

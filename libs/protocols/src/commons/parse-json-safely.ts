@@ -1,4 +1,5 @@
-import { loggerGate } from "./loggerGate";
+import { loggerGate } from "./loggerGate.js";
+
 export const parseJsonSafely = (
   jsonString: string,
 ): Record<string, unknown> | null => {

@@ -5,7 +5,7 @@ import {
   fromString as u8FromString,
   toString as u8ToString,
 } from "uint8arrays";
-import { loggerGate } from "./loggerGate";
+import { loggerGate } from "./loggerGate.js";
 
 export async function attachOngoingStream(
   protocol: string,

@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "tsx src/index.ts --force",
+    "start": "tsx src/index.ts",
     "dev": "yarn copy-configs && tsx watch src/index.ts",
     "copy-configs": "copyfiles 'config.*.{json,yaml,yml}' 'config.{json,yaml,yml}' dist/",
     "type-check": "tsc --noEmit",
@@ -22,6 +22,7 @@
     "@chainsafe/libp2p-noise": "^16.1.4",
     "@chainsafe/libp2p-yamux": "^7.0.4",
     "@icod2/contracts": "workspace:*",
+    "@icod2/protocols": "workspace:*",
     "@libp2p/autonat": "^2.0.38",
     "@libp2p/circuit-relay-v2": "^3.2.24",
     "@libp2p/crypto": "^5.1.8",

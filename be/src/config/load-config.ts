@@ -23,24 +23,32 @@ function loadFileConfig(configPath: string): Partial<AppConfig> {
   }
 }
 
+const configDirPath = process.cwd();
+
 export function loadConfig(): AppConfig {
   const configPaths = [
-    join(process.cwd(), "config.local.yaml"),
-    join(process.cwd(), "config.local.yml"),
-    join(process.cwd(), "config.local.json"),
-    join(process.cwd(), "config.yaml"),
-    join(process.cwd(), "config.yml"),
-    join(process.cwd(), "config.json"),
+    join(configDirPath, "config.local.yaml"),
+    join(configDirPath, "config.local.yml"),
+    join(configDirPath, "config.local.json"),
+    join(configDirPath, "config.yaml"),
+    join(configDirPath, "config.yml"),
+    join(configDirPath, "config.json"),
   ];
 
   let fileConfig: Partial<AppConfig> = {};
+  let configLoadedFromFile = false;
 
   for (const configPath of configPaths) {
     if (existsSync(configPath)) {
       console.log(`Loading config from: ${configPath}`);
       fileConfig = loadFileConfig(configPath);
+      configLoadedFromFile = true;
       break;
     }
+  }
+
+  if (!configLoadedFromFile) {
+    console.log(`No config file found at ${configDirPath}`);
   }
 
   const config: AppConfig = {

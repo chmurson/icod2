@@ -12,7 +12,9 @@ export async function getPeerIdFromEnv(
     return privateKeyFromRaw(privateKeyFromEnv) as Ed25519PrivateKey;
   }
 
-  const keyFilePath = join(process.cwd(), "peer-id-private-key.json");
+  const keyFilePath =
+    process.env.PEER_ID_FILE_PATH ||
+    join(process.cwd(), "../data/peer-id-private-key.json");
   const privateKeyBytes = await loadPrivateKeyFromFile(keyFilePath);
 
   if (privateKeyBytes) {
@@ -84,6 +86,8 @@ async function savePrivateKeyToFile(
 }
 
 async function savePrivateKey(keyPair: Ed25519PrivateKey): Promise<void> {
-  const keyFilePath = join(process.cwd(), "peer-id-private-key.json");
+  const keyFilePath =
+    process.env.PEER_ID_FILE_PATH ||
+    join(process.cwd(), "../data/peer-id-private-key.json");
   await savePrivateKeyToFile(keyFilePath, keyPair.raw);
 }

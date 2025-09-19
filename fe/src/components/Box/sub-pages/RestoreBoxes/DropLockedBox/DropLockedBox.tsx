@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { StartLeaderFollowerAlert } from "@/components/Box/components/StartLeaderFollowerAlert";
 import { useRoomToken } from "@/services/libp2p/useRoomRegistration";
 import type { LockedBox } from "@/stores/boxStore/common-types";

@@ -87,14 +87,13 @@ class LoggerGate {
     return this.config.enabled;
   }
 
-  setLevel(level: LogLevel | "none"): void {
+  setLevel(level: LogLevel | "none" | string): void {
     if (level === "none") {
       this.config.levels = {
         log: false,
         warn: false,
         error: false,
       };
-      return;
     }
     if (level === "log") {
       this.config.levels = {
@@ -144,8 +143,6 @@ class LoggerGate {
   }
 
   private showNodeInitialization(): void {
-    console.log("Logger Gate initialized (Node.js mode - no persistence)");
-    console.log("Use loggerGate.showHelp() to see available commands");
     this.showStatus();
   }
 
@@ -156,7 +153,7 @@ class LoggerGate {
     );
 
     console.log(
-      `Status: ${config.enabled ? "ENABLED" : "DISABLED"} | Active level: ${enabledLevel || "none"}`,
+      `Logger Gate Status: ${config.enabled ? "ENABLED" : "DISABLED"} | Active level: ${enabledLevel || "none"}`,
     );
   }
 

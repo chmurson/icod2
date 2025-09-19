@@ -1,5 +1,5 @@
 libp2p:
   listenMultiaddrs:
-    - /ip4/127.0.0.1/tcp/8000/ws
+    - /ip4/127.0.0.1/tcp/7999/ws
   announceMultiaddrs:
-    - /ip4/127.0.0.1/tcp/8000/ws
+    - /ip4/127.0.0.1/tcp/7999/ws
