@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useRoomToken } from "@/services/libp2p/useRoomRegistration";
 import type { LockedBox } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
@@ -48,10 +49,17 @@ export const DropLockedBox: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const openLockedBoxState = useOpenLockedBoxStore();
   const joinLockedBoxState = useJoinLockedBoxStore();
+  const { generateAndPersistRoomToken } = useRoomToken();
 
   const isForcingLeader = roomToken
     ? isPersistedStartedUnlocking(roomToken)
     : false;
+
+  useEffect(() => {
+    if (!isPersistedStartedUnlocking(roomToken ?? "")) {
+      clearPersistedStartedUnlockingInfo();
+    }
+  }, [roomToken]);
 
   const isFollower = !isForcingLeader && (roomToken?.trim().length ?? 0) > 0;
   const joinLockedBoxError = useJoinLockedBoxStore((state) => state.error);
@@ -62,12 +70,6 @@ export const DropLockedBox: React.FC = () => {
     }
   }, [joinLockedBoxError]);
 
-  useEffect(() => {
-    if (!isPersistedStartedUnlocking(roomToken ?? "")) {
-      clearPersistedStartedUnlockingInfo();
-    }
-  }, [roomToken]);
-
   const consumeLockedBox = useCallback(
     (data: object) => {
       if (!isLockedBoxFile(data)) {
@@ -77,6 +79,11 @@ export const DropLockedBox: React.FC = () => {
       setSuccess(data);
 
       if (isFollower) {
+        if (!roomToken) {
+          setError("Room token is required.");
+          return;
+        }
+
         joinLockedBoxState.actions.connect({
           boxTitle: data.boxTitle,
           encryptedMessage: data.encryptedMessage,
@@ -84,8 +91,13 @@ export const DropLockedBox: React.FC = () => {
           keyHolderId: data.keyHolderId,
           keyHolders: data.keyHolders,
           keyThreshold: data.keyThreshold,
+          roomToken,
         });
       } else {
+        const notEmptyRoomToken = roomToken
+          ? roomToken
+          : generateAndPersistRoomToken();
+
         openLockedBoxState.actions.connect({
           boxTitle: data.boxTitle,
           encryptedMessage: data.encryptedMessage,
@@ -93,6 +105,7 @@ export const DropLockedBox: React.FC = () => {
           keyHolderId: data.keyHolderId,
           keyHolders: data.keyHolders,
           keyThreshold: data.keyThreshold,
+          roomToken: notEmptyRoomToken,
         });
       }
     },
@@ -100,6 +113,8 @@ export const DropLockedBox: React.FC = () => {
       isFollower,
       joinLockedBoxState.actions.connect,
       openLockedBoxState.actions.connect,
+      roomToken,
+      generateAndPersistRoomToken,
     ],
   );
 

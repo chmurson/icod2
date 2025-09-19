@@ -5,6 +5,7 @@ import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconne
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
 import { ContentCard } from "@/components/layout/MainLayout";
+import { useShareablURLWithRoomToken } from "@/hooks/useShareableURL";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import ErrorBoundary from "@/ui/ErrorBoundry";
@@ -20,17 +21,13 @@ import { NavigationAwayBlocker } from "../commons/components/NavigationAwayBlock
 import { PageTitle } from "../commons/components/PageTitle";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
 import { router } from "./dataChannelRouter";
-import {
-  useNavigateToShareableLink,
-  useShareKeyWithParticipants,
-} from "./hooks";
+import { useShareKeyWithParticipants } from "./hooks";
 import { useInitiateCounter } from "./hooks/useInitiateCounter";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
 import { useSendMessageProto } from "./useSendMessageProto";
 
 export const OpenLockedBox: FC = () => {
   const boxTitle = useOpenLockedBoxStore((state) => state.boxTitle);
-  const { shareableURL, roomToken } = useNavigateToShareableLink();
 
   return (
     <div className="flex flex-col gap-8">
@@ -50,28 +47,26 @@ export const OpenLockedBox: FC = () => {
           </div>
         )}
       >
-        {roomToken && (
-          <OpenLockedBoxContent
-            shareableURL={shareableURL}
-            roomToken={roomToken}
-          />
-        )}
+        <OpenLockedBoxContent />
       </ErrorBoundary>
     </div>
   );
 };
 
-export const OpenLockedBoxContent: FC<{
-  shareableURL: string;
-  roomToken: string;
-}> = ({ shareableURL, roomToken }) => {
+export const OpenLockedBoxContent: FC = () => {
+  const roomToken = useOpenLockedBoxStore((state) => state.roomToken);
+  const shareableURL = useShareablURLWithRoomToken({
+    roomToken: roomToken,
+    url: "/unlock-box/:roomToken",
+  });
+
   const {
     messageProto,
     routerMng,
     error,
     isRelayReconnecting,
     retryRoomRegistration,
-  } = useOpenLockedBoxConnection();
+  } = useOpenLockedBoxConnection({ roomToken });
 
   useEffect(() => {
     routerMng.addRouter("open-locked-box", router.router);

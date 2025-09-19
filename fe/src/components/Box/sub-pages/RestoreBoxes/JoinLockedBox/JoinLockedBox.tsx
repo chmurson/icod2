@@ -47,10 +47,13 @@ export const JoinLockedBox: FC = () => {
 
 const JoinLockedBoxContent: React.FC = () => {
   const state = useJoinLockedBoxStore((state) => state.state);
+  const roomToken = useJoinLockedBoxStore((state) => state.roomToken);
+
   const connectionToLeaderFailReason = useJoinLockedBoxStore(
     (state) => state.connectionToLeaderFailReason,
   );
-  const { peerMessageProtoRef } = useJoinLockedBoxConnection();
+
+  const { peerMessageProtoRef } = useJoinLockedBoxConnection({ roomToken });
 
   const { sendKey } = useDataChannelSendMessages({
     peerMessageProtoRef,

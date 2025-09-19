@@ -1,7 +1,8 @@
 import type { Libp2p } from "@libp2p/interface";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ConnectedPeerStorage } from "@/services/libp2p/connected-peer-storage";
 import type { ConnectionErrors } from "@/services/libp2p/peer-connection-handler";
+import type { RoomTokenProvider } from "@/services/libp2p/room-token-provider";
 import { useRouterManager } from "@/services/libp2p/use-router-manager";
 import {
   type Libp2pServiceErrors,
@@ -14,22 +15,26 @@ import {
 import {
   type RoomRegistrationErrors,
   useRoomRegistration,
-  useRoomToken,
 } from "@/services/libp2p/useRoomRegistration";
 
-export function useCreateBoxConnection() {
+export function useCreateBoxConnection({ roomToken }: { roomToken: string }) {
   const [error, setError] = useState<
     RoomRegistrationErrors | Libp2pServiceErrors | ConnectionErrors | undefined
   >(undefined);
   const [roomRegistered, setRoomRegistered] = useState<boolean>(false);
-  const { roomTokenProvider } = useRoomToken();
 
   const connectedPeersStorage = useRef(new ConnectedPeerStorage());
   const libp2p = useRef<Libp2p>(undefined);
 
+  const roomTokenProvider = useMemo(() => {
+    return {
+      getRoomToken: () => roomToken,
+    } satisfies RoomTokenProvider;
+  }, [roomToken]);
+
   const roomRegistrationObject = useRoomRegistration({
     connectedPeersStorage: connectedPeersStorage.current,
-    roomTokenProvider: roomTokenProvider,
+    roomTokenProvider,
     onRoomRegistered: () => {
       setRoomRegistered(true);
     },

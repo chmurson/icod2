@@ -5,6 +5,7 @@ import {
   useContext,
   useMemo,
 } from "react";
+import { useCreateBoxStore } from "@/stores";
 import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
 type CreateBoxConnectionContext = ReturnType<typeof useCreateBoxConnection>;
@@ -29,6 +30,8 @@ export const useCreateBoxConnectionContext =
 export const CreateBoxConnectionProvider: FC<PropsWithChildren> = ({
   children,
 }) => {
+  const roomToken = useCreateBoxStore((state) => state.roomToken);
+
   const {
     error,
     retyRoomRegistartion,
@@ -37,7 +40,7 @@ export const CreateBoxConnectionProvider: FC<PropsWithChildren> = ({
     isRelayReconnecting,
     messageProto,
     peerId,
-  } = useCreateBoxConnection() ?? {};
+  } = useCreateBoxConnection({ roomToken }) ?? {};
 
   const value = useMemo(() => {
     return {

@@ -57,6 +57,7 @@ export type JoinLockedBoxState = {
       keyHolderId: string;
       keyHolders: ParticipantType[];
       keyThreshold: number;
+      roomToken: string;
     }) => void;
     toggleShareAccessKey: (participantId: string, value?: boolean) => void;
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
@@ -101,6 +102,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
         keyHolderId,
         keyHolders,
         keyThreshold,
+        roomToken,
       }) => {
         const you = keyHolders.find((x) => x.id === keyHolderId);
         if (!you)
@@ -124,6 +126,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           you: {
             ...you,
           },
+          roomToken,
         });
       },
       connectKeyHolder: (

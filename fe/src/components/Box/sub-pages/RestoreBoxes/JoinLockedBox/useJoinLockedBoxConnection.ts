@@ -1,7 +1,8 @@
 import type { Libp2p } from "@libp2p/interface";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ConnectedPeerStorage } from "@/services/libp2p/connected-peer-storage";
 import type { ConnectionErrors } from "@/services/libp2p/peer-connection-handler";
+import type { RoomTokenProvider } from "@/services/libp2p/room-token-provider";
 import { useRouterManager } from "@/services/libp2p/use-router-manager";
 import {
   type Libp2pServiceErrors,
@@ -11,7 +12,6 @@ import {
   type PeerMessageExchangeProtocol,
   usePeerMessageProto,
 } from "@/services/libp2p/usePeerMessageProto";
-import { useRoomToken } from "@/services/libp2p/useRoomRegistration";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 import { router } from "./dataChannelRouter";
@@ -22,7 +22,11 @@ export type JoinBoxConnectionError = ReturnType<
   typeof useJoinLockedBoxConnection
 >["error"];
 
-export function useJoinLockedBoxConnection() {
+export function useJoinLockedBoxConnection({
+  roomToken,
+}: {
+  roomToken: string;
+}) {
   const routerMng = useRouterManager<
     Record<string, unknown>,
     PeerMessageExchangeProtocol
@@ -36,7 +40,13 @@ export function useJoinLockedBoxConnection() {
     Libp2pServiceErrors | ConnectionErrors | undefined
   >(undefined);
 
-  const { roomTokenProvider } = useRoomToken();
+  const roomTokenProvider = useMemo(
+    () =>
+      ({
+        getRoomToken: () => roomToken,
+      }) satisfies RoomTokenProvider,
+    [roomToken],
+  );
 
   const connectedPeersStorage = useRef(new ConnectedPeerStorage());
   const libp2p = useRef<Libp2p>(undefined);

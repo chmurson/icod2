@@ -36,6 +36,7 @@ export const lockedBoxStoreStateCommonPart = {
   offLineKeyHolders: [] as ParticipantType[],
   unlockingStartDate: null as Date | null,
   encryptedMessage: "",
+  roomToken: "",
 };
 
 export type LockedBoxStoreCommonPart = typeof lockedBoxStoreStateCommonPart & {

@@ -55,9 +55,10 @@ const JoinBoxContent = () => {
     you,
     content,
     connectionToLeaderFailReason,
+    roomToken,
   } = useStoreSlice();
 
-  const { error, isRelayReconnecting } = useJoinBoxConnection();
+  const { error, isRelayReconnecting } = useJoinBoxConnection({ roomToken });
 
   const blocker = useNavigateAwayBlocker({
     shouldNavigationBeBlocked: () => !connectionToLeaderFailReason,
@@ -192,6 +193,7 @@ const useStoreSlice = () => {
   const threshold = useJoinBoxStore((state) => state.threshold);
   const otherKeyholders = useJoinBoxStore((state) => state.otherKeyHolders);
   const content = useJoinBoxStore((state) => state.content);
+  const roomToken = useJoinBoxStore((state) => state.roomToken);
   const connectionToLeaderFailReason = useJoinBoxStore(
     (state) => state.connectionToLeaderFailReason,
   );
@@ -204,6 +206,7 @@ const useStoreSlice = () => {
     otherKeyholders,
     content,
     connectionToLeaderFailReason,
+    roomToken,
   };
 };
 

@@ -1,11 +1,11 @@
 import { TextArea, TextField } from "@radix-ui/themes";
-import type React from "react";
-import { useEffect } from "react";
+import { type FC, useEffect } from "react";
 import { BoxErrorAlert } from "@/components/Box/components/BoxErrorAlert";
 import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { SharePreviewButton } from "@/components/Box/components/SharePreviewButton";
 import { ContentCard } from "@/components/layout";
-import { useDownloadBoxStore } from "@/stores";
+import { useShareablURLWithRoomToken } from "@/hooks/useShareableURL";
+import { useCreateBoxStore, useDownloadBoxStore } from "@/stores";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button.tsx";
 import ErrorBoundary from "@/ui/ErrorBoundry";
@@ -26,7 +26,6 @@ import {
   useCreateLockedBox,
   useKeepKeyHoldersUpdated,
   usePartOfCreateBoxStore,
-  useShareableURL,
 } from "./hooks";
 
 export const CreateBox = () => {
@@ -56,7 +55,12 @@ export const CreateBox = () => {
   );
 };
 
-export const CreateBoxContent: React.FC = () => {
+export const CreateBoxContent: FC = () => {
+  const roomToken = useCreateBoxStore((state) => state.roomToken);
+  const shareableURL = useShareablURLWithRoomToken({
+    roomToken,
+    url: "/lock-box/:roomToken",
+  });
   const context = useCreateBoxConnectionContext();
 
   useEffect(() => {
@@ -97,8 +101,6 @@ export const CreateBoxContent: React.FC = () => {
   useKeepKeyHoldersUpdated(context.messageProto.peerMessageProtoRef);
 
   const noParticipantConnected = state.keyHolders.length === 0;
-
-  const shareableURL = useShareableURL();
 
   const blocker = useNavigateAwayBlocker({
     shouldNavigationBeBlocked: () => true,

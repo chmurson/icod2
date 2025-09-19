@@ -1,9 +1,9 @@
 export type RoomTokenProvider = {
-  getRoomToken: () => Promise<string | undefined>;
+  getRoomToken: () => string;
 };
 
 export const createRoomTokenProvider = (): RoomTokenProvider => {
-  const getRoomToken = async (): Promise<string> => {
+  const getRoomToken = (): string => {
     // Implement logic to fetch room token from your backend or any other source
     return "your_room_token_here";
   };
