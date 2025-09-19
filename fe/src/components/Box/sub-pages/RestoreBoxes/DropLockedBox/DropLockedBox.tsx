@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { StartLeaderFollowerAlert } from "@/components/Box/components/StartLeaderFollowerAlert";
 import { useRoomToken } from "@/services/libp2p/useRoomRegistration";
 import type { LockedBox } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
@@ -41,7 +42,6 @@ function isLockedBoxFile(data: object): data is LockedBox {
 }
 
 export const DropLockedBox: React.FC = () => {
-  const navigate = useNavigate();
   const { roomToken } = useParams();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<LockedBox | null>(null);
@@ -213,26 +213,22 @@ export const DropLockedBox: React.FC = () => {
           {isFollower && "Join Unlocking a Box"}
         </Text>
         {isFollower && (
-          <div className="flex flex-col gap-4">
-            <Alert variant="info">
-              <div className="flex justify-between max-sm:flex-col gap-2">
-                <span>
-                  You are going to <b>join</b> process of unlocking a box.
-                </span>
-                <Button
-                  variant="secondary"
-                  className="self-end text-sm max-sm:w-full whitespace-nowrap"
-                  size="1"
-                  onClick={() => {
-                    navigate("/unlock-box");
-                  }}
-                >
-                  Start unlocking instead
-                </Button>
-              </div>
-            </Alert>
-            <div className="flex flex-col gap-1" />
-          </div>
+          <StartLeaderFollowerAlert
+            className="self-stretch"
+            followerAlertContent={
+              <>
+                You are going to <b>join</b> process of unlocking a box.
+              </>
+            }
+            type={isFollower ? "follower" : "leader"}
+            followerNavigateButtonText="Start unlocking instead"
+            followerNavigateToLink="/unlock-box"
+            leaderAlertContent={
+              <>
+                You are going to <b>start</b> process of unlocking a box.
+              </>
+            }
+          />
         )}
         {!isFollower && (
           <Alert variant="info">
