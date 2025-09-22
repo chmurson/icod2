@@ -7,5 +7,8 @@ export const defaultConfig: AppConfig = {
   },
   logging: {
     level: "info",
+    axiom: {
+      enabled: false,
+    },
   },
 };

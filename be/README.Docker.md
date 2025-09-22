@@ -49,3 +49,16 @@ The peer ID file will be stored at `/app/data/peer-id-private-key.json` inside t
 ```bash
 docker run -p 8080:8080 -v icod2-data:/app/data -e PEER_ID_FILE_PATH=/app/data/my-peer-id.json icod2-backend
 ```
+
+### Logging
+
+The relay now uses [Pino](https://github.com/pinojs/pino) for structured logging. Control verbosity via the `logging.level` setting in `config.yaml` (defaults to `info`).
+
+To forward logs to [Axiom](https://axiom.co/docs/send-data/pino), provide credentials through configuration or environment variables:
+
+- `AXIOM_DATASET`
+- `AXIOM_TOKEN`
+- `AXIOM_ORG_ID`
+- `AXIOM_URL` (optional, override ingest endpoint)
+
+You can also enable the optional `logging.axiom` block in `config.yaml`. When credentials are supplied, logs continue to stream to stdout while also being shipped to Axiom.

@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import yaml from "js-yaml";
 import { defaultConfig } from "./default-config.js";
-import type { AppConfig } from "./types.js";
+import type { AppConfig, LoggingConfig } from "./types.js";
 
 function loadFileConfig(configPath: string): Partial<AppConfig> {
   if (!existsSync(configPath)) {
@@ -25,7 +25,12 @@ function loadFileConfig(configPath: string): Partial<AppConfig> {
 
 const configDirPath = process.cwd();
 
-export function loadConfig(): AppConfig {
+export type LoadConfigResult = {
+  config: AppConfig;
+  sourcePath?: string;
+};
+
+export function loadConfig(): LoadConfigResult {
   const configPaths = [
     join(configDirPath, "config.local.yaml"),
     join(configDirPath, "config.local.yml"),
@@ -36,19 +41,14 @@ export function loadConfig(): AppConfig {
   ];
 
   let fileConfig: Partial<AppConfig> = {};
-  let configLoadedFromFile = false;
+  let sourcePath: string | undefined;
 
   for (const configPath of configPaths) {
     if (existsSync(configPath)) {
-      console.log(`Loading config from: ${configPath}`);
       fileConfig = loadFileConfig(configPath);
-      configLoadedFromFile = true;
+      sourcePath = configPath;
       break;
     }
-  }
-
-  if (!configLoadedFromFile) {
-    console.log(`No config file found at ${configDirPath}`);
   }
 
   const config: AppConfig = {
@@ -63,8 +63,25 @@ export function loadConfig(): AppConfig {
         fileConfig.libp2p?.announceMultiaddrs ||
         defaultConfig.libp2p.announceMultiaddrs,
     },
-    logging: { ...defaultConfig.logging, ...fileConfig.logging },
+    logging: mergeLogging(defaultConfig.logging, fileConfig.logging),
   };
 
-  return config;
+  return { config, sourcePath };
+}
+
+function mergeLogging(
+  base: LoggingConfig,
+  override?: Partial<LoggingConfig>,
+): LoggingConfig {
+  const result: LoggingConfig = {
+    ...base,
+    ...override,
+  };
+
+  result.axiom = {
+    ...base.axiom,
+    ...override?.axiom,
+  };
+
+  return result;
 }
