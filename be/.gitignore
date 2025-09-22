@@ -1,4 +1,5 @@
 tsconfig.tsbuildinfo
 dist
-config.*.{json,yaml,yml}
+config.local.*
 peer-id-private-key.json
+1
