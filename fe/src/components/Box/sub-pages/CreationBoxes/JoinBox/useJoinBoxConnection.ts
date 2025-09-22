@@ -1,15 +1,5 @@
-import type { PeerMessageExchangeProtocol } from "@icod2/protocols";
-import type { Libp2p } from "@libp2p/interface";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ConnectedPeerStorage } from "@/services/libp2p/connected-peer-storage";
-import type { ConnectionErrors } from "@/services/libp2p/peer-connection-handler";
-import type { RoomTokenProvider } from "@/services/libp2p/room-token-provider";
-import { useRouterManager } from "@/services/libp2p/use-router-manager";
-import {
-  type Libp2pServiceErrors,
-  useLibp2p,
-} from "@/services/libp2p/useLibp2p/useLibp2p";
-import { usePeerMessageProto } from "@/services/libp2p/usePeerMessageProto";
+import { useCallback, useEffect } from "react";
+import { useFollowerConnection } from "@/services/libp2p/connection-setups";
 import { useJoinBoxStore } from "@/stores";
 import type { KeyHolderWelcomesLeader } from "../commons";
 import { router } from "./joinPeerMessageRouter";
@@ -19,40 +9,14 @@ export type JoinBoxConnectionError = ReturnType<
 >["error"];
 
 export function useJoinBoxConnection({ roomToken }: { roomToken: string }) {
-  const routerMng = useRouterManager<
-    Record<string, unknown>,
-    PeerMessageExchangeProtocol
-  >();
-
-  const messageProto = usePeerMessageProto({
-    onMessageListener: routerMng.currentCombinedRouter,
-  });
-
-  const [error, setError] = useState<
-    Libp2pServiceErrors | ConnectionErrors | undefined
-  >(undefined);
-
-  const roomTokenProvider = useMemo(
-    () =>
-      ({
-        getRoomToken: () => roomToken,
-      }) satisfies RoomTokenProvider,
-    [roomToken],
-  );
-
-  const connectedPeersStorage = useRef(new ConnectedPeerStorage());
-  const libp2p = useRef<Libp2p>(undefined);
-
-  const { isRelayReconnecting } = useLibp2p({
-    roomTokenProvider: roomTokenProvider,
-    connectedPeersStorage: connectedPeersStorage.current,
-    onLibp2pStarted: (libp2pInstance) => {
-      libp2p.current = libp2pInstance;
-    },
-    onFailedToConnect: (error) => {
-      setError(error);
-    },
-    protos: [messageProto],
+  const {
+    error,
+    messageProto,
+    isRelayReconnecting,
+    routerMng,
+    connectedPeersStorageRef,
+  } = useFollowerConnection({
+    roomToken,
   });
 
   const onPeerConnected = useCallback(
@@ -70,19 +34,28 @@ export function useJoinBoxConnection({ roomToken }: { roomToken: string }) {
   );
 
   useEffect(() => {
-    const removeListener = connectedPeersStorage.current.addListener(
-      "peer-added",
-      (peerId, info) => {
-        if (!info.isRelay) {
-          onPeerConnected(peerId);
-        }
-      },
-    );
+    const removeListeners = [
+      connectedPeersStorageRef.current.addListener(
+        "peer-added",
+        (peerId, info) => {
+          if (!info.isRelay) {
+            onPeerConnected(peerId);
+          }
+        },
+      ),
+
+      connectedPeersStorageRef.current.addListener("peer-removed", (peerId) => {
+        const actions = useJoinBoxStore.getState().actions;
+        actions.disconnectParticipant(peerId);
+      }),
+    ];
 
     return () => {
-      removeListener();
+      for (const removeListener of removeListeners) {
+        removeListener();
+      }
     };
-  }, [onPeerConnected]);
+  }, [onPeerConnected, connectedPeersStorageRef]);
 
   useEffect(() => {
     routerMng.addRouter("join-create-box", router.router);

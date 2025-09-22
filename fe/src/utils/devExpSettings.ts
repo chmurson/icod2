@@ -4,12 +4,43 @@ const LOCKED_BOX_AUTO_LOAD_LOCAL_STORAGAE_KEY = "ICOD2_DEV_AUTO_LOAD_BOX";
 const ICOD2_DEV_COUNT_DOWN_OVERRIDE_STORAGAE_KEY =
   "ICOD2_DEV_COUNT_DOWN_OVERRIDE";
 const ICOD2_DEV_TOP_NAV_TOOLS_STORAGAE_KEY = "ICOD2_DEV_TOP_NAV_TOOLS";
+const ICOD2_DEV_BOOTSTRAP_MULTIADDR_LOCAL_STORAGAE_KEY =
+  "ICOD2_DEV_BOOTSTRAP_MULTIADDR";
 
 window.icod2Dev = {
   clear: () => {
     localStorage.removeItem(LOCKED_BOX_AUTO_LOAD_LOCAL_STORAGAE_KEY);
     localStorage.removeItem(ICOD2_DEV_COUNT_DOWN_OVERRIDE_STORAGAE_KEY);
     localStorage.removeItem(ICOD2_DEV_TOP_NAV_TOOLS_STORAGAE_KEY);
+  },
+  bootstrapMultiaddr: {
+    set: (multiaddr: string | object) => {
+      localStorage.setItem(
+        ICOD2_DEV_BOOTSTRAP_MULTIADDR_LOCAL_STORAGAE_KEY,
+        JSON.stringify([multiaddr]),
+      );
+    },
+    get: () => {
+      try {
+        const value = localStorage.getItem(
+          ICOD2_DEV_BOOTSTRAP_MULTIADDR_LOCAL_STORAGAE_KEY,
+        );
+
+        if (value === null) {
+          return undefined;
+        }
+
+        const parsedValue = JSON.parse(value);
+
+        if (!Array.isArray(parsedValue)) {
+          throw new Error("Invalid bootstrap multiaddr format");
+        }
+        return parsedValue;
+      } catch (e) {
+        loggerGate.canWarn && console.warn(e);
+        return undefined;
+      }
+    },
   },
   lockedBoxAutoLoad: {
     set: (box: string | object) => {
@@ -82,6 +113,10 @@ interface Icod2Dev {
   topNavTools: {
     set: (isOn: boolean) => void;
     get: () => boolean;
+  };
+  bootstrapMultiaddr: {
+    set: (multiaddr: string) => void;
+    get: () => string[] | undefined;
   };
 }
 

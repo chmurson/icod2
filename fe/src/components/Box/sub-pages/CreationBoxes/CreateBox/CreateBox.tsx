@@ -112,7 +112,7 @@ export const CreateBoxContent: FC = () => {
         {context.isRelayReconnecting && <RelayReconnectingAlert />}
         <BoxErrorAlert
           error={context.error}
-          onRetryRoomRegistration={context.retyRoomRegistartion}
+          onRetryRoomRegistration={context.retryRoomRegistration}
         />
         <FieldArea label="Invite URL">
           <TextField.Root value={shareableURL} readOnly />

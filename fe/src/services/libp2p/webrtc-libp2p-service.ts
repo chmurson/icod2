@@ -26,6 +26,8 @@ export async function startLibp2pService({
       roomToken,
       "Local peer ID: ",
       libp2p.peerId.toString(),
+      "Bootstrap multiaddrs: ",
+      bootstrapMultiaddrs,
     );
   return libp2p;
 }

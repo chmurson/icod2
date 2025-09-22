@@ -2,8 +2,12 @@ export function getBootstrapMultiaddrs(): {
   bootstrapMultiaddrs: string[];
   relayPeerIds: string[];
 } {
-  const bootstrapMultiaddrs =
-    import.meta.env.VITE_BOOTSTRAP_MULTIADDRS?.split(",") || [];
+  const browserMultiaddrsOverride = window.icod2Dev.bootstrapMultiaddr.get();
+
+  const bootstrapMultiaddrs = [
+    ...(browserMultiaddrsOverride ?? []),
+    ...(import.meta.env.VITE_BOOTSTRAP_MULTIADDRS?.split(",") ?? []),
+  ];
 
   const relayPeerIds = bootstrapMultiaddrs
     .filter(isString)

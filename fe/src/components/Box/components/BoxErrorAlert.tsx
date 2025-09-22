@@ -1,3 +1,7 @@
+import {
+  type IgnoredErrors,
+  isIgnoredErrors,
+} from "@/services/libp2p/connection-setups";
 import type { ConnectionErrors } from "@/services/libp2p/peer-connection-handler";
 import type { Libp2pServiceErrors } from "@/services/libp2p/useLibp2p/useLibp2p";
 import type { RoomRegistrationErrors } from "@/services/libp2p/useRoomRegistration";
@@ -17,11 +21,14 @@ type Props = {
 export function BoxErrorAlert(props: Props) {
   const { error, onRetryRoomRegistration } = props;
 
-  if (!error) {
+  if (!error || isIgnoredErrors(error)) {
     return null;
   }
 
-  const errorMessages: Record<Exclude<PossibleErrors, undefined>, string> = {
+  const errorMessages: Record<
+    Exclude<PossibleErrors, IgnoredErrors>,
+    string
+  > = {
     "room-registration-invalid-state": "Invalid state for room registration",
     "room-registration-timeout": "Timeout occurred while registering room",
     "room-registration-unknown-error":
@@ -29,7 +36,7 @@ export function BoxErrorAlert(props: Props) {
     EmptyBootstrapMultiaddrsError: "Empty bootstrap multiaddrs",
     Libp2pServiceError: "Libp2p service error",
     RoomTokenProviderError: "Room token provider error",
-    CannotConnectToRelayPeer: "Cannot connect to relay peer",
+    CannotConnectToAnyOfRelayPeers: "Cannot connect to any of relay peers",
   };
 
   return (

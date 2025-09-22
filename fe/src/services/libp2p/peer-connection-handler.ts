@@ -6,7 +6,9 @@ import type { PersistingDialer } from "./persiting-dialer";
 
 type HandShake = () => Promise<void>;
 
-export type ConnectionErrors = "CannotConnectToRelayPeer";
+export type ConnectionErrors =
+  | "CannotConnectToRelayPeer"
+  | "CannotConnectToAnyOfRelayPeers";
 
 export const createPeerConnectionHandler = ({
   relayPeerIds,
@@ -39,6 +41,7 @@ export const createPeerConnectionHandler = ({
   });
 
   return function peerConnectionHandler(libp2p: Libp2p) {
+    let failedConnectionsToRelayPeersCount = 0;
     libp2p.addEventListener("peer:disconnect", (evt) => {
       const peerIdStr = evt.detail.toString();
       loggerGate.canLog && console.log("Peer connected:", peerIdStr);
@@ -86,6 +89,10 @@ export const createPeerConnectionHandler = ({
               err,
             );
           onError("CannotConnectToRelayPeer");
+          failedConnectionsToRelayPeersCount++;
+          if (failedConnectionsToRelayPeersCount === relayPeerIds.length) {
+            onError("CannotConnectToAnyOfRelayPeers");
+          }
         } else {
           persistingDialer.add(discoveredPeerIdStr);
           loggerGate.canError &&
