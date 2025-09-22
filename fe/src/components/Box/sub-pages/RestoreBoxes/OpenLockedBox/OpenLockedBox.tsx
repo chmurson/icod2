@@ -1,10 +1,15 @@
 import { TextField } from "@radix-ui/themes";
 import { type FC, useEffect, useMemo } from "react";
+import { BoxErrorAlert } from "@/components/Box/components/BoxErrorAlert";
+import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
 import { ContentCard } from "@/components/layout/MainLayout";
+import { useShareablURLWithRoomToken } from "@/hooks/useShareableURL";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
+import ErrorBoundary from "@/ui/ErrorBoundry";
+import { Alert, Button } from "@/ui/index";
 import { FieldArea } from "../../../components/FieldArea";
 import {
   LoobbyKeyHolders,
@@ -15,22 +20,66 @@ import { LeaveLobbyButton } from "../commons/components/LeaveLobbyButton";
 import { NavigationAwayBlocker } from "../commons/components/NavigationAwayBlocker";
 import { PageTitle } from "../commons/components/PageTitle";
 import { persistStartedUnlocking } from "../commons/persistStartedUnlocking";
-import { useDataChannelSendMessages } from "./dataChannelSendMessages";
-import {
-  useNavigateToShareableLink,
-  useShareKeyWithParticipants,
-} from "./hooks";
+import { router } from "./dataChannelRouter";
+import { useShareKeyWithParticipants } from "./hooks";
 import { useInitiateCounter } from "./hooks/useInitiateCounter";
 import { useOpenLockedBoxConnection } from "./useOpenLockedBoxConnection";
+import { useSendMessageProto } from "./useSendMessageProto";
 
-export const OpenLockedBox: React.FC = () => {
-  const { dataChannelManagerRef } = useOpenLockedBoxConnection();
+export const OpenLockedBox: FC = () => {
+  const boxTitle = useOpenLockedBoxStore((state) => state.boxTitle);
 
-  const { sendKey } = useDataChannelSendMessages({
-    dataChannelManagerRef,
+  return (
+    <div className="flex flex-col gap-8">
+      <PageTitle boxTitle={boxTitle} />
+      <ErrorBoundary
+        fallback={({ handleRetry, isRetrying }) => (
+          <div className="flex flex-col gap-4">
+            <Alert variant="error">Something went wrong</Alert>
+            <Button
+              variant="primary"
+              onClick={handleRetry}
+              className="self-start"
+              loading={isRetrying}
+            >
+              Try to connect again
+            </Button>
+          </div>
+        )}
+      >
+        <OpenLockedBoxContent />
+      </ErrorBoundary>
+    </div>
+  );
+};
+
+export const OpenLockedBoxContent: FC = () => {
+  const roomToken = useOpenLockedBoxStore((state) => state.roomToken);
+  const shareableURL = useShareablURLWithRoomToken({
+    roomToken: roomToken,
+    url: "/unlock-box/:roomToken",
   });
 
-  const { shareableURL, sessionId } = useNavigateToShareableLink();
+  const {
+    messageProto,
+    routerMng,
+    error,
+    isRelayReconnecting,
+    retryRoomRegistration,
+  } = useOpenLockedBoxConnection({ roomToken });
+
+  useEffect(() => {
+    routerMng.addRouter("open-locked-box", router.router);
+
+    return () => {
+      routerMng.removeRouter("open-locked-box");
+    };
+  }, [routerMng]);
+
+  const { sendKey } = useSendMessageProto({
+    peerMessageProtoRef: messageProto.peerMessageProtoRef,
+  });
+
   const state = useOpenLockedBoxStore((state) => state.state);
 
   const offLineKeyHolders = useOpenLockedBoxStore(
@@ -49,13 +98,12 @@ export const OpenLockedBox: React.FC = () => {
 
   const you = useOpenLockedBoxStore((state) => state.you);
   const actions = useOpenLockedBoxStore((state) => state.actions);
-  const boxTitle = useOpenLockedBoxStore((state) => state.boxTitle);
 
   useEffect(() => {
-    if (sessionId) {
-      persistStartedUnlocking(sessionId);
+    if (roomToken) {
+      persistStartedUnlocking(roomToken);
     }
-  }, [sessionId]);
+  }, [roomToken]);
 
   useShareKeyWithParticipants(sendKey);
 
@@ -82,7 +130,13 @@ export const OpenLockedBox: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <PageTitle boxTitle={boxTitle} />
+      {isRelayReconnecting && <RelayReconnectingAlert />}
+      {error && (
+        <BoxErrorAlert
+          error={error}
+          onRetryRoomRegistration={retryRoomRegistration}
+        />
+      )}
       <TopLobbySection useStoreHook={useOpenLockedBoxStore} />
       <div className="flex flex-col gap-4 py-4">
         {shareableURL && (

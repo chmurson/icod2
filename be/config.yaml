@@ -1,0 +1,16 @@
+# default values are taken from: be/src/config/default-config.ts
+
+libp2p:
+  listenMultiaddrs:
+    - /ip4/127.0.0.1/tcp/8080/ws
+  announceMultiaddrs:
+    - /ip4/127.0.0.1/tcp/8080/ws
+    # - /dns4/example.com/tcp/443/wss   Example of multiaddr with Secure WebSockets
+logging:
+  level: info
+  # axiom:
+  #   enabled: false
+  #   dataset: your-dataset
+  #   orgId: your-org-id
+  #   token: your-token # Prefer environment variables AXIOM_TOKEN/AXIOM_ORG_ID/AXIOM_DATASET
+  #   url: https://api.axiom.co

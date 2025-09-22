@@ -1,9 +1,11 @@
 import { TextArea, TextField } from "@radix-ui/themes";
-import type React from "react";
-import { useEffect } from "react";
+import { type FC, useEffect } from "react";
+import { BoxErrorAlert } from "@/components/Box/components/BoxErrorAlert";
+import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { SharePreviewButton } from "@/components/Box/components/SharePreviewButton";
 import { ContentCard } from "@/components/layout";
-import { useDownloadBoxStore } from "@/stores";
+import { useShareablURLWithRoomToken } from "@/hooks/useShareableURL";
+import { useCreateBoxStore, useDownloadBoxStore } from "@/stores";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button.tsx";
 import ErrorBoundary from "@/ui/ErrorBoundry";
@@ -24,7 +26,6 @@ import {
   useCreateLockedBox,
   useKeepKeyHoldersUpdated,
   usePartOfCreateBoxStore,
-  useShareableURL,
 } from "./hooks";
 
 export const CreateBox = () => {
@@ -54,24 +55,36 @@ export const CreateBox = () => {
   );
 };
 
-export const CreateBoxContent: React.FC = () => {
+export const CreateBoxContent: FC = () => {
+  const roomToken = useCreateBoxStore((state) => state.roomToken);
+  const shareableURL = useShareablURLWithRoomToken({
+    roomToken,
+    url: "/lock-box/:roomToken",
+  });
   const context = useCreateBoxConnectionContext();
 
   useEffect(() => {
-    context.addRouter("create-box-router", router);
+    context.routerMng.addRouter("create-box-router", router.router);
 
     return () => {
-      context.removeRouter("create-box-router");
+      context.routerMng.removeRouter("create-box-router");
     };
-  }, [context.addRouter, context.removeRouter]);
+  }, [context.routerMng]);
 
   const { state, actions } = usePartOfCreateBoxStore();
+
+  useEffect(() => {
+    if (context.peerId) {
+      actions.setLeaderPeerId(context.peerId);
+    }
+  }, [context.peerId, actions.setLeaderPeerId]);
+
   const setDownloadStoreFromCreateBox = useDownloadBoxStore(
     (state) => state.fromCreateBox,
   );
 
   const { sendLockedBoxes } = useDataChannelSendMessages({
-    dataChannelManagerRef: context.dataChannelMngRef,
+    peerProtoExchangeRef: context.messageProto.peerMessageProtoRef,
   });
 
   const { createLockedBox } = useCreateLockedBox();
@@ -85,11 +98,9 @@ export const CreateBoxContent: React.FC = () => {
     },
   });
 
-  useKeepKeyHoldersUpdated(context.dataChannelMngRef);
+  useKeepKeyHoldersUpdated(context.messageProto.peerMessageProtoRef);
 
   const noParticipantConnected = state.keyHolders.length === 0;
-
-  const shareableURL = useShareableURL();
 
   const blocker = useNavigateAwayBlocker({
     shouldNavigationBeBlocked: () => true,
@@ -98,12 +109,16 @@ export const CreateBoxContent: React.FC = () => {
   return (
     <>
       <div className="flex flex-col gap-4">
+        {context.isRelayReconnecting && <RelayReconnectingAlert />}
+        <BoxErrorAlert
+          error={context.error}
+          onRetryRoomRegistration={context.retryRoomRegistration}
+        />
         <FieldArea label="Invite URL">
           <TextField.Root value={shareableURL} readOnly />
         </FieldArea>
         <FieldArea label="Name of the box">
           <TextField.Root
-            id="title"
             type="text"
             value={state.title}
             onChange={(e) => actions.setBoxInfo({ title: e.target.value })}
@@ -116,7 +131,6 @@ export const CreateBoxContent: React.FC = () => {
         </FieldArea>
         <FieldArea label="Content: ">
           <TextArea
-            id="content"
             value={state.content}
             onChange={(e) => actions.setBoxInfo({ content: e.target.value })}
             rows={10}
@@ -135,7 +149,7 @@ export const CreateBoxContent: React.FC = () => {
             value={state.threshold}
             onChange={(e) =>
               actions.setBoxInfo({
-                threshold: Number.parseInt(e.currentTarget.value),
+                threshold: Number.parseInt(e.currentTarget.value, 10),
               })
             }
             disabled={state.status === "creating"}

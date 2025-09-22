@@ -4,10 +4,10 @@ import { useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCurrentUserAgent } from "@/hooks/useCurrentUserAgent";
 import { usePersistInLocalStorage } from "@/hooks/usePersistInLocalStorage";
+import { useRoomToken } from "@/services/libp2p/useRoomRegistration";
 import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";
-import { generateNiceRandomToken } from "@/utils/generateNiceRandomToken";
 import { StartLeaderFollowerAlert } from "../../components/StartLeaderFollowerAlert";
 import { UserAgent } from "../../components/UserAgent";
 
@@ -21,13 +21,14 @@ export function WhatsYourName(
   const { getValue, setValue } = usePersistInLocalStorage<string>({
     keyName: "userName",
   });
-  const { sessionId } = useParams();
+  const { roomToken } = useParams();
   const refDefaultName = useRef<string | undefined>(getValue() ?? undefined);
   const refInput = useRef<HTMLInputElement>(null);
   const isCreate = "create" in props;
   const createBoxStoreActions = useCreateBoxStore((x) => x.actions);
   const joinBoxStoreActions = useJoinBoxStore((x) => x.actions);
   const currentUserAgent = useCurrentUserAgent();
+  const { generateAndPersistRoomToken } = useRoomToken();
 
   const handleOkClick = () => {
     const name = refInput.current?.value.trim() ?? "";
@@ -35,21 +36,21 @@ export function WhatsYourName(
     setValue(name);
 
     if (isCreate) {
-      const idToken =
-        (sessionId?.trim() ?? "") !== ""
-          ? sessionId
-          : generateNiceRandomToken();
+      const newOrPrevRoomToken =
+        (roomToken?.trim() ?? "") === ""
+          ? generateAndPersistRoomToken()
+          : roomToken;
 
       createBoxStoreActions.connect({
         name,
         userAgent: currentUserAgent,
-        idToken,
+        roomToken: newOrPrevRoomToken ?? "",
       });
     } else {
       joinBoxStoreActions.connect({
         name,
         userAgent: currentUserAgent,
-        sessionId: sessionId ?? "",
+        roomToken: roomToken ?? "",
       });
     }
   };

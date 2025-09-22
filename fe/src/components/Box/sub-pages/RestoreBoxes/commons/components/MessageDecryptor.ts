@@ -1,6 +1,6 @@
+import { loggerGate } from "@icod2/protocols";
 import init, { restore_message } from "icod-crypto-js";
 import wasm from "icod-crypto-js/icod_crypto_js_bg.wasm?url";
-
 import {
   type FC,
   type ReactNode,
@@ -43,11 +43,11 @@ export const MessageDecryptor: FC<Props> = ({
       const restoredMessage = restore_message([encryptedMessage], keys);
       setDecryptedMessage(restoredMessage);
     } catch (e) {
-      console.error(e);
-      const defaultMessage = "Unkown error";
+      loggerGate.canError && console.error(e);
+      const defaultMessage = "Unknown error";
 
       if (e instanceof Error) {
-        setError(e.message ?? decryptMessage);
+        setError(e.message ?? defaultMessage);
       } else {
         setError(defaultMessage);
       }

@@ -1,8 +1,5 @@
-import type {
-  CallerConnectionFailureReason,
-  CallerSignalingService,
-} from "@/services/signaling";
-import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
+import type { PeerMessageExchangeProtocol } from "@icod2/protocols";
+import { PeersMessageRouter } from "@/services/libp2p/peers-message-router";
 import { useDownloadBoxStore, useJoinBoxStore } from "@/stores";
 import {
   isLeaderNotAuthorizedKeyholder,
@@ -13,9 +10,9 @@ import {
   type KeyHolderSendsCreatedBoxReceived,
 } from "../commons";
 
-export const router = new DataChannelMessageRouter<
-  CallerSignalingService,
-  CallerConnectionFailureReason
+export const router = new PeersMessageRouter<
+  Record<string, unknown>,
+  PeerMessageExchangeProtocol<Record<string, unknown>>
 >();
 
 router.addHandler(isLeaderWelcomesKeyholder, (_, message) => {
@@ -48,15 +45,12 @@ router.addHandler(isLeaderSendsBoxUpdate, (_, message) => {
   });
 });
 
-router.addHandler(isLeaderSendsBoxCreated, (_, message, dataChannelMng) => {
+router.addHandler(isLeaderSendsBoxCreated, (_, message, proto) => {
   const storeActions = useJoinBoxStore.getState().actions;
 
-  dataChannelMng?.sendMessageToSinglePeer(
-    useJoinBoxStore.getState().leader.id,
-    {
-      type: "keyholder:created-box-received",
-    } satisfies KeyHolderSendsCreatedBoxReceived,
-  );
+  proto.sendMessageToPeer(useJoinBoxStore.getState().leader.id, {
+    type: "keyholder:created-box-received",
+  } satisfies KeyHolderSendsCreatedBoxReceived);
 
   storeActions.markAsCreated();
 

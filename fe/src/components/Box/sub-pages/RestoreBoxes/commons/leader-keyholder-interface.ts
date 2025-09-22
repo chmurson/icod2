@@ -1,49 +1,49 @@
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 
-export interface KeyholderHello {
+export type KeyholderHello = {
   type: "keyholder:hello";
   userAgent: string;
   id: string;
   hash: string;
-}
+};
 
-export interface KeyholderKey {
+export type KeyholderKey = {
   type: "keyholder:key";
   key: string;
   keyHolderId: string;
-}
+};
 
-export interface LeaderKey {
+export type LeaderKey = {
   type: "leader:key";
   key: string;
   keyHolderId: string;
-}
+};
 
-export interface LeaderRelayKey {
+export type LeaderRelayKey = {
   type: "leader:relay-key";
   keyToRelay: string;
   keyHolderId: string;
-}
+};
 
-export interface LeaderWelcome {
+export type LeaderWelcome = {
   type: "leader:welcome";
   name: string;
   userAgent: string;
   id: string;
   onlineKeyHolders: Array<{ id: string; name: string; userAgent: string }>;
-}
+};
 
-export interface LeaderError {
+export type LeaderError = {
   type: "leader:error";
   reason: string;
-}
+};
 
-export interface LeaderSendsPartialStateMessage {
+export type LeaderSendsPartialStateMessage = {
   type: "leader:send-partial-state";
   shareAccessKeyMapByKeyHolderId?: Record<string, Record<string, boolean>>;
   onlineKeyHolders?: ParticipantType[];
   unlockingStartDate?: string | null;
-}
+};
 
 export type RestoreBoxesMessage =
   | KeyholderHello

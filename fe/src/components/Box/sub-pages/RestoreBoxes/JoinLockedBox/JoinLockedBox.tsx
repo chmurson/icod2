@@ -5,6 +5,8 @@ import { ContentCard } from "@/components/layout/MainLayout";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { Alert } from "@/ui/Alert";
+import ErrorBoundary from "@/ui/ErrorBoundry";
+import { Button } from "@/ui/index";
 import {
   LoobbyKeyHolders,
   ShareAccessKeysAvatars as ShareAccessKeysAvatarsDumb,
@@ -17,15 +19,44 @@ import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useSendKeyToLeader } from "./hooks";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
-export const JoinLockedBox: React.FC = () => {
+export const JoinLockedBox: FC = () => {
+  const boxTitle = useJoinLockedBoxStore((state) => state.boxTitle);
+  return (
+    <div className="flex flex-col gap-8">
+      <PageTitle boxTitle={boxTitle} />
+      <ErrorBoundary
+        fallback={({ handleRetry, isRetrying }) => (
+          <div className="flex flex-col gap-4">
+            <Alert variant="error">Something went wrong</Alert>
+            <Button
+              variant="primary"
+              onClick={handleRetry}
+              className="self-start"
+              loading={isRetrying}
+            >
+              Try to connect again
+            </Button>
+          </div>
+        )}
+      >
+        <JoinLockedBoxContent />
+      </ErrorBoundary>
+    </div>
+  );
+};
+
+const JoinLockedBoxContent: React.FC = () => {
   const state = useJoinLockedBoxStore((state) => state.state);
+  const roomToken = useJoinLockedBoxStore((state) => state.roomToken);
+
   const connectionToLeaderFailReason = useJoinLockedBoxStore(
     (state) => state.connectionToLeaderFailReason,
   );
-  const { dataChannelManagerRef } = useJoinLockedBoxConnection();
+
+  const { peerMessageProtoRef } = useJoinLockedBoxConnection({ roomToken });
 
   const { sendKey } = useDataChannelSendMessages({
-    dataChannelManagerRef,
+    peerMessageProtoRef,
   });
 
   const onlineKeyHolders = useJoinLockedBoxStore(
@@ -43,8 +74,6 @@ export const JoinLockedBox: React.FC = () => {
   const shareAccessKeyMapByKeyHolderId = useJoinLockedBoxStore(
     (state) => state.shareAccessKeyMapByKeyHolderId,
   );
-
-  const boxTitle = useJoinLockedBoxStore((state) => state.boxTitle);
 
   const loadingStates = [
     "connecting",
@@ -76,7 +105,6 @@ export const JoinLockedBox: React.FC = () => {
   };
   return (
     <div className="flex flex-col gap-8">
-      <PageTitle boxTitle={boxTitle} />
       {connectionToLeaderFailReason && (
         <div className="flex flex-col items-start gap-4">
           <Alert variant="warning" className="self-stretch">

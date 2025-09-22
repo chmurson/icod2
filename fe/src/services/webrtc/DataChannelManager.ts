@@ -1,3 +1,4 @@
+import { loggerGate } from "@icod2/protocols";
 import { generateNiceRandomToken } from "@/utils/generateNiceRandomToken";
 import type {
   SignalingService,
@@ -96,24 +97,28 @@ export class DataChannelManager<
         (id) => id.localID === localId,
       );
       if (!objectId) {
-        console.warn(`No peer found with local ID: ${localId}`);
+        loggerGate.canWarn &&
+          console.warn(`No peer found with local ID: ${localId}`);
         this.callbacks.onPeerDisconnected?.(localId);
         return false;
       }
 
       const peer = this.peers.get(objectId);
       if (!peer || peer.channel.readyState !== "open") {
-        console.warn(`Data channel for peer ${localId} is not available`);
+        loggerGate.canWarn &&
+          console.warn(`Data channel for peer ${localId} is not available`);
         return false;
       }
 
-      console.log(
-        `Sending message ${"type" in message ? message.type : JSON.stringify(message)} to peer ${localId}`,
-      );
+      loggerGate.canLog &&
+        console.log(
+          `Sending message ${"type" in message ? message.type : JSON.stringify(message)} to peer ${localId}`,
+        );
       peer.channel.send(JSON.stringify(message));
       return true;
     } catch (error) {
-      console.error(`Failed to send message to peer ${localId}:`, error);
+      loggerGate.canError &&
+        console.error(`Failed to send message to peer ${localId}:`, error);
       return false;
     }
   }
@@ -122,14 +127,16 @@ export class DataChannelManager<
     this.objectIdSet.forEach((objectId) => {
       const peer = this.peers.get(objectId);
       if (peer && peer.channel.readyState === "open") {
-        console.log(
-          `Sending message ${"type" in message ? message.type : JSON.stringify(message)} to peer ${objectId.localID}`,
-        );
+        loggerGate.canLog &&
+          console.log(
+            `Sending message ${"type" in message ? message.type : JSON.stringify(message)} to peer ${objectId.localID}`,
+          );
         peer.channel.send(JSON.stringify(message));
       } else {
-        console.warn(
-          `Data channel for peer ${objectId.localID} is not open. Current state: ${peer?.channel.readyState}`,
-        );
+        loggerGate.canWarn &&
+          console.warn(
+            `Data channel for peer ${objectId.localID} is not open. Current state: ${peer?.channel.readyState}`,
+          );
       }
     });
   }
@@ -139,16 +146,18 @@ export class DataChannelManager<
       (objectId) => objectId.localID === peerId,
     );
     if (!objectId) {
-      console.warn(
-        `Cannot disconnect peer with id:${peerId} because it seems it's not connected`,
-      );
+      loggerGate.canWarn &&
+        console.warn(
+          `Cannot disconnect peer with id:${peerId} because it seems it's not connected`,
+        );
     }
     const peer = this.peers.get(objectId);
 
     if (!peer) {
-      console.warn(
-        `Cannot disconnect peer with id:${peerId} because, although an object ID was found, no corresponding peer connection data exists.`,
-      );
+      loggerGate.canWarn &&
+        console.warn(
+          `Cannot disconnect peer with id:${peerId} because, although an object ID was found, no corresponding peer connection data exists.`,
+        );
     }
 
     peer?.channel.close();
@@ -186,10 +195,12 @@ export class DataChannelManager<
             onDataChannelMessage?.(localID, data, this);
           }
         } catch (error) {
-          console.error("Failed to parse message:", error);
+          loggerGate.canError &&
+            console.error("Failed to parse message:", error);
         }
       } else {
-        console.warn("Received non-string message:", event.data);
+        loggerGate.canWarn &&
+          console.warn("Received non-string message:", event.data);
       }
     });
 

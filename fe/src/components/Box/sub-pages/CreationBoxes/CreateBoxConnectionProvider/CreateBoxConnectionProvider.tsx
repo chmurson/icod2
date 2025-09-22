@@ -5,6 +5,7 @@ import {
   useContext,
   useMemo,
 } from "react";
+import { useCreateBoxStore } from "@/stores";
 import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
 type CreateBoxConnectionContext = ReturnType<typeof useCreateBoxConnection>;
@@ -29,31 +30,36 @@ export const useCreateBoxConnectionContext =
 export const CreateBoxConnectionProvider: FC<PropsWithChildren> = ({
   children,
 }) => {
+  const roomToken = useCreateBoxStore((state) => state.roomToken);
+
   const {
-    addRouter,
-    clearRouters,
-    dataChannelMngRef,
-    getRouterIds,
-    hasRouter,
-    removeRouter,
-  } = useCreateBoxConnection();
+    error,
+    retryRoomRegistration,
+    roomRegistered,
+    routerMng,
+    isRelayReconnecting,
+    messageProto,
+    peerId,
+  } = useCreateBoxConnection({ roomToken }) ?? {};
 
   const value = useMemo(() => {
     return {
-      addRouter,
-      clearRouters,
-      dataChannelMngRef,
-      getRouterIds,
-      hasRouter,
-      removeRouter,
+      error,
+      retryRoomRegistration,
+      roomRegistered,
+      routerMng,
+      isRelayReconnecting,
+      messageProto,
+      peerId,
     };
   }, [
-    addRouter,
-    clearRouters,
-    dataChannelMngRef,
-    getRouterIds,
-    hasRouter,
-    removeRouter,
+    error,
+    retryRoomRegistration,
+    roomRegistered,
+    routerMng,
+    isRelayReconnecting,
+    messageProto,
+    peerId,
   ]);
 
   return <Provider value={value}>{children}</Provider>;

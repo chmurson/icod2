@@ -57,6 +57,7 @@ export type JoinLockedBoxState = {
       keyHolderId: string;
       keyHolders: ParticipantType[];
       keyThreshold: number;
+      roomToken: string;
     }) => void;
     toggleShareAccessKey: (participantId: string, value?: boolean) => void;
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
@@ -101,6 +102,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
         keyHolderId,
         keyHolders,
         keyThreshold,
+        roomToken,
       }) => {
         const you = keyHolders.find((x) => x.id === keyHolderId);
         if (!you)
@@ -124,6 +126,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           you: {
             ...you,
           },
+          roomToken,
         });
       },
       connectKeyHolder: (
@@ -273,7 +276,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
   })),
 );
 if (import.meta.env.DEV === true) {
-  //@ts-ignore
+  //@ts-expect-error
   window.useJoinLockedBoxStore = {
     connectAllOffLineKeyholders: () => {
       const {
@@ -292,7 +295,7 @@ if (import.meta.env.DEV === true) {
     },
     addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) => {
       useJoinLockedBoxStore.getState().actions.addReceivedKey(arg);
-      //@ts-ignore
+      //@ts-expect-error
       window.useJoinLockedBoxStore.setReadyToUnlock();
     },
   };

@@ -20,6 +20,7 @@ import { useConnection } from "./useConnection";
 export const DownloadLockedBox: React.FC = () => {
   useConnection();
   const downloadLockedBoxState = useDownloadLockedBoxState();
+
   const clearKeyAndMessage = useDownloadBoxStore(
     (state) => state.clearKeyAndMessage,
   );

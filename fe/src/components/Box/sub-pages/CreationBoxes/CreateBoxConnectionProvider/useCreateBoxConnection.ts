@@ -1,16 +1,41 @@
-import { useCallback } from "react";
-import { CalleeSignalingService } from "@/services/signaling";
-import { useDataChannelMng } from "@/services/webrtc";
+import { useEffect } from "react";
+import { useLeaderConnection } from "@/services/libp2p/connection-setups";
 import { useCreateBoxStore } from "@/stores";
 
-export function useCreateBoxConnection() {
-  const onPeerDisconnected = useCallback((localId: string) => {
-    const storeActions = useCreateBoxStore.getState().actions;
-    storeActions.disconnectParticipant(localId);
-  }, []);
+export function useCreateBoxConnection({ roomToken }: { roomToken: string }) {
+  const {
+    error,
+    isRelayReconnecting,
+    messageProto,
+    peerId,
+    retryRoomRegistration,
+    roomRegistered,
+    routerMng,
+    connectedPeersStorageRef,
+  } = useLeaderConnection({ roomToken });
 
-  return useDataChannelMng({
-    SignalingService: CalleeSignalingService,
-    onPeerDisconnected,
-  });
+  useEffect(() => {
+    const removeListeners = [
+      connectedPeersStorageRef.current.addListener("peer-removed", (peerId) => {
+        const { disconnectParticipant } = useCreateBoxStore.getState().actions;
+        disconnectParticipant(peerId);
+      }),
+    ];
+
+    return () => {
+      for (const removeListener of removeListeners) {
+        removeListener();
+      }
+    };
+  }, [connectedPeersStorageRef]);
+
+  return {
+    error,
+    isRelayReconnecting,
+    messageProto,
+    peerId,
+    retryRoomRegistration,
+    roomRegistered,
+    routerMng,
+  };
 }

@@ -1,3 +1,4 @@
+import { loggerGate } from "@icod2/protocols";
 import { type RefObject, useCallback, useEffect, useRef } from "react";
 import { DataChannelManager } from "@/services/webrtc";
 import type { PossibleSignalingServie } from "@/services/webrtc/DataChannelManager";
@@ -86,7 +87,8 @@ export const useDataChannelMng = <
             routerItem.router.router(localID, data, dataChannelManager);
           }
         } catch (error) {
-          console.error(`Error in router ${routerItem.id}:`, error);
+          loggerGate.canError &&
+            console.error(`Error in router ${routerItem.id}:`, error);
         }
       }
     },
@@ -115,24 +117,25 @@ export const useDataChannelMng = <
       signalingService: new SignalingService(webSocketConnection),
       callbacks: {
         onPeerConnected: (localId) => {
-          console.log("Peer connected:", localId);
+          loggerGate.canLog && console.log("Peer connected:", localId);
           onPeerConnectedRef.current?.(localId);
         },
         onPeerDisconnected: (localId) => {
           onPeerDisconnectedRef.current?.(localId);
-          console.log("Peer disconnected:", localId);
+          loggerGate.canLog && console.log("Peer disconnected:", localId);
         },
         onFailedToConnect: (reason) => {
           onFailedToConnectRef.current?.(reason);
-          console.error("Failed to connect:", reason);
+          loggerGate.canError && console.error("Failed to connect:", reason);
         },
         onPeerConnecting: () => {
-          console.log("New peer connecting...");
+          loggerGate.canLog && console.log("New peer connecting...");
         },
         onSignalingServerConnected: () => {
-          console.log(
-            `Connected to signaling service at ${webSocketConnection.getUrl()}`,
-          );
+          loggerGate.canLog &&
+            console.log(
+              `Connected to signaling service at ${webSocketConnection.getUrl()}`,
+            );
         },
         onDataChannelMessage: combinedRouter,
       },
@@ -160,7 +163,8 @@ export const useDataChannelMng = <
         | DataChannelMessageRouter<TSignalingService, TConnectionFailReason>,
     ) => {
       if (routersRef.current.has(id)) {
-        console.warn(`Router with id "${id}" already exists. Replacing it.`);
+        loggerGate.canWarn &&
+          console.warn(`Router with id "${id}" already exists. Replacing it.`);
       }
 
       routersRef.current.set(id, {
@@ -174,7 +178,7 @@ export const useDataChannelMng = <
   const removeRouter = useCallback((id: string) => {
     const deleted = routersRef.current.delete(id);
     if (!deleted) {
-      console.warn(`Router with id "${id}" not found.`);
+      loggerGate.canWarn && console.warn(`Router with id "${id}" not found.`);
     }
     return deleted;
   }, []);

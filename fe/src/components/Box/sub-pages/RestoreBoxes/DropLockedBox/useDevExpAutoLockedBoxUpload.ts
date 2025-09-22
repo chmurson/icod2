@@ -1,3 +1,4 @@
+import { loggerGate } from "@icod2/protocols";
 import { useEffect, useRef } from "react";
 
 export function useDevExpAutoLockedBoxUpload({
@@ -24,7 +25,8 @@ export function useDevExpAutoLockedBoxUpload({
 
     if (typeof data === "object") {
       timeoutHandler = window.setTimeout(() => {
-        console.warn("Loading locked box data from localStorage");
+        loggerGate.canWarn &&
+          console.warn("Loading locked box data from localStorage");
         onAutoUploadRef.current(data);
       }, 1000);
     }

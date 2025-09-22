@@ -1,6 +1,8 @@
 import { TextArea } from "@radix-ui/themes";
 import type React from "react";
 import { FiEye } from "react-icons/fi";
+import { BoxErrorAlert } from "@/components/Box/components/BoxErrorAlert";
+import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { ContentCard } from "@/components/layout";
 import { useJoinBoxStore } from "@/stores";
 import { Alert } from "@/ui/Alert";
@@ -53,8 +55,10 @@ const JoinBoxContent = () => {
     you,
     content,
     connectionToLeaderFailReason,
+    roomToken,
   } = useStoreSlice();
-  useJoinBoxConnection();
+
+  const { error, isRelayReconnecting } = useJoinBoxConnection({ roomToken });
 
   const blocker = useNavigateAwayBlocker({
     shouldNavigationBeBlocked: () => !connectionToLeaderFailReason,
@@ -77,6 +81,9 @@ const JoinBoxContent = () => {
 
   return (
     <>
+      {isRelayReconnecting && <RelayReconnectingAlert />}
+      <BoxErrorAlert error={error} />
+      {/*<JoinBoxError error={error} />*/}
       {!leader?.id && connectionToLeaderFailReason && (
         <div className="flex flex-col items-start gap-4">
           <Alert variant="warning" className="self-stretch">
@@ -186,6 +193,7 @@ const useStoreSlice = () => {
   const threshold = useJoinBoxStore((state) => state.threshold);
   const otherKeyholders = useJoinBoxStore((state) => state.otherKeyHolders);
   const content = useJoinBoxStore((state) => state.content);
+  const roomToken = useJoinBoxStore((state) => state.roomToken);
   const connectionToLeaderFailReason = useJoinBoxStore(
     (state) => state.connectionToLeaderFailReason,
   );
@@ -198,6 +206,7 @@ const useStoreSlice = () => {
     otherKeyholders,
     content,
     connectionToLeaderFailReason,
+    roomToken,
   };
 };
 

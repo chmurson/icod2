@@ -33,6 +33,7 @@ export type OpenLockedBoxState = {
       keyHolderId: string;
       keyHolders: ParticipantType[];
       keyThreshold: number;
+      roomToken: string;
     }) => void;
     toggleShareAccessKey: (participantId: string, value?: boolean) => void;
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
@@ -104,6 +105,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         keyHolderId,
         keyHolders,
         keyThreshold,
+        roomToken,
       }) => {
         const you = keyHolders.find((x) => x.id === keyHolderId);
         if (!you)
@@ -127,6 +129,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
           you: {
             ...you,
           },
+          roomToken,
         });
       },
       connectKeyHolder: (keyHolder: ParticipantType) => {
@@ -203,7 +206,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
 );
 
 if (import.meta.env.DEV === true) {
-  //@ts-ignore
+  //@ts-expect-error
   window.useOpenLockedBoxStore = {
     connectAllOffLineKeyholders: () => {
       const {

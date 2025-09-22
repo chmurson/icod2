@@ -10,6 +10,7 @@ import {
   type SendsOfferRequest,
   type SendsOfferResponse,
 } from "@icod2/contracts/src/client-server";
+import { loggerGate } from "@icod2/protocols";
 import type { WebsocketJSONHandler } from "@/services/websocket/WebSocketJSONHandler";
 import type {
   SignalingService,
@@ -142,7 +143,7 @@ export class CallerSignalingService
     this.dataChannel = this.peerConnection.createDataChannel("chat");
 
     this.dataChannel.onopen = () => {
-      console.log("data channel open");
+      loggerGate.canLog && console.log("data channel open");
       this.dataChannel?.send(callerIntroduction);
     };
 
@@ -155,24 +156,26 @@ export class CallerSignalingService
         this.stopPeerConnectingTimeout();
         this.onPeerConnected?.(this.peerConnection, this.dataChannel);
         this.peerConnection?.getStats().then((stats) => {
-          console.log(stats);
+          loggerGate.canLog && console.log(stats);
         });
       } else {
-        console.warn(
-          "Received ",
-          calleeIntroduction,
-          "but connection not accepted",
-          {
-            peerConnection: this.peerConnection,
-            peerConnected: this.peerConnected,
-            dataChannel: this.dataChannel,
-          },
-        );
+        loggerGate.canWarn &&
+          console.warn(
+            "Received ",
+            calleeIntroduction,
+            "but connection not accepted",
+            {
+              peerConnection: this.peerConnection,
+              peerConnected: this.peerConnected,
+              dataChannel: this.dataChannel,
+            },
+          );
       }
     };
 
     this.peerConnection.onconnectionstatechange = () => {
-      console.log("connetion state", this.peerConnection?.connectionState);
+      loggerGate.canLog &&
+        console.log("connetion state", this.peerConnection?.connectionState);
 
       if (this.peerConnection?.connectionState === "failed") {
         this.stopPeerConnectingTimeout();
@@ -237,7 +240,8 @@ export class CallerSignalingService
 
     if (!this.peerConnection) {
       this.onFailedToConnect?.("fail-to-initialize-rtc-connection");
-      console.error("Peer connection is not initialized");
+      loggerGate.canError &&
+        console.error("Peer connection is not initialized");
       return;
     }
 
@@ -269,7 +273,8 @@ export class CallerSignalingService
 
   private async handleAnswerRequest(data: AnswerRequest) {
     if (!this.peerConnection) {
-      console.error("Peer connection is not initialized");
+      loggerGate.canError &&
+        console.error("Peer connection is not initialized");
       return;
     }
 

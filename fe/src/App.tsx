@@ -84,11 +84,11 @@ const router = createBrowserRouter([
         Component: DecodePlayground,
       },
       {
-        path: "/unlock-box/:sessionId?",
+        path: "/unlock-box/:roomToken?",
         Component: LockedBox,
       },
       {
-        path: "/lock-box/:sessionId?",
+        path: "/lock-box/:roomToken?",
         Component: RootLockBox,
       },
       {

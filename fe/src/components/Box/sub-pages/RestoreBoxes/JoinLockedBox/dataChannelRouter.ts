@@ -1,4 +1,5 @@
-import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
+import { PeersMessageRouter } from "@/services/libp2p/peers-message-router";
+import type { PeerMessageExchangeProtocol } from "@/services/libp2p/usePeerMessageProto";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import {
   isLeaderError,
@@ -9,7 +10,10 @@ import {
 } from "../commons/leader-keyholder-interface";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 
-export const router = new DataChannelMessageRouter();
+export const router = new PeersMessageRouter<
+  Record<string, unknown>,
+  PeerMessageExchangeProtocol
+>();
 
 router.addHandler(isLeaderWelcome, (peerId, message) => {
   const actions = useJoinLockedBoxStore.getState().actions;

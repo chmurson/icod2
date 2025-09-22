@@ -1,3 +1,4 @@
+import { loggerGate } from "@icod2/protocols";
 import { getPeerConnectionConfiguration } from "./getPeerConnectionConfiguration";
 
 export function consumeOfferAndIceCandidates(
@@ -19,7 +20,7 @@ export function consumeOfferAndIceCandidates(
     let answer: RTCSessionDescriptionInit | undefined;
 
     peerConnection.onicecandidate = (event) => {
-      console.log("ice candidate", event.candidate);
+      loggerGate.canLog && console.log("ice candidate", event.candidate);
 
       if (event.candidate !== null) {
         iceCandidates.push(event.candidate);

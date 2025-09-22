@@ -24,7 +24,7 @@ const joinBoxDefaultState = {
     name: "",
     userAgent: "",
   } satisfies ParticipantType,
-  sessionId: "" as string,
+  roomToken: "" as string,
   otherKeyHolders: [] as ParticipantType[],
   content: undefined as string | undefined,
   threshold: 1,
@@ -47,7 +47,7 @@ type JoinBoxState = {
     connect: (args: {
       name: string;
       userAgent: string;
-      sessionId: string;
+      roomToken: string;
     }) => void;
     connectYou: (args: {
       you: { id: string };
@@ -73,12 +73,12 @@ export const useJoinBoxStore = create<JoinBoxState>()(
     ...joinBoxDefaultState,
     actions: {
       start: () => set({ ...joinBoxDefaultState, state: "set-name" }),
-      connect: ({ name, userAgent, sessionId }) =>
+      connect: ({ name, userAgent, roomToken }) =>
         set((state) => ({
           ...joinBoxDefaultState,
           connecting: true,
           state: "connecting",
-          sessionId,
+          roomToken,
           you: {
             ...state.you,
             name,
