@@ -6,11 +6,13 @@ import type { Responses } from "@icod2/protocols/src/room-registration-protocol/
 import { autoNAT } from "@libp2p/autonat";
 import { circuitRelayServer } from "@libp2p/circuit-relay-v2";
 import { identify } from "@libp2p/identify";
+import type { PeerId } from "@libp2p/interface";
 import { tcp } from "@libp2p/tcp";
 import { webSockets } from "@libp2p/websockets";
 import { createLibp2p } from "libp2p";
 import { starRoomRegistrationServiceStart } from "./services/room-registration.js";
 import { getPeerIdFromEnv } from "./utils/get-or-create-peer-id.js";
+import { shortenPeerId } from "./utils/shorten-peer-id.js";
 
 export type Args = {
   listenMultiaddrs: string[];
@@ -47,12 +49,23 @@ export async function startLibp2pRelay({
 
   libp2p.addEventListener("connection:open", (event) => {
     const { id, remotePeer } = event.detail;
-    loggerGate.canLog && console.log("Connection open:", { id, remotePeer });
+    loggerGate.canLog &&
+      console.log("Connection open:", {
+        id,
+        remotePeer: shortenPeerId(remotePeer.toString()),
+      });
+
+    printRoomStats();
   });
 
   libp2p.addEventListener("connection:close", (event) => {
     const { id, remotePeer } = event.detail;
-    loggerGate.canLog && console.log("Connection closed:", { id, remotePeer });
+    loggerGate.canLog &&
+      console.log("Connection closed:", {
+        id,
+        remotePeer: shortenPeerId(remotePeer.toString()),
+      });
+    printRoomStats();
   });
 
   const roomRegistrationProt = initRoomRegistrationProtocol(libp2p, {
@@ -71,8 +84,7 @@ export async function startLibp2pRelay({
         type: "register-room-response-success",
       } satisfies Responses["registerRoomSuccess"]);
       close();
-      loggerGate.canLog &&
-        console.log("Registered rooms:", roomRegistration.registeredRooms);
+      printRoomStats();
     },
     onUnregisterRoom: async (roomName, peerId) => {
       loggerGate.canLog && console.log(`Room unregistered: ${roomName}`);
@@ -84,23 +96,32 @@ export async function startLibp2pRelay({
         type: "unregister-room-response-success",
       } satisfies Responses["unregisterRoomSuccess"]);
       close();
-      loggerGate.canLog &&
-        console.log("Registered rooms:", roomRegistration.registeredRooms);
+      printRoomStats();
     },
   });
   await roomRegistrationProt.start();
 
-  const connectedPeers = new Set();
+  const connectedPeers = new Set<string>();
 
   libp2p.addEventListener("peer:connect", (event) => {
-    loggerGate.canLog && console.log("Peer connected:", event.detail);
+    loggerGate.canLog &&
+      console.log("Peer connected:", shortenPeerId(event.detail.toString()));
     connectedPeers.add(event.detail.toString());
-    loggerGate.canLog && console.log("Connected peers:", connectedPeers);
+    loggerGate.canLog &&
+      console.log(
+        "Connected peers:",
+        Array.from(connectedPeers.values()).map((peerId) =>
+          shortenPeerId(peerId),
+        ),
+      );
+
+    printRoomStats();
   });
 
   libp2p.addEventListener("peer:disconnect", (event) => {
     const peerIdStr = event.detail.toString();
-    loggerGate.canLog && console.log("Disconnected peer:", peerIdStr);
+    loggerGate.canLog &&
+      console.log("Disconnected peer:", shortenPeerId(peerIdStr));
     connectedPeers.delete(peerIdStr);
     loggerGate.canLog && console.log("Connected peers:", connectedPeers);
     roomRegistration.removePeerAndUnregisterRoomInNeeded(peerIdStr);
@@ -114,4 +135,22 @@ export async function startLibp2pRelay({
       "Multiaddrs: ",
       multiaddrs.map((ma) => ma.toString()),
     );
+
+  libp2p.services.pubsub.addEventListener("subscription-change", () => {
+    printRoomStats();
+  });
+
+  function printRoomStats() {
+    loggerGate.canLog &&
+      console.log("Registered rooms:", roomRegistration.registeredRooms);
+    for (const roomName of roomRegistration.registeredRooms) {
+      loggerGate.canLog &&
+        console.log(
+          `Subscribers of the room ${roomName}:`,
+          libp2p.services.pubsub
+            .getSubscribers(roomName)
+            .map((peerId) => shortenPeerId(peerId.toString())),
+        );
+    }
+  }
 }
