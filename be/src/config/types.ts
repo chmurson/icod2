@@ -3,7 +3,16 @@ export type AppConfig = {
     listenMultiaddrs: Array<string>;
     announceMultiaddrs: Array<string>;
   };
-  logging: {
-    level: string;
+  logging: LoggingConfig;
+};
+
+export type LoggingConfig = {
+  level: string;
+  axiom?: {
+    enabled?: boolean;
+    dataset?: string;
+    orgId?: string;
+    token?: string;
+    url?: string;
   };
 };
