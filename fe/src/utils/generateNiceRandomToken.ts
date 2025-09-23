@@ -14,3 +14,8 @@ function uint8ArrayToBase64URL(uint8Array: Uint8Array): string {
 
   return base64urlString;
 }
+
+console.log(generateNiceRandomToken());
+console.log(generateNiceRandomToken());
+console.log(generateNiceRandomToken());
+console.log(generateNiceRandomToken());

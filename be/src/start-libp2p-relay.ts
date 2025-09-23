@@ -1,8 +1,8 @@
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
-import { initRoomRegistrationProtocol } from "@icod2/protocols";
-import type { Responses } from "@icod2/protocols/src/room-registration-protocol/messages-and-responses";
+import { initRoomRegistrationProtocol, shortenPeerId } from "@icod2/protocols";
+import type { Responses } from "@icod2/protocols/dist/room-registration-protocol";
 import { autoNAT } from "@libp2p/autonat";
 import { circuitRelayServer } from "@libp2p/circuit-relay-v2";
 import { identify } from "@libp2p/identify";
@@ -14,7 +14,6 @@ import { getLogger } from "./logger.js";
 import { starRoomRegistrationServiceStart } from "./services/room-registration.js";
 import { debounce } from "./utils/debounce.js";
 import { getPeerIdFromEnv } from "./utils/get-or-create-peer-id.js";
-import { shortenPeerId } from "./utils/shorten-peer-id.js";
 
 export type Args = {
   listenMultiaddrs: string[];

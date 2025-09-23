@@ -1,4 +1,4 @@
-import { loggerGate } from "@icod2/protocols";
+import { loggerGate, shortenPeerId } from "@icod2/protocols";
 import type { PeerId, PeerUpdate } from "@libp2p/interface";
 import { peerIdFromString } from "@libp2p/peer-id";
 import type { Multiaddr } from "@multiformats/multiaddr";
@@ -128,7 +128,7 @@ export class PersistingDialer {
 
     if (peerToDial.isCurrentlyDialing) {
       loggerGate.canLog &&
-        console.log(`Peer ${peerIdStr} is already being dialed`);
+        console.log(`Peer ${shortenPeerId(peerIdStr)} is already being dialed`);
       return;
     }
 
@@ -140,7 +140,7 @@ export class PersistingDialer {
       if (!multiAddrs) {
         const peerId = peerIdFromString(peerIdStr);
         loggerGate.canLog &&
-          console.log(`Trying to dial peer by id ${peerIdStr}`);
+          console.log(`Trying to dial peer by id ${shortenPeerId(peerIdStr)}`);
         connection = await this.libp2p.dial(peerId);
       } else {
         const encodedMultiAddrs = multiAddrs.map((multiaddr) =>
@@ -156,7 +156,8 @@ export class PersistingDialer {
       if (isEnabled("CLOSE_INITITIAL_PEER_CONNECTION_ASAP")) {
         connection.close();
       }
-      loggerGate.canLog && console.log(`Successfully dialed peer ${peerIdStr}`);
+      loggerGate.canLog &&
+        console.log(`Successfully dialed peer ${shortenPeerId(peerIdStr)}`);
       this.callAllListeners(peerIdStr);
       this.peersToDial.delete(peerIdStr);
     } catch (error) {

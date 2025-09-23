@@ -1,4 +1,4 @@
-import { loggerGate } from "@icod2/protocols";
+import { loggerGate, shortenPeerId } from "@icod2/protocols";
 import type { Libp2p } from "@libp2p/interface";
 import { isEnabled } from "@/utils/featureFlags";
 import type { IConnectedPeersStorage } from "./connected-peer-storage";
@@ -24,7 +24,8 @@ export const createPeerConnectionHandler = ({
   onError: (error: ConnectionErrors) => void;
 }) => {
   const onDialSuccesfully = async (peerIdStr: string) => {
-    loggerGate.canLog && console.log(`Successfully dialed peer ${peerIdStr}`);
+    loggerGate.canLog &&
+      console.log(`Successfully dialed peer ${shortenPeerId(peerIdStr)}`);
     const isRelay = relayPeerIds.includes(peerIdStr);
 
     try {
@@ -44,7 +45,8 @@ export const createPeerConnectionHandler = ({
     let failedConnectionsToRelayPeersCount = 0;
     libp2p.addEventListener("peer:disconnect", (evt) => {
       const peerIdStr = evt.detail.toString();
-      loggerGate.canLog && console.log("Peer connected:", peerIdStr);
+      loggerGate.canLog &&
+        console.log("Peer connected:", shortenPeerId(peerIdStr));
       connectedPeersStorage.removePeer(peerIdStr);
 
       if (relayPeerIds.includes(peerIdStr)) {
@@ -65,7 +67,7 @@ export const createPeerConnectionHandler = ({
       loggerGate.canLog &&
         console.log(
           `${isRelayPeerDiscovered ? "Relay" : "Regular"} Peer discovered:`,
-          evt.detail.id.toString(),
+          shortenPeerId(discoveredPeerIdStr),
         );
 
       if (maddrs.length === 0) {

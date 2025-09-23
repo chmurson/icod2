@@ -1,4 +1,4 @@
-import { loggerGate } from "@icod2/protocols";
+import { loggerGate, shortenPeerId } from "@icod2/protocols";
 import type { PeerId } from "@libp2p/interface";
 import { peerIdFromString } from "@libp2p/peer-id";
 import { multiaddr } from "@multiformats/multiaddr";
@@ -103,7 +103,8 @@ export class RelayReconnectDialer {
       return;
     }
 
-    loggerGate.canLog && console.log(`Relay peer connected: ${peerIdStr}`);
+    loggerGate.canLog &&
+      console.log(`Relay peer connected: ${shortenPeerId(peerIdStr)}`);
 
     const state = this.reconnectStates.get(peerIdStr);
     if (state?.retryTimeoutId) {
@@ -121,7 +122,8 @@ export class RelayReconnectDialer {
       return;
     }
 
-    loggerGate.canLog && console.log(`Relay peer disconnected: ${peerIdStr}`);
+    loggerGate.canLog &&
+      console.log(`Relay peer disconnected: ${shortenPeerId(peerIdStr)}`);
 
     this.notifyRelayDisconnected(peerIdStr);
     this.attemptReconnect(peerIdStr);
@@ -132,7 +134,7 @@ export class RelayReconnectDialer {
     if (state?.isReconnecting) {
       loggerGate.canLog &&
         console.log(
-          `Already attempting to reconnect to relay peer: ${peerIdStr}`,
+          `Already attempting to reconnect to relay peer: ${shortenPeerId(peerIdStr)}`,
         );
       return;
     }
@@ -147,7 +149,7 @@ export class RelayReconnectDialer {
     try {
       loggerGate.canLog &&
         console.log(
-          `Attempting to reconnect to relay peer: ${peerIdStr} (attempt ${state.retryCount + 1}/${this.maxRetries})`,
+          `Attempting to reconnect to relay peer: ${shortenPeerId(peerIdStr)} (attempt ${state.retryCount + 1}/${this.maxRetries})`,
         );
 
       const { bootstrapMultiaddrs } = getBootstrapMultiaddrs();
@@ -158,20 +160,22 @@ export class RelayReconnectDialer {
       if (peerMultiaddrs.length > 0) {
         loggerGate.canLog &&
           console.log(
-            `Dialing relay peer ${peerIdStr} with multiaddrs:`,
+            `Dialing relay peer ${shortenPeerId(peerIdStr)} with multiaddrs:`,
             peerMultiaddrs,
           );
         const multiaddrs = peerMultiaddrs.map((addr) => multiaddr(addr));
         await this.libp2p.dial(multiaddrs);
       } else {
         loggerGate.canLog &&
-          console.log(`Dialing relay peer ${peerIdStr} by ID`);
+          console.log(`Dialing relay peer ${shortenPeerId(peerIdStr)} by ID`);
         const peerId = peerIdFromString(peerIdStr);
         await this.libp2p.dial(peerId);
       }
 
       loggerGate.canLog &&
-        console.log(`Successfully reconnected to relay peer: ${peerIdStr}`);
+        console.log(
+          `Successfully reconnected to relay peer: ${shortenPeerId(peerIdStr)}`,
+        );
 
       state.isReconnecting = false;
       state.retryCount = 0;
@@ -187,7 +191,7 @@ export class RelayReconnectDialer {
         const delay = this.calculateRetryDelay(state.retryCount);
         loggerGate.canLog &&
           console.log(
-            `Scheduling retry for relay peer ${peerIdStr} in ${delay}ms`,
+            `Scheduling retry for relay peer ${shortenPeerId(peerIdStr)} in ${delay}ms`,
           );
 
         state.retryTimeoutId = setTimeout(() => {
