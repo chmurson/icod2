@@ -1306,7 +1306,6 @@ __metadata:
     "@chainsafe/libp2p-gossipsub": "npm:^14.1.1"
     "@chainsafe/libp2p-noise": "npm:^16.1.4"
     "@chainsafe/libp2p-yamux": "npm:^7.0.4"
-    "@icod2/contracts": "workspace:*"
     "@icod2/protocols": "workspace:*"
     "@libp2p/autonat": "npm:^2.0.38"
     "@libp2p/circuit-relay-v2": "npm:^3.2.24"
@@ -1330,16 +1329,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@icod2/contracts@workspace:*, @icod2/contracts@workspace:libs/contracts":
-  version: 0.0.0-use.local
-  resolution: "@icod2/contracts@workspace:libs/contracts"
-  dependencies:
-    typescript: "npm:^5.9.2"
-  peerDependencies:
-    typescript: ">=4.9.0"
-  languageName: unknown
-  linkType: soft
-
 "@icod2/fe@workspace:fe":
   version: 0.0.0-use.local
   resolution: "@icod2/fe@workspace:fe"
@@ -1349,7 +1338,6 @@ __metadata:
     "@chainsafe/libp2p-yamux": "npm:^7.0.4"
     "@emotion/react": "npm:^11.14.0"
     "@emotion/styled": "npm:^11.14.1"
-    "@icod2/contracts": "workspace:*"
     "@libp2p/bootstrap": "npm:^11.0.47"
     "@libp2p/circuit-relay-v2": "npm:^3.2.24"
     "@libp2p/identify": "npm:^3.0.39"
