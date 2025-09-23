@@ -35,7 +35,13 @@ window.icod2Dev = {
         if (!Array.isArray(parsedValue)) {
           throw new Error("Invalid bootstrap multiaddr format");
         }
-        return parsedValue;
+        const filteredValue = parsedValue.filter((x) => !!x);
+
+        if (filteredValue.length === 0) {
+          return undefined;
+        }
+
+        return filteredValue;
       } catch (e) {
         loggerGate.canWarn && console.warn(e);
         return undefined;
@@ -99,6 +105,28 @@ window.icod2Dev = {
     },
   },
 };
+
+function printStatus() {
+  const lockedBoxAutoLoad = window.icod2Dev.lockedBoxAutoLoad.get();
+  const countDownOverride = window.icod2Dev.countDownOverride.get();
+  const topNavTools = window.icod2Dev.topNavTools.get();
+  const bootstrapMultiaddr = window.icod2Dev.bootstrapMultiaddr.get();
+
+  if (lockedBoxAutoLoad) {
+    console.log("[icod2Dev] Locked Box Auto Load:", lockedBoxAutoLoad);
+  }
+  if (countDownOverride) {
+    console.log("[icod2Dev] Count Down Override:", countDownOverride);
+  }
+  if (topNavTools) {
+    console.log("[icod2Dev] Top Nav Tools:", topNavTools);
+  }
+  if (bootstrapMultiaddr) {
+    console.log("[icod2Dev] Bootstrap Multiaddr:", bootstrapMultiaddr);
+  }
+}
+
+printStatus();
 
 interface Icod2Dev {
   clear: () => void;
