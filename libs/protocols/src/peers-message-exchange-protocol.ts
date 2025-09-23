@@ -3,6 +3,7 @@ import { attachOngoingStream } from "./commons/attach-ongoing-stream.js";
 import { loggerGate } from "./commons/loggerGate.js";
 import { parseJsonSafely } from "./commons/parse-json-safely.js";
 import { registerProtoHandle } from "./commons/register-proto-handle.js";
+import { shortenPeerId } from "./commons/shortenPeerId.js";
 
 export type PeerMessagePayload = Record<string, unknown>;
 export type PeerMessageListener<BasicPayload extends PeerMessagePayload> = (
@@ -54,7 +55,7 @@ export class PeerMessageExchangeProtocol<
       loggerGate.canLog &&
         console.log(
           "Received message from peer:",
-          peerId,
+          shortenPeerId(peerId),
           "message:",
           jsonMessage,
         );
@@ -71,9 +72,15 @@ export class PeerMessageExchangeProtocol<
   async sendMessageToPeer(peerId: string, payload: TPeerMessagePayload) {
     const channel = await this.getOrCreateChannel(peerId);
     loggerGate.canLog &&
-      console.log("Sending message to peer:", peerId, "message:", payload);
+      console.log(
+        "Sending message to peer:",
+        shortenPeerId(peerId),
+        "message:",
+        payload,
+      );
     await channel.send(payload);
-    loggerGate.canLog && console.log("Message sent to peer:", peerId);
+    loggerGate.canLog &&
+      console.log("Message sent to peer:", shortenPeerId(peerId));
   }
 
   async sendMessageToAllPeers(payload: TPeerMessagePayload) {
@@ -125,7 +132,7 @@ export class PeerMessageExchangeProtocol<
         loggerGate.canLog &&
           console.log(
             "Received message from peer:",
-            peerId,
+            shortenPeerId(peerId),
             "message:",
             jsonMessage,
           );

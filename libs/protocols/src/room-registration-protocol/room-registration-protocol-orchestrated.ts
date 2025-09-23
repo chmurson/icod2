@@ -8,6 +8,7 @@ import {
   RequestResponseBuilder,
   RequestResponseManager,
 } from "./../commons/request-response-manager.js";
+import { shortenPeerId } from "../commons/shortenPeerId.js";
 import {
   type Messages,
   messagesSchemas,
@@ -126,7 +127,12 @@ export function initRoomRegistrationProtocol(
       libp2p,
       (message, peerId) => {
         loggerGate.canLog &&
-          console.log("Received message:", message, "from peer", peerId);
+          console.log(
+            "Received message:",
+            message,
+            "from peer",
+            shortenPeerId(peerId),
+          );
         const json = parseJsonSafely(message);
         if (!json) return;
 

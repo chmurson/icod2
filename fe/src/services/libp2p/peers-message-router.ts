@@ -1,4 +1,4 @@
-import { loggerGate } from "@icod2/protocols";
+import { loggerGate, shortenPeerId } from "@icod2/protocols";
 import type { BasicProtoInterface } from "./types";
 
 export class PeersMessageRouter<
@@ -29,7 +29,7 @@ export class PeersMessageRouter<
       if (route.condition(msg)) {
         loggerGate.canLog &&
           console.log(
-            `Found route for ${"type" in msg ? msg.type : JSON.stringify(msg)}; peerId: ${peerId}`,
+            `Found route for ${"type" in msg ? msg.type : JSON.stringify(msg)}; peerId: ${shortenPeerId(peerId)}`,
           );
         route.handler(peerId, msg, proto);
         return;
