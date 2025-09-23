@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import yaml from "js-yaml";
+import { isString } from "../utils/typeguards.js";
 import { defaultConfig } from "./default-config.js";
 import type { AppConfig, LoggingConfig } from "./types.js";
 
@@ -31,14 +32,18 @@ export type LoadConfigResult = {
 };
 
 export function loadConfig(): LoadConfigResult {
+  const configPath = process.env.CONFIG_PATH;
+
   const configPaths = [
+    configPath &&
+      (configPath[0] === "/" ? configPath : join(configDirPath, configPath)),
     join(configDirPath, "config.local.yaml"),
     join(configDirPath, "config.local.yml"),
     join(configDirPath, "config.local.json"),
     join(configDirPath, "config.yaml"),
     join(configDirPath, "config.yml"),
     join(configDirPath, "config.json"),
-  ];
+  ].filter(isString);
 
   let fileConfig: Partial<AppConfig> = {};
   let sourcePath: string | undefined;

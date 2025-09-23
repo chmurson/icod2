@@ -1,9 +1,13 @@
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { generateKeyPair, privateKeyFromRaw } from "@libp2p/crypto/keys";
 import type { Ed25519PrivateKey } from "@libp2p/interface";
 import type { Logger } from "../logger.js";
 import { getLogger } from "../logger.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export async function getPeerIdFromEnv(
   envVarName = "LIBP2P_PRIVATE_KEY",
@@ -20,7 +24,7 @@ export async function getPeerIdFromEnv(
 
   const keyFilePath =
     process.env.PEER_ID_FILE_PATH ||
-    join(process.cwd(), "../data/peer-id-private-key.json");
+    join(__dirname, "../../../data/peer-id-private-key.json");
   const privateKeyBytes = await loadPrivateKeyFromFile(keyFilePath, logger);
 
   if (privateKeyBytes) {
