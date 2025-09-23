@@ -56,11 +56,10 @@ export async function startLibp2pRelay({
       {
         connectionId: id,
         remotePeer: shortenPeerId(remotePeer.toString()),
+        roomStats: getRoomStats(),
       },
       "Connection opened",
     );
-
-    printRoomStats();
   });
 
   libp2p.addEventListener("connection:close", (event) => {
@@ -69,24 +68,25 @@ export async function startLibp2pRelay({
       {
         connectionId: id,
         remotePeer: shortenPeerId(remotePeer.toString()),
+        roomStats: getRoomStats(),
       },
       "Connection closed",
     );
-    printRoomStats();
   });
 
   const roomRegistrationProt = initRoomRegistrationProtocol(libp2p, {
     onRegisterRoom: async (roomName, peerId) => {
       const peerIdStr = toPeerIdString(peerId);
-      logger.info(
-        {
-          peerId: shortenPeerId(peerIdStr),
-          roomName,
-        },
-        "Room registered",
-      );
       try {
         roomRegistration.registerRoom(roomName, peerId);
+        logger.info(
+          {
+            peerId: shortenPeerId(peerIdStr),
+            roomName,
+            roomStats: getRoomStats(),
+          },
+          "Room registered",
+        );
       } catch (error) {
         logger.error(
           {
@@ -104,17 +104,9 @@ export async function startLibp2pRelay({
         type: "register-room-response-success",
       } satisfies Responses["registerRoomSuccess"]);
       close();
-      printRoomStats();
     },
     onUnregisterRoom: async (roomName, peerId) => {
       const peerIdStr = toPeerIdString(peerId);
-      logger.info(
-        {
-          peerId: shortenPeerId(peerIdStr),
-          roomName,
-        },
-        "Room unregistered",
-      );
       roomRegistration.removePeerAndUnregisterRoomInNeeded(peerId);
       const { createPeerConnection } = roomRegistrationProt;
       const { sendResponse, close } = await createPeerConnection(peerId);
@@ -123,7 +115,14 @@ export async function startLibp2pRelay({
         type: "unregister-room-response-success",
       } satisfies Responses["unregisterRoomSuccess"]);
       close();
-      printRoomStats();
+      logger.info(
+        {
+          peerId: shortenPeerId(peerIdStr),
+          roomName,
+          roomStats: getRoomStats(),
+        },
+        "Room unregistered",
+      );
     },
   });
   await roomRegistrationProt.start();
@@ -137,34 +136,24 @@ export async function startLibp2pRelay({
       {
         peerId: shortenPeerId(peerIdStr),
         connectedPeers: formatConnectedPeers(connectedPeers),
+        registeredRooms: Array.from(roomRegistration.registeredRooms),
+        roomStats: getRoomStats(),
       },
       "Peer connected",
     );
-
-    printRoomStats();
   });
 
   libp2p.addEventListener("peer:disconnect", (event) => {
     const peerIdStr = event.detail.toString();
-    logger.info(
-      {
-        peerId: shortenPeerId(peerIdStr),
-      },
-      "Peer disconnected",
-    );
     connectedPeers.delete(peerIdStr);
-    logger.info(
-      {
-        connectedPeers: formatConnectedPeers(connectedPeers),
-      },
-      "Remaining connected peers",
-    );
     roomRegistration.removePeerAndUnregisterRoomInNeeded(peerIdStr);
     logger.info(
       {
+        peerId: shortenPeerId(peerIdStr),
+        remainingPeers: formatConnectedPeers(connectedPeers),
         registeredRooms: Array.from(roomRegistration.registeredRooms),
       },
-      "Room registrations after disconnect",
+      "Peer disconnected",
     );
   });
 
@@ -183,25 +172,25 @@ export async function startLibp2pRelay({
     debouncePrintRoomStats();
   });
 
+  function printRoomStats() {
+    const stats = getRoomStats();
+    logger.info({ stats }, "Room stats");
+  }
+
   const debouncePrintRoomStats = debounce(printRoomStats, 2000);
 
-  function printRoomStats() {
+  function getRoomStats() {
     const rooms = Array.from(roomRegistration.registeredRooms.values());
-    logger.debug({ rooms }, "Registered rooms snapshot");
 
-    for (const roomName of rooms) {
+    return rooms.reduce<Record<string, string[]>>((acc, room) => {
       const subscribers = libp2p.services.pubsub
-        .getSubscribers(roomName)
+        .getSubscribers(room)
         .map((peerId) => shortenPeerId(peerId.toString()));
 
-      logger.debug(
-        {
-          roomName,
-          subscribers,
-        },
-        "Room subscribers snapshot",
-      );
-    }
+      acc[room] = subscribers;
+
+      return acc;
+    }, {});
   }
 
   function formatConnectedPeers(peers: Set<string>): string[] {
