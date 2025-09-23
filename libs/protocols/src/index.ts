@@ -1,4 +1,5 @@
 export { loggerGate } from "./commons/loggerGate.js";
+export { shortenPeerId } from "./commons/shortenPeerId.js";
 export {
   PeerMessageExchangeProtocol,
   type PeerMessageListener,
