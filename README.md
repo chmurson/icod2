@@ -4,7 +4,7 @@ Stashcrate is a simple and lightweight app to share content with your friends an
 
 ## Production
 
-[icod2.netlify.app](https://icod2.netlify.app)
+[stashcrate.io](https://stashcrate.io/)
 
 ## Local development
 
