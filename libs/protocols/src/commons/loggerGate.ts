@@ -13,6 +13,7 @@ interface LoggerConfig {
 
 class LoggerGate {
   private static STORAGE_KEY = "custom_logger_config";
+
   private config: LoggerConfig = {
     enabled: true,
     levels: {
@@ -142,6 +143,36 @@ class LoggerGate {
     this.saveConfig();
   }
 
+  // Public methods for Node.js usage
+  public showHelp(): void {
+    console.log("Logger Gate Help");
+    console.log("================");
+    console.log("Available methods:");
+    console.log(
+      "  loggerGate.setLevel(level)  - Enable set logging level to ('log', 'warn', 'error') or 'none' to disable all",
+    );
+    console.log("  loggerGate.status()            - Show current status");
+    console.log("  loggerGate.showHelp()          - Show this help");
+    if (!this.isNode) {
+      console.log("");
+      console.log("Configuration is persisted in localStorage");
+    }
+  }
+
+  public showStatusIfDev(): void {
+    if (
+      // biome-ignore lint/suspicious/noExplicitAny: Please, let me
+      (window as any).location?.hostname === "localhost" ||
+      // biome-ignore lint/suspicious/noExplicitAny: Please, let me
+      (window as any).location?.hostname === "127.0.0.1"
+    ) {
+      console.log(
+        "Logger Gate initialiazed. Use window.logger.help() to see available commands",
+      );
+      this.showStatus();
+    }
+  }
+
   private showNodeInitialization(): void {
     this.showStatus();
   }
@@ -167,34 +198,6 @@ class LoggerGate {
         status: () => this.status(),
         help: () => this.showHelp(),
       };
-
-      if (
-        // biome-ignore lint/suspicious/noExplicitAny: Please, let me
-        (window as any).location?.hostname === "localhost" ||
-        // biome-ignore lint/suspicious/noExplicitAny: Please, let me
-        (window as any).location?.hostname === "127.0.0.1"
-      ) {
-        console.log(
-          "Logger Gate initialiazed. Use window.logger.help() to see available commands",
-        );
-        this.showStatus();
-      }
-    }
-  }
-
-  // Public methods for Node.js usage
-  showHelp(): void {
-    console.log("Logger Gate Help");
-    console.log("================");
-    console.log("Available methods:");
-    console.log(
-      "  loggerGate.setLevel(level)  - Enable set logging level to ('log', 'warn', 'error') or 'none' to disable all",
-    );
-    console.log("  loggerGate.status()            - Show current status");
-    console.log("  loggerGate.showHelp()          - Show this help");
-    if (!this.isNode) {
-      console.log("");
-      console.log("Configuration is persisted in localStorage");
     }
   }
 

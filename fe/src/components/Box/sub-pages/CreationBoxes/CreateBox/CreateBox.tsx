@@ -103,7 +103,7 @@ export const CreateBoxContent: FC = () => {
   const noParticipantConnected = state.keyHolders.length === 0;
 
   const blocker = useNavigateAwayBlocker({
-    shouldNavigationBeBlocked: () => true,
+    shouldNavigationBeBlocked: () => !context.error,
   });
 
   return (
