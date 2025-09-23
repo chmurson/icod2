@@ -11,8 +11,5 @@
     "skipLibCheck": true,
     "baseUrl": "."
   },
-  "references": [
-    { "path": "../libs/contracts" },
-    { "path": "../libs/protocols" }
-  ]
+  "references": [{ "path": "../libs/protocols" }]
 }
