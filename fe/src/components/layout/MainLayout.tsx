@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 import headerCropppedUrl from "../../../public/header-cropped.jpg";
-import headerSmallCropppedUrl from "../../../public/header-cropped-small.jpg";
+import headerSmallCropppedUrl from "../../../public/header-cropped-small.jpg?inline";
 
 const mergeClassNames = (...classes: (string | undefined)[]) => {
   return classes.filter(Boolean).join(" ");
@@ -19,7 +19,7 @@ const mergeClassNames = (...classes: (string | undefined)[]) => {
 
 export const MainLayout: FC<PropsWithChildren> = ({ children }) => {
   return (
-    <div className="h-full min-h-dvh">
+    <div className="h-full min-h-dvh max-w-[1640px] mx-auto">
       <HeaderImage />
       <ContentCard>{children}</ContentCard>
     </div>
