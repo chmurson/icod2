@@ -1,16 +1,13 @@
 import { fileURLToPath, URL } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig, loadEnv, type UserConfig } from "vite";
+import { visualizer } from "rollup-plugin-visualizer";
+import { defineConfig, type UserConfig } from "vite";
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd());
-  const signalingServerUrl = `ws://${env.VITE_SIGNALING_HOSTNAME}:${env.VITE_SIGNALING_PORT}`;
-  console.log(`Vite: Frontned calls Signaling Server at: ${signalingServerUrl}
-    `);
+export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), visualizer()],
     resolve: {
       alias: {
         "@/ui": fileURLToPath(new URL("./src/components/ui", import.meta.url)),
