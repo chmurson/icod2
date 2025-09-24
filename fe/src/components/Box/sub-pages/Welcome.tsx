@@ -1,7 +1,6 @@
 import type React from "react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { Button } from "@/ui/Button";
 import { Typography } from "@/ui/Typography";
 
@@ -66,11 +65,7 @@ const Welcome: React.FC = () => {
         }
         buttonSlot={
           <Link to="/unlock-box" style={{ textDecoration: "none" }}>
-            <Button
-              onClick={useOpenLockedBoxStore((state) => state.actions.start)}
-              variant="prominent"
-              className="whitespace-nowrap"
-            >
+            <Button variant="prominent" className="whitespace-nowrap">
               Open a Locked Box
             </Button>
           </Link>
