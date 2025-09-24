@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
+  clearPersistedRoomToken,
+  isPersistedRoomToken,
+} from "@/services/libp2p/useRoomRegistration";
+import {
   useCreateBoxStore,
   useDownloadBoxStore,
   useJoinBoxStore,
 } from "@/stores";
 import { CreateBox } from "./CreateBox";
-import {
-  clearPersistedStartedLockingInfo,
-  isPersistedStartedLocking,
-} from "./commons";
+import { CreateBoxConnectionProvider } from "./CreateBoxConnectionProvider";
 import { DownloadLockedBox } from "./DownloadLockedBox";
 import { JoinBox } from "./JoinBox";
 import { WhatsYourName } from "./WhatsYourName";
@@ -24,10 +25,16 @@ export const RootLockBox = () => {
       case "joinBoxSetName":
         return <WhatsYourName join />;
       case "create":
-        return <CreateBox />;
+      case "download-create":
+        return (
+          <CreateBoxConnectionProvider>
+            {currentPage === "create" && <CreateBox />}
+            {currentPage === "download-create" && <DownloadLockedBox />}
+          </CreateBoxConnectionProvider>
+        );
       case "join":
         return <JoinBox />;
-      case "download":
+      case "download-join":
         return <DownloadLockedBox />;
       default:
         return null;
@@ -38,7 +45,7 @@ export const RootLockBox = () => {
 };
 
 const useCurrentPage = () => {
-  const { sessionId } = useParams();
+  const { roomToken } = useParams();
   const createBoxState = useCreateBoxStore((state) => state.state);
   const joinBoxState = useJoinBoxStore((state) => state.state);
   const downloadStateType = useDownloadBoxStore((state) => state.type);
@@ -46,25 +53,25 @@ const useCurrentPage = () => {
   const isInitialized = useInitialization();
 
   useEffect(() => {
-    if (!isPersistedStartedLocking(sessionId ?? "")) {
-      clearPersistedStartedLockingInfo();
+    if (!isPersistedRoomToken(roomToken ?? "")) {
+      clearPersistedRoomToken();
     }
-  }, [sessionId]);
+  }, [roomToken]);
 
   if (!isInitialized) {
     return null;
   }
 
-  if (
-    downloadStateType === "fromCreateBox" ||
-    downloadStateType === "fromJoinBox"
-  ) {
-    return "download";
+  if (downloadStateType === "fromJoinBox") {
+    return "download-join";
+  }
+  if (downloadStateType === "fromCreateBox") {
+    return "download-create";
   }
 
   if (createBoxState === "initial" && joinBoxState === "initial") {
-    return (sessionId?.trim() ?? "") === "" ||
-      isPersistedStartedLocking(sessionId ?? "")
+    const emptyRoomToken = (roomToken?.trim() ?? "") === "";
+    return emptyRoomToken || isPersistedRoomToken(roomToken ?? "")
       ? "createBoxSetName"
       : "joinBoxSetName";
   }
@@ -73,7 +80,12 @@ const useCurrentPage = () => {
     return "createBoxSetName";
   }
 
-  if (createBoxState === "connected" || createBoxState === "connecting") {
+  if (
+    createBoxState === "connected" ||
+    createBoxState === "connecting" ||
+    createBoxState === "creating" ||
+    createBoxState === "created"
+  ) {
     return "create";
   }
 

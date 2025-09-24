@@ -2,7 +2,7 @@ export type KeyHolderWelcomesLeader = {
   type: "keyholder:welcome-leader";
   name: string;
   userAgent: string;
-  sessionId: string;
+  roomToken: string;
 };
 
 export function isKeyHolderWelcomesLeader(
@@ -15,8 +15,8 @@ export function isKeyHolderWelcomesLeader(
     typeof payload.name === "string" &&
     "userAgent" in payload &&
     typeof payload.userAgent === "string" &&
-    "sessionId" in payload &&
-    typeof payload.sessionId === "string"
+    "roomToken" in payload &&
+    typeof payload.roomToken === "string"
   );
 }
 
@@ -113,6 +113,21 @@ export function isLeaderSendsBoxCreated(
     typeof payload.encryptedMessage === "string"
   );
 }
+
+export type KeyHolderSendsCreatedBoxReceived = {
+  type: "keyholder:created-box-received";
+};
+
+export const isKeyHolderSendsCreatedBoxReceived = (
+  message: unknown,
+): message is KeyHolderSendsCreatedBoxReceived => {
+  return (
+    typeof message === "object" &&
+    message !== null &&
+    "type" in message &&
+    message.type === "keyholder:created-box-received"
+  );
+};
 
 export type LeaderSendsKeyHolderList = {
   type: "leader:keyholder-list";

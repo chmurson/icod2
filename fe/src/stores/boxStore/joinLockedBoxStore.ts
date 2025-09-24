@@ -25,6 +25,12 @@ const joinLockedBoxState = {
   } satisfies ParticipantType,
   decryptedContent: "",
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
+  connectionToLeaderFailReason: undefined as
+    | "not-authorized"
+    | "peer-connection-failed"
+    | "timeout"
+    | "other"
+    | undefined,
 };
 
 export type JoinLockedBoxStateData = typeof joinLockedBoxState;
@@ -51,6 +57,7 @@ export type JoinLockedBoxState = {
       keyHolderId: string;
       keyHolders: ParticipantType[];
       keyThreshold: number;
+      roomToken: string;
     }) => void;
     toggleShareAccessKey: (participantId: string, value?: boolean) => void;
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
@@ -61,6 +68,10 @@ export type JoinLockedBoxState = {
     setError: (error: string) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     setPartialStateUpdate: SetPartialStateUpdate;
+    markAsDisconnected: () => void;
+    cannotConnectLeader: (
+      reason: JoinLockedBoxStateData["connectionToLeaderFailReason"],
+    ) => void;
   } & LockedBoxStoreCommonPart["actions"];
 } & JoinLockedBoxStateData;
 
@@ -91,6 +102,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
         keyHolderId,
         keyHolders,
         keyThreshold,
+        roomToken,
       }) => {
         const you = keyHolders.find((x) => x.id === keyHolderId);
         if (!you)
@@ -114,6 +126,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
           you: {
             ...you,
           },
+          roomToken,
         });
       },
       connectKeyHolder: (
@@ -139,6 +152,9 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
             const connectedLeaderId = keyHolderObject.id;
 
             return {
+              connected: true,
+              connecting: false,
+              state: "connected",
               connectedLeaderId,
               onlineKeyHolders,
               offLineKeyHolders,
@@ -165,6 +181,13 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
       setError: (error: string) => set({ error }),
       setUnlockingStartDate: (unlockingStartDate: Date) =>
         set({ unlockingStartDate }),
+
+      markAsDisconnected: () =>
+        set({
+          state: "disconnected",
+          connected: false,
+          connecting: false,
+        }),
       setPartialStateUpdate: (payload: Parameters<SetPartialStateUpdate>[0]) =>
         set((state) => {
           const filteredPayload: Omit<typeof payload, "unlockingStartDate"> & {
@@ -243,11 +266,17 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
         const hasKeyHimself = !!key?.trim();
         return receivedKeysNumber + (hasKeyHimself ? 1 : 0) >= keyThreshold;
       },
+      cannotConnectLeader: (
+        reason: JoinLockedBoxStateData["connectionToLeaderFailReason"],
+      ) =>
+        set({
+          connectionToLeaderFailReason: reason,
+        }),
     },
   })),
 );
 if (import.meta.env.DEV === true) {
-  //@ts-ignore
+  //@ts-expect-error
   window.useJoinLockedBoxStore = {
     connectAllOffLineKeyholders: () => {
       const {
@@ -266,7 +295,7 @@ if (import.meta.env.DEV === true) {
     },
     addReceivedKey: (arg: { fromKeyHolderId: string; key: string }) => {
       useJoinLockedBoxStore.getState().actions.addReceivedKey(arg);
-      //@ts-ignore
+      //@ts-expect-error
       window.useJoinLockedBoxStore.setReadyToUnlock();
     },
   };

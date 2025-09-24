@@ -1,16 +1,16 @@
-const keyNameForSessionId = "icod2-last-started-unlocking-box-session-id";
+const keyNameForRoomToken = "icod2-last-started-unlocking-box-session-id";
 
-export const persistStartedUnlocking = (sessionId: string) => {
-  sessionStorage.setItem(keyNameForSessionId, sessionId);
+export const persistStartedUnlocking = (roomToken: string) => {
+  sessionStorage.setItem(keyNameForRoomToken, roomToken);
 };
 
 export const isPersistedStartedUnlocking = (sessonId: string) => {
   return (
     sessonId.trim() !== "" &&
-    sessionStorage.getItem(keyNameForSessionId) === sessonId
+    sessionStorage.getItem(keyNameForRoomToken) === sessonId
   );
 };
 
 export const clearPersistedStartedUnlockingInfo = () => {
-  sessionStorage.removeItem(keyNameForSessionId);
+  sessionStorage.removeItem(keyNameForRoomToken);
 };

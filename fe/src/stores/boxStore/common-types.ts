@@ -21,6 +21,7 @@ export const lockedBoxStoreStateCommonPart = {
     | "drop-box"
     | "connecting"
     | "connected"
+    | "disconnected"
     | "ready-to-unlock",
   you: {
     id: "",
@@ -35,6 +36,7 @@ export const lockedBoxStoreStateCommonPart = {
   offLineKeyHolders: [] as ParticipantType[],
   unlockingStartDate: null as Date | null,
   encryptedMessage: "",
+  roomToken: "",
 };
 
 export type LockedBoxStoreCommonPart = typeof lockedBoxStoreStateCommonPart & {

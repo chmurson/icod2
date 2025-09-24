@@ -17,7 +17,7 @@ export class PeerIdKeyholderMap {
     return undefined;
   }
 
-  public getKeyholerId(peerId: string): string | undefined {
+  public getKeyholderId(peerId: string): string | undefined {
     return this.mapPeerIdToKeyHolderId.get(peerId);
   }
 

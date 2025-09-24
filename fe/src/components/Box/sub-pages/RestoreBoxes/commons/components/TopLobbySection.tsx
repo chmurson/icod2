@@ -1,4 +1,4 @@
-import { Strong } from "@radix-ui/themes";
+import { Spinner, Strong } from "@radix-ui/themes";
 import type { StoreApi, UseBoundStore } from "zustand";
 import type { LockedBoxStoreCommonPart } from "@/stores/boxStore/common-types";
 import { Text } from "@/ui/Typography";
@@ -39,9 +39,31 @@ export const TopLobbySection = ({
       : 0,
   );
 
+  const getTextReplacement = () => {
+    if (metaStatus === "keyholder-not-able-to-unlock") {
+      return (
+        <Text variant="label" className="text-red-400 dark:text-red-300">
+          Time’s up — you had only <Strong>{allKeysCurrentKeyholderHas}</Strong>{" "}
+          of <Strong>{keyThreshold}</Strong> required keys to unlock the box.
+        </Text>
+      );
+    }
+
+    if (metaStatus === "connecting") {
+      return (
+        <div className="inline-flex items-center gap-2">
+          <Spinner />
+          <Text variant="label">Connecting...</Text>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <>
       {(metaStatus === "not-ready-to-unlock" ||
+        metaStatus === "connecting" ||
         metaStatus === "keyholder-not-able-to-unlock") && (
         <CounterWithInfo
           unlockingStartDate={unlockingStartDate}
@@ -49,17 +71,12 @@ export const TopLobbySection = ({
           onlineKeyHoldersCount={onlineKeyHoldersCount}
           onFinish={() => actions.setReadyToUnlock()}
           timeClassName={cn(
-            metaStatus === "keyholder-not-able-to-unlock" && "opacity-25",
+            (metaStatus === "keyholder-not-able-to-unlock" ||
+              metaStatus === "connecting") &&
+              "opacity-25",
           )}
-          textReplacement={
-            metaStatus === "keyholder-not-able-to-unlock" ? (
-              <Text variant="label" className="text-red-400 dark:text-red-300">
-                Time’s up — you had only{" "}
-                <Strong>{allKeysCurrentKeyholderHas}</Strong> of{" "}
-                <Strong>{keyThreshold}</Strong> required keys to unlock the box.
-              </Text>
-            ) : null
-          }
+          hideText={metaStatus === "connecting"}
+          textReplacement={getTextReplacement()}
         />
       )}
       <div className="flex flex-col gap-4">
@@ -82,6 +99,7 @@ export const TopLobbySection = ({
     </>
   );
 };
+
 const OpenBoxButton = ({
   disabled = false,
   useStoreHook,

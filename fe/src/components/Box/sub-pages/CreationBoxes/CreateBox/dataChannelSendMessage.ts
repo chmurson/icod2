@@ -1,5 +1,5 @@
+import { loggerGate, type PeerMessageExchangeProtocol } from "@icod2/protocols";
 import { type RefObject, useCallback } from "react";
-import type { DataChannelManager } from "@/services/webrtc";
 import { useCreateBoxStore } from "@/stores";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import type {
@@ -9,14 +9,14 @@ import type {
 } from "../commons";
 
 export const useDataChannelSendMessages = ({
-  dataChannelManagerRef,
+  peerProtoExchangeRef,
 }: {
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>;
+  peerProtoExchangeRef: RefObject<PeerMessageExchangeProtocol | undefined>;
 }) => {
-  const sendBoxUpdate = useSendBoxUpdate(dataChannelManagerRef);
-  const sendBoxCreated = useSendBoxCreated(dataChannelManagerRef);
-  const sendKeyholdersUpdate = useSendKeyholdersUpdate(dataChannelManagerRef);
-  const sendLockedBoxes = useSendLockedBoxes(dataChannelManagerRef);
+  const sendBoxUpdate = useSendBoxUpdate(peerProtoExchangeRef);
+  const sendBoxCreated = useSendBoxCreated(peerProtoExchangeRef);
+  const sendKeyholdersUpdate = useSendKeyholdersUpdate(peerProtoExchangeRef);
+  const sendLockedBoxes = useSendLockedBoxes(peerProtoExchangeRef);
 
   return {
     sendBoxUpdate,
@@ -27,7 +27,7 @@ export const useDataChannelSendMessages = ({
 };
 
 const useSendBoxUpdate = (
-  dataChannelMngRef: RefObject<DataChannelManager | undefined>,
+  proto: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) =>
   useCallback(
     (params: {
@@ -48,16 +48,16 @@ const useSendBoxUpdate = (
           }
         : { name: title, keyHolderThreshold };
 
-      dataChannelMngRef.current?.sendMessageToSinglePeer(id, {
+      proto.current?.sendMessageToPeer(id, {
         type: "leader:sends-box-update",
         ...payload,
       } satisfies LeaderSendsBoxUpdate);
     },
-    [dataChannelMngRef],
+    [proto],
   );
 
 const useSendBoxCreated = (
-  dataChannelMngRef: RefObject<DataChannelManager | undefined>,
+  proto: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) =>
   useCallback(
     (params: {
@@ -67,30 +67,32 @@ const useSendBoxCreated = (
     }) => {
       const { encryptedMessage, key, localPeerID } = params;
 
-      dataChannelMngRef.current?.sendMessageToSinglePeer(localPeerID, {
+      proto.current?.sendMessageToPeer(localPeerID, {
         type: "leader:box-created",
         key,
         encryptedMessage,
       } satisfies LeaderSendsBoxCreated);
     },
-    [dataChannelMngRef],
+    [proto],
   );
 
 const useSendKeyholdersUpdate = (
-  dataChannelMngRef: RefObject<DataChannelManager | undefined>,
+  proto: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) =>
   useCallback(
     (keyHolders: ParticipantType[]) => {
-      dataChannelMngRef.current?.sendMessageToAllPeers({
-        type: "leader:keyholder-list",
-        allKeyHolders: keyHolders,
-      } satisfies LeaderSendsKeyHolderList);
+      for (const keyHolder of keyHolders) {
+        proto.current?.sendMessageToPeer(keyHolder.id, {
+          type: "leader:keyholder-list",
+          allKeyHolders: keyHolders,
+        } satisfies LeaderSendsKeyHolderList);
+      }
     },
-    [dataChannelMngRef],
+    [proto],
   );
 
 const useSendLockedBoxes = (
-  dataChannelMngRef: RefObject<DataChannelManager | undefined>,
+  proto: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) =>
   useCallback(
     (params: { keys: string[]; encryptedMessage: string }) => {
@@ -100,18 +102,20 @@ const useSendLockedBoxes = (
       const keysToSlice = [...keys];
 
       keyHolders.forEach((kh) => {
-        const peerKey = keysToSlice.splice(0)[0];
+        const peerKey = keysToSlice.pop();
 
         if (!peerKey) {
-          console.error(`Missing key for keyholder with id: ${kh.id}`);
+          loggerGate.canError &&
+            console.error(`Missing key for keyholder with id: ${kh.id}`);
+          return;
         }
 
-        dataChannelMngRef.current?.sendMessageToSinglePeer(kh.id, {
+        proto.current?.sendMessageToPeer(kh.id, {
           type: "leader:box-created",
           key: peerKey,
           encryptedMessage,
         } satisfies LeaderSendsBoxCreated);
       });
     },
-    [dataChannelMngRef],
+    [proto],
   );

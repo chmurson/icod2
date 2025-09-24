@@ -31,7 +31,7 @@ export const StartLeaderFollowerAlert: FC<Props> = ({
               <Link to={followerNavigateToLink} className="no-underline">
                 <Button
                   variant="secondary"
-                  className="self-end text-sm"
+                  className="self-end text-sm whitespace-nowrap"
                   size="1"
                 >
                   {followerNavigateButtonText}

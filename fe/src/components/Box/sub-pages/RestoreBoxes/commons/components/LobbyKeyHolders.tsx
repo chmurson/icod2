@@ -1,4 +1,4 @@
-import type { ComponentType, FC, ReactNode } from "react";
+import { type ComponentType, type FC, type ReactNode, useMemo } from "react";
 import {
   ParticipantItemAvatar,
   ParticipantItemDescription,
@@ -13,12 +13,14 @@ import { cn } from "@/utils/cn";
 import { useTailwindBreakpoints } from "@/utils/useTailwindBreakpoints";
 import tokenSvg from "./assets/token.svg";
 import { AltProminentBadgeButton } from "./BoxUnlockedButtonBadge";
+import { ConnectingLabel } from "./ConnectingLabel";
+import { DisconnectedLabel } from "./DisconnectedLabel";
 import { MissingOneKeyLabel } from "./MIssingOneKeyLabel";
 import { ReadyToUnlockLabel } from "./ReadyToUnlockLabel";
 
 export const LoobbyKeyHolders: FC<{
   status: LockedBoxStoreCommonPart["state"];
-  you: ParticipantType;
+  you: ParticipantType & { isLeader?: boolean };
   onlineKeyHolders: ParticipantType[];
   offLineKeyHolders: ParticipantType[];
   possibleKeyHolders: ParticipantType[];
@@ -50,11 +52,17 @@ export const LoobbyKeyHolders: FC<{
   ShareAccessButton,
 }) => {
   const { isMaxSm } = useTailwindBreakpoints();
-  const { isReadyToUnlock, isMissingOne } = isReadyToUnlockAndMissingOne(
+  const labelType = isReadyToUnlockAndMissingOne(
     shareAccessKeyMapByKeyHolderId,
     keyThreshold,
     you.id,
   );
+  const finalLabelType = useMemo(() => {
+    if (status === "connecting") {
+      return "is-connecting";
+    }
+    return labelType;
+  }, [labelType, status]);
   const isReadyToUnLockStatus = status === "ready-to-unlock";
 
   return (
@@ -64,8 +72,7 @@ export const LoobbyKeyHolders: FC<{
           <Text variant="label">Your access key</Text>
         </div>
         <ParticipantRow
-          isMissingOne={isMissingOne}
-          isReadyToUnlock={isReadyToUnlock}
+          label={finalLabelType}
           name={you.name}
           userAgent={you.userAgent}
           shareAcceessKeyAvatarsSlot={
@@ -83,7 +90,7 @@ export const LoobbyKeyHolders: FC<{
                   shortText={isMaxSm}
                 />
               )}
-              {isReadyToUnLockStatus && isReadyToUnlock && (
+              {isReadyToUnLockStatus && labelType === "is-ready-to-unlock" && (
                 <BoxUnlockedBadgeButton />
               )}
             </>
@@ -97,19 +104,17 @@ export const LoobbyKeyHolders: FC<{
         )}
         {onlineKeyHolders.length !== 0 &&
           onlineKeyHolders.map((kh) => {
-            const { isReadyToUnlock, isMissingOne } =
-              isReadyToUnlockAndMissingOne(
-                shareAccessKeyMapByKeyHolderId,
-                keyThreshold,
-                kh.id,
-              );
+            const labelType = isReadyToUnlockAndMissingOne(
+              shareAccessKeyMapByKeyHolderId,
+              keyThreshold,
+              kh.id,
+            );
 
             return (
               <ParticipantRow
                 key={kh.id}
-                isMissingOne={isMissingOne}
-                isReadyToUnlock={isReadyToUnlock}
                 name={kh.name}
+                label={labelType}
                 userAgent={kh.userAgent}
                 shareAcceessKeyAvatarsSlot={
                   <ShareAccesKeyAvatars
@@ -125,9 +130,10 @@ export const LoobbyKeyHolders: FC<{
                         shortText={isMaxSm}
                       />
                     )}
-                    {isReadyToUnLockStatus && isReadyToUnlock && (
-                      <BoxUnlockedBadgeButton />
-                    )}
+                    {isReadyToUnLockStatus &&
+                      labelType === "is-ready-to-unlock" && (
+                        <BoxUnlockedBadgeButton />
+                      )}
                   </>
                 }
               />
@@ -171,14 +177,16 @@ export const LoobbyKeyHolders: FC<{
 const ParticipantRow = (props: {
   name: string;
   userAgent: string;
-  isMissingOne?: boolean;
-  isReadyToUnlock?: boolean;
+  label?:
+    | "is-missing-one"
+    | "is-ready-to-unlock"
+    | "is-connecting"
+    | "is-disconnected";
   shareButtonSlot: ReactNode;
   shareAcceessKeyAvatarsSlot: ReactNode;
 }) => {
   const {
-    isMissingOne,
-    isReadyToUnlock,
+    label,
     name,
     shareButtonSlot,
     userAgent,
@@ -193,8 +201,10 @@ const ParticipantRow = (props: {
           <ParticipantItemDescription name={name} ua={userAgent} />
         </div>
         <div className="flex items-center shrink-0">
-          {isMissingOne && <MissingOneKeyLabel />}
-          {isReadyToUnlock && <ReadyToUnlockLabel />}
+          {label === "is-missing-one" && <MissingOneKeyLabel />}
+          {label === "is-ready-to-unlock" && <ReadyToUnlockLabel />}
+          {label === "is-disconnected" && <DisconnectedLabel />}
+          {label === "is-connecting" && <ConnectingLabel />}
         </div>
       </div>
       <div
@@ -221,9 +231,15 @@ const isReadyToUnlockAndMissingOne = (
   }).length;
   const fullAmountOfKeys = numberOfAccesses + 1;
   const isReadyToUnlock = fullAmountOfKeys >= keyThreshold;
+  if (isReadyToUnlock) {
+    return "is-ready-to-unlock";
+  }
   const isMissingOne = fullAmountOfKeys === keyThreshold - 1;
+  if (isMissingOne) {
+    return "is-missing-one";
+  }
 
-  return { isReadyToUnlock, isMissingOne };
+  return;
 };
 
 const BoxUnlockedBadgeButton = () => (

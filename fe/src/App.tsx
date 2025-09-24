@@ -84,11 +84,11 @@ const router = createBrowserRouter([
         Component: DecodePlayground,
       },
       {
-        path: "/unlock-box/:sessionId?",
+        path: "/unlock-box/:roomToken?",
         Component: LockedBox,
       },
       {
-        path: "/lock-box/:sessionId?",
+        path: "/lock-box/:roomToken?",
         Component: RootLockBox,
       },
       {
@@ -109,7 +109,7 @@ function App() {
 
   return (
     <Theme
-      accentColor="plum"
+      accentColor="violet"
       appearance={theme}
       grayColor="gray"
       panelBackground="translucent"

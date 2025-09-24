@@ -30,5 +30,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "references": [{ "path": "../libs/contracts" }]
+  "references": [{ "path": "../libs/protocols" }]
 }

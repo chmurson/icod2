@@ -1,0 +1,23 @@
+{
+  "name": "@icod2/protocols",
+  "packageManager": "yarn@4.9.2",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@libp2p/peer-id": "^5.1.9",
+    "it-byte-stream": "^2.0.3",
+    "libp2p": "^2.10.0",
+    "typescript": "^5.9.2",
+    "uint8arrays": "^5.1.0",
+    "zod": "^4.1.9"
+  }
+}

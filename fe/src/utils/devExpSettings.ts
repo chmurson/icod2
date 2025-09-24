@@ -1,13 +1,52 @@
+import { loggerGate } from "@icod2/protocols";
+
 const LOCKED_BOX_AUTO_LOAD_LOCAL_STORAGAE_KEY = "ICOD2_DEV_AUTO_LOAD_BOX";
 const ICOD2_DEV_COUNT_DOWN_OVERRIDE_STORAGAE_KEY =
   "ICOD2_DEV_COUNT_DOWN_OVERRIDE";
 const ICOD2_DEV_TOP_NAV_TOOLS_STORAGAE_KEY = "ICOD2_DEV_TOP_NAV_TOOLS";
+const ICOD2_DEV_BOOTSTRAP_MULTIADDR_LOCAL_STORAGAE_KEY =
+  "ICOD2_DEV_BOOTSTRAP_MULTIADDR";
 
 window.icod2Dev = {
   clear: () => {
     localStorage.removeItem(LOCKED_BOX_AUTO_LOAD_LOCAL_STORAGAE_KEY);
     localStorage.removeItem(ICOD2_DEV_COUNT_DOWN_OVERRIDE_STORAGAE_KEY);
     localStorage.removeItem(ICOD2_DEV_TOP_NAV_TOOLS_STORAGAE_KEY);
+  },
+  bootstrapMultiaddr: {
+    set: (multiaddr: string | object) => {
+      localStorage.setItem(
+        ICOD2_DEV_BOOTSTRAP_MULTIADDR_LOCAL_STORAGAE_KEY,
+        JSON.stringify([multiaddr]),
+      );
+    },
+    get: () => {
+      try {
+        const value = localStorage.getItem(
+          ICOD2_DEV_BOOTSTRAP_MULTIADDR_LOCAL_STORAGAE_KEY,
+        );
+
+        if (value === null) {
+          return undefined;
+        }
+
+        const parsedValue = JSON.parse(value);
+
+        if (!Array.isArray(parsedValue)) {
+          throw new Error("Invalid bootstrap multiaddr format");
+        }
+        const filteredValue = parsedValue.filter((x) => !!x);
+
+        if (filteredValue.length === 0) {
+          return undefined;
+        }
+
+        return filteredValue;
+      } catch (e) {
+        loggerGate.canWarn && console.warn(e);
+        return undefined;
+      }
+    },
   },
   lockedBoxAutoLoad: {
     set: (box: string | object) => {
@@ -28,7 +67,7 @@ window.icod2Dev = {
 
         return JSON.parse(value);
       } catch (e) {
-        console.warn(e);
+        loggerGate.canWarn && console.warn(e);
         return undefined;
       }
     },
@@ -67,6 +106,28 @@ window.icod2Dev = {
   },
 };
 
+function printStatus() {
+  const lockedBoxAutoLoad = window.icod2Dev.lockedBoxAutoLoad.get();
+  const countDownOverride = window.icod2Dev.countDownOverride.get();
+  const topNavTools = window.icod2Dev.topNavTools.get();
+  const bootstrapMultiaddr = window.icod2Dev.bootstrapMultiaddr.get();
+
+  if (lockedBoxAutoLoad) {
+    console.log("[icod2Dev] Locked Box Auto Load:", lockedBoxAutoLoad);
+  }
+  if (countDownOverride) {
+    console.log("[icod2Dev] Count Down Override:", countDownOverride);
+  }
+  if (topNavTools) {
+    console.log("[icod2Dev] Top Nav Tools:", topNavTools);
+  }
+  if (bootstrapMultiaddr) {
+    console.log("[icod2Dev] Bootstrap Multiaddr:", bootstrapMultiaddr);
+  }
+}
+
+printStatus();
+
 interface Icod2Dev {
   clear: () => void;
   lockedBoxAutoLoad: {
@@ -80,6 +141,10 @@ interface Icod2Dev {
   topNavTools: {
     set: (isOn: boolean) => void;
     get: () => boolean;
+  };
+  bootstrapMultiaddr: {
+    set: (multiaddr: string) => void;
+    get: () => string[] | undefined;
   };
 }
 

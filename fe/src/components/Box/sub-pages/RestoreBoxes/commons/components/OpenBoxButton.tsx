@@ -40,7 +40,7 @@ export const OpenBoxButton: FC<Props> = ({
     <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Dialog.Trigger>
         <AlternateProminentButton
-          className={cn("self-center", className)}
+          className={cn("self-center whitespace-nowrap", className)}
           disabled={disabled}
         >
           <img alt="box" src={tokenSvg} width={18} height={18} />

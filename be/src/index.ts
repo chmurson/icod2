@@ -1,9 +1,28 @@
-import { config } from "dotenv";
-import { SignalingServer } from "./signaling";
+import { loadConfig } from "./config/load-config.js";
+import { startToListenToErrors } from "./listen-to-errors.js";
+import { initializeLogger } from "./logger.js";
+import { startLibp2pRelay } from "./start-libp2p-relay.js";
 
-config({ path: [".env.local", ".env"] });
+const { config, sourcePath } = loadConfig();
+const { libp2p, logging } = config;
 
-const port = Number.parseInt(process.env.PORT ?? "8080", 10);
-const hostname = process.env.VITE_SIGNALING_HOSTNAME ?? "0.0.0.0";
+const logger = initializeLogger(logging);
+startToListenToErrors(logger);
 
-new SignalingServer(port, hostname);
+if (sourcePath) {
+  logger.info({ configPath: sourcePath }, "Configuration loaded");
+} else {
+  logger.warn(
+    { searchDirectory: process.cwd() },
+    "No configuration file found; using defaults",
+  );
+}
+
+try {
+  startLibp2pRelay({
+    announceMultiaddrs: libp2p.announceMultiaddrs,
+    listenMultiaddrs: libp2p.listenMultiaddrs,
+  });
+} catch (error) {
+  logger.error({ error }, "Failed to start libp2p relay");
+}

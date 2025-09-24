@@ -1,6 +1,8 @@
 import { TextArea } from "@radix-ui/themes";
 import type React from "react";
 import { FiEye } from "react-icons/fi";
+import { BoxErrorAlert } from "@/components/Box/components/BoxErrorAlert";
+import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { ContentCard } from "@/components/layout";
 import { useJoinBoxStore } from "@/stores";
 import { Alert } from "@/ui/Alert";
@@ -15,7 +17,6 @@ import { FieldArea } from "../../../components/FieldArea";
 import { ParticipantItem } from "../../../components/ParticipantItem";
 import { LeaveLobbyButton } from "../commons/components";
 import { BoxJoinContentForOKSkeleton } from "./BoxJoinContentForOKSkeleton";
-import { useConnectionTimeout } from "./useConnectionTimeout";
 import { useJoinBoxConnection } from "./useJoinBoxConnection";
 
 export const JoinBox: React.FC = () => {
@@ -54,20 +55,25 @@ const JoinBoxContent = () => {
     you,
     content,
     connectionToLeaderFailReason,
+    roomToken,
   } = useStoreSlice();
-  useJoinBoxConnection();
-  useConnectionTimeout();
+
+  const { error, isRelayReconnecting } = useJoinBoxConnection({ roomToken });
 
   const blocker = useNavigateAwayBlocker({
     shouldNavigationBeBlocked: () => !connectionToLeaderFailReason,
   });
 
-  const getConnectionErrorMessage = (reason: string) => {
+  const getConnectionErrorMessage = (
+    reason: typeof connectionToLeaderFailReason,
+  ) => {
     switch (reason) {
       case "timeout":
         return "Connection timed out. Please try again.";
       case "not-authorized":
         return "You are not authorized to join this session.";
+      case "peer-connection-failed":
+        return "Connection between you and peer has failed, sorry.";
       default:
         return "Cannot connect to a leader";
     }
@@ -75,6 +81,9 @@ const JoinBoxContent = () => {
 
   return (
     <>
+      {isRelayReconnecting && <RelayReconnectingAlert />}
+      <BoxErrorAlert error={error} />
+      {/*<JoinBoxError error={error} />*/}
       {!leader?.id && connectionToLeaderFailReason && (
         <div className="flex flex-col items-start gap-4">
           <Alert variant="warning" className="self-stretch">
@@ -184,6 +193,7 @@ const useStoreSlice = () => {
   const threshold = useJoinBoxStore((state) => state.threshold);
   const otherKeyholders = useJoinBoxStore((state) => state.otherKeyHolders);
   const content = useJoinBoxStore((state) => state.content);
+  const roomToken = useJoinBoxStore((state) => state.roomToken);
   const connectionToLeaderFailReason = useJoinBoxStore(
     (state) => state.connectionToLeaderFailReason,
   );
@@ -196,6 +206,7 @@ const useStoreSlice = () => {
     otherKeyholders,
     content,
     connectionToLeaderFailReason,
+    roomToken,
   };
 };
 

@@ -33,6 +33,7 @@ export type OpenLockedBoxState = {
       keyHolderId: string;
       keyHolders: ParticipantType[];
       keyThreshold: number;
+      roomToken: string;
     }) => void;
     toggleShareAccessKey: (participantId: string, value?: boolean) => void;
     toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) => void;
@@ -45,6 +46,8 @@ export type OpenLockedBoxState = {
     addReceivedKey: (message: { fromKeyHolderId: string; key: string }) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     hasEnoughKeysToUnlock: () => boolean;
+    markAsConnected: () => void;
+    markAsDisconnected: () => void;
   } & LockedBoxStoreCommonPart["actions"];
 } & OpenLockedBoxStateData;
 
@@ -102,6 +105,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         keyHolderId,
         keyHolders,
         keyThreshold,
+        roomToken,
       }) => {
         const you = keyHolders.find((x) => x.id === keyHolderId);
         if (!you)
@@ -125,6 +129,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
           you: {
             ...you,
           },
+          roomToken,
         });
       },
       connectKeyHolder: (keyHolder: ParticipantType) => {
@@ -172,6 +177,18 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         set({
           ...openLockedBoxState,
         }),
+      markAsConnected: () =>
+        set({
+          state: "connected",
+          connected: true,
+          connecting: false,
+        }),
+      markAsDisconnected: () =>
+        set({
+          state: "disconnected",
+          connected: false,
+          connecting: false,
+        }),
       setUnlockingStartDate: (unlockingStartDate: Date | null) =>
         set({ unlockingStartDate }),
       hasEnoughKeysToUnlock: () => {
@@ -189,7 +206,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
 );
 
 if (import.meta.env.DEV === true) {
-  //@ts-ignore
+  //@ts-expect-error
   window.useOpenLockedBoxStore = {
     connectAllOffLineKeyholders: () => {
       const {

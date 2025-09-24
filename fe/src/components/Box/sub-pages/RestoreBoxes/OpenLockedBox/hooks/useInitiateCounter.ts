@@ -25,7 +25,7 @@ export function useInitiateCounter({
       shareAccessKeyMapByKeyHolderId,
     ).reduce(
       (prev, accesses) => {
-        Object.entries(accesses).map(([key, hasShare]) => {
+        Object.entries(accesses).forEach(([key, hasShare]) => {
           if (hasShare === true) {
             prev[key] = (prev[key] ?? 0) + 1;
           }

@@ -54,6 +54,6 @@ export const usePeerToHolderMapRef: UsePeerToHolderMapRef = (() => {
 })();
 
 if (import.meta.env.DEV) {
-  //@ts-ignore
+  //@ts-expect-error
   window.peerIdKeyholderMap = usePeerToHolderMapRef;
 }

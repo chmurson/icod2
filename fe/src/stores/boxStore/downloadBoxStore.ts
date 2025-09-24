@@ -14,7 +14,9 @@ type DownloadBoxFromCreateState = {
     | "content"
     | "encryptedMessage"
     | "generatedKey"
-  >;
+  > & {
+    confirmationBoxesReceivedByKeyHolderId: string[];
+  };
 };
 
 type DownloadBoxFromJoinState = {
@@ -46,6 +48,7 @@ type Actions = {
   fromJoinBox: (payload: { encryptedMessage: string; key: string }) => void;
   reset: () => void;
   clearKeyAndMessage: () => void;
+  addConfirmationBoxReceived: (keyHolderId: string) => void;
 };
 
 const createStoreFn: StateCreator<DownloadBoxStoreStateType & Actions> = (
@@ -75,6 +78,23 @@ const createStoreFn: StateCreator<DownloadBoxStoreStateType & Actions> = (
       });
     }
   },
+  addConfirmationBoxReceived: (keyHolderId: string) => {
+    const state = get();
+    if (state.type !== "fromCreateBox") {
+      return;
+    }
+    const currentList = state.state.confirmationBoxesReceivedByKeyHolderId;
+    if (currentList.includes(keyHolderId)) {
+      return;
+    }
+
+    return set({
+      state: {
+        ...state.state,
+        confirmationBoxesReceivedByKeyHolderId: [...currentList, keyHolderId],
+      },
+    });
+  },
   fromCreateBox: ({
     encryptedMessage,
     key,
@@ -93,6 +113,7 @@ const createStoreFn: StateCreator<DownloadBoxStoreStateType & Actions> = (
         keyHolders: createBoxState.keyHolders,
         threshold: createBoxState.threshold,
         title: createBoxState.title,
+        confirmationBoxesReceivedByKeyHolderId: [],
       },
     });
   },

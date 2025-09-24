@@ -1,4 +1,5 @@
-import { DataChannelMessageRouter } from "@/services/webrtc/DataChannelMessageRouter";
+import type { PeerMessageExchangeProtocol } from "@icod2/protocols";
+import { PeersMessageRouter } from "@/services/libp2p/peers-message-router";
 import { useCreateBoxStore } from "@/stores";
 import {
   isKeyHolderWelcomesLeader,
@@ -6,46 +7,43 @@ import {
   type LeaderWelcomesKeyholder,
 } from "../commons";
 
-export const router = new DataChannelMessageRouter();
+export const router = new PeersMessageRouter<
+  Record<string, unknown>,
+  PeerMessageExchangeProtocol
+>();
 
-router.addHandler(
-  isKeyHolderWelcomesLeader,
-  (localId, message, dataChannelMng) => {
-    const {
-      actions,
-      leader: { id: leaderId },
-    } = useCreateBoxStore.getState();
+router.addHandler(isKeyHolderWelcomesLeader, (localId, message, proto) => {
+  const { actions, roomToken } = useCreateBoxStore.getState();
 
-    if (leaderId.trim() !== message.sessionId.trim()) {
-      dataChannelMng?.sendMessageToSinglePeer(localId, {
-        type: "leader:keyholder-not-athorized",
-      } satisfies LeaderNotAuthorizedKeyholder);
+  if (roomToken !== message.roomToken.trim()) {
+    proto.sendMessageToPeer(localId, {
+      type: "leader:keyholder-not-athorized",
+    } satisfies LeaderNotAuthorizedKeyholder);
 
-      dataChannelMng?.disconnectPeer(localId);
+    // dataChannelMng?.disconnectPeer(localId);
 
-      return;
-    }
+    return;
+  }
 
-    actions.connectParticipant({
-      id: localId,
-      name: message.name,
-      userAgent: message.userAgent,
-    });
+  actions.connectParticipant({
+    id: localId,
+    name: message.name,
+    userAgent: message.userAgent,
+  });
 
-    const state = useCreateBoxStore.getState();
+  const state = useCreateBoxStore.getState();
 
-    dataChannelMng?.sendMessageToSinglePeer(localId, {
-      boxInfo: {
-        keyHolderThreshold: state.threshold,
-        name: state.title,
-      },
-      leaderInfo: {
-        id: state.leader.id,
-        name: state.leader.name,
-        userAgent: state.leader.userAgent,
-      },
-      keyHolderId: localId,
-      type: "leader:welcome-keyholder",
-    } satisfies LeaderWelcomesKeyholder);
-  },
-);
+  proto.sendMessageToPeer(localId, {
+    boxInfo: {
+      keyHolderThreshold: state.threshold,
+      name: state.title,
+    },
+    leaderInfo: {
+      id: state.leader.id,
+      name: state.leader.name,
+      userAgent: state.leader.userAgent,
+    },
+    keyHolderId: localId,
+    type: "leader:welcome-keyholder",
+  } satisfies LeaderWelcomesKeyholder);
+});

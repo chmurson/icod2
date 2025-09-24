@@ -1,5 +1,5 @@
 import { AlertDialog } from "@radix-ui/themes";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { useBlocker } from "react-router-dom";
 import { Button } from "@/ui/Button";
 import { useTailwindBreakpoints } from "@/utils/useTailwindBreakpoints";
@@ -54,11 +54,13 @@ export const useNavigateAwayBlocker = ({
 }: {
   shouldNavigationBeBlocked: () => boolean;
 }) => {
+  const shouldNavigationBeBlockedRef = useRef(shouldNavigationBeBlocked);
+  shouldNavigationBeBlockedRef.current = shouldNavigationBeBlocked;
   const blocker = useBlocker(shouldNavigationBeBlocked);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (shouldNavigationBeBlocked()) {
+      if (shouldNavigationBeBlockedRef.current()) {
         event.preventDefault();
         event.returnValue = ""; // Required for browser to show prompt
       }
@@ -69,7 +71,7 @@ export const useNavigateAwayBlocker = ({
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [shouldNavigationBeBlocked]);
+  }, []);
 
   return blocker;
 };

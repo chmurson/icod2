@@ -1,22 +1,24 @@
+import type { PeerMessageExchangeProtocol } from "@icod2/protocols";
 import { type RefObject, useEffect, useMemo, useRef } from "react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import type { DataChannelManager } from "@/services/webrtc";
 import { useDataChannelSendMessages } from "../dataChannelSendMessage";
 import { usePartOfCreateBoxStore } from "./usePartOfCreateBoxStore";
 
 export const useKeepKeyHoldersUpdated = (
-  dataChannelManagerRef: RefObject<DataChannelManager | undefined>,
+  peerMessageExchangeRef: RefObject<PeerMessageExchangeProtocol | undefined>,
 ) => {
   const { state } = usePartOfCreateBoxStore();
 
   const { sendKeyholdersUpdate, sendBoxUpdate } = useDataChannelSendMessages({
-    dataChannelManagerRef,
+    peerProtoExchangeRef: peerMessageExchangeRef,
   });
 
   const keyHoldersRef = useRef(state.keyHolders);
   keyHoldersRef.current = state.keyHolders;
 
   useEffect(() => {
+    if (state.keyHolders.length === 0) return;
+
     sendKeyholdersUpdate(state.keyHolders);
   }, [state.keyHolders, sendKeyholdersUpdate]);
 

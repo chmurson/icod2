@@ -15,9 +15,12 @@ import {
 import { Text } from "@/ui/Typography";
 import { LeaveLobbyButton } from "../commons/components";
 import { useDownloadLockedBox, useDownloadLockedBoxState } from "./hooks";
+import { useConnection } from "./useConnection";
 
 export const DownloadLockedBox: React.FC = () => {
+  useConnection();
   const downloadLockedBoxState = useDownloadLockedBoxState();
+
   const clearKeyAndMessage = useDownloadBoxStore(
     (state) => state.clearKeyAndMessage,
   );

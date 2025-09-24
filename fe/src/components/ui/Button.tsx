@@ -21,13 +21,13 @@ const buttonVariantToProps: Record<
   Pick<RadixButtonProps, "color" | "size" | "variant" | "className">
 > = {
   prominent: {
-    color: "plum",
+    color: "violet",
     size: "3",
     variant: "solid",
     className: "py-4 px-8",
   },
-  primary: { color: "plum", size: "2", variant: "solid" },
-  secondary: { color: "plum", size: "2", variant: "outline" },
+  primary: { color: "violet", size: "2", variant: "solid" },
+  secondary: { color: "violet", size: "2", variant: "outline" },
   "alt-primary": { color: "indigo", size: "2", variant: "solid" },
 };
 
