@@ -108,7 +108,7 @@ export const CreateBoxContent: FC = () => {
 
   return (
     <>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 max-w-2xl w-full">
         {context.isRelayReconnecting && <RelayReconnectingAlert />}
         <BoxErrorAlert error={context.error} onRetryRoomRegistration={retry} />
         <FieldArea label="Invite URL">
