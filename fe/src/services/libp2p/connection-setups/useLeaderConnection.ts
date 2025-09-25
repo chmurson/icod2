@@ -1,5 +1,5 @@
 import type { Libp2p } from "@libp2p/interface";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { ErrorTypes } from "@/components/Box/sub-pages/RestoreBoxes/OpenLockedBox/useOpenLockedBoxConnection";
 import { ConnectedPeerStorage } from "../connected-peer-storage";
 import type { RoomTokenProvider } from "../room-token-provider";
