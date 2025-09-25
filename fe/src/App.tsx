@@ -8,7 +8,6 @@ import {
 } from "react-router-dom";
 import Welcome from "./components/Box/sub-pages/Welcome";
 import { MainLayout } from "./components/layout/MainLayout";
-import "./utils/devExpSettings";
 
 const LazyUnlockBox = lazy(
   () => import("./components/Box/sub-pages/RestoreBoxes/LockedBox"),

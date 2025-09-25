@@ -30,7 +30,6 @@ class LoggerGate {
     this.isNode = typeof window === "undefined";
     if (!this.isNode) {
       this.loadConfig();
-      this.attachToWindow();
     } else {
       this.showNodeInitialization();
     }
@@ -44,15 +43,6 @@ class LoggerGate {
       }
     } catch (error) {
       console.error("Failed to load logger config:", error);
-    }
-  }
-
-  private saveConfig(): void {
-    if (this.isNode) return;
-    try {
-      localStorage.setItem(LoggerGate.STORAGE_KEY, JSON.stringify(this.config));
-    } catch (error) {
-      console.error("Failed to save logger config:", error);
     }
   }
 
@@ -74,17 +64,14 @@ class LoggerGate {
 
   enable(): void {
     this.config.enabled = true;
-    this.saveConfig();
   }
 
   disable(): void {
     this.config.enabled = false;
-    this.saveConfig();
   }
 
   toggle(): boolean {
     this.config.enabled = !this.config.enabled;
-    this.saveConfig();
     return this.config.enabled;
   }
 
@@ -117,7 +104,6 @@ class LoggerGate {
         error: true,
       };
     }
-    this.saveConfig();
   }
 
   getConfig(): LoggerConfig {
@@ -126,7 +112,6 @@ class LoggerGate {
 
   setConfig(config: Partial<LoggerConfig>): void {
     this.config = { ...this.config, ...config };
-    this.saveConfig();
   }
 
   reset(): void {
@@ -140,23 +125,6 @@ class LoggerGate {
       prefix: "",
       timestamp: false,
     };
-    this.saveConfig();
-  }
-
-  // Public methods for Node.js usage
-  public showHelp(): void {
-    console.log("Logger Gate Help");
-    console.log("================");
-    console.log("Available methods:");
-    console.log(
-      "  loggerGate.setLevel(level)  - Enable set logging level to ('log', 'warn', 'error') or 'none' to disable all",
-    );
-    console.log("  loggerGate.status()            - Show current status");
-    console.log("  loggerGate.showHelp()          - Show this help");
-    if (!this.isNode) {
-      console.log("");
-      console.log("Configuration is persisted in localStorage");
-    }
   }
 
   public showStatusIfDev(): void {
@@ -186,19 +154,6 @@ class LoggerGate {
     console.log(
       `Logger Gate Status: ${config.enabled ? "ENABLED" : "DISABLED"} | Active level: ${enabledLevel || "none"}`,
     );
-  }
-
-  private attachToWindow(): void {
-    if (typeof window !== "undefined") {
-      // biome-ignore lint/suspicious/noExplicitAny: Please, let me
-      (window as any).logger = {
-        enable: () => this.enable(),
-        disable: () => this.disable(),
-        toggle: () => this.toggle(),
-        status: () => this.status(),
-        help: () => this.showHelp(),
-      };
-    }
   }
 
   status(): void {
