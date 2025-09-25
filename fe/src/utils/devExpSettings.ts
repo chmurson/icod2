@@ -6,6 +6,7 @@ const ICOD2_DEV_COUNT_DOWN_OVERRIDE_STORAGAE_KEY =
 const ICOD2_DEV_TOP_NAV_TOOLS_STORAGAE_KEY = "ICOD2_DEV_TOP_NAV_TOOLS";
 const ICOD2_DEV_BOOTSTRAP_MULTIADDR_LOCAL_STORAGAE_KEY =
   "ICOD2_DEV_BOOTSTRAP_MULTIADDR";
+const ICOD2_DEV_LOGGER_STORAGAE_KEY = "ICOD2_DEV_LOGGER";
 
 window.icod2Dev = {
   clear: () => {
@@ -92,6 +93,24 @@ window.icod2Dev = {
       return Number.isNaN(parsedValue) ? undefined : parsedValue;
     },
   },
+  loggerLevel: {
+    set: (value: string | undefined) => {
+      if (value === undefined) {
+        localStorage.removeItem(ICOD2_DEV_LOGGER_STORAGAE_KEY);
+        return;
+      }
+      const possibleValues = ["log", "warn", "error", "none"];
+      if (!possibleValues.includes(value)) {
+        console.error(`Invalid logger level: ${value}`);
+        return;
+      }
+      localStorage.setItem(ICOD2_DEV_LOGGER_STORAGAE_KEY, value);
+    },
+    get: () => {
+      const value = localStorage.getItem(ICOD2_DEV_LOGGER_STORAGAE_KEY);
+      return value;
+    },
+  },
   topNavTools: {
     set: (box: boolean) => {
       localStorage.setItem(
@@ -111,6 +130,7 @@ function printStatus() {
   const countDownOverride = window.icod2Dev.countDownOverride.get();
   const topNavTools = window.icod2Dev.topNavTools.get();
   const bootstrapMultiaddr = window.icod2Dev.bootstrapMultiaddr.get();
+  const loggerLevel = window.icod2Dev.loggerLevel.get();
 
   if (lockedBoxAutoLoad) {
     console.log("[icod2Dev] Locked Box Auto Load:", lockedBoxAutoLoad);
@@ -123,6 +143,9 @@ function printStatus() {
   }
   if (bootstrapMultiaddr) {
     console.log("[icod2Dev] Bootstrap Multiaddr:", bootstrapMultiaddr);
+  }
+  if (loggerLevel) {
+    console.log("[icod2Dev] Logger Level:", loggerLevel);
   }
 }
 
@@ -145,6 +168,10 @@ interface Icod2Dev {
   bootstrapMultiaddr: {
     set: (multiaddr: string) => void;
     get: () => string[] | undefined;
+  };
+  loggerLevel: {
+    set: (level: string) => void;
+    get: () => string | null;
   };
 }
 
