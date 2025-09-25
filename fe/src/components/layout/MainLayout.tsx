@@ -23,7 +23,7 @@ export const MainLayout: FC<PropsWithChildren> = ({ children }) => {
       <div className="mx-auto max-sm:h-42 h-64 min-[1640px]:h-80 w-full bg-gradient-to-r from-[#311750] to-[#55aee0]">
         <HeaderImage />
       </div>
-      <div className="max-w-[1640px] mx-auto">
+      <div className="w-full">
         <ContentCard>{children}</ContentCard>
       </div>
     </div>
@@ -45,7 +45,7 @@ export const ContentCard: ContentCardComponent = ({ children }) => {
 
   return (
     <ContentCardContext.Provider value={contextValue}>
-      <div className="mx-auto max-w-5xl py-12">
+      <div className="mx-auto max-w-5xl py-12 w-auto">
         <Card className="mx-4 px-4 -mt-32 mb-4 min-h-96 box-border max-sm:px-0">
           <div className="p-6 px-24 max-md:px-8">{children}</div>
         </Card>
