@@ -1,19 +1,30 @@
 import { Theme } from "@radix-ui/themes";
-import { type FC, useEffect, useState } from "react";
+import { type FC, lazy, useEffect, useState } from "react";
 import {
   createBrowserRouter,
   Link,
   Outlet,
   RouterProvider,
 } from "react-router-dom";
-import { RootLockBox } from "./components/Box/sub-pages/CreationBoxes";
-import LockedBox from "./components/Box/sub-pages/RestoreBoxes/LockedBox";
 import Welcome from "./components/Box/sub-pages/Welcome";
-import ComponentsDemo from "./components/ComponentsDemo";
-import CryptoPlayground from "./components/CryptoPlayground";
-import DecodePlayground from "./components/DecodePlayground";
 import { MainLayout } from "./components/layout/MainLayout";
 import "./utils/devExpSettings";
+
+const LazyUnlockBox = lazy(
+  () => import("./components/Box/sub-pages/RestoreBoxes/LockedBox"),
+);
+const LazyLockBox = lazy(() =>
+  import("./components/Box/sub-pages/CreationBoxes").then((mod) => ({
+    default: mod.RootLockBox,
+  })),
+);
+const LazyComponentsDemo = lazy(() => import("./components/ComponentsDemo"));
+const LazyCryptoPlayground = lazy(
+  () => import("./components/CryptoPlayground"),
+);
+const LazyDecodePlayground = lazy(
+  () => import("./components/DecodePlayground"),
+);
 
 function useSystemTheme() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -73,23 +84,23 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/crypto-poc",
-        Component: CryptoPlayground,
+        Component: LazyCryptoPlayground,
       },
       {
         path: "/components-demo",
-        Component: ComponentsDemo,
+        Component: LazyComponentsDemo,
       },
       {
         path: "/decode-poc",
-        Component: DecodePlayground,
+        Component: LazyDecodePlayground,
       },
       {
         path: "/unlock-box/:roomToken?",
-        Component: LockedBox,
+        Component: LazyUnlockBox,
       },
       {
         path: "/lock-box/:roomToken?",
-        Component: RootLockBox,
+        Component: LazyLockBox,
       },
       {
         path: "/",

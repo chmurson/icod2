@@ -2,7 +2,9 @@ import { useCallback, useState } from "react";
 import z from "zod";
 
 export const useValidateBoxForm = () => {
-  const [errors, setErrors] = useState<z.ZodError | null>(null);
+  const [errors, setErrors] = useState<z.ZodError<CreateBoxSchema> | null>(
+    null,
+  );
 
   const validate = useCallback((partialStateUpdate: CreateBoxSchema) => {
     setErrors(null);
@@ -20,7 +22,7 @@ export const useValidateBoxForm = () => {
   }, []);
 
   const getError = (fieldName: keyof CreateBoxSchema) => {
-    return errors?.errors.find((e) => e.path[0] === fieldName)?.message;
+    return errors?.issues.find((issue) => issue.path[0] === fieldName)?.message;
   };
 
   return {
