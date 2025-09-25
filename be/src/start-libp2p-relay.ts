@@ -1,4 +1,4 @@
-import { gossipsub } from "@chainsafe/libp2p-gossipsub";
+import { type GossipSub, gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
 import { initRoomRegistrationProtocol, shortenPeerId } from "@icod2/protocols";
@@ -11,7 +11,7 @@ import { tcp } from "@libp2p/tcp";
 import { webSockets } from "@libp2p/websockets";
 import { createLibp2p } from "libp2p";
 import { getLogger } from "./logger.js";
-import { starRoomRegistrationServiceStart } from "./services/room-registration.js";
+import { starRoomRegistrationServiceStart as startRoomRegistrationServiceStart } from "./services/room-registration.js";
 import { debounce } from "./utils/debounce.js";
 import { getPeerIdFromEnv } from "./utils/get-or-create-peer-id.js";
 
@@ -40,11 +40,17 @@ export async function startLibp2pRelay({
       identify: identify(),
       autoNat: autoNAT(),
       relay: circuitRelayServer(),
-      pubsub: gossipsub(),
+      // biome-ignore lint/suspicious/noExplicitAny: migration 2 -> 3 of libp2p
+      pubsub: gossipsub() as any,
     },
   });
 
-  const roomRegistration = starRoomRegistrationServiceStart(libp2p);
+  const roomRegistration = startRoomRegistrationServiceStart(
+    libp2p.services.pubsub as {
+      subscribe: (topic: string) => Promise<void>;
+      unsubscribe: (topic: string) => Promise<void>;
+    },
+  );
 
   const peerId = libp2p.peerId.toString();
   const multiaddrs = libp2p.getMultiaddrs();
@@ -98,7 +104,7 @@ export async function startLibp2pRelay({
       }
       const { createPeerConnection } = roomRegistrationProt;
       const { sendResponse, close } = await createPeerConnection(peerId);
-      await sendResponse({
+      sendResponse({
         roomName,
         type: "register-room-response-success",
       } satisfies Responses["registerRoomSuccess"]);
@@ -109,7 +115,7 @@ export async function startLibp2pRelay({
       roomRegistration.removePeerAndUnregisterRoomInNeeded(peerId);
       const { createPeerConnection } = roomRegistrationProt;
       const { sendResponse, close } = await createPeerConnection(peerId);
-      await sendResponse({
+      sendResponse({
         roomName,
         type: "unregister-room-response-success",
       } satisfies Responses["unregisterRoomSuccess"]);
@@ -167,9 +173,12 @@ export async function startLibp2pRelay({
     "Relay listening on multiaddrs",
   );
 
-  libp2p.services.pubsub.addEventListener("subscription-change", () => {
-    debouncePrintRoomStats();
-  });
+  (libp2p.services.pubsub as GossipSub).addEventListener(
+    "gossipsub:graft",
+    () => {
+      debouncePrintRoomStats();
+    },
+  );
 
   function printRoomStats() {
     const stats = getRoomStats();
@@ -182,7 +191,7 @@ export async function startLibp2pRelay({
     const rooms = Array.from(roomRegistration.registeredRooms.values());
 
     return rooms.reduce<Record<string, string[]>>((acc, room) => {
-      const subscribers = libp2p.services.pubsub
+      const subscribers = (libp2p.services.pubsub as GossipSub)
         .getSubscribers(room)
         .map((peerId) => shortenPeerId(peerId.toString()));
 

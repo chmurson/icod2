@@ -71,10 +71,11 @@ async function createLibp2pService({
       pubsubPeerDiscovery({
         interval: 10_000,
         topics: [roomToken],
-      }),
+      }) as any,
     ],
     services: {
-      pubsub: gossipsub(),
+      // biome-ignore lint/suspicious/noExplicitAny: migration 2 -> 3 of libp2p
+      pubsub: gossipsub() as any,
       identify: identify(),
     },
   });

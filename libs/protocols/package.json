@@ -14,9 +14,9 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@libp2p/peer-id": "^5.1.9",
+    "@libp2p/peer-id": "^6.0.1",
     "it-byte-stream": "^2.0.3",
-    "libp2p": "^2.10.0",
+    "libp2p": "^3.0.2",
     "typescript": "^5.9.2",
     "uint8arrays": "^5.1.0",
     "zod": "^4.1.11"

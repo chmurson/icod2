@@ -1,9 +1,7 @@
-import type { GossipsubEvents } from "@chainsafe/libp2p-gossipsub";
-import type { Libp2p, PubSub } from "@libp2p/interface";
-
-export const starRoomRegistrationServiceStart = (
-  libp2p: Libp2p<{ pubsub: PubSub<GossipsubEvents> }>,
-) => {
+export const starRoomRegistrationServiceStart = (pubsub: {
+  subscribe: (topic: string) => Promise<void>;
+  unsubscribe: (topic: string) => Promise<void>;
+}) => {
   const registeredRooms = new Set<string>();
   const peerIdToRoomTokens = new Map<string, Set<string>>();
 
@@ -21,7 +19,7 @@ export const starRoomRegistrationServiceStart = (
       peerRoomTokens.add(roomToken);
       peerIdToRoomTokens.set(peerId, peerRoomTokens);
       registeredRooms.add(roomToken);
-      libp2p.services.pubsub.subscribe(roomToken);
+      pubsub.subscribe(roomToken);
     },
 
     unregisterRoom(roomToken: string, peerId: string) {
@@ -35,7 +33,7 @@ export const starRoomRegistrationServiceStart = (
       }
 
       registeredRooms.delete(roomToken);
-      libp2p.services.pubsub.unsubscribe(roomToken);
+      pubsub.unsubscribe(roomToken);
     },
 
     removePeerAndUnregisterRoomInNeeded(peerId: string) {
@@ -52,7 +50,7 @@ export const starRoomRegistrationServiceStart = (
 
       roomTotensToUnregister.forEach((roomToken) => {
         registeredRooms.delete(roomToken);
-        libp2p.services.pubsub.unsubscribe(roomToken);
+        pubsub.unsubscribe(roomToken);
       });
     },
     registeredRooms,

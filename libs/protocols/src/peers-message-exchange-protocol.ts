@@ -15,7 +15,7 @@ export type PeerMessageListener<BasicPayload extends PeerMessagePayload> = (
 const DEFAULT_PROTOCOL_ID = "/icod2/peer-message-exchange/1.0.0";
 
 type PeerChannel<TPayload extends PeerMessagePayload> = {
-  send: (payload: TPayload) => Promise<void>;
+  send: (payload: TPayload) => void;
   close: () => void;
 };
 
@@ -122,7 +122,7 @@ export class PeerMessageExchangeProtocol<
     }
 
     const libp2p = this.requireLibp2p();
-    const { sendJson, getStream } = await attachOngoingStream(
+    const { sendJson, dispose } = await attachOngoingStream(
       this.protocolId,
       libp2p,
       peerId,
@@ -143,7 +143,7 @@ export class PeerMessageExchangeProtocol<
     const peerChannel: PeerChannel<TPeerMessagePayload> = {
       send: (payload) => sendJson(payload),
       close: () => {
-        getStream().close();
+        dispose();
         this.channels.delete(peerId);
       },
     };

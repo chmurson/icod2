@@ -68,7 +68,7 @@ export function initRoomRegistrationProtocol(
   const createPeerConnection = async (peerIdStr: string) => {
     const peerManager = new RequestResponseManager<Record<string, unknown>>();
 
-    const { sendJson, getStream } = await attachOngoingStream(
+    const { sendJson, dispose } = await attachOngoingStream(
       ROOM_REGISTRATION_PROTOCOL,
       libp2p,
       peerIdStr,
@@ -89,7 +89,7 @@ export function initRoomRegistrationProtocol(
       close: () => {
         peerManager.clearPendingRequests();
         peerManagers.delete(peerIdStr);
-        getStream().close();
+        dispose();
       },
       sendResponse: (message: Responses[keyof Responses]) => {
         return sendJson(message);
@@ -121,8 +121,8 @@ export function initRoomRegistrationProtocol(
     };
   };
 
-  const start = (): Promise<void> => {
-    return registerProtoHandle(
+  const start = async (): Promise<void> => {
+    await registerProtoHandle(
       ROOM_REGISTRATION_PROTOCOL,
       libp2p,
       (message, peerId) => {
