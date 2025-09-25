@@ -50,17 +50,6 @@ export class RoomRegistrationService {
     this.callbacks = callback;
   }
 
-  retry(): void {
-    if (!this.libp2p) {
-      this.callbacks.onError?.("room-registration-invalid-state");
-      return;
-    }
-
-    if (this.relayPeerId) {
-      this.registerWithRelay(this.relayPeerId);
-    }
-  }
-
   private setupPeerListeners(): void {
     const onPeerAdded = this.connectedPeersStorage.addListener(
       "peer-added",
@@ -93,12 +82,12 @@ export class RoomRegistrationService {
     this.roomRegistrationProtocol = initRoomRegistrationProtocol(this.libp2p);
     this.registrationAbortController = new AbortController();
 
-    this.startTimeout();
     this.roomRegistrationProtocol.start();
   }
 
   private async registerWithRelay(peerId: string): Promise<void> {
     try {
+      this.startTimeout();
       await this.performRegistration(peerId);
     } catch (e) {
       if (!this.registrationAbortController?.signal.aborted) {
@@ -118,7 +107,7 @@ export class RoomRegistrationService {
       await this.roomRegistrationProtocol.createPeerConnection(peerId);
     if (signal?.aborted) return;
 
-    const roomToken = await this.roomTokenProvider.getRoomToken();
+    const roomToken = this.roomTokenProvider.getRoomToken();
     if (signal?.aborted || !roomToken) return;
 
     await connection.operations.registerRoom(roomToken);

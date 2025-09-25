@@ -54,12 +54,7 @@ export function useRoomRegistration({
     serviceRef.current?.initialize(libp2p);
   }, []);
 
-  const retry = useCallback(() => {
-    serviceRef.current?.retry();
-  }, []);
-
   return {
     initialize,
-    retry,
   };
 }

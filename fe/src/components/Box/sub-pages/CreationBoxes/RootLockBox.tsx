@@ -9,6 +9,7 @@ import {
   useDownloadBoxStore,
   useJoinBoxStore,
 } from "@/stores";
+import { Retry } from "@/ui/index";
 import { CreateBox } from "./CreateBox";
 import { CreateBoxConnectionProvider } from "./CreateBoxConnectionProvider";
 import { DownloadLockedBox } from "./DownloadLockedBox";
@@ -27,10 +28,12 @@ export const RootLockBox = () => {
       case "create":
       case "download-create":
         return (
-          <CreateBoxConnectionProvider>
-            {currentPage === "create" && <CreateBox />}
-            {currentPage === "download-create" && <DownloadLockedBox />}
-          </CreateBoxConnectionProvider>
+          <Retry>
+            <CreateBoxConnectionProvider>
+              {currentPage === "create" && <CreateBox />}
+              {currentPage === "download-create" && <DownloadLockedBox />}
+            </CreateBoxConnectionProvider>
+          </Retry>
         );
       case "join":
         return <JoinBox />;

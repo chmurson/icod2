@@ -23,7 +23,7 @@ export const MainLayout: FC<PropsWithChildren> = ({ children }) => {
       <div className="mx-auto max-sm:h-42 h-64 min-[1640px]:h-80 w-full bg-gradient-to-r from-[#311750] to-[#55aee0]">
         <HeaderImage />
       </div>
-      <div className="h-full min-h-dvh max-w-[1640px] mx-auto">
+      <div className="max-w-[1640px] mx-auto">
         <ContentCard>{children}</ContentCard>
       </div>
     </div>

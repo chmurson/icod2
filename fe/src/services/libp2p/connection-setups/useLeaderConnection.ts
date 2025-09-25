@@ -72,7 +72,6 @@ export const useLeaderConnection = ({
     roomRegistered,
     routerMng,
     error,
-    retryRoomRegistration: roomRegistrationObject.retry,
     isRelayReconnecting,
     messageProto,
     peerId: libp2p.current?.peerId.toString(),
