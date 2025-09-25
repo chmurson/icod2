@@ -9,7 +9,7 @@ import { useShareablURLWithRoomToken } from "@/hooks/useShareableURL";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type { ParticipantType } from "@/stores/boxStore/common-types";
 import ErrorBoundary from "@/ui/ErrorBoundry";
-import { Alert, Button } from "@/ui/index";
+import { Alert, Button, Retry, useRetry } from "@/ui/index";
 import { FieldArea } from "../../../components/FieldArea";
 import {
   LoobbyKeyHolders,
@@ -47,26 +47,24 @@ export const OpenLockedBox: FC = () => {
           </div>
         )}
       >
-        <OpenLockedBoxContent />
+        <Retry>
+          <OpenLockedBoxContent />
+        </Retry>
       </ErrorBoundary>
     </div>
   );
 };
 
 export const OpenLockedBoxContent: FC = () => {
+  const { retry } = useRetry();
   const roomToken = useOpenLockedBoxStore((state) => state.roomToken);
   const shareableURL = useShareablURLWithRoomToken({
     roomToken: roomToken,
     url: "/unlock-box/:roomToken",
   });
 
-  const {
-    messageProto,
-    routerMng,
-    error,
-    isRelayReconnecting,
-    retryRoomRegistration,
-  } = useOpenLockedBoxConnection({ roomToken });
+  const { messageProto, routerMng, error, isRelayReconnecting } =
+    useOpenLockedBoxConnection({ roomToken });
 
   useEffect(() => {
     routerMng.addRouter("open-locked-box", router.router);
@@ -131,12 +129,7 @@ export const OpenLockedBoxContent: FC = () => {
   return (
     <div className="flex flex-col gap-8">
       {isRelayReconnecting && <RelayReconnectingAlert />}
-      {error && (
-        <BoxErrorAlert
-          error={error}
-          onRetryRoomRegistration={retryRoomRegistration}
-        />
-      )}
+      {error && <BoxErrorAlert error={error} onRetryRoomRegistration={retry} />}
       <TopLobbySection useStoreHook={useOpenLockedBoxStore} />
       <div className="flex flex-col gap-4 py-4">
         {shareableURL && (

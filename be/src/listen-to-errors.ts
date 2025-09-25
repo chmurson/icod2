@@ -3,7 +3,15 @@ import type { Logger } from "./logger";
 export function startToListenToErrors(logger: Logger) {
   process.on("unhandledRejection", (reason, promise) => {
     // Extract more detailed error information
-    const errorInfo: any = {
+    const errorInfo: {
+      promise: string;
+      error?: {
+        name: string;
+        message: string;
+        stack?: string;
+      };
+      reason?: unknown;
+    } = {
       promise: promise.toString(),
     };
 

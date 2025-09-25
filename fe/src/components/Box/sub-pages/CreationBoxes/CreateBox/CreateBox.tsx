@@ -4,6 +4,7 @@ import { BoxErrorAlert } from "@/components/Box/components/BoxErrorAlert";
 import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { SharePreviewButton } from "@/components/Box/components/SharePreviewButton";
 import { ContentCard } from "@/components/layout";
+import { useRetry } from "@/components/ui";
 import { useShareablURLWithRoomToken } from "@/hooks/useShareableURL";
 import { useCreateBoxStore, useDownloadBoxStore } from "@/stores";
 import { Alert } from "@/ui/Alert";
@@ -28,34 +29,33 @@ import {
   usePartOfCreateBoxStore,
 } from "./hooks";
 
-export const CreateBox = () => {
-  return (
-    <div className="flex flex-col gap-6">
-      <Text variant="pageTitle" className="mt-4">
-        Create a box
-      </Text>
-      <ErrorBoundary
-        fallback={({ handleRetry, isRetrying }) => (
-          <div className="flex flex-col gap-4">
-            <Alert variant="error">Something went wrong</Alert>
-            <Button
-              variant="primary"
-              onClick={handleRetry}
-              className="self-start"
-              loading={isRetrying}
-            >
-              Try to connect again
-            </Button>
-          </div>
-        )}
-      >
-        <CreateBoxContent />
-      </ErrorBoundary>
-    </div>
-  );
-};
+export const CreateBox = () => (
+  <div className="flex flex-col gap-6">
+    <Text variant="pageTitle" className="mt-4">
+      Create a box
+    </Text>
+    <ErrorBoundary
+      fallback={({ handleRetry, isRetrying }) => (
+        <div className="flex flex-col gap-4">
+          <Alert variant="error">Something went wrong</Alert>
+          <Button
+            variant="primary"
+            onClick={handleRetry}
+            className="self-start"
+            loading={isRetrying}
+          >
+            Try to connect again
+          </Button>
+        </div>
+      )}
+    >
+      <CreateBoxContent />
+    </ErrorBoundary>
+  </div>
+);
 
 export const CreateBoxContent: FC = () => {
+  const { retry } = useRetry();
   const roomToken = useCreateBoxStore((state) => state.roomToken);
   const shareableURL = useShareablURLWithRoomToken({
     roomToken,
@@ -110,10 +110,7 @@ export const CreateBoxContent: FC = () => {
     <>
       <div className="flex flex-col gap-4">
         {context.isRelayReconnecting && <RelayReconnectingAlert />}
-        <BoxErrorAlert
-          error={context.error}
-          onRetryRoomRegistration={context.retryRoomRegistration}
-        />
+        <BoxErrorAlert error={context.error} onRetryRoomRegistration={retry} />
         <FieldArea label="Invite URL">
           <TextField.Root value={shareableURL} readOnly />
         </FieldArea>

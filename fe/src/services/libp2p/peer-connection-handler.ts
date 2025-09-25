@@ -80,8 +80,20 @@ export const createPeerConnectionHandler = ({
         if (isEnabled("CLOSE_INITITIAL_PEER_CONNECTION_ASAP")) {
           connection.close();
         }
-        connectedPeersStorage.addPeer(discoveredPeerIdStr, {
-          isRelay: isRelayPeerDiscovered,
+        const remotePeerId = connection.remotePeer.toString();
+        const isRemotePeerRelay = relayPeerIds.includes(remotePeerId);
+        const isRelayPeerBasedOnLocalOrRemotePeerId =
+          isRemotePeerRelay || isRelayPeerDiscovered;
+
+        if (remotePeerId !== discoveredPeerIdStr) {
+          loggerGate.canWarn &&
+            console.warn(
+              `Peer ID is different than local one. We are going to use remote peer ID: ${shortenPeerId(remotePeerId)} [${isRelayPeerBasedOnLocalOrRemotePeerId ? "Relay Peer" : "Non Relay Peer"}]`,
+            );
+        }
+
+        connectedPeersStorage.addPeer(remotePeerId, {
+          isRelay: isRelayPeerBasedOnLocalOrRemotePeerId,
         });
       } catch (err) {
         if (isRelayPeerDiscovered) {

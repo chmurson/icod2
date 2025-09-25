@@ -156,9 +156,14 @@ export class PersistingDialer {
       if (isEnabled("CLOSE_INITITIAL_PEER_CONNECTION_ASAP")) {
         connection.close();
       }
+      const remotePeerId = connection.remotePeer.toString();
       loggerGate.canLog &&
         console.log(`Successfully dialed peer ${shortenPeerId(peerIdStr)}`);
-      this.callAllListeners(peerIdStr);
+      loggerGate.canWarn &&
+        console.warn(
+          `But the remote peer id is different than local one. We are using the remote one which is: ${shortenPeerId(remotePeerId)}`,
+        );
+      this.callAllListeners(remotePeerId);
       this.peersToDial.delete(peerIdStr);
     } catch (error) {
       peerToDial.isCurrentlyDialing = false;

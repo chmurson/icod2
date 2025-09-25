@@ -8,7 +8,6 @@ export function useCreateBoxConnection({ roomToken }: { roomToken: string }) {
     isRelayReconnecting,
     messageProto,
     peerId,
-    retryRoomRegistration,
     roomRegistered,
     routerMng,
     connectedPeersStorageRef,
@@ -34,7 +33,6 @@ export function useCreateBoxConnection({ roomToken }: { roomToken: string }) {
     isRelayReconnecting,
     messageProto,
     peerId,
-    retryRoomRegistration,
     roomRegistered,
     routerMng,
   };

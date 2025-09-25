@@ -26,18 +26,8 @@ export function useOpenLockedBoxConnection({
     peerId,
     roomRegistered,
     routerMng,
-    retryRoomRegistration,
     connectedPeersStorageRef,
   } = useLeaderConnection({ roomToken });
-
-  // specific to this use case below 👇
-  useEffect(() => {
-    if (!error) {
-      return;
-    }
-
-    useOpenLockedBoxStore.getState().actions.markAsDisconnected();
-  }, [error]);
 
   const { peerToKeyHolderMapRef } = usePeerToHolderMapRef();
 
@@ -87,7 +77,6 @@ export function useOpenLockedBoxConnection({
     roomRegistered,
     routerMng,
     error,
-    retryRoomRegistration,
     isRelayReconnecting,
     messageProto,
     peerId,
