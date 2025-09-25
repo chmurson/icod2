@@ -117,8 +117,28 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
       window.debugPrintConnections = () => {
         const peers = libp2pService.getPeers();
         loggerGate.canLog && console.log("Peers:", peers);
-        const x = libp2pService.getConnections();
-        loggerGate.canLog && console.log("Connections:", x);
+        const connections = libp2pService.getConnections();
+        const connectionAddrsStats = connections.reduce(
+          (acc, connection) => {
+            const { remotePeer } = connection;
+            const peerIdStr = remotePeer.toString();
+            const peerObj = acc[peerIdStr] || [];
+            acc[peerIdStr] = peerObj;
+
+            peerObj.push({
+              multiPlexer: connection.multiplexer ?? "unknown",
+              multiaddr: connection.remoteAddr.toString(),
+              status: connection.status,
+            });
+
+            return acc;
+          },
+          {} as Record<
+            string,
+            { multiPlexer: string; multiaddr: string; status: string }[]
+          >,
+        );
+        loggerGate.canLog && console.log("Connections:", connectionAddrsStats);
       };
 
       libp2pServiceRef.current = libp2pService;

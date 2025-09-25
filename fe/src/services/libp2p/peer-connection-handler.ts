@@ -23,25 +23,25 @@ export const createPeerConnectionHandler = ({
   persistingDialer: PersistingDialer;
   onError: (error: ConnectionErrors) => void;
 }) => {
-  const onDialSuccesfully = async (peerIdStr: string) => {
-    loggerGate.canLog &&
-      console.log(`Successfully dialed peer ${shortenPeerId(peerIdStr)}`);
-    const isRelay = relayPeerIds.includes(peerIdStr);
-
-    try {
-      await handShake();
-      connectedPeersStorage.addPeer(peerIdStr, { isRelay });
-    } catch (error) {
-      loggerGate.canError &&
-        console.error(`Handshake failed for peer ${peerIdStr}: ${error}`);
-    }
-  };
-
-  persistingDialer.addOnPeerDialedListener((peerIdStr: string) => {
-    onDialSuccesfully(peerIdStr);
-  });
-
   return function peerConnectionHandler(libp2p: Libp2p) {
+    const onDialSuccesfully = async (peerIdStr: string) => {
+      loggerGate.canLog &&
+        console.log(`Successfully dialed peer ${shortenPeerId(peerIdStr)}`);
+      const isRelay = relayPeerIds.includes(peerIdStr);
+
+      try {
+        await handShake();
+        connectedPeersStorage.addPeer(peerIdStr, { isRelay });
+      } catch (error) {
+        loggerGate.canError &&
+          console.error(`Handshake failed for peer ${peerIdStr}: ${error}`);
+      }
+    };
+
+    persistingDialer.addOnPeerDialedListener((peerIdStr: string) => {
+      onDialSuccesfully(peerIdStr);
+    });
+
     let failedConnectionsToRelayPeersCount = 0;
     libp2p.addEventListener("peer:disconnect", (evt) => {
       const peerIdStr = evt.detail.toString();
@@ -63,10 +63,13 @@ export const createPeerConnectionHandler = ({
         ma.encapsulate(`/p2p/${discoveredPeerIdStr}`),
       );
 
-      const isRelayPeerDiscovered = relayPeerIds.includes(discoveredPeerIdStr);
+      const isRelayPeerBasedOnLocalPeerId =
+        relayPeerIds.includes(discoveredPeerIdStr);
+      let isRelayPeerBasedOnLocalOrRemotePeerId = isRelayPeerBasedOnLocalPeerId;
+
       loggerGate.canLog &&
         console.log(
-          `${isRelayPeerDiscovered ? "Relay" : "Regular"} Peer discovered:`,
+          `${isRelayPeerBasedOnLocalOrRemotePeerId ? "Relay" : "Regular"} Peer discovered:`,
           shortenPeerId(discoveredPeerIdStr),
         );
 
@@ -82,8 +85,8 @@ export const createPeerConnectionHandler = ({
         }
         const remotePeerId = connection.remotePeer.toString();
         const isRemotePeerRelay = relayPeerIds.includes(remotePeerId);
-        const isRelayPeerBasedOnLocalOrRemotePeerId =
-          isRemotePeerRelay || isRelayPeerDiscovered;
+        isRelayPeerBasedOnLocalOrRemotePeerId =
+          isRemotePeerRelay || isRelayPeerBasedOnLocalOrRemotePeerId;
 
         if (remotePeerId !== discoveredPeerIdStr) {
           loggerGate.canWarn &&
@@ -92,11 +95,9 @@ export const createPeerConnectionHandler = ({
             );
         }
 
-        connectedPeersStorage.addPeer(remotePeerId, {
-          isRelay: isRelayPeerBasedOnLocalOrRemotePeerId,
-        });
+        onDialSuccesfully(remotePeerId);
       } catch (err) {
-        if (isRelayPeerDiscovered) {
+        if (isRelayPeerBasedOnLocalOrRemotePeerId) {
           loggerGate.canError &&
             console.error(
               `Failed to dial relay peer (${evt.detail.id.toString()}):`,
