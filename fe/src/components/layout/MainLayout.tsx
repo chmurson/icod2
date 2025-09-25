@@ -19,9 +19,13 @@ const mergeClassNames = (...classes: (string | undefined)[]) => {
 
 export const MainLayout: FC<PropsWithChildren> = ({ children }) => {
   return (
-    <div className="h-full min-h-dvh max-w-[1640px] mx-auto">
-      <HeaderImage />
-      <ContentCard>{children}</ContentCard>
+    <div className="h-full min-h-dvh flex flex-col">
+      <div className="mx-auto max-sm:h-42 h-64 min-[1640px]:h-80 w-full bg-gradient-to-r from-[#311750] to-[#55aee0]">
+        <HeaderImage />
+      </div>
+      <div className="h-full min-h-dvh max-w-[1640px] mx-auto">
+        <ContentCard>{children}</ContentCard>
+      </div>
     </div>
   );
 };
@@ -93,13 +97,13 @@ ContentCard.OutsideSlot = ({ children, asChild = false }) => {
 
 const HeaderImage: FC = () => {
   return (
-    <div className="relative w-full h-64 z-0 overflow-hidden max-sm:h-42">
+    <div className="relative w-full h-full z-0 overflow-hidden max-w-[2264px] mx-auto">
       <div
         className="absolute inset-0 bg-center bg-cover filter blur-xl scale-110"
         style={{ backgroundImage: `url(${headerSmallCropppedUrl})` }}
       />
       <div
-        className="absolute inset-0 bg-center bg-[length:auto_256px] max-sm:bg-cover max-sm:bg-[48%]"
+        className="absolute inset-0 bg-center bg-[length:auto_256px] max-sm:bg-cover max-sm:bg-[48%] min-[1640px]:bg-[length:auto_320px]"
         style={{ backgroundImage: `url(${headerCropppedUrl})` }}
       />
     </div>
