@@ -1,6 +1,6 @@
 import { loggerGate } from "@icod2/protocols";
 import { useCallback, useRef } from "react";
-import type { RouterItem } from "./types";
+import type { RouterItem } from "./../types";
 
 export function useRouterManager<BasicMessagePayload extends object, TProto>() {
   const routersRef = useRef<

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useFollowerConnection } from "@/services/libp2p/connection-setups";
+import { useFollowerConnection } from "@/services/libp2p";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 import { router } from "./dataChannelRouter";

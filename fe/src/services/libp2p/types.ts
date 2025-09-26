@@ -11,3 +11,7 @@ export type BasicProtoInterface<BasicMessagePayload> = {
   ) => Promise<void>;
   sendMessageToAllPeers: (message: BasicMessagePayload) => Promise<void>;
 };
+
+export type RoomTokenProvider = {
+  getRoomToken: () => string;
+};

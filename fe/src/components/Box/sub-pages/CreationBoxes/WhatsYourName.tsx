@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCurrentUserAgent } from "@/hooks/useCurrentUserAgent";
 import { usePersistInLocalStorage } from "@/hooks/usePersistInLocalStorage";
-import { useRoomToken } from "@/services/libp2p/useRoomRegistration";
+import { useRoomToken } from "@/services/libp2p";
 import { useCreateBoxStore, useJoinBoxStore } from "@/stores";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Typography";

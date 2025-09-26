@@ -1,6 +1,6 @@
 import { loggerGate } from "@icod2/protocols";
 import { type RefObject, useCallback } from "react";
-import type { BasicProtoInterface } from "@/services/libp2p/types";
+import type { BasicProtoInterface } from "@/services/libp2p";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import type {
   LeaderError,

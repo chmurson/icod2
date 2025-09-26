@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLeaderConnection } from "@/services/libp2p/connection-setups";
+import { useLeaderConnection } from "@/services/libp2p";
 import { useCreateBoxStore } from "@/stores";
 
 export function useCreateBoxConnection({ roomToken }: { roomToken: string }) {

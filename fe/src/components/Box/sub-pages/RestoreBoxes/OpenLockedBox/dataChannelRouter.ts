@@ -1,5 +1,5 @@
 import { loggerGate, type PeerMessageExchangeProtocol } from "@icod2/protocols";
-import { PeersMessageRouter } from "@/services/libp2p/peers-message-router";
+import { PeersMessageRouter } from "@/services/libp2p";
 import { useOpenLockedBoxStore } from "@/stores/boxStore/openLockedBoxStore";
 import { createKeyholderHelloHash } from "@/utils/createKeyholderHelloHash";
 import type {

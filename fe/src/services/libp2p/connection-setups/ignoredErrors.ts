@@ -1,5 +1,5 @@
 import type { Subset } from "@/utils/types";
-import type { ConnectionErrors } from "../peer-connection-handler";
+import type { ConnectionErrors } from "../core/peer-connection-handler";
 
 export type IgnoredErrors = Subset<
   ConnectionErrors,

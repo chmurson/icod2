@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getBootstrapMultiaddrs } from "../get-bootstrap-multiaddrs";
+import { getBootstrapMultiaddrs } from "../core/get-bootstrap-multiaddrs";
 
 export function useConnectedRelayState() {
   const [relaysConnected, setRelaysConnected] = useState({

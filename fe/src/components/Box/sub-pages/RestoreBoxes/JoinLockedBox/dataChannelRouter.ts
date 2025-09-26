@@ -1,5 +1,5 @@
-import { PeersMessageRouter } from "@/services/libp2p/peers-message-router";
-import type { PeerMessageExchangeProtocol } from "@/services/libp2p/usePeerMessageProto";
+import type { PeerMessageExchangeProtocol } from "@/services/libp2p";
+import { PeersMessageRouter } from "@/services/libp2p";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import {
   isLeaderError,
