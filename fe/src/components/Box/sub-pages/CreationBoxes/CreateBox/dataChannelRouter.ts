@@ -1,5 +1,5 @@
 import type { PeerMessageExchangeProtocol } from "@icod2/protocols";
-import { PeersMessageRouter } from "@/services/libp2p/peers-message-router";
+import { PeersMessageRouter } from "@/services/libp2p";
 import { useCreateBoxStore } from "@/stores";
 import {
   isKeyHolderWelcomesLeader,

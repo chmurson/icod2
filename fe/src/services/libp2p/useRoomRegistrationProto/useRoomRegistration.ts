@@ -2,8 +2,8 @@
 
 import type { Libp2p } from "@libp2p/interface";
 import { useCallback, useEffect, useRef } from "react";
-import type { ConnectedPeerStorage } from "@/services/libp2p/connected-peer-storage";
-import type { RoomTokenProvider } from "@/services/libp2p/room-token-provider";
+import type { RoomTokenProvider } from "@/services/libp2p";
+import type { ConnectedPeerStorage } from "../core/connected-peer-storage";
 import {
   type RoomRegistrationCallbacks,
   type RoomRegistrationErrors,

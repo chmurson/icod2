@@ -1,7 +1,7 @@
 import { initRoomRegistrationProtocol, loggerGate } from "@icod2/protocols";
 import type { Libp2p } from "@libp2p/interface";
-import type { ConnectedPeerStorage } from "@/services/libp2p/connected-peer-storage";
-import type { RoomTokenProvider } from "@/services/libp2p/room-token-provider";
+import type { RoomTokenProvider } from "@/services/libp2p";
+import type { ConnectedPeerStorage } from "../core/connected-peer-storage";
 
 export type RoomRegistrationErrors =
   | "room-registration-unknown-error"

@@ -1,9 +1,9 @@
 import type { Libp2p } from "@libp2p/interface";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { ConnectedPeerStorage } from "../connected-peer-storage";
-import type { ConnectionErrors } from "../peer-connection-handler";
-import type { RoomTokenProvider } from "../room-token-provider";
-import { useRouterManager } from "../use-router-manager";
+import { ConnectedPeerStorage } from "../core/connected-peer-storage";
+import type { ConnectionErrors } from "../core/peer-connection-handler";
+import { useRouterManager } from "../core/use-router-manager";
+import type { RoomTokenProvider } from "../types";
 import { type Libp2pServiceErrors, useLibp2p } from "../useLibp2p/useLibp2p";
 import {
   type PeerMessageExchangeProtocol,

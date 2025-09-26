@@ -1,15 +1,15 @@
 import type { Libp2p } from "@libp2p/interface";
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { ErrorTypes } from "@/components/Box/sub-pages/RestoreBoxes/OpenLockedBox/useOpenLockedBoxConnection";
-import { ConnectedPeerStorage } from "../connected-peer-storage";
-import type { RoomTokenProvider } from "../room-token-provider";
-import { useRouterManager } from "../use-router-manager";
+import { ConnectedPeerStorage } from "../core/connected-peer-storage";
+import { useRouterManager } from "../core/use-router-manager";
+import type { RoomTokenProvider } from "../types";
 import { useLibp2p } from "../useLibp2p/useLibp2p";
 import {
   type PeerMessageExchangeProtocol,
   usePeerMessageProto,
 } from "../usePeerMessageProto";
-import { useRoomRegistration } from "../useRoomRegistration";
+import { useRoomRegistration } from "../useRoomRegistrationProto";
 import { type IgnoredErrors, ignoredErrors } from "./ignoredErrors";
 
 export const useLeaderConnection = ({

@@ -1,8 +1,10 @@
 import { useEffect } from "react";
-import { useLeaderConnection } from "@/services/libp2p/connection-setups";
-import type { ConnectionErrors } from "@/services/libp2p/peer-connection-handler";
-import type { Libp2pServiceErrors } from "@/services/libp2p/useLibp2p/useLibp2p";
-import type { RoomRegistrationErrors } from "@/services/libp2p/useRoomRegistration";
+import type {
+  ConnectionErrors,
+  Libp2pServiceErrors,
+  RoomRegistrationErrors,
+} from "@/services/libp2p";
+import { useLeaderConnection } from "@/services/libp2p";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { usePeerToHolderMapRef } from "../commons";
 import { useOnChangeShareablePartOfState } from "./useSelectiveStatePusher";

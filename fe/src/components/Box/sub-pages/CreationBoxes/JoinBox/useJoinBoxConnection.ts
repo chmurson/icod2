@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { useFollowerConnection } from "@/services/libp2p/connection-setups";
+import { useFollowerConnection } from "@/services/libp2p";
 import { useJoinBoxStore } from "@/stores";
 import type { KeyHolderWelcomesLeader } from "../commons";
 import { router } from "./joinPeerMessageRouter";

@@ -4,16 +4,16 @@ import { useCallback, useEffect, useRef } from "react";
 import {
   ConnectedPeerStorage,
   type IConnectedPeersStorage,
-} from "../../libp2p/connected-peer-storage";
-import { getBootstrapMultiaddrs } from "../../libp2p/get-bootstrap-multiaddrs";
+} from "../core/connected-peer-storage";
+import { getBootstrapMultiaddrs } from "../core/get-bootstrap-multiaddrs";
 import {
   type ConnectionErrors,
   createPeerConnectionHandler,
-} from "../../libp2p/peer-connection-handler";
-import { PersistingDialer } from "../../libp2p/persiting-dialer";
-import type { RoomTokenProvider } from "../../libp2p/room-token-provider";
-import { startLibp2pService } from "../../libp2p/webrtc-libp2p-service";
-import { RelayReconnectDialer } from "../relay-reconnect-dialer";
+} from "../core/peer-connection-handler";
+import { PersistingDialer } from "../core/persiting-dialer";
+import { RelayReconnectDialer } from "../core/relay-reconnect-dialer";
+import { startLibp2pService } from "../core/webrtc-libp2p-service";
+import type { RoomTokenProvider } from "..//types";
 import { useConnectedRelayState } from "./useConnectedRelayState";
 
 export type Libp2pServiceErrors =

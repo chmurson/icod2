@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import {
   clearPersistedRoomToken,
   isPersistedRoomToken,
-} from "@/services/libp2p/useRoomRegistration";
+} from "@/services/libp2p";
 import {
   useCreateBoxStore,
   useDownloadBoxStore,
