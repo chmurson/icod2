@@ -129,13 +129,19 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
               multiPlexer: connection.multiplexer ?? "unknown",
               multiaddr: connection.remoteAddr.toString(),
               status: connection.status,
+              streamsCount: connection.streams.length,
             });
 
             return acc;
           },
           {} as Record<
             string,
-            { multiPlexer: string; multiaddr: string; status: string }[]
+            {
+              multiPlexer: string;
+              multiaddr: string;
+              status: string;
+              streamsCount: number;
+            }[]
           >,
         );
         loggerGate.canLog && console.log("Connections:", connectionAddrsStats);
