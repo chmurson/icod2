@@ -34,6 +34,7 @@ const joinBoxDefaultState = {
     | "not-authorized"
     | "peer-connection-failed"
     | "timeout"
+    | "peer-disconnected"
     | "other"
     | undefined,
 };

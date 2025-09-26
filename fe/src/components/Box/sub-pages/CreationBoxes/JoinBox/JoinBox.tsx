@@ -74,6 +74,8 @@ const JoinBoxContent = () => {
         return "You are not authorized to join this session.";
       case "peer-connection-failed":
         return "Connection between you and peer has failed, sorry.";
+      case "peer-disconnected":
+        return "Leader has disconnected. Trying to connect again.";
       default:
         return "Cannot connect to a leader";
     }
@@ -83,8 +85,7 @@ const JoinBoxContent = () => {
     <>
       {isRelayReconnecting && <RelayReconnectingAlert />}
       <BoxErrorAlert error={error} />
-      {/*<JoinBoxError error={error} />*/}
-      {!leader?.id && connectionToLeaderFailReason && (
+      {connectionToLeaderFailReason && (
         <div className="flex flex-col items-start gap-4">
           <Alert variant="warning" className="self-stretch">
             {getConnectionErrorMessage(connectionToLeaderFailReason)}

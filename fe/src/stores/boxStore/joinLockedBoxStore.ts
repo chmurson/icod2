@@ -183,11 +183,16 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
         set({ unlockingStartDate }),
 
       markAsDisconnected: () =>
-        set({
-          state: "disconnected",
-          connected: false,
-          connecting: false,
-        }),
+        set((state) => ({
+          ...state,
+          state: "connecting",
+          connecting: true,
+          onlineKeyHolders: [],
+          offLineKeyHolders: [
+            ...state.onlineKeyHolders,
+            ...state.offLineKeyHolders,
+          ],
+        })),
       setPartialStateUpdate: (payload: Parameters<SetPartialStateUpdate>[0]) =>
         set((state) => {
           const filteredPayload: Omit<typeof payload, "unlockingStartDate"> & {
