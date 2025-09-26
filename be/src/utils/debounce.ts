@@ -1,4 +1,5 @@
-export function debounce<T extends (...args: unknown[]) => void>(
+// biome-ignore lint/suspicious/noExplicitAny: This is a generic debounce function, so it needs to be able to accept any arguments.
+export function debounce<T extends (...args: any[]) => void>(
   func: T,
   delay: number,
 ): (...args: Parameters<T>) => void {

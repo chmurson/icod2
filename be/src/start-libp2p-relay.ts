@@ -6,7 +6,7 @@ import type { Responses } from "@icod2/protocols/dist/room-registration-protocol
 import { autoNAT } from "@libp2p/autonat";
 import { circuitRelayServer } from "@libp2p/circuit-relay-v2";
 import { identify } from "@libp2p/identify";
-import type { PeerId } from "@libp2p/interface";
+import type { Libp2p, PeerId } from "@libp2p/interface";
 import { tcp } from "@libp2p/tcp";
 import { webSockets } from "@libp2p/websockets";
 import { createLibp2p } from "libp2p";
@@ -49,6 +49,17 @@ export async function startLibp2pRelay({
   const peerId = libp2p.peerId.toString();
   const multiaddrs = libp2p.getMultiaddrs();
 
+  logger.info(
+    { peerId, shortPeerId: shortenPeerId(peerId) },
+    "Relay peer ready",
+  );
+  logger.info(
+    {
+      multiaddrs: multiaddrs.map((ma) => ma.toString()),
+    },
+    "Relay listening on multiaddrs",
+  );
+
   libp2p.addEventListener("connection:open", (event) => {
     const { id, remotePeer } = event.detail;
     logger.info(
@@ -56,6 +67,7 @@ export async function startLibp2pRelay({
         connectionId: id,
         remotePeer: shortenPeerId(remotePeer.toString()),
         roomStats: getRoomStats(),
+        connections: getConnectionStats(libp2p, remotePeer.toString()),
       },
       "Connection opened",
     );
@@ -68,6 +80,7 @@ export async function startLibp2pRelay({
         connectionId: id,
         remotePeer: shortenPeerId(remotePeer.toString()),
         roomStats: getRoomStats(),
+        connections: getConnectionStats(libp2p, remotePeer.toString()),
       },
       "Connection closed",
     );
@@ -134,7 +147,7 @@ export async function startLibp2pRelay({
     logger.info(
       {
         peerId: shortenPeerId(peerIdStr),
-        connectedPeers: formatConnectedPeers(connectedPeers),
+        connections: getConnectionStats(libp2p, peerIdStr),
         registeredRooms: Array.from(roomRegistration.registeredRooms),
         roomStats: getRoomStats(),
       },
@@ -149,6 +162,7 @@ export async function startLibp2pRelay({
     logger.info(
       {
         peerId: shortenPeerId(peerIdStr),
+        connections: getConnectionStats(libp2p, peerIdStr),
         remainingPeers: formatConnectedPeers(connectedPeers),
         registeredRooms: Array.from(roomRegistration.registeredRooms),
       },
@@ -156,16 +170,10 @@ export async function startLibp2pRelay({
     );
   });
 
-  logger.info(
-    { peerId, shortPeerId: shortenPeerId(peerId) },
-    "Relay peer ready",
-  );
-  logger.info(
-    {
-      multiaddrs: multiaddrs.map((ma) => ma.toString()),
-    },
-    "Relay listening on multiaddrs",
-  );
+  libp2p.addEventListener("peer:update", (event) => {
+    const peerIdStr = event.detail.peer.id.toString();
+    debouncePrintStats(peerIdStr);
+  });
 
   libp2p.services.pubsub.addEventListener("subscription-change", () => {
     debouncePrintRoomStats();
@@ -176,7 +184,20 @@ export async function startLibp2pRelay({
     logger.info({ stats }, "Room stats");
   }
 
+  const debouncePrintStats = debounce(peerUpdated, 2000);
   const debouncePrintRoomStats = debounce(printRoomStats, 2000);
+
+  function peerUpdated(peerIdStr: string) {
+    logger.info(
+      {
+        peerId: shortenPeerId(peerIdStr),
+        connections: getConnectionStats(libp2p, peerIdStr),
+        remainingPeers: formatConnectedPeers(connectedPeers),
+        registeredRooms: Array.from(roomRegistration.registeredRooms),
+      },
+      "Peer updated",
+    );
+  }
 
   function getRoomStats() {
     const rooms = Array.from(roomRegistration.registeredRooms.values());
@@ -198,5 +219,26 @@ export async function startLibp2pRelay({
 
   function toPeerIdString(peerId: string | PeerId): string {
     return typeof peerId === "string" ? peerId : peerId.toString();
+  }
+
+  function getConnectionStats(libp2p: Libp2p, peerIdStr: string) {
+    return libp2p.getConnections().reduce(
+      (acc, conn) => {
+        const object = acc.find(
+          (x) => x.peerId === shortenPeerId(peerIdStr),
+        ) ?? {
+          peerId: shortenPeerId(conn.remotePeer.toString()),
+          connectionCount: 0,
+          streamsCount: 0,
+        };
+        if (object.connectionCount === 0) {
+          acc.push(object);
+        }
+        object.connectionCount += 1;
+        object.streamsCount += conn.streams.length;
+        return acc;
+      },
+      [] as { peerId: string; connectionCount: number; streamsCount: number }[],
+    );
   }
 }
