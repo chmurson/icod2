@@ -171,7 +171,9 @@ export class PersistingDialer {
         await this.triggerDialFromQueue(peerIdStr);
       }
       loggerGate.canError &&
-        console.error(`Failed to dial peer ${peerIdStr}: ${error}`);
+        console.error(
+          `Failed to dial peer ${shortenPeerId(peerIdStr)}: ${error}`,
+        );
     }
   }
 }
