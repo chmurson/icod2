@@ -1,4 +1,5 @@
 import { type FC, useMemo } from "react";
+import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
 import { ContentCard } from "@/components/layout/MainLayout";
@@ -53,7 +54,8 @@ const JoinLockedBoxContent: React.FC = () => {
     (state) => state.connectionToLeaderFailReason,
   );
 
-  const { peerMessageProtoRef } = useJoinLockedBoxConnection({ roomToken });
+  const { peerMessageProtoRef, isRelayReconnecting } =
+    useJoinLockedBoxConnection({ roomToken });
 
   const { sendKey } = useDataChannelSendMessages({
     peerMessageProtoRef,
@@ -105,6 +107,7 @@ const JoinLockedBoxContent: React.FC = () => {
   };
   return (
     <div className="flex flex-col gap-8">
+      {isRelayReconnecting && <RelayReconnectingAlert />}
       {connectionToLeaderFailReason && (
         <div className="flex flex-col items-start gap-4">
           <Alert variant="warning" className="self-stretch">

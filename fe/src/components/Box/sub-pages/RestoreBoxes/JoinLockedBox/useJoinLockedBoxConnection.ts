@@ -24,7 +24,7 @@ export function useJoinLockedBoxConnection({
   } = useFollowerConnection({
     roomToken,
   });
-  // specific to this use case below 👇
+
   useEffect(() => {
     routerMng.addRouter("join-unlock-box", router.router);
 
@@ -58,8 +58,8 @@ export function useJoinLockedBoxConnection({
         },
       ),
       connectedPeersStorageRef.current.addListener("peer-removed", (peerId) => {
-        peerToKeyHolderMapRef.current.removeByPeerId(peerId);
         const khId = peerToKeyHolderMapRef.current.getKeyholderId(peerId);
+        peerToKeyHolderMapRef.current.removeByPeerId(peerId);
         const leaderKhId = useJoinLockedBoxStore.getState().connectedLeaderId;
 
         if (khId === leaderKhId) {

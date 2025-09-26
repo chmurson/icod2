@@ -33,6 +33,13 @@ export function useJoinBoxConnection({ roomToken }: { roomToken: string }) {
     [messageProto.peerMessageProtoRef],
   );
 
+  const onPeerDisconnected = useCallback((peerId: string) => {
+    const { leader, actions } = useJoinBoxStore.getState();
+    if (leader.id === peerId) {
+      actions.cannotConnectLeader("peer-disconnected");
+    }
+  }, []);
+
   useEffect(() => {
     const removeListeners = [
       connectedPeersStorageRef.current.addListener(
@@ -45,8 +52,7 @@ export function useJoinBoxConnection({ roomToken }: { roomToken: string }) {
       ),
 
       connectedPeersStorageRef.current.addListener("peer-removed", (peerId) => {
-        const actions = useJoinBoxStore.getState().actions;
-        actions.disconnectParticipant(peerId);
+        onPeerDisconnected(peerId);
       }),
     ];
 
@@ -55,7 +61,7 @@ export function useJoinBoxConnection({ roomToken }: { roomToken: string }) {
         removeListener();
       }
     };
-  }, [onPeerConnected, connectedPeersStorageRef]);
+  }, [onPeerConnected, connectedPeersStorageRef, onPeerDisconnected]);
 
   useEffect(() => {
     routerMng.addRouter("join-create-box", router.router);
