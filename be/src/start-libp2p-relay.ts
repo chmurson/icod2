@@ -40,7 +40,12 @@ export async function startLibp2pRelay({
       identify: identify(),
       autoNat: autoNAT(),
       relay: circuitRelayServer(),
-      pubsub: gossipsub(),
+      pubsub: gossipsub({
+        emitSelf: false,
+        fallbackToFloodsub: true,
+        floodPublish: true,
+        doPX: true,
+      }),
     },
   });
 

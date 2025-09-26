@@ -71,12 +71,12 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
 
   useEffect(() => {
     connectedPeersStorage.clear();
-    let libp2pService: Libp2p;
+    let libp2pService: Awaited<ReturnType<typeof startLibp2pService>>;
     let unmounted = false;
 
     (async () => {
       const { bootstrapMultiaddrs, relayPeerIds } = getBootstrapMultiaddrs();
-      const roomToken = await roomTokenProvider.getRoomToken();
+      const roomToken = roomTokenProvider.getRoomToken();
 
       if (!roomToken) {
         onFailedToConnectRef.current?.("RoomTokenProviderError");
@@ -145,6 +145,14 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
           >,
         );
         loggerGate.canLog && console.log("Connections:", connectionAddrsStats);
+      };
+
+      // @ts-expect-error
+      window.debugTriggerRediscovery = async () => {
+        // Temporarily unsubscribe and resubscribe
+        libp2pService.services.pubsub.unsubscribe(roomToken);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        libp2pService.services.pubsub.subscribe(roomToken);
       };
 
       libp2pServiceRef.current = libp2pService;

@@ -159,10 +159,12 @@ export class PersistingDialer {
       const remotePeerId = connection.remotePeer.toString();
       loggerGate.canLog &&
         console.log(`Successfully dialed peer ${shortenPeerId(peerIdStr)}`);
-      loggerGate.canWarn &&
-        console.warn(
-          `But the remote peer id is different than local one. We are using the remote one which is: ${shortenPeerId(remotePeerId)}`,
-        );
+      if (remotePeerId !== peerIdStr) {
+        loggerGate.canWarn &&
+          console.warn(
+            `But the remote peer id is different than local one. We are using the remote one which is: ${shortenPeerId(remotePeerId)}`,
+          );
+      }
       this.callAllListeners(remotePeerId);
       this.peersToDial.delete(peerIdStr);
     } catch (error) {
