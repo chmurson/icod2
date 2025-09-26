@@ -74,7 +74,12 @@ async function createLibp2pService({
       }),
     ],
     services: {
-      pubsub: gossipsub(),
+      pubsub: gossipsub({
+        emitSelf: false,
+        fallbackToFloodsub: true,
+        floodPublish: true,
+        doPX: true, // Enable peer exchange
+      }),
       identify: identify(),
     },
   });
