@@ -115,7 +115,7 @@ export const useJoinBoxStore = create<JoinBoxState>()(
           connecting: false,
           connected: true,
           error: null,
-
+          connectionToLeaderFailReason: undefined,
           state: "connected",
         })),
       connectParticipant: (participant: ParticipantType) => {
