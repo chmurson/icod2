@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useOpenLockedBoxStore } from "@/stores/boxStore";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { DropLockedBox } from "./DropLockedBox/DropLockedBox";
@@ -21,8 +21,6 @@ const LockedBox: React.FC = () => {
 
   const renderCurrentPage = () => {
     switch (currentPage) {
-      case "drop":
-        return <DropLockedBox />;
       case "open":
         return <OpenLockedBox />;
       case "join":
@@ -36,8 +34,7 @@ const LockedBox: React.FC = () => {
 };
 
 const useCurrentPage = () => {
-  const [currentPage, setCurrentPage] = useState<string | undefined>(undefined);
-
+  const [isMounted, setIsMounted] = useState(false);
   const openLockedBoxState = useOpenLockedBoxStore((state) => state.state);
   const joinLockedBoxState = useJoinLockedBoxStore((state) => state.state);
 
@@ -49,21 +46,26 @@ const useCurrentPage = () => {
   );
   const joinLockedBoxError = useJoinLockedBoxStore((state) => state.error);
 
-  useEffect(() => {
-    if (lobbyStates.includes(joinLockedBoxState) && !joinLockedBoxError) {
-      return setCurrentPage("join");
+  const currentPage = useMemo(() => {
+    if (
+      isMounted &&
+      lobbyStates.includes(joinLockedBoxState) &&
+      !joinLockedBoxError
+    ) {
+      return "join";
     }
 
-    if (lobbyStates.includes(openLockedBoxState)) {
-      return setCurrentPage("open");
+    if (isMounted && lobbyStates.includes(openLockedBoxState)) {
+      return "open";
     }
 
-    setCurrentPage("drop");
-  }, [joinLockedBoxState, joinLockedBoxError, openLockedBoxState]);
+    return "drop";
+  }, [joinLockedBoxState, joinLockedBoxError, openLockedBoxState, isMounted]);
 
   useEffect(() => {
     resetJoinLockedBoxState();
     resetOpenLockedBoxState();
+    setIsMounted(true);
   }, [resetJoinLockedBoxState, resetOpenLockedBoxState]);
 
   return currentPage;
