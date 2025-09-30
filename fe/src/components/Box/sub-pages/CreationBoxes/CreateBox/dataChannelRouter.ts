@@ -20,8 +20,6 @@ router.addHandler(isKeyHolderWelcomesLeader, (localId, message, proto) => {
       type: "leader:keyholder-not-athorized",
     } satisfies LeaderNotAuthorizedKeyholder);
 
-    // dataChannelMng?.disconnectPeer(localId);
-
     return;
   }
 
