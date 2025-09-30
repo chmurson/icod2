@@ -66,6 +66,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
           };
 
           return {
+            isPristine: false,
             shareAccessKeyByKeyHolderId,
             shareAccessKeyMapByKeyHolderId: {
               ...state.shareAccessKeyMapByKeyHolderId,
@@ -80,6 +81,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
           );
 
           return {
+            isPristine: false,
             shareAccessKeyByKeyHolderId,
             shareAccessKeyMapByKeyHolderId: {
               ...state.shareAccessKeyMapByKeyHolderId,
@@ -92,6 +94,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
         shareAccessKeyMapByKeyHolderId: Record<KeyHolderId, boolean>,
       ) => {
         set((state) => ({
+          isPristine: false,
           shareAccessKeyMapByKeyHolderId: {
             ...state.shareAccessKeyMapByKeyHolderId,
             [keyholderId]: shareAccessKeyMapByKeyHolderId,
@@ -140,6 +143,7 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
               ...keyHolder,
             },
           ],
+          isPristine: false,
           offLineKeyHolders: state.offLineKeyHolders.filter(
             (x) => x.id !== keyHolder.id,
           ),
