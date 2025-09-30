@@ -153,6 +153,7 @@ export async function startLibp2pRelay({
       {
         peerId: shortenPeerId(peerIdStr),
         connections: getConnectionStats(libp2p, peerIdStr),
+        peers: formatConnectedPeers(connectedPeers),
         registeredRooms: Array.from(roomRegistration.registeredRooms),
         roomStats: getRoomStats(),
       },
@@ -168,8 +169,9 @@ export async function startLibp2pRelay({
       {
         peerId: shortenPeerId(peerIdStr),
         connections: getConnectionStats(libp2p, peerIdStr),
-        remainingPeers: formatConnectedPeers(connectedPeers),
+        peers: formatConnectedPeers(connectedPeers),
         registeredRooms: Array.from(roomRegistration.registeredRooms),
+        roomStats: getRoomStats(),
       },
       "Peer disconnected",
     );
@@ -177,20 +179,20 @@ export async function startLibp2pRelay({
 
   libp2p.addEventListener("peer:update", (event) => {
     const peerIdStr = event.detail.peer.id.toString();
-    debouncePrintStats(peerIdStr);
+    debouncedLogPeerUpdated(peerIdStr);
   });
 
   libp2p.services.pubsub.addEventListener("subscription-change", () => {
-    debouncePrintRoomStats();
+    debouncedSubscriptionChange();
   });
 
-  function printRoomStats() {
-    const stats = getRoomStats();
-    logger.info({ stats }, "Room stats");
+  function subscriptionChanged() {
+    const roomStats = getRoomStats();
+    logger.info({ roomStats }, "Subscription changed");
   }
 
-  const debouncePrintStats = debounce(peerUpdated, 2000);
-  const debouncePrintRoomStats = debounce(printRoomStats, 2000);
+  const debouncedLogPeerUpdated = debounce(peerUpdated, 2000);
+  const debouncedSubscriptionChange = debounce(subscriptionChanged, 2000);
 
   function peerUpdated(peerIdStr: string) {
     logger.info(
