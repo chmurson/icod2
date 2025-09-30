@@ -17,6 +17,7 @@ type Props = {
         | "key"
         | "you"
         | "keyThreshold"
+        | "isPristine"
       >
     >
   >;
@@ -27,7 +28,8 @@ type Props = {
 type BlockReason =
   | "box-can-be-unlocked-now"
   | "countdown-has-started"
-  | "leader-is-critical";
+  | "leader-is-critical"
+  | "keyholder-has-connected";
 
 export const NavigationAwayBlocker: FC<Props> = ({
   useHookStore,
@@ -39,6 +41,7 @@ export const NavigationAwayBlocker: FC<Props> = ({
   >();
 
   const status = useHookStore((state) => state.state);
+  const isPristine = useHookStore((state) => state.isPristine);
   const unlockingStartDate = useHookStore((state) => state.unlockingStartDate);
 
   const shouldHaveEnoughKeysToUnlock = useHookStore((state) => {
@@ -74,7 +77,14 @@ export const NavigationAwayBlocker: FC<Props> = ({
       };
     }
 
-    if (isLeader) {
+    if (!isLeader && !isPristine) {
+      return {
+        shouldBeBlocked: true,
+        reason: "keyholder-has-connected",
+      };
+    }
+
+    if (isLeader && !isPristine) {
       return {
         shouldBeBlocked: true,
         reason: "leader-is-critical",
@@ -84,7 +94,13 @@ export const NavigationAwayBlocker: FC<Props> = ({
     return {
       shouldBeBlocked: false,
     };
-  }, [status, unlockingStartDate, shouldHaveEnoughKeysToUnlock, isLeader]);
+  }, [
+    status,
+    unlockingStartDate,
+    shouldHaveEnoughKeysToUnlock,
+    isLeader,
+    isPristine,
+  ]);
 
   const blocker = useNavigateAwayBlocker({
     shouldNavigationBeBlocked: () => {
@@ -136,6 +152,14 @@ function getGoBackTextByShouldBeBlockedReason(
       textTitle: "Critical action required as Leader",
       textDescription:
         "You are the Leader of this Box and your action is critical. Leaving now could affect other participants. Are you sure you want to navigate away?",
+    };
+  }
+
+  if (reason === "keyholder-has-connected") {
+    return {
+      textTitle: "Keyholder has connected",
+      textDescription:
+        "As a keyholder, your presence is important to unlocking this box. Leaving now may affect its progress. Are you sure you want to navigate away?",
     };
   }
 

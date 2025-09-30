@@ -83,6 +83,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
       setReadyToUnlock: () => set({ state: "ready-to-unlock" }),
       toggleShareAccessKey: (keyHolderId: string, value?: boolean) =>
         set((state) => ({
+          isPristine: false,
           shareAccessKeyByKeyHolderId: {
             ...state.shareAccessKeyByKeyHolderId,
             [keyHolderId]:
@@ -91,6 +92,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
         })),
       toggleSharesAccessKeys: (idsOfKeyHoldersToShareWith: string[]) =>
         set(() => ({
+          isPristine: false,
           shareAccessKeyByKeyHolderId: Object.fromEntries(
             idsOfKeyHoldersToShareWith.map((id) => [id, true]),
           ),
@@ -158,12 +160,14 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
               connectedLeaderId,
               onlineKeyHolders,
               offLineKeyHolders,
+              isPristine: false,
             };
           }
 
           return {
             onlineKeyHolders,
             offLineKeyHolders,
+            isPristine: false,
           };
         });
       },

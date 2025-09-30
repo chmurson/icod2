@@ -7,6 +7,7 @@ export const usePartOfCreateBoxStore = () => {
   const leader = useCreateBoxStore((state) => state.leader);
   const threshold = useCreateBoxStore((state) => state.threshold);
   const keyHolders = useCreateBoxStore((state) => state.keyHolders);
+  const isPristine = useCreateBoxStore((state) => state.isPristine);
   const contentPreviewSharedWith = useCreateBoxStore(
     (state) => state.contentPreviewSharedWith,
   );
@@ -21,6 +22,7 @@ export const usePartOfCreateBoxStore = () => {
       threshold,
       keyHolders,
       contentPreviewSharedWith,
+      isPristine,
     },
     actions,
   };

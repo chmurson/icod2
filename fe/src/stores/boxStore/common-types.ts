@@ -37,6 +37,7 @@ export const lockedBoxStoreStateCommonPart = {
   unlockingStartDate: null as Date | null,
   encryptedMessage: "",
   roomToken: "",
+  isPristine: true as boolean,
 };
 
 export type LockedBoxStoreCommonPart = typeof lockedBoxStoreStateCommonPart & {

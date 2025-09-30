@@ -26,6 +26,7 @@ const createBoxDefaultState = {
   generatedKeys: [] as string[],
   generatedKey: "",
   contentPreviewSharedWith: {} as Record<string, boolean>,
+  isPristine: true as boolean,
 };
 
 export type CreateBoxStateData = typeof createBoxDefaultState;
@@ -85,6 +86,7 @@ export const useCreateBoxStore = create<CreateBoxState>((set, get) => ({
             ...participant,
           },
         ],
+        isPristine: false,
       })),
     disconnectParticipant: (participantId: string) => {
       set((state) => ({
@@ -109,7 +111,7 @@ export const useCreateBoxStore = create<CreateBoxState>((set, get) => ({
       payload: Partial<
         Pick<CreateBoxStateData, "title" | "content" | "threshold">
       >,
-    ) => set(payload),
+    ) => set({ ...payload, isPristine: false }),
 
     setContentPreviewSharedWith: (keyHolderId: string, value: boolean) =>
       set({
