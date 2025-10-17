@@ -6,6 +6,28 @@ Stashcrate is a simple and lightweight app to share content with your friends an
 
 [stashcrate.io](https://stashcrate.io/)
 
+##
+```mermaid
+---
+config:
+  theme: neo
+---
+architecture-beta
+    service browser1(internet)[Browser Node]
+    service browser2(internet)[Browser Node]
+    service browser3(internet)[Browser Node]
+    service relay(server)[Relay Node]
+
+    junction junctionCenter
+
+    browser1:R <-- L:junctionCenter
+    browser2:R <-- B:junctionCenter
+    browser3:R <-- T:junctionCenter
+    junctionCenter:R --> L:relay
+```
+
+
+
 ## Local development
 
 ```
