@@ -6,6 +6,46 @@ Stashcrate is a simple and lightweight app to share content with your friends an
 
 [stashcrate.io](https://stashcrate.io/)
 
+## Architecture diagram
+
+### Diagram
+```mermaid
+---
+config:
+  theme: neo
+---
+architecture-beta
+    service browser1(internet)[Browser Leader]
+    service browser2(internet)[Browser Node]
+    service browser3(internet)[Browser Node]
+    service relay(server)[Relay Node]
+
+    junction junctionRelay
+    junction junctionBrowsers
+
+    browser1:R <-- L:junctionRelay
+    browser2:R <-- B:junctionRelay
+    browser3:R <-- T:junctionRelay
+    junctionRelay:R --> L:relay
+
+    browser1:L <-- R:junctionBrowsers
+    browser2:L <-- T:junctionBrowsers
+    browser3:L <-- B:junctionBrowsers
+```
+### Connections
+- Browser <-> Browser : WebRTC, if direct connection is possible, otherwise traffic goes through Relay Node.
+- Browser <-> Relay : Websocket or WebTransport
+
+Connection low level logic is controlled by `libp2p`.
+
+### Repository Folders
+
+- `be` - Backend - Relay Node
+- `fe` - Frontend - Web UI + Browser Node
+- `libs/icon-crypto-js` - WebAssembly implementation of Shamir Secret Sharing
+- `libs/protocols` - Protocols and common utilities that are shared between backend and frontend
+- `docs` - Additional documentation
+
 ## Local development
 
 ```
@@ -18,7 +58,12 @@ cd be
 yarn dev
 ```
 
-Take note of the multiaddrs the server is listening on in the backend's standard output. It should look like `/ip4/127.0.0.1/tcp/8080/p2p/Qm...XnBs`. It can be configured if needed in `be/config.yaml` by creating `be/config.local.yaml`.
+Take note of the multiaddrs the server is listening on in the backend's standard output. It should look like `/ip4/127.0.0.1/tcp/8080/p2p/Qm...XnBs`.
+
+The part `/ip4/127.0.0.1/tcp/8080` of the multiaddr is the address the backend is listening on, and it can be changed via `config.yaml`, ideally by creating `config.local.yaml`
+
+The last part of the multiaddr (`Qm...XnBs`) is the peer ID. A private key from which peer ID derives from is created - if it does not exist - and stored by default in `data/peer-id-private-key.json` (the path can be changed with `PEER_ID_FILE_PATH` env variable).
+
 
 Make sure the multiaddrs output by the backend is written into `/fe/.env.local` under the `VITE_BOOTSTRAP_MULTIADDRS` variable.
 
@@ -89,3 +134,9 @@ Allows you to enable developer tools in the top navigation bar.
 
 *   `set(box: string)`: Enables the tools.
 *   `get()`: Gets the status of the tools.
+
+### `bootstrapMultiaddr`
+
+Normally the mutliaddr is set via an env varable and is backed into js bundle. If for some reason one wants to change it: `window.icod2Dev.bootstrapMultiaddr.set()` is available.
+
+`.get()` and `.set()` allows to manage the bootstrap multiaddrs from within browser's console log.
