@@ -1,6 +1,7 @@
 import { TextField } from "@radix-ui/themes";
 import { type FC, useEffect, useMemo } from "react";
 import { BoxErrorAlert } from "@/components/Box/components/BoxErrorAlert";
+import { PortalPeerId } from "@/components/Box/components/PortalPeerId";
 import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
 import { ShareAccessDropdown as ShareAccessDropdownDumb } from "@/components/Box/components/ShareAccessDropdown";
@@ -63,7 +64,7 @@ export const OpenLockedBoxContent: FC = () => {
     url: "/unlock-box/:roomToken",
   });
 
-  const { messageProto, routerMng, error, isRelayReconnecting } =
+  const { messageProto, routerMng, error, isRelayReconnecting, peerId } =
     useOpenLockedBoxConnection({ roomToken });
 
   useEffect(() => {
@@ -128,6 +129,7 @@ export const OpenLockedBoxContent: FC = () => {
 
   return (
     <div className="flex flex-col gap-8">
+      <PortalPeerId peerId={peerId} />
       {isRelayReconnecting && <RelayReconnectingAlert />}
       {error && <BoxErrorAlert error={error} onRetryRoomRegistration={retry} />}
       <TopLobbySection useStoreHook={useOpenLockedBoxStore} />

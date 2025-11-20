@@ -29,4 +29,6 @@ export function useConnection() {
 
     return () => {};
   }, [context?.routerMng]);
+
+  return context;
 }

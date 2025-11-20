@@ -2,6 +2,7 @@ import { TextArea } from "@radix-ui/themes";
 import type React from "react";
 import { FiEye } from "react-icons/fi";
 import { BoxErrorAlert } from "@/components/Box/components/BoxErrorAlert";
+import { PortalPeerId } from "@/components/Box/components/PortalPeerId";
 import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { ContentCard } from "@/components/layout";
 import { useJoinBoxStore } from "@/stores";
@@ -58,7 +59,9 @@ const JoinBoxContent = () => {
     roomToken,
   } = useStoreSlice();
 
-  const { error, isRelayReconnecting } = useJoinBoxConnection({ roomToken });
+  const { error, isRelayReconnecting, peerId } = useJoinBoxConnection({
+    roomToken,
+  });
 
   const blocker = useNavigateAwayBlocker({
     shouldNavigationBeBlocked: () => !connectionToLeaderFailReason,
@@ -83,6 +86,7 @@ const JoinBoxContent = () => {
 
   return (
     <>
+      <PortalPeerId peerId={peerId} />
       {isRelayReconnecting && <RelayReconnectingAlert />}
       <BoxErrorAlert error={error} />
       {connectionToLeaderFailReason && (
