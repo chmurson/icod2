@@ -46,7 +46,7 @@ export const createPeerConnectionHandler = ({
     libp2p.addEventListener("peer:disconnect", (evt) => {
       const peerIdStr = evt.detail.toString();
       loggerGate.canLog &&
-        console.log("Peer connected:", shortenPeerId(peerIdStr));
+        console.log("Peer disconnected:", shortenPeerId(peerIdStr));
       connectedPeersStorage.removePeer(peerIdStr);
 
       if (relayPeerIds.includes(peerIdStr)) {
