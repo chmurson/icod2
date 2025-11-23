@@ -15,6 +15,7 @@ export function useJoinBoxConnection({ roomToken }: { roomToken: string }) {
     isRelayReconnecting,
     routerMng,
     connectedPeersStorageRef,
+    libp2p,
   } = useFollowerConnection({
     roomToken,
   });
@@ -72,6 +73,7 @@ export function useJoinBoxConnection({ roomToken }: { roomToken: string }) {
   }, [routerMng]);
 
   return {
+    peerId: libp2p?.peerId,
     routerMng,
     error,
     isRelayReconnecting,

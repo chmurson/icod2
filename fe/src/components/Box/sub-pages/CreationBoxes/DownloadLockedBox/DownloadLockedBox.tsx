@@ -1,6 +1,7 @@
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { useCallback, useEffect, useState } from "react"; // Added useEffect
 import { ParticipantItem } from "@/components/Box/components/ParticipantItem";
+import { PortalPeerId } from "@/components/Box/components/PortalPeerId";
 import { ContentCard } from "@/components/layout";
 import {
   useCreateBoxStore,
@@ -18,7 +19,7 @@ import { useDownloadLockedBox, useDownloadLockedBoxState } from "./hooks";
 import { useConnection } from "./useConnection";
 
 export const DownloadLockedBox: React.FC = () => {
-  useConnection();
+  const context = useConnection();
   const downloadLockedBoxState = useDownloadLockedBoxState();
 
   const clearKeyAndMessage = useDownloadBoxStore(
@@ -59,6 +60,7 @@ export const DownloadLockedBox: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-8">
+      <PortalPeerId peerId={context?.peerId} />
       <Text variant="pageTitle" className="mt-4">
         Locked Box
       </Text>

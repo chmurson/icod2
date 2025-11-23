@@ -21,6 +21,7 @@ export function useJoinLockedBoxConnection({
     isRelayReconnecting,
     routerMng,
     connectedPeersStorageRef,
+    libp2p,
   } = useFollowerConnection({
     roomToken,
   });
@@ -80,5 +81,6 @@ export function useJoinLockedBoxConnection({
     error,
     isRelayReconnecting,
     peerMessageProtoRef: messageProto.peerMessageProtoRef,
+    peerId: libp2p?.peerId,
   };
 }

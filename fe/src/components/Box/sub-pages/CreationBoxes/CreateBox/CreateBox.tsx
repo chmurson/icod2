@@ -1,6 +1,7 @@
 import { TextArea, TextField } from "@radix-ui/themes";
 import { type FC, useEffect } from "react";
 import { BoxErrorAlert } from "@/components/Box/components/BoxErrorAlert";
+import { PortalPeerId } from "@/components/Box/components/PortalPeerId";
 import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { SharePreviewButton } from "@/components/Box/components/SharePreviewButton";
 import { ContentCard } from "@/components/layout";
@@ -108,6 +109,7 @@ export const CreateBoxContent: FC = () => {
 
   return (
     <>
+      <PortalPeerId peerId={context.peerId} />
       <div className="flex flex-col gap-4 max-w-2xl w-full">
         {context.isRelayReconnecting && <RelayReconnectingAlert />}
         <BoxErrorAlert error={context.error} onRetryRoomRegistration={retry} />
