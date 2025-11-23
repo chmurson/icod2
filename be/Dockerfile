@@ -12,7 +12,6 @@ RUN corepack enable && yarn set version 4.9.2
 # Builder stage
 FROM base AS builder
 
-
 RUN yarn workspaces focus @icod2/be @icod2/protocols
 
 COPY libs/protocols /app/libs/protocols
@@ -32,7 +31,6 @@ COPY --from=builder /app/be/dist /app/be/dist
 
 COPY be/.env /app/be/
 COPY be/.config.* /app/be
-
 
 RUN chown -R node:node /app && \
   mkdir -p /app/data && \
