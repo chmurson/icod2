@@ -1,7 +1,6 @@
 import { loggerGate, shortenPeerId } from "@icod2/protocols";
 import type { Libp2p } from "@libp2p/interface";
-import type { Multiaddr } from "@multiformats/multiaddr";
-import { featureFlagsManager, isEnabled } from "@/utils/featureFlags";
+import { isEnabled } from "@/utils/featureFlags";
 import type { IConnectedPeersStorage } from "../core/connected-peer-storage";
 import type { PersistingDialer } from "./persiting-dialer";
 import { startPing } from "./ping";
