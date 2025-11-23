@@ -5,6 +5,7 @@ import { loggerGate } from "@icod2/protocols";
 import { bootstrap } from "@libp2p/bootstrap";
 import { circuitRelayTransport } from "@libp2p/circuit-relay-v2";
 import { identify } from "@libp2p/identify";
+import { ping } from "@libp2p/ping";
 import { pubsubPeerDiscovery } from "@libp2p/pubsub-peer-discovery";
 import { webRTC } from "@libp2p/webrtc";
 import { webSockets } from "@libp2p/websockets";
@@ -73,6 +74,12 @@ async function createLibp2pService({
         topics: [roomToken],
       }),
     ],
+    connectionManager: {
+      dialTimeout: 30000,
+      maxPeerAddrsToDial: 10,
+      inboundUpgradeTimeout: 30000,
+      maxConnections: 100,
+    },
     services: {
       pubsub: gossipsub({
         emitSelf: false,
@@ -81,6 +88,9 @@ async function createLibp2pService({
         doPX: true, // Enable peer exchange
       }),
       identify: identify(),
+      ping: ping({
+        timeout: 5000,
+      }),
     },
   });
 
