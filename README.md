@@ -78,6 +78,15 @@ cd fe
 yarn dev
 ```
 
+## Displaying nicely logs from backend locally
+
+Backend logs are displayed as unformatted JSON by default. To display them in a more readable format, the recommended approach is to use `hl` (`brew install hl`).
+
+Following command displays logs nicely, and hides unnecessary fields.
+```
+yarn dev | hl --hide pid --hide hostname --hide level
+```
+
 ## Manually deploy frontend client in Netlify Preview context
 
 ```bash
