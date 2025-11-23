@@ -10,9 +10,9 @@ import {
 } from "./../commons/request-response-manager.js";
 import { shortenPeerId } from "../commons/shortenPeerId.js";
 import {
-  type Messages,
+  type RoomRegistrationProtocolMessages as Messages,
   messagesSchemas,
-  type Responses,
+  type RoomRegistrationProtocolResponses as Responses,
   responseSchemas,
 } from "./messages-and-responses.js";
 
