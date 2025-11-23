@@ -90,6 +90,8 @@ async function createLibp2pService({
       identify: identify(),
       ping: ping({
         timeout: 5000,
+        maxInboundStreams: 512,
+        maxOutboundStreams: 512,
       }),
     },
   });

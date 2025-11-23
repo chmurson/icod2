@@ -2,6 +2,7 @@ import { loggerGate } from "@icod2/protocols";
 
 export const FEATURE_FLAGS = {
   CLOSE_INITITIAL_PEER_CONNECTION_ASAP: "CLOSE_INITITIAL_PEER_CONNECTION_ASAP",
+  PING_REGULAR_PEERS: "PING_REGULAR_PEERS",
 } as const;
 
 export type FeatureFlagName =
@@ -16,6 +17,7 @@ type FeatureFlags = {
 const getDefaultFlags = (): FeatureFlags => {
   return {
     [FEATURE_FLAGS.CLOSE_INITITIAL_PEER_CONNECTION_ASAP]: false,
+    [FEATURE_FLAGS.PING_REGULAR_PEERS]: false,
   };
 };
 

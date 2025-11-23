@@ -36,10 +36,26 @@ export async function startLibp2pRelay({
     transports: [webSockets(), tcp()],
     connectionEncrypters: [noise()],
     streamMuxers: [yamux()],
+    connectionManager: {
+      maxConnections: 1000,
+      inboundUpgradeTimeout: 60_000,
+    },
     services: {
       identify: identify(),
       autoNat: autoNAT(),
-      relay: circuitRelayServer(),
+      relay: circuitRelayServer({
+        reservations: {
+          maxReservations: 1000, // Default is only 15!
+          reservationTtl: 2 * 60 * 60 * 1000, // 2 hours (default is 1 hour)
+          defaultDurationLimit: 2 * 60 * 60 * 1000, // 2 hours
+          defaultDataLimit: BigInt(1024 * 1024 * 1024), // 1GB (default is 128KB!)
+          applyDefaultLimit: false, // Don't enforce limits
+        },
+        maxInboundHopStreams: 512,
+        maxOutboundHopStreams: 512,
+        maxOutboundStopStreams: 512,
+        hopTimeout: 60_000,
+      }),
       pubsub: gossipsub({
         emitSelf: false,
         fallbackToFloodsub: true,

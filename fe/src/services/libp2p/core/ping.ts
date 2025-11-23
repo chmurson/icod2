@@ -12,19 +12,33 @@ export async function startPing(libp2p: Libp2p, peerMultiaddr: Multiaddr[]) {
     throw new Error("Ping service is not available");
   }
 
+  const peerId = peerMultiaddr[0]
+    ?.getComponents()
+    .filter((x) => x.name === "p2p")
+    .at(-1);
+
+  if (!peerId) {
+    loggerGate.canWarn && console.warn("Peer ID not found");
+  }
+
+  loggerGate.canLog && console.log(`Starting to ping peer ${peerId}`);
+
   await ping(libp2p as LocalLibp2p, peerMultiaddr);
 }
 
 async function ping(libp2p: LocalLibp2p, peerMultiaddr: Multiaddr[]) {
-  loggerGate.canLog && console.log(`Start ping for peer ${peerMultiaddr}`);
-  try {
-    const result = await libp2p.services.ping.ping(peerMultiaddr);
+  while (true) {
     loggerGate.canLog &&
-      console.log(`Ring result for peer ${peerMultiaddr}`, result);
-    await new Promise((resolve) => setTimeout(resolve, timeout));
-    ping(libp2p, peerMultiaddr);
-  } catch (error) {
-    loggerGate.canLog &&
-      console.error(`Error pinging peer ${peerMultiaddr}`, error);
+      console.log(`Sending ping to peer with ${peerMultiaddr}`);
+    try {
+      const result = await libp2p.services.ping.ping(peerMultiaddr);
+      loggerGate.canLog && console.log(` ${peerMultiaddr}`, result);
+      await new Promise((resolve) => setTimeout(resolve, timeout));
+    } catch (error) {
+      loggerGate.canLog &&
+        console.error(`Error pinging peer ${peerMultiaddr}`, error);
+
+      return; // end while loop
+    }
   }
 }

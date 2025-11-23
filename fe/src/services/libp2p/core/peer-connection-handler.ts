@@ -1,6 +1,7 @@
 import { loggerGate, shortenPeerId } from "@icod2/protocols";
 import type { Libp2p } from "@libp2p/interface";
-import { isEnabled } from "@/utils/featureFlags";
+import type { Multiaddr } from "@multiformats/multiaddr";
+import { featureFlagsManager, isEnabled } from "@/utils/featureFlags";
 import type { IConnectedPeersStorage } from "../core/connected-peer-storage";
 import type { PersistingDialer } from "./persiting-dialer";
 import { startPing } from "./ping";
@@ -36,24 +37,7 @@ export const createPeerConnectionHandler = ({
         await handShake();
         connectedPeersStorage.addPeer(peerIdStr, { isRelay });
 
-        const multiAddrs = libp2p
-          .getConnections()
-          .find((c) => c.remotePeer.toString() === peerIdStr)?.remoteAddr;
-
-        if (isRelay) {
-          loggerGate.canLog &&
-            console.log(`Skip ping for relay peer ${shortenPeerId(peerIdStr)}`);
-        } else if (multiAddrs) {
-          console.log(
-            `Start ping for peer ${shortenPeerId(peerIdStr)} on ${multiAddrs}`,
-          );
-          startPing(libp2p, [multiAddrs]);
-        } else {
-          loggerGate.canError &&
-            console.warn(
-              `No multiaddrs found for peer ${peerIdStr} thus cannot start ping`,
-            );
-        }
+        startPingService({ peerIdStr, isRelay, libp2p });
       } catch (error) {
         loggerGate.canError &&
           console.error(`Handshake failed for peer ${peerIdStr}: ${error}`);
@@ -148,3 +132,35 @@ export const createPeerConnectionHandler = ({
     });
   };
 };
+
+function startPingService({
+  isRelay,
+  peerIdStr,
+  libp2p,
+}: {
+  isRelay: boolean;
+  peerIdStr: string;
+  libp2p: Libp2p;
+}) {
+  if (!isEnabled("PING_REGULAR_PEERS")) {
+    return;
+  }
+  const multiAddrs = libp2p
+    .getConnections()
+    .find((c) => c.remotePeer.toString() === peerIdStr)?.remoteAddr;
+
+  if (isRelay) {
+    loggerGate.canLog &&
+      console.log(`Skip ping for relay peer ${shortenPeerId(peerIdStr)}`);
+  } else if (multiAddrs) {
+    console.log(
+      `Start ping for peer ${shortenPeerId(peerIdStr)} on ${multiAddrs}`,
+    );
+    startPing(libp2p, [multiAddrs]);
+  } else {
+    loggerGate.canError &&
+      console.warn(
+        `No multiaddrs found for peer ${peerIdStr} thus cannot start ping`,
+      );
+  }
+}
