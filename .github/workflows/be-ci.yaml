@@ -11,11 +11,13 @@ on:
     branches: [main]
     paths:
       - "be/**"
+      - "libs/protocols/**"
       - ".github/workflows/be-ci.yaml"
       - "yarn.lock"
   pull_request:
     paths:
       - "be/**"
+      - "libs/protocols/**"
       - ".github/workflows/be-ci.yaml"
       - "yarn.lock"
 
@@ -71,7 +73,7 @@ jobs:
           context: .
           file: ./be/Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
