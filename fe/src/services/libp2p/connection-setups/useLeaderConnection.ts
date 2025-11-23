@@ -66,6 +66,7 @@ export const useLeaderConnection = ({
       setFilteredError(error);
     },
     protos: [roomRegistrationObject, messageProto],
+    dontDialDiscoveredPeers: true,
   });
 
   return {

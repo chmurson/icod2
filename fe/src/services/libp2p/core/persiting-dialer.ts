@@ -12,7 +12,10 @@ export class PersistingDialer {
       isCurrentlyDialing: boolean;
     }
   > = new Map();
-  private queuedPeersToDialByIds: string[] = [];
+  private queuedPeersToDialByIds: {
+    peerId: string;
+    multiAddrs?: Multiaddr[];
+  }[] = [];
   private libp2p: Libp2p;
   private listeners: ((peerIdStr: string) => void)[] = [];
 
@@ -80,7 +83,9 @@ export class PersistingDialer {
       this.peersToDial.delete(peerIdStr);
     }
 
-    const index = this.queuedPeersToDialByIds.indexOf(peerIdStr);
+    const index = this.queuedPeersToDialByIds.findIndex(
+      (qp) => qp.peerId === peerIdStr,
+    );
 
     if (index !== -1) {
       this.queuedPeersToDialByIds.splice(index, 1);
@@ -96,7 +101,10 @@ export class PersistingDialer {
     }
 
     if (peerToDial.isCurrentlyDialing) {
-      this.queuedPeersToDialByIds.push(peerIdStr);
+      this.queuedPeersToDialByIds.push({
+        peerId: peerIdStr,
+        multiAddrs: evt.detail.peer.addresses.map((a) => a.multiaddr),
+      });
       return;
     }
 
@@ -111,15 +119,24 @@ export class PersistingDialer {
       return;
     }
 
-    const index = this.queuedPeersToDialByIds.indexOf(peerIdStr);
-    if (index !== -1) {
-      this.queuedPeersToDialByIds.splice(index, 1);
-    }
+    const index = this.queuedPeersToDialByIds.findIndex(
+      (qp) => qp.peerId === peerIdStr,
+    );
 
-    await this.dial(peerIdStr);
+    if (index === -1) {
+      return;
+    }
+    const { peerId, multiAddrs } = this.queuedPeersToDialByIds[index];
+
+    this.queuedPeersToDialByIds.splice(index, 1);
+
+    await this.dial(peerId, multiAddrs);
   }
 
   private async dial(peerIdStr: string, multiAddrs?: Multiaddr[]) {
+    console.log(
+      `persisting-dialer.dial() - peerId: ${shortenPeerId(peerIdStr)} with multiaddrs ${multiAddrs?.map((m) => m.toString()).join(", ")}`,
+    );
     const peerToDial = this.peersToDial.get(peerIdStr);
 
     if (!peerToDial) {
@@ -167,15 +184,17 @@ export class PersistingDialer {
       }
       this.callAllListeners(remotePeerId);
       this.peersToDial.delete(peerIdStr);
+
+      this.queuedPeersToDialByIds = this.queuedPeersToDialByIds.filter(
+        (qp) => qp.peerId !== peerIdStr,
+      );
     } catch (error) {
       peerToDial.isCurrentlyDialing = false;
-      if (this.queuedPeersToDialByIds.includes(peerIdStr)) {
-        await this.triggerDialFromQueue(peerIdStr);
-      }
       loggerGate.canError &&
         console.error(
           `Failed to dial peer ${shortenPeerId(peerIdStr)}: ${error}`,
         );
+      await this.triggerDialFromQueue(peerIdStr);
     }
   }
 }

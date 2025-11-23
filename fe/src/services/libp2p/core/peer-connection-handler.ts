@@ -3,6 +3,7 @@ import type { Libp2p } from "@libp2p/interface";
 import { isEnabled } from "@/utils/featureFlags";
 import type { IConnectedPeersStorage } from "../core/connected-peer-storage";
 import type { PersistingDialer } from "./persiting-dialer";
+import { startPing } from "./ping";
 
 type HandShake = () => Promise<void>;
 
@@ -16,12 +17,14 @@ export const createPeerConnectionHandler = ({
   handShake,
   persistingDialer,
   onError,
+  dontDialDiscoveredPeers = false,
 }: {
   relayPeerIds: string[];
   connectedPeersStorage: IConnectedPeersStorage;
   handShake: HandShake;
   persistingDialer: PersistingDialer;
   onError: (error: ConnectionErrors) => void;
+  dontDialDiscoveredPeers?: boolean;
 }) => {
   return function peerConnectionHandler(libp2p: Libp2p) {
     const onDialSuccesfully = async (peerIdStr: string) => {
@@ -32,6 +35,8 @@ export const createPeerConnectionHandler = ({
       try {
         await handShake();
         connectedPeersStorage.addPeer(peerIdStr, { isRelay });
+
+        startPingService({ peerIdStr, isRelay, libp2p });
       } catch (error) {
         loggerGate.canError &&
           console.error(`Handshake failed for peer ${peerIdStr}: ${error}`);
@@ -46,7 +51,7 @@ export const createPeerConnectionHandler = ({
     libp2p.addEventListener("peer:disconnect", (evt) => {
       const peerIdStr = evt.detail.toString();
       loggerGate.canLog &&
-        console.log("Peer connected:", shortenPeerId(peerIdStr));
+        console.log("Peer disconnected:", shortenPeerId(peerIdStr));
       connectedPeersStorage.removePeer(peerIdStr);
 
       if (relayPeerIds.includes(peerIdStr)) {
@@ -73,11 +78,17 @@ export const createPeerConnectionHandler = ({
           shortenPeerId(discoveredPeerIdStr),
         );
 
+      if (dontDialDiscoveredPeers && !isRelayPeerBasedOnLocalPeerId) {
+        console.log("Dialing disabled for discovered peer");
+        return;
+      }
+
       if (maddrs.length === 0) {
         loggerGate.canLog && console.log("No multiaddrs to dial");
         persistingDialer.add(discoveredPeerIdStr);
         return;
       }
+
       try {
         const connection = await libp2p.dial(maddrs);
         if (isEnabled("CLOSE_INITITIAL_PEER_CONNECTION_ASAP")) {
@@ -120,3 +131,35 @@ export const createPeerConnectionHandler = ({
     });
   };
 };
+
+function startPingService({
+  isRelay,
+  peerIdStr,
+  libp2p,
+}: {
+  isRelay: boolean;
+  peerIdStr: string;
+  libp2p: Libp2p;
+}) {
+  if (!isEnabled("PING_REGULAR_PEERS")) {
+    return;
+  }
+  const multiAddrs = libp2p
+    .getConnections()
+    .find((c) => c.remotePeer.toString() === peerIdStr)?.remoteAddr;
+
+  if (isRelay) {
+    loggerGate.canLog &&
+      console.log(`Skip ping for relay peer ${shortenPeerId(peerIdStr)}`);
+  } else if (multiAddrs) {
+    console.log(
+      `Start ping for peer ${shortenPeerId(peerIdStr)} on ${multiAddrs}`,
+    );
+    startPing(libp2p, [multiAddrs]);
+  } else {
+    loggerGate.canError &&
+      console.warn(
+        `No multiaddrs found for peer ${peerIdStr} thus cannot start ping`,
+      );
+  }
+}

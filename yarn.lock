@@ -1186,6 +1186,7 @@ __metadata:
     "@libp2p/bootstrap": "npm:^11.0.47"
     "@libp2p/circuit-relay-v2": "npm:^3.2.24"
     "@libp2p/identify": "npm:^3.0.39"
+    "@libp2p/ping": "npm:2.0.37"
     "@libp2p/pubsub-peer-discovery": "npm:^11.0.2"
     "@libp2p/webrtc": "npm:^5.2.24"
     "@libp2p/websockets": "npm:^9.2.19"
@@ -1587,6 +1588,21 @@ __metadata:
     uint8arraylist: "npm:^2.4.8"
     uint8arrays: "npm:^5.1.0"
   checksum: 10c0/f729455796f3f0adbd27dfec242bffd24c24d90b15fb4aeec7ec7e3a5a6fbef1e05b7036cc288a9f4bd917adbd8b8355b56fedbc736a19075756d918a642720c
+  languageName: node
+  linkType: hard
+
+"@libp2p/ping@npm:2.0.37":
+  version: 2.0.37
+  resolution: "@libp2p/ping@npm:2.0.37"
+  dependencies:
+    "@libp2p/crypto": "npm:^5.1.8"
+    "@libp2p/interface": "npm:^2.11.0"
+    "@libp2p/interface-internal": "npm:^2.3.19"
+    "@multiformats/multiaddr": "npm:^12.4.4"
+    it-byte-stream: "npm:^2.0.2"
+    main-event: "npm:^1.0.1"
+    uint8arrays: "npm:^5.1.0"
+  checksum: 10c0/6fa917c1d7216f3affebde62d2fb1f1172523dfddc29851ca016a1b31adfafd861ed6e34cc0372ffbf5c1ee3b896c052eea58a2680c216fc9558391468b723f2
   languageName: node
   linkType: hard
 

@@ -33,6 +33,7 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
   onRelayPeerConnected,
   onRelayPeerDisconnected,
   protos,
+  dontDialDiscoveredPeers = false,
 }: {
   roomTokenProvider: RoomTokenProvider;
   connectedPeersStorage?: IConnectedPeersStorage;
@@ -45,6 +46,7 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
   onLibp2pStarted?: (libp2pService: Libp2p) => void;
   onRelayPeerConnected?: (relayPeerId: string) => void;
   onRelayPeerDisconnected?: (relayPeerId: string) => void;
+  dontDialDiscoveredPeers?: boolean;
 }) => {
   const { relaysConnected, isRelayReconnecting, setRelaysConnected } =
     useConnectedRelayState();
@@ -185,6 +187,7 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
         onError: (error) => {
           onFailedToConnectRef.current?.(error);
         },
+        dontDialDiscoveredPeers,
       });
 
       for (const proto of protosRef.current) {
@@ -209,6 +212,7 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
     handleLibp2pStarted,
     connectedPeersStorage,
     setRelaysConnected,
+    dontDialDiscoveredPeers,
   ]);
 
   useRaiseErrorIfChanges(null, "null");

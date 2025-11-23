@@ -46,6 +46,11 @@ export class PeerMessageExchangeProtocol<
   }
 
   initialize(libp2p: Libp2p) {
+    console.log(
+      "initialize()",
+      `protocol: ${this.protocolId}`,
+      `initialized: ${this.initialized}`,
+    );
     if (this.initialized) return;
 
     this.libp2p = libp2p;
@@ -78,9 +83,19 @@ export class PeerMessageExchangeProtocol<
         "message:",
         payload,
       );
-    await channel.send(payload);
-    loggerGate.canLog &&
-      console.log("Message sent to peer:", shortenPeerId(peerId));
+    try {
+      await channel.send(payload);
+      loggerGate.canLog &&
+        console.log("Message sent to peer:", shortenPeerId(peerId));
+    } catch (e) {
+      loggerGate.canLog &&
+        console.error(
+          "Failed to send message to peer:",
+          shortenPeerId(peerId),
+          "error:",
+          e,
+        );
+    }
   }
 
   async sendMessageToAllPeers(payload: TPeerMessagePayload) {
@@ -122,6 +137,7 @@ export class PeerMessageExchangeProtocol<
     }
 
     const libp2p = this.requireLibp2p();
+
     const { sendJson, getStream } = await attachOngoingStream(
       this.protocolId,
       libp2p,

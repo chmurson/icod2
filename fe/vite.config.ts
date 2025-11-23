@@ -15,6 +15,9 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
 // https://vite.dev/config/
 export default defineConfig(() => {
   return {
+    server: {
+      allowedHosts: ["marcus-publication-declared-guardian.trycloudflare.com"],
+    },
     plugins: [
       react(),
       tailwindcss(),
