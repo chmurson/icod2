@@ -10,7 +10,7 @@ import { initRoomRegistrationProtocol, shortenPeerId } from "@icod2/protocols";
 import { autoNAT } from "@libp2p/autonat";
 import { circuitRelayServer } from "@libp2p/circuit-relay-v2";
 import { identify } from "@libp2p/identify";
-import type { Libp2p, PeerId } from "@libp2p/interface";
+import type { Libp2p, PeerId, SubscriptionChangeData } from "@libp2p/interface";
 import { tcp } from "@libp2p/tcp";
 import { webSockets } from "@libp2p/websockets";
 import { createLibp2p } from "libp2p";
@@ -202,17 +202,40 @@ export async function startLibp2pRelay({
     debouncedLogPeerUpdated(peerIdStr);
   });
 
-  libp2p.services.pubsub.addEventListener("subscription-change", () => {
-    debouncedSubscriptionChange();
+  libp2p.services.pubsub.addEventListener("subscription-change", (e) => {
+    debouncedSubscriptionChange(e);
   });
 
-  function subscriptionChanged() {
+  function subscriptionChanged(e: CustomEvent<SubscriptionChangeData>) {
+    const topic = e.detail.subscriptions[0].topic;
+    logger.info(e.detail, "Subscription changed event detail");
+    logger.info(
+      libp2p.services.pubsub
+        .getSubscribers(topic)
+        .map((peerId) => shortenPeerId(peerId.toString())),
+      `Subscribers to ${topic} topic `,
+    );
     const roomStats = getRoomStats();
     logger.info({ roomStats }, "Subscription changed");
+    debouncedPrintInfoAboutPubSubTopics();
   }
 
   const debouncedLogPeerUpdated = debounce(peerUpdated, 2000);
   const debouncedSubscriptionChange = debounce(subscriptionChanged, 2000);
+
+  function getTopics() {
+    return libp2p.services.pubsub.getTopics();
+  }
+
+  const debouncedPrintInfoAboutPubSubTopics = debounce(
+    printInfoAboutPubSubTopics,
+    2000,
+  );
+
+  function printInfoAboutPubSubTopics() {
+    const topics = getTopics();
+    logger.info({ topics }, "All Topics");
+  }
 
   function peerUpdated(peerIdStr: string) {
     logger.info(
@@ -224,6 +247,7 @@ export async function startLibp2pRelay({
       },
       "Peer updated",
     );
+    debouncedPrintInfoAboutPubSubTopics();
   }
 
   function getRoomStats() {
@@ -239,33 +263,31 @@ export async function startLibp2pRelay({
       return acc;
     }, {});
   }
+}
 
-  function formatConnectedPeers(peers: Set<string>): string[] {
-    return Array.from(peers.values()).map((peerId) => shortenPeerId(peerId));
-  }
+function formatConnectedPeers(peers: Set<string>): string[] {
+  return Array.from(peers.values()).map((peerId) => shortenPeerId(peerId));
+}
 
-  function toPeerIdString(peerId: string | PeerId): string {
-    return typeof peerId === "string" ? peerId : peerId.toString();
-  }
+function toPeerIdString(peerId: string | PeerId): string {
+  return typeof peerId === "string" ? peerId : peerId.toString();
+}
 
-  function getConnectionStats(libp2p: Libp2p, peerIdStr: string) {
-    return libp2p.getConnections().reduce(
-      (acc, conn) => {
-        const object = acc.find(
-          (x) => x.peerId === shortenPeerId(peerIdStr),
-        ) ?? {
-          peerId: shortenPeerId(conn.remotePeer.toString()),
-          connectionCount: 0,
-          streamsCount: 0,
-        };
-        if (object.connectionCount === 0) {
-          acc.push(object);
-        }
-        object.connectionCount += 1;
-        object.streamsCount += conn.streams.length;
-        return acc;
-      },
-      [] as { peerId: string; connectionCount: number; streamsCount: number }[],
-    );
-  }
+function getConnectionStats(libp2p: Libp2p, peerIdStr: string) {
+  return libp2p.getConnections().reduce(
+    (acc, conn) => {
+      const object = acc.find((x) => x.peerId === shortenPeerId(peerIdStr)) ?? {
+        peerId: shortenPeerId(conn.remotePeer.toString()),
+        connectionCount: 0,
+        streamsCount: 0,
+      };
+      if (object.connectionCount === 0) {
+        acc.push(object);
+      }
+      object.connectionCount += 1;
+      object.streamsCount += conn.streams.length;
+      return acc;
+    },
+    [] as { peerId: string; connectionCount: number; streamsCount: number }[],
+  );
 }
