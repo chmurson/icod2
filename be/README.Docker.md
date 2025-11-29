@@ -34,9 +34,6 @@ docker run -p 8080:8080 icod2-backend
 
 # With environment variables
 docker run -p 8080:8080 -e PEER_ID_FILE_PATH=/app/data/my-peer-id.json -e CONFIG_PATH=/app/config/config.yaml ghcr.io/chmurson/icod2/backend
-
-# With .env file
-docker run -p 8080:8080 --env-file .env ghcr.io/chmurson/icod2/backend
 ```
 
 ### Persistent Peer ID Storage
