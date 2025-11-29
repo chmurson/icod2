@@ -1,8 +1,8 @@
-import type { GossipsubEvents } from "@chainsafe/libp2p-gossipsub";
-import type { Libp2p, PubSub } from "@libp2p/interface";
+import type { GossipSub } from "@chainsafe/libp2p-gossipsub";
+import type { Libp2p } from "@libp2p/interface";
 
 export const starRoomRegistrationServiceStart = (
-  libp2p: Libp2p<{ pubsub: PubSub<GossipsubEvents> }>,
+  libp2p: Libp2p<{ pubsub: GossipSub }>,
 ) => {
   const registeredRooms = new Set<string>();
   const peerIdToRoomTokens = new Map<string, Set<string>>();

@@ -9,6 +9,10 @@ import {
   lockedBoxStoreStateCommonPart,
   type ParticipantType,
 } from "./common-types";
+import {
+  type DataRequiredToCalculateMetaStatus,
+  getLockedBoxTopLobbyMetaStatus,
+} from "./commons/getLockedBoxTopLobbyMetaStatus";
 
 const joinLockedBoxState = {
   ...lockedBoxStoreStateCommonPart,
@@ -33,7 +37,11 @@ const joinLockedBoxState = {
     | undefined,
 };
 
-export type JoinLockedBoxStateData = typeof joinLockedBoxState;
+export type JoinLockedBoxStateData = typeof joinLockedBoxState & {
+  getTopLobbyMetaStatus: () => ReturnType<
+    typeof getLockedBoxTopLobbyMetaStatus
+  >;
+};
 
 type SetPartialStateUpdate = (
   payload: Partial<
@@ -68,7 +76,7 @@ export type JoinLockedBoxState = {
     setError: (error: string) => void;
     setUnlockingStartDate: (unlockingStartDate: Date | null) => void;
     setPartialStateUpdate: SetPartialStateUpdate;
-    markAsDisconnected: () => void;
+    reactToDisconnectedLeader: () => void;
     cannotConnectLeader: (
       reason: JoinLockedBoxStateData["connectionToLeaderFailReason"],
     ) => void;
@@ -78,6 +86,10 @@ export type JoinLockedBoxState = {
 export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
   devtools((set, get) => ({
     ...joinLockedBoxState,
+    getTopLobbyMetaStatus: () =>
+      getLockedBoxTopLobbyMetaStatus(
+        getDataRequiredToCalculateMetaStatus(get()),
+      ),
     actions: {
       start: () => set({ ...joinLockedBoxState, state: "drop-box" }),
       setReadyToUnlock: () => set({ state: "ready-to-unlock" }),
@@ -186,17 +198,27 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
       setUnlockingStartDate: (unlockingStartDate: Date) =>
         set({ unlockingStartDate }),
 
-      markAsDisconnected: () =>
-        set((state) => ({
-          ...state,
-          state: "connecting",
-          connecting: true,
-          onlineKeyHolders: [],
-          offLineKeyHolders: [
-            ...state.onlineKeyHolders,
-            ...state.offLineKeyHolders,
-          ],
-        })),
+      reactToDisconnectedLeader: () =>
+        set((state) => {
+          const newState = {
+            ...state,
+            onlineKeyHolders: [],
+            offLineKeyHolders: [
+              ...state.onlineKeyHolders,
+              ...state.offLineKeyHolders,
+            ],
+          };
+          const metaStatus = get().getTopLobbyMetaStatus();
+          if (metaStatus === "keyholder-able-to-unlock") {
+            return newState;
+          }
+
+          return {
+            ...newState,
+            state: "connecting",
+            connecting: true,
+          };
+        }),
       setPartialStateUpdate: (payload: Parameters<SetPartialStateUpdate>[0]) =>
         set((state) => {
           const filteredPayload: Omit<typeof payload, "unlockingStartDate"> & {
@@ -284,6 +306,21 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
     },
   })),
 );
+
+const getDataRequiredToCalculateMetaStatus = (
+  state: JoinLockedBoxStateData,
+): DataRequiredToCalculateMetaStatus => {
+  return {
+    currentKeyHolderId: state.you.id,
+    keyThreshold: state.keyThreshold,
+    hasKeyHimself: state.key?.trim() !== undefined,
+    receivedKeysNumber: Object.keys(state.receivedKeysByKeyHolderId ?? {})
+      .length,
+    state: state.state,
+    shareAccessKeyMapByKeyHolderId: state.shareAccessKeyMapByKeyHolderId,
+  };
+};
+
 if (import.meta.env.DEV === true) {
   //@ts-expect-error
   window.useJoinLockedBoxStore = {

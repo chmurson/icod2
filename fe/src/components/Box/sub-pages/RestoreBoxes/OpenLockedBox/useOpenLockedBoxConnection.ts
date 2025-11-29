@@ -50,7 +50,6 @@ export function useOpenLockedBoxConnection({
             return;
           }
           sendWelcome(peerId);
-          useOpenLockedBoxStore.getState().actions.markAsConnected();
         },
       ),
       connectedPeersStorageRef.current.addListener("peer-removed", (peerId) => {

@@ -5,6 +5,10 @@ import {
   lockedBoxStoreStateCommonPart,
   type ParticipantType,
 } from "./common-types";
+import {
+  type DataRequiredToCalculateMetaStatus,
+  getLockedBoxTopLobbyMetaStatus,
+} from "./commons/getLockedBoxTopLobbyMetaStatus";
 
 type KeyHolderId = string;
 
@@ -20,7 +24,11 @@ const openLockedBoxState = {
   shareAccessKeyByKeyHolderId: {} as Record<string, boolean>,
 };
 
-export type OpenLockedBoxStateData = typeof openLockedBoxState;
+export type OpenLockedBoxStateData = typeof openLockedBoxState & {
+  getTopLobbyMetaStatus: () => ReturnType<
+    typeof getLockedBoxTopLobbyMetaStatus
+  >;
+};
 
 export type OpenLockedBoxState = {
   actions: {
@@ -54,6 +62,10 @@ export type OpenLockedBoxState = {
 export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
   devtools((set, get) => ({
     ...openLockedBoxState,
+    getTopLobbyMetaStatus: () =>
+      getLockedBoxTopLobbyMetaStatus(
+        getDataRequiredToCalculateMetaStatus(get()),
+      ),
     actions: {
       start: () => set({ ...openLockedBoxState, state: "drop-box" }),
       setReadyToUnlock: () => set({ state: "ready-to-unlock" }),
@@ -147,6 +159,9 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
           offLineKeyHolders: state.offLineKeyHolders.filter(
             (x) => x.id !== keyHolder.id,
           ),
+          connected: true,
+          connecting: false,
+          state: "connected",
         }));
       },
       disconnectKeyHolder: (disconnectedKeyHolderId: string) => {
@@ -159,15 +174,33 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
             return {};
           }
 
-          return {
-            onlineKeyHolders: state.onlineKeyHolders.filter(
-              (kh) => kh.id !== disconnectedKeyHolderId,
-            ),
+          const newOnlineKeyHolders = state.onlineKeyHolders.filter(
+            (kh) => kh.id !== disconnectedKeyHolderId,
+          );
+
+          const onlineKeyHoldersCount = newOnlineKeyHolders.length;
+
+          const newState = {
+            onlineKeyHolders: newOnlineKeyHolders,
             offLineKeyHolders: [
               disconnectedKeyHolder,
               ...state.offLineKeyHolders,
             ],
           };
+
+          if (
+            onlineKeyHoldersCount === 0 &&
+            state.getTopLobbyMetaStatus() !== "keyholder-able-to-unlock"
+          ) {
+            return {
+              ...newState,
+              connected: false,
+              connecting: true,
+              state: "connecting",
+            };
+          }
+
+          return newState;
         });
       },
       addReceivedKey: ({ fromKeyHolderId, key }) =>
@@ -208,6 +241,20 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
     } satisfies OpenLockedBoxState["actions"],
   })),
 );
+
+const getDataRequiredToCalculateMetaStatus = (
+  state: OpenLockedBoxState,
+): DataRequiredToCalculateMetaStatus => {
+  return {
+    currentKeyHolderId: state.you.id,
+    keyThreshold: state.keyThreshold,
+    hasKeyHimself: state.key?.trim() !== undefined,
+    receivedKeysNumber: Object.keys(state.receivedKeysByKeyHolderId ?? {})
+      .length,
+    state: state.state,
+    shareAccessKeyMapByKeyHolderId: state.shareAccessKeyMapByKeyHolderId,
+  };
+};
 
 if (import.meta.env.DEV === true) {
   //@ts-expect-error

@@ -7,6 +7,7 @@ type DownloadBoxFromCreateState = {
   type: "fromCreateBox";
   state: Pick<
     CreateBoxStateData,
+    | "roomToken"
     | "leader"
     | "keyHolders"
     | "threshold"
@@ -23,6 +24,7 @@ type DownloadBoxFromJoinState = {
   type: "fromJoinBox";
   state: Pick<
     JoinBoxStateData,
+    | "roomToken"
     | "leader"
     | "otherKeyHolders"
     | "you"
@@ -44,8 +46,16 @@ type DownloadBoxStoreStateType =
   | DownloadBoxUndefinedState;
 
 type Actions = {
-  fromCreateBox: (payload: { encryptedMessage: string; key: string }) => void;
-  fromJoinBox: (payload: { encryptedMessage: string; key: string }) => void;
+  fromCreateBox: (payload: {
+    encryptedMessage: string;
+    key: string;
+    roomToken: string;
+  }) => void;
+  fromJoinBox: (payload: {
+    encryptedMessage: string;
+    key: string;
+    roomToken: string;
+  }) => void;
   reset: () => void;
   clearKeyAndMessage: () => void;
   addConfirmationBoxReceived: (keyHolderId: string) => void;
@@ -95,17 +105,12 @@ const createStoreFn: StateCreator<DownloadBoxStoreStateType & Actions> = (
       },
     });
   },
-  fromCreateBox: ({
-    encryptedMessage,
-    key,
-  }: {
-    encryptedMessage: string;
-    key: string;
-  }) => {
+  fromCreateBox: ({ roomToken, encryptedMessage, key }) => {
     const createBoxState = useCreateBoxStore.getState();
     set({
       type: "fromCreateBox",
       state: {
+        roomToken,
         content: createBoxState.content,
         encryptedMessage: encryptedMessage,
         generatedKey: key,
@@ -117,17 +122,12 @@ const createStoreFn: StateCreator<DownloadBoxStoreStateType & Actions> = (
       },
     });
   },
-  fromJoinBox: ({
-    encryptedMessage,
-    key,
-  }: {
-    encryptedMessage: string;
-    key: string;
-  }) => {
+  fromJoinBox: ({ encryptedMessage, key, roomToken }) => {
     const joinBoxState = useJoinBoxStore.getState();
     set({
       type: "fromJoinBox",
       state: {
+        roomToken,
         content: joinBoxState.content,
         encryptedMessage: encryptedMessage,
         generatedKey: key,

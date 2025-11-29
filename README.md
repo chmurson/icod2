@@ -48,6 +48,9 @@ Connection low level logic is controlled by `libp2p`.
 
 ## Local development
 
+### Truly local development
+
+Install dependencies
 ```
 yarn install --immutable
 ```
@@ -58,12 +61,11 @@ cd be
 yarn dev
 ```
 
-Take note of the multiaddrs the server is listening on in the backend's standard output. It should look like `/ip4/127.0.0.1/tcp/8080/p2p/Qm...XnBs`.
+Take note of the multiaddrs the server is listening on in the backend's standard output. It should look like `/ip4/127.0.0.1/tcp/8080/p2p/12...XnBs`.
 
 The part `/ip4/127.0.0.1/tcp/8080` of the multiaddr is the address the backend is listening on, and it can be changed via `config.yaml`, ideally by creating `config.local.yaml`
 
-The last part of the multiaddr (`Qm...XnBs`) is the peer ID. A private key from which peer ID derives from is created - if it does not exist - and stored by default in `data/peer-id-private-key.json` (the path can be changed with `PEER_ID_FILE_PATH` env variable).
-
+The last part of the multiaddr (`12...XnBs`) is the peer ID. A private key from which peer ID derives from is created - if it does not exist - and stored by default in `data/peer-id-private-key.json` (the path can be changed with `PEER_ID_FILE_PATH` env variable).
 
 Make sure the multiaddrs output by the backend is written into `/fe/.env.local` under the `VITE_BOOTSTRAP_MULTIADDRS` variable.
 
@@ -78,11 +80,24 @@ cd fe
 yarn dev
 ```
 
-## Displaying nicely logs from backend locally
+### Remote access via tunneling
+
+This section shows how to mimic more precisely real life environment where devices connecting are in different networks, and keep convenience of local development.  
+
+1. Run everything as described in the local development section above
+1. Use ngrok to expose the backend: `ngrok http 8080`
+1. Ngrok will provide an address like `https://<ngrok_subdomain>.ngrok-free.app`. Add this to `libp2p.announceMultiaddrs` as `/dns4/<ngrok_subdomain>.ngrok-free.app/tcp/443/wss` in `be/config.local.yaml`
+1. Restart the backend and take note of the new multiaddrs printed in the console. It should be something like this: `/dns4/<ngrok_subdomain>.ngrok-free.app/tcp/443/wss/p2p/12D...XnB`
+1. Edit `fe/.env.local` and add `VITE_BOOTSTRAP_MULTIADDRS=dns4/<ngrok_subdomain>.ngrok-free.app/tcp/443/wss/p2p/12D...XnB` 
+1. Use cloudflared to expose the frontend: `cloudflared tunnel --url http://localhost:5173`
+1. Cloudflared will provide an address like `https://<cloudflare_subdomain>.trycloudflare.com`. Add this to `server.allowedHosts` in `fe/vite.config.ts`
+1. Open the frontend in your two different browsers at `https://<cloudflare_subdomain>.trycloudflare.com`
+
+## Displaying backend logs nicely in local development
 
 Backend logs are displayed as unformatted JSON by default. To display them in a more readable format, the recommended approach is to use `hl` (`brew install hl`).
 
-Following command displays logs nicely, and hides unnecessary fields.
+The following command displays logs nicely and hides unnecessary fields:
 ```
 yarn dev | hl --hide pid --hide hostname --hide level
 ```
