@@ -29,7 +29,6 @@ RUN yarn workspaces focus @icod2/be --production && \
 COPY --from=builder /app/libs/protocols/dist /app/libs/protocols/dist
 COPY --from=builder /app/be/dist /app/be/dist
 
-COPY be/.env /app/be/
 COPY be/.config.* /app/be
 
 RUN chown -R node:node /app && \
