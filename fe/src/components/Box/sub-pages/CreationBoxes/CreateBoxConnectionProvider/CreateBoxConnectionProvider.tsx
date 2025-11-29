@@ -37,9 +37,6 @@ export const CreateBoxConnectionProvider: FC<PropsWithChildren> = ({
     state.type === "fromCreateBox" ? state.state.roomToken : undefined,
   );
 
-  console.log("roomTokenFromCreateBoxStore", roomTokenFromCreateBoxStore);
-  console.log("roomTokenFromJoinBoxStore", useDownloadBoxStore);
-
   const roomToken = roomTokenFromCreateBoxStore || roomTokenFromJoinBoxStore;
 
   const {
