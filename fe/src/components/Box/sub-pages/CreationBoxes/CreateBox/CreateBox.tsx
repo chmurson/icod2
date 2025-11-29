@@ -95,7 +95,11 @@ export const CreateBoxContent: FC = () => {
       const { encryptedMessage, keys } = await createLockedBox(payload);
       const [leaderKey, ...restOfKeys] = keys;
       sendLockedBoxes({ encryptedMessage, keys: restOfKeys });
-      setDownloadStoreFromCreateBox({ encryptedMessage, key: leaderKey });
+      setDownloadStoreFromCreateBox({
+        encryptedMessage,
+        key: leaderKey,
+        roomToken,
+      });
     },
   });
 

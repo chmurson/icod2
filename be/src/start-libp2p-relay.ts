@@ -1,4 +1,8 @@
-import { gossipsub } from "@chainsafe/libp2p-gossipsub";
+import {
+  type GossipSub,
+  type GossipSubComponents,
+  gossipsub,
+} from "@chainsafe/libp2p-gossipsub";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
 import { initRoomRegistrationProtocol, shortenPeerId } from "@icod2/protocols";
@@ -61,7 +65,7 @@ export async function startLibp2pRelay({
         fallbackToFloodsub: true,
         floodPublish: true,
         doPX: true,
-      }),
+      }) as (arg: GossipSubComponents) => GossipSub,
     },
   });
 

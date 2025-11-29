@@ -5,7 +5,7 @@ import {
   useContext,
   useMemo,
 } from "react";
-import { useCreateBoxStore } from "@/stores";
+import { useCreateBoxStore, useDownloadBoxStore } from "@/stores";
 import { useCreateBoxConnection } from "./useCreateBoxConnection";
 
 type CreateBoxConnectionContext = ReturnType<typeof useCreateBoxConnection>;
@@ -30,7 +30,17 @@ export const useCreateBoxConnectionContext =
 export const CreateBoxConnectionProvider: FC<PropsWithChildren> = ({
   children,
 }) => {
-  const roomToken = useCreateBoxStore((state) => state.roomToken);
+  const roomTokenFromCreateBoxStore = useCreateBoxStore(
+    (state) => state.roomToken,
+  );
+  const roomTokenFromJoinBoxStore = useDownloadBoxStore((state) =>
+    state.type === "fromCreateBox" ? state.state.roomToken : undefined,
+  );
+
+  console.log("roomTokenFromCreateBoxStore", roomTokenFromCreateBoxStore);
+  console.log("roomTokenFromJoinBoxStore", useDownloadBoxStore);
+
+  const roomToken = roomTokenFromCreateBoxStore || roomTokenFromJoinBoxStore;
 
   const {
     error,

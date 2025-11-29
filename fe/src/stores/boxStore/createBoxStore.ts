@@ -1,4 +1,5 @@
-import { create } from "zustand";
+import { create, type StateCreator } from "zustand";
+import { devtools } from "zustand/middleware";
 import type { ParticipantType } from "./common-types";
 
 const createBoxDefaultState = {
@@ -54,7 +55,7 @@ type CreateBoxState = {
   };
 } & CreateBoxStateData;
 
-export const useCreateBoxStore = create<CreateBoxState>((set, get) => ({
+const createStoreFn: StateCreator<CreateBoxState> = (set, get) => ({
   ...createBoxDefaultState,
   actions: {
     connect: ({ name, userAgent, roomToken }) =>
@@ -121,4 +122,10 @@ export const useCreateBoxStore = create<CreateBoxState>((set, get) => ({
         },
       }),
   },
-}));
+});
+
+export const useCreateBoxStore = create<CreateBoxState>()(
+  devtools(createStoreFn, {
+    name: "createBoxStore",
+  }),
+);
