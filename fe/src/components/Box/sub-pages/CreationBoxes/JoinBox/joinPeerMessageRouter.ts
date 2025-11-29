@@ -55,7 +55,11 @@ router.addHandler(isLeaderSendsBoxCreated, (_, message, proto) => {
   storeActions.markAsCreated();
 
   const { fromJoinBox } = useDownloadBoxStore.getState();
-  fromJoinBox({ encryptedMessage: message.encryptedMessage, key: message.key });
+  fromJoinBox({
+    encryptedMessage: message.encryptedMessage,
+    key: message.key,
+    roomToken: useJoinBoxStore.getState().roomToken,
+  });
 });
 
 router.addHandler(isLeaderSendsKeyHolderList, (_, message) => {
