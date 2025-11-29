@@ -67,8 +67,9 @@ function resolveAxiomConfig(
   const orgId = axiom.orgId ?? process.env.AXIOM_ORG_ID;
   const url = axiom.url ?? process.env.AXIOM_URL;
   const enabled =
-    typeof axiom.enabled === "boolean"
-      ? axiom.enabled
+    typeof axiom.enabled === "boolean" ||
+    isBooleanStringValue(process.env.AXIOM_ENABLED)
+      ? (axiom.enabled ?? process.env.AXIOM_ENABLED === "true")
       : Boolean(dataset && token);
 
   if (!enabled) {
@@ -83,4 +84,8 @@ function resolveAxiomConfig(
   }
 
   return { dataset, token, orgId, url };
+}
+
+function isBooleanStringValue(value: string | undefined) {
+  return value === "true" || value === "false";
 }
