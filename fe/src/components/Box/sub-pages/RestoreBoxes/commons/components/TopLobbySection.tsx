@@ -1,16 +1,19 @@
+/** biome-ignore-all lint/correctness/useHookAtTopLevel: temporal turning off - I know what im doing */
 import { Spinner, Strong } from "@radix-ui/themes";
 import type { StoreApi, UseBoundStore } from "zustand";
 import type { LockedBoxStoreCommonPart } from "@/stores/boxStore/common-types";
+import type { getLockedBoxTopLobbyMetaStatus } from "@/stores/boxStore/commons/getLockedBoxTopLobbyMetaStatus";
 import { Text } from "@/ui/Typography";
 import { cn } from "@/utils/cn";
-import {
-  LoadingTextReceiveingKeys,
-  useGetTopLobbyMetaStatus,
-} from "../../commons";
+import { LoadingTextReceiveingKeys } from "../../commons";
 import { CounterWithInfo } from "../../commons/components/CounterWithInfo";
 import { OpenBoxButton as OpenBoxButtonDumb } from "../../commons/components/OpenBoxButton";
 
-type StoreStateSubset = LockedBoxStoreCommonPart;
+type StoreStateSubset = LockedBoxStoreCommonPart & {
+  getTopLobbyMetaStatus?: () => ReturnType<
+    typeof getLockedBoxTopLobbyMetaStatus
+  >;
+};
 
 type StoreHookType = UseBoundStore<StoreApi<StoreStateSubset>>;
 
@@ -19,7 +22,7 @@ export const TopLobbySection = ({
 }: {
   useStoreHook: StoreHookType;
 }) => {
-  const metaStatus = useGetTopLobbyMetaStatus(useStoreHook);
+  const metaStatus = useStoreHook((state) => state.getTopLobbyMetaStatus?.());
 
   const keyThreshold = useStoreHook((state) => state.keyThreshold);
   const actions = useStoreHook((state) => state.actions);

@@ -64,7 +64,7 @@ export function useJoinLockedBoxConnection({
         const leaderKhId = useJoinLockedBoxStore.getState().connectedLeaderId;
 
         if (khId === leaderKhId) {
-          useJoinLockedBoxStore.getState().actions.markAsDisconnected();
+          useJoinLockedBoxStore.getState().actions.reactToDisconnectedLeader();
         }
       }),
     ];
