@@ -1,8 +1,8 @@
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
+import type { RoomRegistrationProtocolResponses } from "@icod2/protocols";
 import { initRoomRegistrationProtocol, shortenPeerId } from "@icod2/protocols";
-import type { Responses } from "@icod2/protocols/dist/room-registration-protocol";
 import { autoNAT } from "@libp2p/autonat";
 import { circuitRelayServer } from "@libp2p/circuit-relay-v2";
 import { identify } from "@libp2p/identify";
@@ -135,7 +135,7 @@ export async function startLibp2pRelay({
       await sendResponse({
         roomName,
         type: "register-room-response-success",
-      } satisfies Responses["registerRoomSuccess"]);
+      } satisfies RoomRegistrationProtocolResponses["registerRoomSuccess"]);
       close();
     },
     onUnregisterRoom: async (roomName, peerId) => {
@@ -146,7 +146,7 @@ export async function startLibp2pRelay({
       await sendResponse({
         roomName,
         type: "unregister-room-response-success",
-      } satisfies Responses["unregisterRoomSuccess"]);
+      } satisfies RoomRegistrationProtocolResponses["unregisterRoomSuccess"]);
       close();
       logger.info(
         {

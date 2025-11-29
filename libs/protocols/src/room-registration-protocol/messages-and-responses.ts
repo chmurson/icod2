@@ -11,12 +11,12 @@ export const messagesSchemas = {
   }),
 };
 
-export type Messages = {
+export type RoomRegistrationProtocolMessages = {
   registerRoom: z.infer<typeof messagesSchemas.registerRoom>;
   unregisterRoom: z.infer<typeof messagesSchemas.unregisterRoom>;
 };
 
-export type Responses = {
+export type RoomRegistrationProtocolResponses = {
   registerRoomSuccess: z.infer<typeof responseSchemas.registerRoomSuccess>;
   registerRoomError: z.infer<typeof responseSchemas.registerRoomError>;
   unregisterRoomSuccess: z.infer<typeof responseSchemas.unregisterRoomSuccess>;

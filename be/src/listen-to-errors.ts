@@ -1,4 +1,4 @@
-import type { Logger } from "./logger";
+import type { Logger } from "./logger.js";
 
 export function startToListenToErrors(logger: Logger) {
   process.on("unhandledRejection", (reason, promise) => {
