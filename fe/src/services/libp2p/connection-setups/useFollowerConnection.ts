@@ -9,6 +9,7 @@ import {
   type PeerMessageExchangeProtocol,
   usePeerMessageProto,
 } from "../usePeerMessageProto";
+import { useRelayPeerMessageProto } from "../useRelayPeerMessageProto";
 import { type IgnoredErrors, ignoredErrors } from "./ignoredErrors";
 
 export const useFollowerConnection = ({ roomToken }: { roomToken: string }) => {
@@ -20,6 +21,8 @@ export const useFollowerConnection = ({ roomToken }: { roomToken: string }) => {
   const messageProto = usePeerMessageProto({
     onMessageListener: routerMng.currentCombinedRouter,
   });
+
+  const relayMessageProto = useRelayPeerMessageProto();
 
   const [error, setError] = useState<
     Libp2pServiceErrors | ConnectionErrors | undefined
@@ -51,7 +54,7 @@ export const useFollowerConnection = ({ roomToken }: { roomToken: string }) => {
     onFailedToConnect: (error) => {
       setFilteredError(error);
     },
-    protos: [messageProto],
+    protos: [messageProto, relayMessageProto],
   });
 
   return {

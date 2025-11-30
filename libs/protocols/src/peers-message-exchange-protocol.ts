@@ -45,7 +45,12 @@ export class PeerMessageExchangeProtocol<
     this.listener = onMessage;
   }
 
-  initialize(libp2p: Libp2p) {
+  initialize(
+    libp2p: Libp2p,
+    {
+      skipHandleInitialization = false,
+    }: { skipHandleInitialization?: boolean } = {},
+  ) {
     console.log(
       "initialize()",
       `protocol: ${this.protocolId}`,
@@ -54,18 +59,21 @@ export class PeerMessageExchangeProtocol<
     if (this.initialized) return;
 
     this.libp2p = libp2p;
-    registerProtoHandle(this.protocolId, libp2p, (message, peerId) => {
-      const jsonMessage = parseJsonSafely(message);
-      if (!jsonMessage) return;
-      loggerGate.canLog &&
-        console.log(
-          "Received message from peer:",
-          shortenPeerId(peerId),
-          "message:",
-          jsonMessage,
-        );
-      this.listener?.(peerId, jsonMessage as TPeerMessagePayload, this);
-    });
+
+    if (skipHandleInitialization) {
+      registerProtoHandle(this.protocolId, libp2p, (message, peerId) => {
+        const jsonMessage = parseJsonSafely(message);
+        if (!jsonMessage) return;
+        loggerGate.canLog &&
+          console.log(
+            "Received message from peer:",
+            shortenPeerId(peerId),
+            "message:",
+            jsonMessage,
+          );
+        this.listener?.(peerId, jsonMessage as TPeerMessagePayload, this);
+      });
+    }
 
     this.initialized = true;
   }

@@ -67,6 +67,10 @@ jobs:
             type=raw,value=latest
             type=sha
 
+      - name: Get commit date
+        id: commit-date
+        run: echo "date=$(git show -s --format=%cI ${{ github.sha }} | cut -c1-19 | sed 's/[:]/-/g')" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -78,3 +82,5 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VERSION_TAG=${{ steps.commit-date.outputs.date }}

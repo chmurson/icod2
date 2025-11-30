@@ -9,6 +9,7 @@ import {
   type PeerMessageExchangeProtocol,
   usePeerMessageProto,
 } from "../usePeerMessageProto";
+import { useRelayPeerMessageProto } from "../useRelayPeerMessageProto";
 import { useRoomRegistration } from "../useRoomRegistrationProto";
 import { type IgnoredErrors, ignoredErrors } from "./ignoredErrors";
 
@@ -56,6 +57,8 @@ export const useLeaderConnection = ({
     onMessageListener: routerMng.currentCombinedRouter,
   });
 
+  const relayMessageProto = useRelayPeerMessageProto();
+
   const { isRelayReconnecting } = useLibp2p({
     roomTokenProvider: roomTokenProvider,
     connectedPeersStorage: connectedPeersStorage.current,
@@ -65,7 +68,7 @@ export const useLeaderConnection = ({
     onFailedToConnect: (error) => {
       setFilteredError(error);
     },
-    protos: [roomRegistrationObject, messageProto],
+    protos: [roomRegistrationObject, messageProto, relayMessageProto],
     dontDialDiscoveredPeers: true,
   });
 

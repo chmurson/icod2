@@ -6,7 +6,11 @@ import {
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
 import type { RoomRegistrationProtocolResponses } from "@icod2/protocols";
-import { initRoomRegistrationProtocol, shortenPeerId } from "@icod2/protocols";
+import {
+  initRoomRegistrationProtocol,
+  PeerMessageExchangeProtocol,
+  shortenPeerId,
+} from "@icod2/protocols";
 import { autoNAT } from "@libp2p/autonat";
 import { circuitRelayServer } from "@libp2p/circuit-relay-v2";
 import { identify } from "@libp2p/identify";
@@ -22,11 +26,13 @@ import { getPeerIdFromEnv } from "./utils/get-or-create-peer-id.js";
 export type Args = {
   listenMultiaddrs: string[];
   announceMultiaddrs?: string[];
+  versionTag?: string;
 };
 
 export async function startLibp2pRelay({
   listenMultiaddrs,
   announceMultiaddrs,
+  versionTag = "unknown",
 }: Args) {
   const logger = getLogger();
   const privateKey = await getPeerIdFromEnv();
@@ -73,6 +79,11 @@ export async function startLibp2pRelay({
 
   const peerId = libp2p.peerId.toString();
   const multiaddrs = libp2p.getMultiaddrs();
+
+  const peerMessageExchange = new PeerMessageExchangeProtocol({
+    protocolId: "/icod2/relay-peer-message-exchange/1.0.0",
+  });
+  peerMessageExchange.initialize(libp2p);
 
   logger.info(
     { peerId, shortPeerId: shortenPeerId(peerId) },
@@ -169,6 +180,10 @@ export async function startLibp2pRelay({
   libp2p.addEventListener("peer:connect", (event) => {
     const peerIdStr = event.detail.toString();
     connectedPeers.add(peerIdStr);
+    peerMessageExchange.sendMessageToPeer(peerIdStr, {
+      type: "hello-from-relay",
+      message: `Hello my I'm a relay. My version is ${versionTag}`,
+    });
     logger.info(
       {
         peerId: shortenPeerId(peerIdStr),

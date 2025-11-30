@@ -1,5 +1,9 @@
 FROM node:lts-slim AS base
 
+ARG VERSION_TAG=dev
+ENV VERSION_TAG=${VERSION_TAG}
+LABEL version="${VERSION_TAG}"
+
 WORKDIR /app
 
 # Copy relevant files early for better caching
