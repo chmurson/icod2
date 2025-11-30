@@ -1,5 +1,5 @@
 import { Theme } from "@radix-ui/themes";
-import { type FC, lazy, useEffect, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 import {
   createBrowserRouter,
   Link,
@@ -8,22 +8,6 @@ import {
 } from "react-router-dom";
 import Welcome from "./components/Box/sub-pages/Welcome";
 import { MainLayout } from "./components/layout/MainLayout";
-
-const LazyUnlockBox = lazy(
-  () => import("./components/Box/sub-pages/RestoreBoxes/LockedBox"),
-);
-const LazyLockBox = lazy(() =>
-  import("./components/Box/sub-pages/CreationBoxes").then((mod) => ({
-    default: mod.RootLockBox,
-  })),
-);
-const LazyComponentsDemo = lazy(() => import("./components/ComponentsDemo"));
-const LazyCryptoPlayground = lazy(
-  () => import("./components/CryptoPlayground"),
-);
-const LazyDecodePlayground = lazy(
-  () => import("./components/DecodePlayground"),
-);
 
 function useSystemTheme() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -83,23 +67,40 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/crypto-poc",
-        Component: LazyCryptoPlayground,
+        async lazy() {
+          const mod = await import("./components/CryptoPlayground");
+          return { Component: mod.default };
+        },
       },
       {
         path: "/components-demo",
-        Component: LazyComponentsDemo,
+        async lazy() {
+          const mod = await import("./components/ComponentsDemo");
+          return { Component: mod.default };
+        },
       },
       {
         path: "/decode-poc",
-        Component: LazyDecodePlayground,
+        async lazy() {
+          const mod = await import("./components/DecodePlayground");
+          return { Component: mod.default };
+        },
       },
       {
         path: "/unlock-box/:roomToken?",
-        Component: LazyUnlockBox,
+        async lazy() {
+          const mod = await import(
+            "./components/Box/sub-pages/RestoreBoxes/LockedBox"
+          );
+          return { Component: mod.default };
+        },
       },
       {
         path: "/lock-box/:roomToken?",
-        Component: LazyLockBox,
+        async lazy() {
+          const mod = await import("./components/Box/sub-pages/CreationBoxes");
+          return { Component: mod.RootLockBox };
+        },
       },
       {
         path: "/",

@@ -83,7 +83,7 @@ export async function startLibp2pRelay({
   const peerMessageExchange = new PeerMessageExchangeProtocol({
     protocolId: "/icod2/relay-peer-message-exchange/1.0.0",
   });
-  peerMessageExchange.initialize(libp2p);
+  peerMessageExchange.initialize(libp2p, { skipHandleInitialization: false });
 
   logger.info(
     { peerId, shortPeerId: shortenPeerId(peerId) },
