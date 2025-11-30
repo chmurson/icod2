@@ -10,6 +10,10 @@ const { libp2p, logging } = config;
 const logger = initializeLogger(logging);
 startToListenToErrors(logger);
 
+// Log version information on startup
+const versionTag = process.env.VERSION_TAG || "dev";
+logger.info(`Version: ${versionTag}`);
+
 const stdoutEmitter = new StdoutEmitter();
 
 stdoutEmitter.on("data", (data) => {
@@ -29,6 +33,7 @@ try {
   startLibp2pRelay({
     announceMultiaddrs: libp2p.announceMultiaddrs,
     listenMultiaddrs: libp2p.listenMultiaddrs,
+    versionTag,
   });
 } catch (error) {
   logger.error({ error }, "Failed to start libp2p relay");
