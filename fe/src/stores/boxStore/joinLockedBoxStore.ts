@@ -215,6 +215,7 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
 
           return {
             ...newState,
+            unlockingStartDate: null,
             state: "connecting",
             connecting: true,
           };
