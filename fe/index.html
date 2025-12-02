@@ -42,8 +42,8 @@
         color: #c089ff;
         background: transparent;
         opacity: 0;
-        animation: preload-fade 1500ms ease forwards;
-        animation-delay: 750ms;
+        animation: preload-fade 2500ms ease forwards;
+        animation-delay: 1000ms;
       }
 
       .preload__spinner {
@@ -84,5 +84,8 @@
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      document?.querySelector("#root")?.setAttribute("data-loading-start-timestamp", new Date().getTime());
+    </script>
   </body>
 </html>
