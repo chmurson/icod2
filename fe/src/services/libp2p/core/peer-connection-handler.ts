@@ -59,8 +59,26 @@ export const createPeerConnectionHandler = ({
       }
     });
 
+    libp2p.addEventListener("peer:update", (evt) => {
+      const { peer, previous } = evt.detail;
+      loggerGate.canLog &&
+        console.log(
+          "[peer:update]",
+          shortenPeerId(peer.id.toString()),
+          "hadPrevious?",
+          previous != null,
+          "addresses:",
+          peer.addresses.map((a) => a.multiaddr.toString()),
+        );
+    });
+
     // 👇 Dial peers discovered via pubsub
     libp2p.addEventListener("peer:discovery", async (evt) => {
+      loggerGate.canLog &&
+        console.log(
+          "[peer:discovery] Peer discovered:",
+          shortenPeerId(evt.detail.id.toString()),
+        );
       // Encapsulate the multiaddrs with the peer ID to ensure correct dialing
       // Should be fixed when https://github.com/libp2p/js-libp2p/issues/3239 is resolved.
       const discoveredPeerIdStr = evt.detail.id.toString();
