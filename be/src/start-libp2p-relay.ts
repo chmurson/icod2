@@ -18,6 +18,8 @@ import type { Libp2p, PeerId, SubscriptionChangeData } from "@libp2p/interface";
 import { tcp } from "@libp2p/tcp";
 import { webSockets } from "@libp2p/websockets";
 import { createLibp2p } from "libp2p";
+import { debugPrintGossipScore } from "./debug-utils/debugPrintGossipScore.js";
+import { debugPubSubMessages } from "./debug-utils/debugPubSubMessages.js";
 import { getLogger } from "./logger.js";
 import { starRoomRegistrationServiceStart } from "./services/room-registration.js";
 import { debounce } from "./utils/debounce.js";
@@ -71,6 +73,22 @@ export async function startLibp2pRelay({
         fallbackToFloodsub: true,
         floodPublish: true,
         doPX: true,
+        // Relax scoring so peers are not greylisted/pruned in small rooms
+        scoreParams: {
+          topics: {},
+          topicScoreCap: 0,
+          appSpecificScore: () => 0,
+          appSpecificWeight: 0,
+          IPColocationFactorWeight: 0,
+          behaviourPenaltyWeight: 0,
+        },
+        scoreThresholds: {
+          gossipThreshold: -1,
+          publishThreshold: -1,
+          graylistThreshold: -1,
+          acceptPXThreshold: 0,
+          opportunisticGraftThreshold: 0,
+        },
       }) as (arg: GossipSubComponents) => GossipSub,
     },
   });
@@ -83,7 +101,7 @@ export async function startLibp2pRelay({
   const peerMessageExchange = new PeerMessageExchangeProtocol({
     protocolId: "/icod2/relay-peer-message-exchange/1.0.0",
   });
-  peerMessageExchange.initialize(libp2p);
+  peerMessageExchange.initialize(libp2p, { skipHandleInitialization: false });
 
   logger.info(
     { peerId, shortPeerId: shortenPeerId(peerId) },
@@ -233,6 +251,7 @@ export async function startLibp2pRelay({
     const roomStats = getRoomStats();
     logger.info({ roomStats }, "Subscription changed");
     debouncedPrintInfoAboutPubSubTopics();
+    debugPrintGossipScore(libp2p, logger);
   }
 
   const debouncedLogPeerUpdated = debounce(peerUpdated, 2000);
@@ -250,6 +269,7 @@ export async function startLibp2pRelay({
   function printInfoAboutPubSubTopics() {
     const topics = getTopics();
     logger.info({ topics }, "All Topics");
+    debugPrintGossipScore(libp2p, logger);
   }
 
   function peerUpdated(peerIdStr: string) {
@@ -278,6 +298,8 @@ export async function startLibp2pRelay({
       return acc;
     }, {});
   }
+
+  debugPubSubMessages(libp2p, logger);
 }
 
 function formatConnectedPeers(peers: Set<string>): string[] {

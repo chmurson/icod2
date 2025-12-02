@@ -60,7 +60,7 @@ export class PeerMessageExchangeProtocol<
 
     this.libp2p = libp2p;
 
-    if (skipHandleInitialization) {
+    if (skipHandleInitialization === false) {
       registerProtoHandle(this.protocolId, libp2p, (message, peerId) => {
         const jsonMessage = parseJsonSafely(message);
         if (!jsonMessage) return;

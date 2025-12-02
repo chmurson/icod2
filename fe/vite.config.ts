@@ -16,7 +16,7 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
 export default defineConfig(() => {
   return {
     server: {
-      allowedHosts: ["marcus-publication-declared-guardian.trycloudflare.com"],
+      allowedHosts: true,
     },
     plugins: [
       react(),

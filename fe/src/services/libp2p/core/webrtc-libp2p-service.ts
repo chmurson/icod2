@@ -86,6 +86,21 @@ async function createLibp2pService({
         fallbackToFloodsub: true,
         floodPublish: true,
         doPX: true, // Enable peer exchange
+        scoreParams: {
+          topics: {},
+          topicScoreCap: 0,
+          appSpecificScore: () => 0,
+          appSpecificWeight: 0,
+          IPColocationFactorWeight: 0,
+          behaviourPenaltyWeight: 0,
+        },
+        scoreThresholds: {
+          gossipThreshold: -1,
+          publishThreshold: -1,
+          graylistThreshold: -1,
+          acceptPXThreshold: 0,
+          opportunisticGraftThreshold: 0,
+        },
       }),
       identify: identify(),
       ping: ping({

@@ -15,6 +15,14 @@ import { RelayReconnectDialer } from "../core/relay-reconnect-dialer";
 import { startLibp2pService } from "../core/webrtc-libp2p-service";
 import type { RoomTokenProvider } from "..//types";
 import { useConnectedRelayState } from "./useConnectedRelayState";
+import {
+  addDebugDiscoveryState,
+  addDebugLogDiscoveryMessages,
+  addDebugPrintConnections,
+  addDebugTriggerRediscovery,
+  addManuallyBroadcastMessage,
+  cleanDebugUtils,
+} from "./utils/debug-utils";
 
 export type Libp2pServiceErrors =
   | "RoomTokenProviderError"
@@ -115,48 +123,6 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
 
       onLibp2pStartedRef.current?.(libp2pService);
 
-      // @ts-expect-error
-      window.debugPrintConnections = () => {
-        const peers = libp2pService.getPeers();
-        loggerGate.canLog && console.log("Peers:", peers);
-        const connections = libp2pService.getConnections();
-        const connectionAddrsStats = connections.reduce(
-          (acc, connection) => {
-            const { remotePeer } = connection;
-            const peerIdStr = remotePeer.toString();
-            const peerObj = acc[peerIdStr] || [];
-            acc[peerIdStr] = peerObj;
-
-            peerObj.push({
-              multiPlexer: connection.multiplexer ?? "unknown",
-              multiaddr: connection.remoteAddr.toString(),
-              status: connection.status,
-              streamsCount: connection.streams.length,
-            });
-
-            return acc;
-          },
-          {} as Record<
-            string,
-            {
-              multiPlexer: string;
-              multiaddr: string;
-              status: string;
-              streamsCount: number;
-            }[]
-          >,
-        );
-        loggerGate.canLog && console.log("Connections:", connectionAddrsStats);
-      };
-
-      // @ts-expect-error
-      window.debugTriggerRediscovery = async () => {
-        // Temporarily unsubscribe and resubscribe
-        libp2pService.services.pubsub.unsubscribe(roomToken);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        libp2pService.services.pubsub.subscribe(roomToken);
-      };
-
       libp2pServiceRef.current = libp2pService;
       const persistingDialer = new PersistingDialer(libp2pService);
       const relayReconnectDialer = new RelayReconnectDialer(libp2pService, {
@@ -195,13 +161,20 @@ export const useLibp2p = <TConnectionFailReason = Libp2pServiceErrors>({
       }
 
       peerConnectionHandler(libp2pService);
+
+      addDebugDiscoveryState(libp2pService, roomToken);
+      addDebugLogDiscoveryMessages(libp2pService, roomToken);
+      addDebugPrintConnections(libp2pService);
+      addDebugTriggerRediscovery(libp2pService, roomToken);
+      addManuallyBroadcastMessage(libp2pService, roomToken);
+      // @ts-expect-error
+      window.debugLogDiscoveryMessages();
     })();
 
     return () => {
       unmounted = true;
 
-      // @ts-expect-error
-      window.debugPrintConnections = undefined;
+      cleanDebugUtils();
 
       libp2pService?.removeEventListener("start", handleLibp2pStarted);
 
