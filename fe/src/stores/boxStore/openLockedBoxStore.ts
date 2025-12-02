@@ -181,6 +181,14 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
           const onlineKeyHoldersCount = newOnlineKeyHolders.length;
 
           const newState = {
+            shareAccessKeyByKeyHolderId: {
+              ...state.shareAccessKeyByKeyHolderId,
+              [disconnectedKeyHolderId]: false,
+            },
+            shareAccessKeyMapByKeyHolderId: {
+              ...state.shareAccessKeyMapByKeyHolderId,
+              [disconnectedKeyHolderId]: {},
+            },
             onlineKeyHolders: newOnlineKeyHolders,
             offLineKeyHolders: [
               disconnectedKeyHolder,
