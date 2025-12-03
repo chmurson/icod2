@@ -3,6 +3,8 @@ import { Loader } from "./Loader";
 
 let timeoutHandler: NodeJS.Timeout | undefined;
 
+const RESET_GLOBAL_LOADING_ANIMATION_TIMEOUT_IN_MS = 250;
+
 export const FullPageLoader: FC<{ message?: string }> = ({
   message = "Loading Stashcrate...",
 }) => {
@@ -17,7 +19,7 @@ export const FullPageLoader: FC<{ message?: string }> = ({
           ?.querySelector("#root")
           ?.setAttribute("data-loading-start-timestamp", "");
         console.log("Timeout cleared");
-      }, 5000);
+      }, RESET_GLOBAL_LOADING_ANIMATION_TIMEOUT_IN_MS);
     };
   }, []);
 

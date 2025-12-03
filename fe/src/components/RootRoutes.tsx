@@ -86,7 +86,7 @@ const router = createBrowserRouter([
       {
         path: "/unlock-box/:roomToken?",
         element: (
-          <Suspense fallback={<FullPageLoader />}>
+          <Suspense fallback={<FullPageLoader message="Loading..." />}>
             <LockedBoxes />
           </Suspense>
         ),
@@ -94,7 +94,7 @@ const router = createBrowserRouter([
       {
         path: "/lock-box/:roomToken?",
         element: (
-          <Suspense fallback={<FullPageLoader />}>
+          <Suspense fallback={<FullPageLoader message="Loading..." />}>
             <CreationBoxes />
           </Suspense>
         ),
