@@ -41,6 +41,11 @@ export function useInitiateCounter({
     );
   }, [sharesRequiredToStartCounter, shareAccessKeyMapByKeyHolderId]);
 
+  console.log("------");
+  console.log("isTresholdReached", isTresholdReached);
+  console.log("sharesRequiredToStartCounter", sharesRequiredToStartCounter);
+  console.log("shareAccessKeyMapByKeyHolderId", shareAccessKeyMapByKeyHolderId);
+
   const prevIsTresholdReached = usePrevious(isTresholdReached);
 
   useEffect(() => {
