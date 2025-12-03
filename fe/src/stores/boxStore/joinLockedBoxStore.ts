@@ -258,6 +258,14 @@ export const useJoinLockedBoxStore = create<JoinLockedBoxState>()(
                 ),
             );
 
+            const shareAccessKeyByKeyHolderId = {
+              ...state.shareAccessKeyByKeyHolderId,
+            };
+
+            for (const newOfflineKeyholders of newOffLineKeyHolders) {
+              delete shareAccessKeyByKeyHolderId[newOfflineKeyholders.id];
+            }
+
             filteredPayload.onlineKeyHolders = newOnlineKeyHolders;
             filteredPayload.offLineKeyHolders = newOffLineKeyHolders;
           }

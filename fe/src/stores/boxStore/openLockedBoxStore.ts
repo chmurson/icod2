@@ -180,21 +180,35 @@ export const useOpenLockedBoxStore = create<OpenLockedBoxState>()(
 
           const onlineKeyHoldersCount = newOnlineKeyHolders.length;
 
+          const shareAccessKeyByKeyHolderId = {
+            ...state.shareAccessKeyByKeyHolderId,
+          };
+
+          const shareAccessKeyMapByKeyHolderId = {
+            ...Object.fromEntries(
+              Object.entries(state.shareAccessKeyMapByKeyHolderId).map(
+                ([keyHolderId, shareAccesKeyMap]) => {
+                  delete shareAccesKeyMap[disconnectedKeyHolderId];
+                  return [keyHolderId, shareAccesKeyMap];
+                },
+              ),
+            ),
+          };
+
+          delete shareAccessKeyByKeyHolderId[disconnectedKeyHolderId];
+          delete shareAccessKeyMapByKeyHolderId[disconnectedKeyHolderId];
+
           const newState = {
-            shareAccessKeyByKeyHolderId: {
-              ...state.shareAccessKeyByKeyHolderId,
-              [disconnectedKeyHolderId]: false,
-            },
-            shareAccessKeyMapByKeyHolderId: {
-              ...state.shareAccessKeyMapByKeyHolderId,
-              [disconnectedKeyHolderId]: {},
-            },
+            shareAccessKeyByKeyHolderId,
+            shareAccessKeyMapByKeyHolderId,
             onlineKeyHolders: newOnlineKeyHolders,
             offLineKeyHolders: [
               disconnectedKeyHolder,
               ...state.offLineKeyHolders,
             ],
           };
+
+          console.log(newState);
 
           if (
             onlineKeyHoldersCount === 0 &&
