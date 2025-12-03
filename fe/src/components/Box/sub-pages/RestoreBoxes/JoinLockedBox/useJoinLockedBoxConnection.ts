@@ -4,6 +4,7 @@ import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 import { router } from "./dataChannelRouter";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
+import { keySharingWorkflowManager } from "./keySharingWorkflow";
 import { useOnChangeShareablePartOfState } from "./useSelectiveStatePusher";
 
 export type JoinBoxConnectionError = ReturnType<
@@ -28,9 +29,14 @@ export function useJoinLockedBoxConnection({
 
   useEffect(() => {
     routerMng.addRouter("join-unlock-box", router.router);
+    routerMng.addRouter(
+      "join-unlock-box-workflows",
+      keySharingWorkflowManager.router,
+    );
 
     return () => {
       routerMng.removeRouter("join-unlock-box");
+      routerMng.removeRouter("join-unlock-box-workflows");
     };
   }, [routerMng]);
 
