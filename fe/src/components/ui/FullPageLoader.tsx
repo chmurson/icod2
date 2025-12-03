@@ -18,7 +18,6 @@ export const FullPageLoader: FC<{ message?: string }> = ({
         window?.document
           ?.querySelector("#root")
           ?.setAttribute("data-loading-start-timestamp", "");
-        console.log("Timeout cleared");
       }, RESET_GLOBAL_LOADING_ANIMATION_TIMEOUT_IN_MS);
     };
   }, []);
@@ -32,8 +31,6 @@ function globalDelayFromNow() {
   const startTimestamp = window?.document
     ?.querySelector("#root")
     ?.getAttribute("data-loading-start-timestamp");
-
-  console.log(startTimestamp, "XXX");
 
   if (!startTimestamp) {
     return 1500;

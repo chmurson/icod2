@@ -10,7 +10,6 @@ import { MainLayout } from "./layout";
 import { FullPageLoader, Loader } from "./ui";
 
 const Root: FC = () => {
-  console.log("Root component rendered");
   return (
     <>
       {window.icod2Dev.topNavTools.get() === true && (
@@ -113,6 +112,5 @@ const router = createBrowserRouter([
 ]);
 
 export const RootRoutes = () => {
-  console.log("RootRoutes component rendered");
   return <RouterProvider router={router} />;
 };

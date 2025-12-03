@@ -33,13 +33,6 @@ export const Loader: FC<LoaderProps> = ({
     )
   ).toFixed(1);
 
-  console.log(
-    JSON.stringify({
-      fadeDelay: fadeDelayRef.current,
-      opacityStart,
-    }),
-  );
-
   return (
     <div
       className={containerStyles}

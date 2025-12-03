@@ -29,7 +29,6 @@ const LazyRootRoutes = lazy(() =>
 
 function App() {
   const theme = useSystemTheme();
-  console.log("App");
 
   return (
     <Theme
