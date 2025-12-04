@@ -34,11 +34,13 @@ export function useJoinLockedBoxConnection({
       keySharingWorkflowManager.router,
     );
 
+    console.log("useEffect in useJoinLockedBoxConnection");
+
     return () => {
       routerMng.removeRouter("join-unlock-box");
       routerMng.removeRouter("join-unlock-box-workflows");
     };
-  }, [routerMng]);
+  }, [routerMng.addRouter, routerMng.removeRouter]);
 
   useEffect(() => {
     useJoinLockedBoxStore

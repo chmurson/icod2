@@ -1,4 +1,4 @@
-import { type FC, useMemo } from "react";
+import { type FC, useEffect, useMemo } from "react";
 import { PortalPeerId } from "@/components/Box/components/PortalPeerId";
 import { RelayReconnectingAlert } from "@/components/Box/components/RelayReconnectingAlert";
 import { ShareAccessButton as ShareAccessButtonDumb } from "@/components/Box/components/ShareAccessButton";
@@ -19,6 +19,7 @@ import { NavigationAwayBlocker } from "../commons/components/NavigationAwayBlock
 import { PageTitle } from "../commons/components/PageTitle";
 import { useDataChannelSendMessages } from "./dataChannelSendMessages";
 import { useSendKeyToLeader } from "./hooks";
+import { keySharingWorkflowManager } from "./keySharingWorkflow";
 import { useJoinLockedBoxConnection } from "./useJoinLockedBoxConnection";
 
 export const JoinLockedBox: FC = () => {
@@ -48,6 +49,14 @@ export const JoinLockedBox: FC = () => {
 };
 
 const JoinLockedBoxContent: React.FC = () => {
+  useEffect(() => {
+    keySharingWorkflowManager.startAllWorkflows();
+
+    return () => {
+      keySharingWorkflowManager.reset();
+    };
+  }, []);
+
   const state = useJoinLockedBoxStore((state) => state.state);
   const roomToken = useJoinLockedBoxStore((state) => state.roomToken);
 

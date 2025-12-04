@@ -1,3 +1,5 @@
+import { loggerGate } from "@icod2/protocols";
+import { WorkflowBuilder, WorkflowManager } from "@/services/libp2p/workflows";
 import { useJoinLockedBoxStore } from "@/stores/boxStore/joinLockedBoxStore";
 import {
   type FollowerSendsPartialStateMessage,
@@ -5,14 +7,13 @@ import {
   isLeaderWelcome,
   type LeaderSendsPartialStateMessage,
 } from "../commons/leader-keyholder-interface";
-import { WorkflowBuilder, WorkflowManager } from "./WorkflowManager";
+import { usePeerToHolderMapRef } from "../commons/usePeerToHolderMapRef";
 
 export const keySharingWorkflowManager = new WorkflowManager();
 
 const createKeySharingWorkflow = () => {
   return new WorkflowBuilder("keySharing")
     .waitForWithCondition(isLeaderWelcome, () => {
-      debugger;
       const { shareAccessKeyByKeyHolderId } = useJoinLockedBoxStore.getState();
 
       const isThereAnyShared = Object.values(shareAccessKeyByKeyHolderId).some(
@@ -22,7 +23,6 @@ const createKeySharingWorkflow = () => {
       return isThereAnyShared;
     })
     .waitFor(isLeaderSendsPartialStateMessage, (message, _, proto) => {
-      debugger;
       const { connectedLeaderId, shareAccessKeyByKeyHolderId } =
         useJoinLockedBoxStore.getState();
 
@@ -43,7 +43,16 @@ const createKeySharingWorkflow = () => {
         )
         .map(([keyHolderId]) => keyHolderId);
 
-      proto.sendMessageToPeer(connectedLeaderId, {
+      const leaderPeerId = usePeerToHolderMapRef
+        .getValue()
+        .getPeerId(connectedLeaderId);
+
+      if (!leaderPeerId) {
+        loggerGate.canError && console.error("Leader peer ID not found");
+        return;
+      }
+
+      proto.sendMessageToPeer(leaderPeerId, {
         type: "follower:send-partial-state",
         keyHoldersIdsToSharedKeyWith,
       } satisfies FollowerSendsPartialStateMessage);
@@ -57,3 +66,4 @@ const createKeySharingWorkflow = () => {
 };
 
 keySharingWorkflowManager.defineWorkflow(createKeySharingWorkflow().build());
+keySharingWorkflowManager.startWorkflow("keySharing");
