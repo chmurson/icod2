@@ -73,7 +73,7 @@ export const OpenLockedBoxContent: FC = () => {
     return () => {
       routerMng.removeRouter("open-locked-box");
     };
-  }, [routerMng]);
+  }, [routerMng.addRouter, routerMng.removeRouter]);
 
   const { sendKey } = useSendMessageProto({
     peerMessageProtoRef: messageProto.peerMessageProtoRef,
